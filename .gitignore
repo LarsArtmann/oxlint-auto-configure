@@ -1,0 +1,22 @@
+# Binaries
+bin/
+*.exe
+
+# Coverage
+coverage.out
+coverage.html
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Oxlint config (generated)
+.oxlintrc.json
+
+# Dependency directories
+vendor/
