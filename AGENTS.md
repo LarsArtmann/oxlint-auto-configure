@@ -85,7 +85,8 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Version injected at build** — `internal/cli.version` via ldflags (default: "dev")
 - **Per-command files** — Commands are in `internal/cli/cmd_*.go`, not a monolithic file
 - **SARIF output** — analyze command defaults to summary format; SARIF is opt-in via `-f sarif`
-- **Structured logging** — CLI uses `log/slog` for all diagnostic output (not fmt.Fprintf)
+- **Structured logging** — CLI uses `log/slog` for all diagnostic output with --verbose/--quiet flags
+- **Global Flags** — `-v/--verbose` and `-q/--quiet` on root command control log level
 - **PluginConfig** — `map[rule.Plugin]bool` (not a struct with bool fields)
 - **Self-describing Plugin** — `CLIFlag()` and `NeedsFlag()` methods on Plugin type
 - **Version-pinned rules** — `rules_version.txt` embedded; warns on mismatch
