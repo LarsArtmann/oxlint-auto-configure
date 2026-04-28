@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -57,15 +58,13 @@ Profiles:
 			if err != nil {
 				return fmt.Errorf("oxlint: %w", err)
 			}
-			fmt.Fprintf(os.Stderr, "Oxlint version: %s\n", oxlintVer)
+			slog.Info("oxlint version", "version", oxlintVer)
 
 			embeddedVer := rule.EmbeddedVersion()
 			if embeddedVer != "" && embeddedVer != oxlintVer {
-				fmt.Fprintf(
-					os.Stderr,
-					"Warning: embedded rules from oxlint %s, but runtime is %s — rules may differ\n",
-					embeddedVer,
-					oxlintVer,
+				slog.Warn("embedded rules version mismatch",
+					"embedded", embeddedVer,
+					"runtime", oxlintVer,
 				)
 			}
 
@@ -80,9 +79,9 @@ Profiles:
 				return fmt.Errorf("detect project type: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Detected project: %s\n", detect.FormatTypes(projectTypes))
-			fmt.Fprintf(os.Stderr, "Profile: %s\n", p)
-			fmt.Fprintf(os.Stderr, "Total rules: %d\n", reg.Len())
+			slog.Info("detected project", "types", detect.FormatTypes(projectTypes))
+			slog.Info("profile", "name", p)
+			slog.Info("rules loaded", "total", reg.Len())
 
 			cat := profile.NewCategorizer(p, pluginConfig)
 			gen := config.NewGenerator(cat, reg)
@@ -107,8 +106,8 @@ Profiles:
 				existing, err := config.FromJSON(existingData)
 				if err == nil {
 					d := diff.NewDiffer(existing, cfg)
-					fmt.Fprintf(os.Stderr, "\nChanges:\n%s\n", d.FormatDiff())
-					fmt.Fprintf(os.Stderr, "%s\n", d.Summary())
+					slog.Info("changes\n" + d.FormatDiff())
+					slog.Info(d.Summary())
 				}
 			}
 
@@ -121,18 +120,18 @@ Profiles:
 				return fmt.Errorf("write config: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Configuration written to %s\n", targetPath)
+			slog.Info("configuration written", "path", targetPath)
 
 			if runFix {
-				fmt.Fprintf(os.Stderr, "\nRunning oxlint --fix...\n")
+				slog.Info("running oxlint fix")
 				fixResult, err := oxlint.RunFix(cmd.Context(), absRoot, targetPath)
 				if err != nil {
 					return fmt.Errorf("fix: %w", err)
 				}
 				if fixResult.Output != "" {
-					fmt.Fprintf(os.Stderr, "%s\n", fixResult.Output)
+					slog.Info("fix output", "detail", fixResult.Output)
 				}
-				fmt.Fprintf(os.Stderr, "Fix complete.\n")
+				slog.Info("fix complete")
 			}
 
 			return nil
@@ -156,7 +155,7 @@ func writeDryRun(cfg *config.OxlintConfig, targetPath string) error {
 		return fmt.Errorf("generate config JSON: %w", err)
 	}
 
-	fmt.Fprintf(os.Stderr, "Dry run — would write to %s:\n", targetPath)
+	slog.Info("dry run", "path", targetPath)
 	fmt.Println(string(data))
 	return nil
 }

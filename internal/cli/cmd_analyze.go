@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -67,7 +68,7 @@ Formats:
 			}
 
 			if result.TotalDetected == 0 {
-				fmt.Fprintln(os.Stderr, "No findings — your project is clean!")
+				slog.Info("no findings — project is clean")
 				return nil
 			}
 
@@ -99,11 +100,14 @@ Formats:
 }
 
 func printSummary(report *finding.Report, result *pipeline.PipelineResult) error {
-	fmt.Fprintf(os.Stderr, "Findings: %d total\n", report.Summary.Total)
-	fmt.Fprintf(os.Stderr, "  By severity: %v\n", formatSeverityMap(report.Summary.BySeverity))
-	fmt.Fprintf(os.Stderr, "  By category: %v\n", formatCategoryMap(report.Summary.ByCategory))
-	fmt.Fprintf(os.Stderr, "  Files affected: %d\n", report.Summary.FilesAffected)
-	fmt.Fprintf(os.Stderr, "  Pipeline iterations: %d, stable: %v\n", result.TotalIterations, result.Stable)
+	slog.Info("findings",
+		"total", report.Summary.Total,
+		"by_severity", formatSeverityMap(report.Summary.BySeverity),
+		"by_category", formatCategoryMap(report.Summary.ByCategory),
+		"files_affected", report.Summary.FilesAffected,
+		"iterations", result.TotalIterations,
+		"stable", result.Stable,
+	)
 	return nil
 }
 

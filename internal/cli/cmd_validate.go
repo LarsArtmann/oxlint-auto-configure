@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -45,7 +46,7 @@ func newValidateCommand() *cobra.Command {
 			}
 
 			if len(unknown) > 0 {
-				fmt.Fprintf(os.Stderr, "Unknown rules: %s\n", strings.Join(unknown, ", "))
+				slog.Error("unknown rules", "rules", strings.Join(unknown, ", "))
 				return fmt.Errorf("%d unknown rules found", len(unknown))
 			}
 
@@ -58,7 +59,7 @@ func newValidateCommand() *cobra.Command {
 			}
 
 			if len(invalid) > 0 {
-				fmt.Fprintf(os.Stderr, "Invalid severities: %s\n", strings.Join(invalid, ", "))
+				slog.Error("invalid severities", "rules", strings.Join(invalid, ", "))
 				return fmt.Errorf("%d invalid severities found", len(invalid))
 			}
 
@@ -69,11 +70,14 @@ func newValidateCommand() *cobra.Command {
 				}
 			}
 
-			fmt.Fprintf(os.Stderr, "Config valid: %s\n", targetPath)
-			fmt.Fprintf(os.Stderr, "  Rules: %d total, %d enabled, %d disabled\n",
-				len(cfg.Rules), enabled, len(cfg.Rules)-enabled)
-			fmt.Fprintf(os.Stderr, "  Plugins: %v\n", cfg.Plugins)
-			fmt.Fprintf(os.Stderr, "  Categories: %v\n", cfg.Categories)
+			slog.Info("config valid",
+				"path", targetPath,
+				"rules", len(cfg.Rules),
+				"enabled", enabled,
+				"disabled", len(cfg.Rules)-enabled,
+				"plugins", cfg.Plugins,
+				"categories", cfg.Categories,
+			)
 
 			return nil
 		},

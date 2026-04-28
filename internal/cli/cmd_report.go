@@ -3,7 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"log/slog"
 	"path/filepath"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
@@ -106,14 +106,16 @@ func reportSummary(decisions []profile.RuleDecision, reg *rule.Registry) error {
 		counts[string(d.Severity)]++
 	}
 
-	fmt.Fprintf(os.Stderr, "Total rules: %d\n", reg.Len())
-	fmt.Fprintf(os.Stderr, "  error: %d\n", counts["error"])
-	fmt.Fprintf(os.Stderr, "  warn:  %d\n", counts["warn"])
-	fmt.Fprintf(os.Stderr, "  off:   %d\n", counts["off"])
-	fmt.Fprintf(os.Stderr, "  Enabled by default: %d\n", len(reg.EnabledByDefault()))
-	fmt.Fprintf(os.Stderr, "  Disabled by default: %d\n", len(reg.DisabledByDefault()))
-	fmt.Fprintf(os.Stderr, "  Fixable: %d\n", len(reg.Fixable()))
-	fmt.Fprintf(os.Stderr, "  Type-aware: %d\n", len(reg.TypeAwareRules()))
+	slog.Info("rule summary",
+		"total", reg.Len(),
+		"error", counts["error"],
+		"warn", counts["warn"],
+		"off", counts["off"],
+		"enabled_by_default", len(reg.EnabledByDefault()),
+		"disabled_by_default", len(reg.DisabledByDefault()),
+		"fixable", len(reg.Fixable()),
+		"type_aware", len(reg.TypeAwareRules()),
+	)
 
 	return nil
 }
