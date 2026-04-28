@@ -85,6 +85,7 @@ oxlint-auto-configure configure [flags]
 | `-p, --profile` | `recommended` | Configuration profile |
 | `-c, --config` | `.oxlintrc.json` | Output config file path |
 | `-d, --dry-run` | false | Show changes without writing |
+| `--fix` | false | Run oxlint --fix after writing config |
 | `--root` | `.` | Project root directory |
 
 ### `analyze`
@@ -92,7 +93,7 @@ oxlint-auto-configure configure [flags]
 Run oxlint and show findings using the go-finding pipeline:
 
 ```bash
-oxlint-auto-configure analyze [--root .]
+oxlint-auto-configure analyze [--root .] [-f summary|json|sarif|table]
 ```
 
 ### `validate`
