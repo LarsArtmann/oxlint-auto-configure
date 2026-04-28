@@ -4,6 +4,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sort"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
@@ -12,11 +13,11 @@ import (
 
 // OxlintConfig represents the .oxlintrc.json structure.
 type OxlintConfig struct {
-	Plugins  []string               `json:"plugins,omitempty"`
-	Categories map[string]string    `json:"categories,omitempty"`
-	Rules    map[string]string      `json:"rules,omitempty"`
-	Settings map[string]interface{} `json:"settings,omitempty"`
-	Env      map[string]bool        `json:"env,omitempty"`
+	Plugins    []string         `json:"plugins,omitempty"`
+	Categories map[string]string `json:"categories,omitempty"`
+	Rules      map[string]string `json:"rules,omitempty"`
+	Settings   map[string]any   `json:"settings,omitempty"`
+	Env        map[string]bool  `json:"env,omitempty"`
 }
 
 // Generator creates oxlint configuration from profile decisions.
@@ -46,7 +47,7 @@ func (g *Generator) Generate() *OxlintConfig {
 // This is the maximal-typesafe profile.
 func (g *Generator) GenerateAllError() *OxlintConfig {
 	cfg := &OxlintConfig{
-		Plugins:  g.allPlugins(),
+		Plugins: g.allPlugins(),
 		Categories: map[string]string{
 			"correctness": "error",
 			"suspicious":  "error",
@@ -85,14 +86,13 @@ func FromJSON(data []byte) (*OxlintConfig, error) {
 func (g *Generator) enabledPlugins() []string {
 	var plugins []string
 
-	// Default plugins (always on in oxlint)
 	plugins = append(plugins, "unicorn", "typescript", "oxc")
 
 	if g.categorizer != nil {
 		pc := g.categorizer.EnabledPlugins()
 		for _, p := range pc {
 			name := pluginFlagToName(p)
-			if name != "" && !contains(plugins, name) {
+			if name != "" && !slices.Contains(plugins, name) {
 				plugins = append(plugins, name)
 			}
 		}
@@ -131,7 +131,6 @@ func (g *Generator) categorySeverityMap() map[string]string {
 
 	result := make(map[string]string)
 	for name, cat := range cats {
-		// Use a representative rule from each category to decide severity
 		rules := g.registry.ByCategory(cat)
 		if len(rules) > 0 {
 			decision := g.categorizer.Decide(rules[0])
@@ -159,45 +158,43 @@ func (g *Generator) ruleSeverityMap() map[string]string {
 		fullName := d.Rule.FullName()
 		catSev, hasCat := catMap[string(d.Rule.Category)]
 
-		if hasCat && string(d.Severity) != catSev && d.Severity != rule.SeverityOff {
-			rules[fullName] = string(d.Severity)
-		}
-
 		if d.Severity == rule.SeverityOff {
 			rules[fullName] = "off"
+		} else if hasCat && string(d.Severity) != catSev {
+			rules[fullName] = string(d.Severity)
 		}
 	}
 
 	return rules
 }
 
-func defaultSettings() map[string]interface{} {
-	return map[string]interface{}{
-		"jsx-a11y": map[string]interface{}{
+func defaultSettings() map[string]any {
+	return map[string]any{
+		"jsx-a11y": map[string]any{
 			"polymorphicPropName": nil,
-			"components":         map[string]interface{}{},
-			"attributes":         map[string]interface{}{},
+			"components":         map[string]any{},
+			"attributes":         map[string]any{},
 		},
-		"next": map[string]interface{}{
-			"rootDir": []interface{}{},
+		"next": map[string]any{
+			"rootDir": []any{},
 		},
-		"react": map[string]interface{}{
-			"formComponents":           []interface{}{},
-			"linkComponents":           []interface{}{},
-			"version":                 nil,
-			"componentWrapperFunctions": []interface{}{},
+		"react": map[string]any{
+			"formComponents":            []any{},
+			"linkComponents":            []any{},
+			"version":                   nil,
+			"componentWrapperFunctions": []any{},
 		},
-		"jsdoc": map[string]interface{}{
-			"ignorePrivate":                  false,
-			"ignoreInternal":                 false,
-			"ignoreReplacesDocs":             true,
-			"overrideReplacesDocs":           true,
-			"augmentsExtendsReplacesDocs":    false,
-			"implementsReplacesDocs":         false,
+		"jsdoc": map[string]any{
+			"ignorePrivate":                    false,
+			"ignoreInternal":                   false,
+			"ignoreReplacesDocs":               true,
+			"overrideReplacesDocs":             true,
+			"augmentsExtendsReplacesDocs":      false,
+			"implementsReplacesDocs":           false,
 			"exemptDestructuredRootsFromChecks": false,
-			"tagNamePreference":             map[string]interface{}{},
+			"tagNamePreference":               map[string]any{},
 		},
-		"vitest": map[string]interface{}{
+		"vitest": map[string]any{
 			"typecheck": false,
 		},
 	}
@@ -218,13 +215,4 @@ func pluginFlagToName(flag string) string {
 		"--vue-plugin":        "vue",
 	}
 	return m[flag]
-}
-
-func contains[T comparable](s []T, v T) bool {
-	for _, x := range s {
-		if x == v {
-			return true
-		}
-	}
-	return false
 }

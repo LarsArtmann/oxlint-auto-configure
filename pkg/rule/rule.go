@@ -1,6 +1,8 @@
 // Package rule defines types and the registry for oxlint rules.
 package rule
 
+import "slices"
+
 // Category represents an oxlint rule category.
 type Category string
 
@@ -73,12 +75,7 @@ func AllPlugins() []Plugin {
 
 // IsValid returns true if the plugin is a recognized oxlint plugin.
 func (p Plugin) IsValid() bool {
-	for _, known := range AllPlugins() {
-		if p == known {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(AllPlugins(), p)
 }
 
 // String returns the string representation.

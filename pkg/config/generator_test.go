@@ -92,7 +92,7 @@ func TestConfigToJSON(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, data)
 
-	var parsed map[string]interface{}
+	var parsed map[string]any
 	err = json.Unmarshal(data, &parsed)
 	require.NoError(t, err)
 }

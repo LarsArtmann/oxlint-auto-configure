@@ -327,11 +327,11 @@ func newReportCommand() *cobra.Command {
 
 			switch format {
 			case "json":
-				return reportJSON(decisions, reg)
+				return reportJSON(decisions)
 			case "summary":
 				return reportSummary(decisions, reg)
 			default:
-				return reportTable(decisions, reg)
+				return reportTable(decisions)
 			}
 		},
 	}
@@ -363,7 +363,7 @@ func profileNames() []string {
 	return names
 }
 
-func reportJSON(decisions []profile.RuleDecision, reg *rule.Registry) error {
+func reportJSON(decisions []profile.RuleDecision) error {
 	type entry struct {
 		Rule     string `json:"rule"`
 		Plugin   string `json:"plugin"`
@@ -411,7 +411,7 @@ func reportSummary(decisions []profile.RuleDecision, reg *rule.Registry) error {
 	return nil
 }
 
-func reportTable(decisions []profile.RuleDecision, reg *rule.Registry) error {
+func reportTable(decisions []profile.RuleDecision) error {
 	fmt.Println("| Rule | Plugin | Category | Default | Severity |")
 	fmt.Println("|------|--------|----------|---------|----------|")
 

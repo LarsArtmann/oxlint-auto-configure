@@ -3,6 +3,8 @@
 package profile
 
 import (
+	"slices"
+
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 )
 
@@ -35,12 +37,7 @@ func AllProfiles() []Profile {
 
 // IsValid returns true if the profile is recognized.
 func (p Profile) IsValid() bool {
-	for _, known := range AllProfiles() {
-		if p == known {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(AllProfiles(), p)
 }
 
 // String returns the string representation.

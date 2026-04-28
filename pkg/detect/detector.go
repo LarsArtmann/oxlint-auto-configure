@@ -187,7 +187,7 @@ func (d *Detector) hasImportUsage() bool {
 }
 
 func (d *Detector) hasPromiseUsage(deps map[string]bool) bool {
-	return deps["bluebird"] || strings.Contains(d.rootDir, "promise")
+	return deps["bluebird"]
 }
 
 // FormatTypes returns a human-readable string of detected types.
