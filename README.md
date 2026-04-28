@@ -165,7 +165,6 @@ oxlint-auto-configure/
 │   ├── detect/                 # Project type detection
 │   ├── diff/                   # Config comparison
 │   ├── oxlint/                 # go-finding Detector for oxlint
-│   └── report/                 # Report generation
 ├── internal/cli/               # CLI commands (Cobra)
 └── docs/                       # Documentation
 ```

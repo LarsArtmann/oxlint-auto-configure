@@ -8,8 +8,7 @@ import (
 )
 
 type FixResult struct {
-	FilesFixed int
-	Output     string
+	Output string
 }
 
 func RunFix(ctx context.Context, rootDir, configPath string) (*FixResult, error) {
