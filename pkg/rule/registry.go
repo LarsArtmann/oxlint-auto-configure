@@ -111,48 +111,35 @@ func (r *Registry) ByCategory(c Category) []Rule {
 	return r.byCat[c]
 }
 
-// EnabledByDefault returns all rules that are enabled by default in oxlint.
-func (r *Registry) EnabledByDefault() []Rule {
+// Filter returns all rules matching the given predicate.
+func (r *Registry) Filter(pred func(Rule) bool) []Rule {
 	var result []Rule
 	for _, rule := range r.rules {
-		if rule.Enabled {
+		if pred(rule) {
 			result = append(result, rule)
 		}
 	}
 	return result
+}
+
+// EnabledByDefault returns all rules that are enabled by default in oxlint.
+func (r *Registry) EnabledByDefault() []Rule {
+	return r.Filter(func(rule Rule) bool { return rule.Enabled })
 }
 
 // DisabledByDefault returns all rules that are disabled by default in oxlint.
 func (r *Registry) DisabledByDefault() []Rule {
-	var result []Rule
-	for _, rule := range r.rules {
-		if !rule.Enabled {
-			result = append(result, rule)
-		}
-	}
-	return result
+	return r.Filter(func(rule Rule) bool { return !rule.Enabled })
 }
 
 // Fixable returns all rules that have any fix capability.
 func (r *Registry) Fixable() []Rule {
-	var result []Rule
-	for _, rule := range r.rules {
-		if rule.IsFixable() {
-			result = append(result, rule)
-		}
-	}
-	return result
+	return r.Filter(func(rule Rule) bool { return rule.IsFixable() })
 }
 
 // TypeAwareRules returns all rules that require type information.
 func (r *Registry) TypeAwareRules() []Rule {
-	var result []Rule
-	for _, rule := range r.rules {
-		if rule.TypeAware {
-			result = append(result, rule)
-		}
-	}
-	return result
+	return r.Filter(func(rule Rule) bool { return rule.TypeAware })
 }
 
 // Len returns the total number of rules.
