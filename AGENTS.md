@@ -56,6 +56,7 @@ just check       # All checks (fmt + vet + lint + test)
 3. **Project-aware** — Auto-detects frameworks to enable relevant plugins
 4. **go-finding integration** — Uses Detector interface for oxlint integration
 5. **Config round-trip** — Generated configs can be parsed back and compared
+6. **Self-describing types** — Plugin has `CLIFlag()`/`NeedsFlag()`; Registry has generic `Filter()`
 
 ### Profiles
 
@@ -83,7 +84,11 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
 - **Version injected at build** — `internal/cli.version` via ldflags (default: "dev")
 - **Per-command files** — Commands are in `internal/cli/cmd_*.go`, not a monolithic file
-- **SARIF output** — analyze command outputs SARIF to stdout, status to stderr
+- **SARIF output** — analyze command defaults to summary format; SARIF is opt-in via `-f sarif`
+- **Structured logging** — CLI uses `log/slog` for all diagnostic output (not fmt.Fprintf)
+- **PluginConfig** — `map[rule.Plugin]bool` (not a struct with bool fields)
+- **Self-describing Plugin** — `CLIFlag()` and `NeedsFlag()` methods on Plugin type
+- **Version-pinned rules** — `rules_version.txt` embedded; warns on mismatch
 
 ---
 
