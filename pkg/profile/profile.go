@@ -4,6 +4,7 @@ package profile
 
 import (
 	"slices"
+	"sort"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 )
@@ -66,19 +67,7 @@ type Categorizer struct {
 }
 
 // PluginConfig determines which plugins are relevant for the target project.
-type PluginConfig struct {
-	React     bool
-	NextJS    bool
-	Vue       bool
-	Jest      bool
-	Vitest    bool
-	JSDoc     bool
-	JSXA11y   bool
-	Node      bool
-	Import    bool
-	Promise   bool
-	ReactPerf bool
-}
+type PluginConfig map[rule.Plugin]bool
 
 // NewCategorizer creates a categorizer with the given profile and plugin config.
 func NewCategorizer(p Profile, pc PluginConfig) *Categorizer {
@@ -101,42 +90,17 @@ func (c *Categorizer) Decide(r rule.Rule) rule.SeverityDecision {
 	}
 }
 
-// EnabledPlugins returns the list of oxlint plugin flags to enable.
-func (c *Categorizer) EnabledPlugins() []string {
-	var plugins []string
-	if c.pluginConfig.Import {
-		plugins = append(plugins, "--import-plugin")
+// EnabledPlugins returns the list of detected plugins that are enabled.
+func (c *Categorizer) EnabledPlugins() []rule.Plugin {
+	plugins := make([]rule.Plugin, 0, len(c.pluginConfig))
+	for p, enabled := range c.pluginConfig {
+		if enabled {
+			plugins = append(plugins, p)
+		}
 	}
-	if c.pluginConfig.React {
-		plugins = append(plugins, "--react-plugin")
-	}
-	if c.pluginConfig.JSDoc {
-		plugins = append(plugins, "--jsdoc-plugin")
-	}
-	if c.pluginConfig.Jest {
-		plugins = append(plugins, "--jest-plugin")
-	}
-	if c.pluginConfig.Vitest {
-		plugins = append(plugins, "--vitest-plugin")
-	}
-	if c.pluginConfig.JSXA11y {
-		plugins = append(plugins, "--jsx-a11y-plugin")
-	}
-	if c.pluginConfig.NextJS {
-		plugins = append(plugins, "--nextjs-plugin")
-	}
-	if c.pluginConfig.ReactPerf {
-		plugins = append(plugins, "--react-perf-plugin")
-	}
-	if c.pluginConfig.Promise {
-		plugins = append(plugins, "--promise-plugin")
-	}
-	if c.pluginConfig.Node {
-		plugins = append(plugins, "--node-plugin")
-	}
-	if c.pluginConfig.Vue {
-		plugins = append(plugins, "--vue-plugin")
-	}
+	sort.Slice(plugins, func(i, j int) bool {
+		return string(plugins[i]) < string(plugins[j])
+	})
 	return plugins
 }
 
@@ -192,32 +156,10 @@ func (c *Categorizer) decideMinimal(r rule.Rule) rule.SeverityDecision {
 
 // IsPluginRelevant returns true if a rule's plugin is relevant given the project config.
 func (c *Categorizer) IsPluginRelevant(r rule.Rule) bool {
-	switch r.Plugin {
-	case rule.PluginESLint, rule.PluginOXC, rule.PluginTypeScript, rule.PluginUnicorn:
+	if !r.Plugin.NeedsFlag() {
 		return true
-	case rule.PluginReact, rule.PluginReactPerf:
-		return c.pluginConfig.React
-	case rule.PluginNextJS:
-		return c.pluginConfig.NextJS
-	case rule.PluginVue:
-		return c.pluginConfig.Vue
-	case rule.PluginJest:
-		return c.pluginConfig.Jest
-	case rule.PluginVitest:
-		return c.pluginConfig.Vitest
-	case rule.PluginJSDoc:
-		return c.pluginConfig.JSDoc
-	case rule.PluginJSXA11y:
-		return c.pluginConfig.JSXA11y
-	case rule.PluginNode:
-		return c.pluginConfig.Node
-	case rule.PluginImport:
-		return c.pluginConfig.Import
-	case rule.PluginPromise:
-		return c.pluginConfig.Promise
-	default:
-		return false
 	}
+	return c.pluginConfig[r.Plugin]
 }
 
 // RuleDecision pairs a rule with its decided severity.

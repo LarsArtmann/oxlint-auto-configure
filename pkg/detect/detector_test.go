@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
+	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,9 +30,9 @@ func TestDetectReactProject(t *testing.T) {
 	pc, types, err := det.Detect()
 	require.NoError(t, err)
 
-	assert.True(t, pc.React)
-	assert.True(t, pc.JSXA11y)
-	assert.True(t, pc.ReactPerf)
+	assert.True(t, pc[rule.PluginReact])
+	assert.True(t, pc[rule.PluginJSXA11y])
+	assert.True(t, pc[rule.PluginReactPerf])
 
 	var hasReact bool
 	for _, t := range types {
@@ -52,8 +53,8 @@ func TestDetectNextJSProject(t *testing.T) {
 	pc, types, err := det.Detect()
 	require.NoError(t, err)
 
-	assert.True(t, pc.NextJS)
-	assert.True(t, pc.React)
+	assert.True(t, pc[rule.PluginNextJS])
+	assert.True(t, pc[rule.PluginReact])
 
 	var hasNextJS bool
 	for _, t := range types {
@@ -74,7 +75,7 @@ func TestDetectVueProject(t *testing.T) {
 	pc, types, err := det.Detect()
 	require.NoError(t, err)
 
-	assert.True(t, pc.Vue)
+	assert.True(t, pc[rule.PluginVue])
 
 	var hasVue bool
 	for _, t := range types {
@@ -95,8 +96,8 @@ func TestDetectJestProject(t *testing.T) {
 	pc, _, err := det.Detect()
 	require.NoError(t, err)
 
-	assert.True(t, pc.Jest)
-	assert.True(t, pc.Node)
+	assert.True(t, pc[rule.PluginJest])
+	assert.True(t, pc[rule.PluginNode])
 }
 
 func TestDetectVitestProject(t *testing.T) {
@@ -109,7 +110,7 @@ func TestDetectVitestProject(t *testing.T) {
 	pc, _, err := det.Detect()
 	require.NoError(t, err)
 
-	assert.True(t, pc.Vitest)
+	assert.True(t, pc[rule.PluginVitest])
 }
 
 func TestDetectTSProject(t *testing.T) {

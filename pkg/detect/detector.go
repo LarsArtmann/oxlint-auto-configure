@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
+	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 )
 
 // ProjectType represents the detected project framework/type.
@@ -83,38 +84,38 @@ func (d *Detector) detectProjectTypes(deps map[string]bool) []ProjectType {
 
 // toPluginConfig converts detected types to plugin configuration.
 func (d *Detector) toPluginConfig(types []ProjectType, deps map[string]bool) profile.PluginConfig {
-	pc := profile.PluginConfig{}
+	pc := make(profile.PluginConfig)
 
 	for _, t := range types {
 		switch t {
 		case ProjectTypeReact, ProjectTypeNextJS:
-			pc.React = true
-			pc.JSXA11y = true
-			pc.ReactPerf = true
+			pc[rule.PluginReact] = true
+			pc[rule.PluginJSXA11y] = true
+			pc[rule.PluginReactPerf] = true
 		case ProjectTypeVue:
-			pc.Vue = true
+			pc[rule.PluginVue] = true
 		case ProjectTypeNode:
-			pc.Node = true
+			pc[rule.PluginNode] = true
 		}
 	}
 
 	if deps["next"] {
-		pc.NextJS = true
+		pc[rule.PluginNextJS] = true
 	}
 	if deps["jest"] {
-		pc.Jest = true
+		pc[rule.PluginJest] = true
 	}
 	if deps["vitest"] {
-		pc.Vitest = true
+		pc[rule.PluginVitest] = true
 	}
 	if d.hasJSDocUsage(deps) {
-		pc.JSDoc = true
+		pc[rule.PluginJSDoc] = true
 	}
 	if d.hasImportUsage() {
-		pc.Import = true
+		pc[rule.PluginImport] = true
 	}
 	if d.hasPromiseUsage(deps) {
-		pc.Promise = true
+		pc[rule.PluginPromise] = true
 	}
 
 	return pc

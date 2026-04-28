@@ -77,10 +77,10 @@ func TestCategorizerMinimal(t *testing.T) {
 
 func TestPluginRelevance(t *testing.T) {
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{
-		React:  true,
-		NextJS: true,
-		Jest:   true,
-		Vitest: true,
+		rule.PluginReact:  true,
+		rule.PluginNextJS: true,
+		rule.PluginJest:   true,
+		rule.PluginVitest: true,
 	})
 
 	assert.True(t, cat.IsPluginRelevant(rule.Rule{Plugin: rule.PluginESLint}))
@@ -97,15 +97,15 @@ func TestPluginRelevance(t *testing.T) {
 
 func TestEnabledPlugins(t *testing.T) {
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{
-		React:   true,
-		Jest:    true,
-		JSXA11y: true,
+		rule.PluginReact:   true,
+		rule.PluginJest:    true,
+		rule.PluginJSXA11y: true,
 	})
 
 	plugins := cat.EnabledPlugins()
-	assert.Contains(t, plugins, "--react-plugin")
-	assert.Contains(t, plugins, "--jest-plugin")
-	assert.Contains(t, plugins, "--jsx-a11y-plugin")
+	assert.Contains(t, plugins, rule.PluginReact)
+	assert.Contains(t, plugins, rule.PluginJest)
+	assert.Contains(t, plugins, rule.PluginJSXA11y)
 }
 
 func TestDecideAll(t *testing.T) {

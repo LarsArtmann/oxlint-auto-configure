@@ -52,7 +52,7 @@ func TestGeneratorWithReactProject(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	pc := profile.PluginConfig{React: true, JSXA11y: true, ReactPerf: true}
+	pc := profile.PluginConfig{rule.PluginReact: true, rule.PluginJSXA11y: true, rule.PluginReactPerf: true}
 	cat := profile.NewCategorizer(profile.ProfileRecommended, pc)
 	gen := NewGenerator(cat, reg)
 	cfg := gen.Generate()
@@ -66,9 +66,10 @@ func TestGeneratorWithAllPlugins(t *testing.T) {
 	require.NoError(t, err)
 
 	pc := profile.PluginConfig{
-		React: true, NextJS: true, Vue: true, Jest: true,
-		Vitest: true, JSDoc: true, JSXA11y: true, Node: true,
-		Import: true, Promise: true, ReactPerf: true,
+		rule.PluginReact: true, rule.PluginNextJS: true, rule.PluginVue: true,
+		rule.PluginJest: true, rule.PluginVitest: true, rule.PluginJSDoc: true,
+		rule.PluginJSXA11y: true, rule.PluginNode: true, rule.PluginImport: true,
+		rule.PluginPromise: true, rule.PluginReactPerf: true,
 	}
 	cat := profile.NewCategorizer(profile.ProfileRecommended, pc)
 	gen := NewGenerator(cat, reg)

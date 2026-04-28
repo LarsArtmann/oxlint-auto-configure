@@ -70,24 +70,21 @@ func FromJSON(data []byte) (*OxlintConfig, error) {
 
 // enabledPlugins returns the list of plugins that should be enabled.
 func (g *Generator) enabledPlugins() []string {
-	seen := make(map[string]struct{})
+	seen := make(map[string]bool)
 	var plugins []string
 
-	for _, p := range []string{"unicorn", "typescript", "oxc"} {
-		seen[p] = struct{}{}
-		plugins = append(plugins, p)
+	for _, p := range []rule.Plugin{rule.PluginOXC, rule.PluginTypeScript, rule.PluginUnicorn} {
+		name := string(p)
+		seen[name] = true
+		plugins = append(plugins, name)
 	}
 
 	if g.categorizer != nil {
-		for _, flag := range g.categorizer.EnabledPlugins() {
-			for _, p := range rule.AllPlugins() {
-				if p.CLIFlag() == flag {
-					name := string(p)
-					if _, ok := seen[name]; !ok {
-						seen[name] = struct{}{}
-						plugins = append(plugins, name)
-					}
-				}
+		for _, p := range g.categorizer.EnabledPlugins() {
+			name := string(p)
+			if !seen[name] {
+				seen[name] = true
+				plugins = append(plugins, name)
 			}
 		}
 	}
