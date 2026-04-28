@@ -21,13 +21,13 @@ func EmbeddedVersion() string {
 
 // rawRule maps the oxlint JSON rule format.
 type rawRule struct {
-	Scope    string `json:"scope"`
-	Value    string `json:"value"`
-	Category string `json:"category"`
-	TypeAware bool  `json:"type_aware"`
-	Fix      string `json:"fix"`
-	Default  bool   `json:"default"`
-	DocsURL  string `json:"docs_url"`
+	Scope     string `json:"scope"`
+	Value     string `json:"value"`
+	Category  string `json:"category"`
+	TypeAware bool   `json:"type_aware"`
+	Fix       string `json:"fix"`
+	Default   bool   `json:"default"`
+	DocsURL   string `json:"docs_url"`
 }
 
 // Registry holds all known oxlint rules, indexed for fast lookup.

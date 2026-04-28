@@ -46,21 +46,21 @@ func (c Category) String() string { return string(c) }
 type Plugin string
 
 const (
-	PluginESLint    Plugin = "eslint"
-	PluginImport    Plugin = "import"
-	PluginJest      Plugin = "jest"
-	PluginJSDoc     Plugin = "jsdoc"
-	PluginJSXA11y   Plugin = "jsx_a11y"
-	PluginNextJS    Plugin = "nextjs"
-	PluginNode      Plugin = "node"
-	PluginOXC       Plugin = "oxc"
-	PluginPromise   Plugin = "promise"
-	PluginReact     Plugin = "react"
-	PluginReactPerf Plugin = "react_perf"
+	PluginESLint     Plugin = "eslint"
+	PluginImport     Plugin = "import"
+	PluginJest       Plugin = "jest"
+	PluginJSDoc      Plugin = "jsdoc"
+	PluginJSXA11y    Plugin = "jsx_a11y"
+	PluginNextJS     Plugin = "nextjs"
+	PluginNode       Plugin = "node"
+	PluginOXC        Plugin = "oxc"
+	PluginPromise    Plugin = "promise"
+	PluginReact      Plugin = "react"
+	PluginReactPerf  Plugin = "react_perf"
 	PluginTypeScript Plugin = "typescript"
-	PluginUnicorn   Plugin = "unicorn"
-	PluginVitest    Plugin = "vitest"
-	PluginVue       Plugin = "vue"
+	PluginUnicorn    Plugin = "unicorn"
+	PluginVitest     Plugin = "vitest"
+	PluginVue        Plugin = "vue"
 )
 
 // AllPlugins returns all known oxlint plugins.
@@ -93,13 +93,13 @@ const (
 
 // Rule represents a single oxlint rule with all its metadata.
 type Rule struct {
-	Name        string        // e.g., "no-unused-vars"
-	Plugin      Plugin        // e.g., "eslint"
-	Category    Category      // e.g., "correctness"
-	Enabled     bool          // enabled by default?
-	TypeAware   bool          // requires type information?
-	Fix         FixCapability // auto-fix capability
-	DocsURL     string        // documentation URL
+	Name      string        // e.g., "no-unused-vars"
+	Plugin    Plugin        // e.g., "eslint"
+	Category  Category      // e.g., "correctness"
+	Enabled   bool          // enabled by default?
+	TypeAware bool          // requires type information?
+	Fix       FixCapability // auto-fix capability
+	DocsURL   string        // documentation URL
 }
 
 // FullName returns the fully qualified rule name with plugin prefix.
@@ -125,9 +125,9 @@ func (r Rule) IsSafeFixable() bool {
 type SeverityDecision string
 
 const (
-	SeverityError   SeverityDecision = "error"
-	SeverityWarn    SeverityDecision = "warn"
-	SeverityOff     SeverityDecision = "off"
+	SeverityError SeverityDecision = "error"
+	SeverityWarn  SeverityDecision = "warn"
+	SeverityOff   SeverityDecision = "off"
 )
 
 // String returns the string representation.

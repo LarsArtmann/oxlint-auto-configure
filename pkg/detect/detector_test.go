@@ -131,7 +131,11 @@ func TestDetectTSProject(t *testing.T) {
 }
 
 func TestFormatTypes(t *testing.T) {
-	assert.Equal(t, "react, nextjs", FormatTypes([]ProjectType{ProjectTypeReact, ProjectTypeNextJS}))
+	assert.Equal(
+		t,
+		"react, nextjs",
+		FormatTypes([]ProjectType{ProjectTypeReact, ProjectTypeNextJS}),
+	)
 	assert.Equal(t, "unknown", FormatTypes(nil))
 }
 

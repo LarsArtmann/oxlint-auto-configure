@@ -79,7 +79,8 @@ func newValidateCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&configPath, "config", "c", "", "Config file path (default: .oxlintrc.json)")
+	cmd.Flags().
+		StringVarP(&configPath, "config", "c", "", "Config file path (default: .oxlintrc.json)")
 
 	return cmd
 }

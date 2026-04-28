@@ -15,13 +15,13 @@ import (
 type ProjectType string
 
 const (
-	ProjectTypeUnknown    ProjectType = "unknown"
-	ProjectTypeReact      ProjectType = "react"
-	ProjectTypeNextJS     ProjectType = "nextjs"
-	ProjectTypeVue        ProjectType = "vue"
-	ProjectTypeNode       ProjectType = "node"
-	ProjectTypePlainTS    ProjectType = "typescript"
-	ProjectTypeLibrary    ProjectType = "library"
+	ProjectTypeUnknown ProjectType = "unknown"
+	ProjectTypeReact   ProjectType = "react"
+	ProjectTypeNextJS  ProjectType = "nextjs"
+	ProjectTypeVue     ProjectType = "vue"
+	ProjectTypeNode    ProjectType = "node"
+	ProjectTypePlainTS ProjectType = "typescript"
+	ProjectTypeLibrary ProjectType = "library"
 )
 
 // Detector detects project type from the filesystem.

@@ -46,7 +46,11 @@ Profiles:
 
 			p := profile.Profile(profileFlag)
 			if !p.IsValid() {
-				return fmt.Errorf("invalid profile %q: choose from %s", profileFlag, strings.Join(profileNames(), ", "))
+				return fmt.Errorf(
+					"invalid profile %q: choose from %s",
+					profileFlag,
+					strings.Join(profileNames(), ", "),
+				)
 			}
 
 			oxlintVer, err := oxlint.CheckVersion(cmd.Context())
@@ -57,7 +61,12 @@ Profiles:
 
 			embeddedVer := rule.EmbeddedVersion()
 			if embeddedVer != "" && embeddedVer != oxlintVer {
-				fmt.Fprintf(os.Stderr, "Warning: embedded rules from oxlint %s, but runtime is %s — rules may differ\n", embeddedVer, oxlintVer)
+				fmt.Fprintf(
+					os.Stderr,
+					"Warning: embedded rules from oxlint %s, but runtime is %s — rules may differ\n",
+					embeddedVer,
+					oxlintVer,
+				)
 			}
 
 			reg, err := rule.LoadRegistry()
@@ -130,8 +139,10 @@ Profiles:
 		},
 	}
 
-	cmd.Flags().StringVarP(&profileFlag, "profile", "p", string(defaultProfile), "Configuration profile")
-	cmd.Flags().StringVarP(&configPath, "config", "c", "", "Output config file path (default: .oxlintrc.json)")
+	cmd.Flags().
+		StringVarP(&profileFlag, "profile", "p", string(defaultProfile), "Configuration profile")
+	cmd.Flags().
+		StringVarP(&configPath, "config", "c", "", "Output config file path (default: .oxlintrc.json)")
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "d", false, "Show what would change without writing")
 	cmd.Flags().BoolVar(&runFix, "fix", false, "Run oxlint --fix after writing config")
 	cmd.Flags().StringVar(&rootDir, "root", ".", "Project root directory")

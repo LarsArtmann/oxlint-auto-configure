@@ -7,7 +7,7 @@ import (
 
 const (
 	defaultConfigPath = ".oxlintrc.json"
-	defaultProfile   = profile.ProfileRecommended
+	defaultProfile    = profile.ProfileRecommended
 )
 
 var version = "dev"

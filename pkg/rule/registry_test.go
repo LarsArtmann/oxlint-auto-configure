@@ -121,12 +121,21 @@ func TestRuleFullName(t *testing.T) {
 		expected string
 	}{
 		{Rule{Name: "no-unused-vars", Plugin: PluginESLint}, "no-unused-vars"},
-		{Rule{Name: "no-floating-promises", Plugin: PluginTypeScript}, "typescript/no-floating-promises"},
+		{
+			Rule{Name: "no-floating-promises", Plugin: PluginTypeScript},
+			"typescript/no-floating-promises",
+		},
 		{Rule{Name: "alt-text", Plugin: PluginJSXA11y}, "jsx_a11y/alt-text"},
 		{Rule{Name: "google-font-display", Plugin: PluginNextJS}, "nextjs/google-font-display"},
 		{Rule{Name: "valid-describe-callback", Plugin: PluginJest}, "jest/valid-describe-callback"},
-		{Rule{Name: "bad-array-method-on-arguments", Plugin: PluginOXC}, "oxc/bad-array-method-on-arguments"},
-		{Rule{Name: "no-await-in-promise-methods", Plugin: PluginUnicorn}, "unicorn/no-await-in-promise-methods"},
+		{
+			Rule{Name: "bad-array-method-on-arguments", Plugin: PluginOXC},
+			"oxc/bad-array-method-on-arguments",
+		},
+		{
+			Rule{Name: "no-await-in-promise-methods", Plugin: PluginUnicorn},
+			"unicorn/no-await-in-promise-methods",
+		},
 	}
 
 	for _, tt := range tests {

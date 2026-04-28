@@ -101,7 +101,7 @@ func TestReportJSON(t *testing.T) {
 	decisions := cat.DecideAll(reg)
 
 	// Verify we can generate the report data
-	assert.Equal(t, 716, len(decisions))
+	assert.Len(t, decisions, 716)
 
 	// Verify JSON serialization
 	entries := make([]map[string]string, 0, len(decisions))
@@ -113,5 +113,5 @@ func TestReportJSON(t *testing.T) {
 	}
 	data, err := json.Marshal(entries)
 	require.NoError(t, err)
-	assert.True(t, len(data) > 1000)
+	assert.Greater(t, len(data), 1000)
 }

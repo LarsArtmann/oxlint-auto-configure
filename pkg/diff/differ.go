@@ -21,10 +21,10 @@ type Change struct {
 type ChangeKind string
 
 const (
-	KindAdded      ChangeKind = "added"
-	KindRemoved    ChangeKind = "removed"
-	KindChanged    ChangeKind = "changed"
-	KindUnchanged  ChangeKind = "unchanged"
+	KindAdded     ChangeKind = "added"
+	KindRemoved   ChangeKind = "removed"
+	KindChanged   ChangeKind = "changed"
+	KindUnchanged ChangeKind = "unchanged"
 )
 
 // Differ compares two OxlintConfig instances.
@@ -48,11 +48,25 @@ func (d *Differ) Diff() []Change {
 
 		switch {
 		case !hadBefore && hasAfter:
-			changes = append(changes, Change{Rule: "category:" + key, OldValue: "", NewValue: after, Kind: KindAdded})
+			changes = append(
+				changes,
+				Change{Rule: "category:" + key, OldValue: "", NewValue: after, Kind: KindAdded},
+			)
 		case hadBefore && !hasAfter:
-			changes = append(changes, Change{Rule: "category:" + key, OldValue: before, NewValue: "", Kind: KindRemoved})
+			changes = append(
+				changes,
+				Change{Rule: "category:" + key, OldValue: before, NewValue: "", Kind: KindRemoved},
+			)
 		case hadBefore && hasAfter && before != after:
-			changes = append(changes, Change{Rule: "category:" + key, OldValue: before, NewValue: after, Kind: KindChanged})
+			changes = append(
+				changes,
+				Change{
+					Rule:     "category:" + key,
+					OldValue: before,
+					NewValue: after,
+					Kind:     KindChanged,
+				},
+			)
 		}
 	}
 
@@ -62,11 +76,20 @@ func (d *Differ) Diff() []Change {
 
 		switch {
 		case !hadBefore && hasAfter:
-			changes = append(changes, Change{Rule: rule, OldValue: "", NewValue: after, Kind: KindAdded})
+			changes = append(
+				changes,
+				Change{Rule: rule, OldValue: "", NewValue: after, Kind: KindAdded},
+			)
 		case hadBefore && !hasAfter:
-			changes = append(changes, Change{Rule: rule, OldValue: before, NewValue: "", Kind: KindRemoved})
+			changes = append(
+				changes,
+				Change{Rule: rule, OldValue: before, NewValue: "", Kind: KindRemoved},
+			)
 		case hadBefore && hasAfter && before != after:
-			changes = append(changes, Change{Rule: rule, OldValue: before, NewValue: after, Kind: KindChanged})
+			changes = append(
+				changes,
+				Change{Rule: rule, OldValue: before, NewValue: after, Kind: KindChanged},
+			)
 		}
 	}
 

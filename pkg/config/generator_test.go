@@ -82,10 +82,10 @@ func TestGeneratorWithAllPlugins(t *testing.T) {
 
 func TestConfigToJSON(t *testing.T) {
 	cfg := &OxlintConfig{
-		Plugins:  []string{"typescript", "unicorn"},
+		Plugins:    []string{"typescript", "unicorn"},
 		Categories: map[string]string{"correctness": "error"},
-		Rules:    map[string]string{"no-unused-vars": "error"},
-		Env:      map[string]bool{"builtin": true},
+		Rules:      map[string]string{"no-unused-vars": "error"},
+		Env:        map[string]bool{"builtin": true},
 	}
 
 	data, err := cfg.ToJSON()

@@ -13,11 +13,11 @@ import (
 
 // OxlintConfig represents the .oxlintrc.json structure.
 type OxlintConfig struct {
-	Plugins    []string         `json:"plugins,omitempty"`
+	Plugins    []string          `json:"plugins,omitempty"`
 	Categories map[string]string `json:"categories,omitempty"`
 	Rules      map[string]string `json:"rules,omitempty"`
-	Settings   map[string]any   `json:"settings,omitempty"`
-	Env        map[string]bool  `json:"env,omitempty"`
+	Settings   map[string]any    `json:"settings,omitempty"`
+	Env        map[string]bool   `json:"env,omitempty"`
 }
 
 // Generator creates oxlint configuration from profile decisions.
@@ -159,8 +159,8 @@ func defaultSettings() map[string]any {
 	return map[string]any{
 		"jsx-a11y": map[string]any{
 			"polymorphicPropName": nil,
-			"components":         map[string]any{},
-			"attributes":         map[string]any{},
+			"components":          map[string]any{},
+			"attributes":          map[string]any{},
 		},
 		"next": map[string]any{
 			"rootDir": []any{},
@@ -172,14 +172,14 @@ func defaultSettings() map[string]any {
 			"componentWrapperFunctions": []any{},
 		},
 		"jsdoc": map[string]any{
-			"ignorePrivate":                    false,
-			"ignoreInternal":                   false,
-			"ignoreReplacesDocs":               true,
-			"overrideReplacesDocs":             true,
-			"augmentsExtendsReplacesDocs":      false,
-			"implementsReplacesDocs":           false,
+			"ignorePrivate":                     false,
+			"ignoreInternal":                    false,
+			"ignoreReplacesDocs":                true,
+			"overrideReplacesDocs":              true,
+			"augmentsExtendsReplacesDocs":       false,
+			"implementsReplacesDocs":            false,
 			"exemptDestructuredRootsFromChecks": false,
-			"tagNamePreference":               map[string]any{},
+			"tagNamePreference":                 map[string]any{},
 		},
 		"vitest": map[string]any{
 			"typecheck": false,

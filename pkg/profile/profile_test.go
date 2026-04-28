@@ -58,17 +58,29 @@ func TestCategorizerStrict(t *testing.T) {
 func TestCategorizerMinimal(t *testing.T) {
 	cat := NewCategorizer(ProfileMinimal, PluginConfig{})
 
-	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryCorrectness, Enabled: true}))
-	assert.Equal(t, rule.SeverityWarn, cat.Decide(rule.Rule{Category: rule.CategoryStyle, Enabled: true}))
-	assert.Equal(t, rule.SeverityOff, cat.Decide(rule.Rule{Category: rule.CategoryStyle, Enabled: false}))
+	assert.Equal(
+		t,
+		rule.SeverityError,
+		cat.Decide(rule.Rule{Category: rule.CategoryCorrectness, Enabled: true}),
+	)
+	assert.Equal(
+		t,
+		rule.SeverityWarn,
+		cat.Decide(rule.Rule{Category: rule.CategoryStyle, Enabled: true}),
+	)
+	assert.Equal(
+		t,
+		rule.SeverityOff,
+		cat.Decide(rule.Rule{Category: rule.CategoryStyle, Enabled: false}),
+	)
 }
 
 func TestPluginRelevance(t *testing.T) {
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{
-		React:   true,
-		NextJS:  true,
-		Jest:    true,
-		Vitest:  true,
+		React:  true,
+		NextJS: true,
+		Jest:   true,
+		Vitest: true,
 	})
 
 	assert.True(t, cat.IsPluginRelevant(rule.Rule{Plugin: rule.PluginESLint}))
@@ -85,8 +97,8 @@ func TestPluginRelevance(t *testing.T) {
 
 func TestEnabledPlugins(t *testing.T) {
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{
-		React:  true,
-		Jest:   true,
+		React:   true,
+		Jest:    true,
 		JSXA11y: true,
 	})
 
@@ -104,7 +116,7 @@ func TestDecideAll(t *testing.T) {
 	decisions := cat.DecideAll(reg)
 
 	assert.NotEmpty(t, decisions)
-	assert.Equal(t, reg.Len(), len(decisions))
+	assert.Len(t, decisions, reg.Len())
 }
 
 func TestAllProfiles(t *testing.T) {

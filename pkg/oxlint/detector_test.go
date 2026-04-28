@@ -206,7 +206,11 @@ func TestDetectOnRealProject(t *testing.T) {
 	}
 
 	dir := t.TempDir()
-	err := os.WriteFile(filepath.Join(dir, "test.ts"), []byte("debugger;\nconst x: any = 1;\n"), 0o644)
+	err := os.WriteFile(
+		filepath.Join(dir, "test.ts"),
+		[]byte("debugger;\nconst x: any = 1;\n"),
+		0o644,
+	)
 	require.NoError(t, err)
 
 	d := NewDetector(dir)

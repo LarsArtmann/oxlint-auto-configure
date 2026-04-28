@@ -62,7 +62,8 @@ func newReportCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&profileFlag, "profile", "p", string(defaultProfile), "Configuration profile")
+	cmd.Flags().
+		StringVarP(&profileFlag, "profile", "p", string(defaultProfile), "Configuration profile")
 	cmd.Flags().StringVarP(&format, "format", "f", "table", "Output format: table, json, summary")
 	cmd.Flags().StringVar(&rootDir, "root", ".", "Project root directory")
 

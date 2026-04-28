@@ -5,6 +5,7 @@ package oxlint
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -55,7 +56,8 @@ func (d *Detector) Detect(ctx context.Context) ([]finding.Finding, error) {
 	if err != nil {
 		// oxlint exits non-zero when findings exist — that's not an error for us.
 		// Only surface real failures (stderr output, command not found, etc.)
-		if exitErr, ok := err.(*exec.ExitError); ok {
+		exitErr := &exec.ExitError{}
+		if errors.As(err, &exitErr) {
 			// If there's stderr, that's a real error
 			if len(exitErr.Stderr) > 0 {
 				return nil, fmt.Errorf("oxlint: %s", string(exitErr.Stderr))
@@ -94,18 +96,18 @@ type oxlintOutput struct {
 
 // oxlintDiagnostic represents a single diagnostic from oxlint.
 type oxlintDiagnostic struct {
-	Message  string          `json:"message"`
-	Code     string          `json:"code"`
-	Severity string          `json:"severity"`
-	Filename string          `json:"filename"`
-	Labels   []oxlintLabel   `json:"labels"`
-	URL      string          `json:"url"`
-	Help     string          `json:"help"`
+	Message  string        `json:"message"`
+	Code     string        `json:"code"`
+	Severity string        `json:"severity"`
+	Filename string        `json:"filename"`
+	Labels   []oxlintLabel `json:"labels"`
+	URL      string        `json:"url"`
+	Help     string        `json:"help"`
 }
 
 // oxlintLabel represents a labeled span in the source code.
 type oxlintLabel struct {
-	Label string    `json:"label,omitempty"`
+	Label string     `json:"label,omitempty"`
 	Span  oxlintSpan `json:"span"`
 }
 

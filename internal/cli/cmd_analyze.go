@@ -68,7 +68,12 @@ func newAnalyzeCommand() *cobra.Command {
 			fmt.Fprintf(os.Stderr, "  By severity: %v\n", report.Summary.BySeverity)
 			fmt.Fprintf(os.Stderr, "  By category: %v\n", report.Summary.ByCategory)
 			fmt.Fprintf(os.Stderr, "  Files affected: %d\n", report.Summary.FilesAffected)
-			fmt.Fprintf(os.Stderr, "  Pipeline iterations: %d, stable: %v\n", result.TotalIterations, result.Stable)
+			fmt.Fprintf(
+				os.Stderr,
+				"  Pipeline iterations: %d, stable: %v\n",
+				result.TotalIterations,
+				result.Stable,
+			)
 
 			sarif, err := report.ToSARIF()
 			if err != nil {
