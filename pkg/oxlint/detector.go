@@ -163,15 +163,12 @@ func positionFromLabels(labels []oxlintLabel) (line, col int) {
 // into (rule-name, plugin).
 func parseCode(code string) (ruleName, plugin string) {
 	// Format 1: "plugin(rule-name)" e.g. "eslint(no-debugger)"
-	if idx := strings.IndexByte(code, '('); idx >= 0 {
-		plugin = code[:idx]
-		ruleName = strings.TrimSuffix(code[idx+1:], ")")
-		return ruleName, plugin
+	plugin, ruleName, found := strings.Cut(code, "(")
+	if found {
+		return strings.TrimSuffix(ruleName, ")"), plugin
 	}
-	// Format 2: "plugin/rule-name" e.g. "typescript/no-explicit-any"
-	if idx := strings.IndexByte(code, '/'); idx >= 0 {
-		plugin = code[:idx]
-		ruleName = code[idx+1:]
+	plugin, ruleName, found = strings.Cut(code, "/")
+	if found {
 		return ruleName, plugin
 	}
 	return code, "eslint"
