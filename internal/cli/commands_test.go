@@ -81,12 +81,52 @@ func TestValidateConfig(t *testing.T) {
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{"validate", "-c", configPath})
 
-	// Redirect stderr
-	oldStderr := os.Stderr
-	os.Stderr = nil
-	defer func() { os.Stderr = oldStderr }()
+	err = cmd.Execute()
+	require.NoError(t, err)
+}
+
+func TestValidateUnknownRules(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, ".oxlintrc.json")
+
+	badConfig := `{"rules":{"nonexistent-rule-xyz":"error"}}`
+	err := os.WriteFile(configPath, []byte(badConfig), 0o644)
+	require.NoError(t, err)
+
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{"validate", "-c", configPath})
 
 	err = cmd.Execute()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "unknown rules")
+}
+
+func TestReportTable(t *testing.T) {
+	t.Parallel()
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{"report", "-f", "table", "--root", t.TempDir()})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+}
+
+func TestAnalyzeCleanProject(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{"analyze", "--root", dir})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+}
+
+func TestVersionFlag(t *testing.T) {
+	t.Parallel()
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{"--version"})
+
+	err := cmd.Execute()
 	require.NoError(t, err)
 }
 
