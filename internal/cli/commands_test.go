@@ -14,6 +14,7 @@ import (
 )
 
 func TestConfigureDryRunRecommended(t *testing.T) {
+	t.Parallel()
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{"configure", "--dry-run", "--root", t.TempDir()})
 
@@ -22,6 +23,7 @@ func TestConfigureDryRunRecommended(t *testing.T) {
 }
 
 func TestConfigureDryRunMaximalTypesafe(t *testing.T) {
+	t.Parallel()
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{"configure", "--dry-run", "-p", "maximal-typesafe", "--root", t.TempDir()})
 
@@ -30,6 +32,7 @@ func TestConfigureDryRunMaximalTypesafe(t *testing.T) {
 }
 
 func TestConfigureInvalidProfile(t *testing.T) {
+	t.Parallel()
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{"configure", "-p", "invalid", "--root", t.TempDir()})
 
@@ -39,6 +42,7 @@ func TestConfigureInvalidProfile(t *testing.T) {
 }
 
 func TestConfigureWritesFile(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	configPath := filepath.Join(dir, ".oxlintrc.json")
 
@@ -59,6 +63,7 @@ func TestConfigureWritesFile(t *testing.T) {
 }
 
 func TestValidateConfig(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	configPath := filepath.Join(dir, ".oxlintrc.json")
 
@@ -86,6 +91,7 @@ func TestValidateConfig(t *testing.T) {
 }
 
 func TestReportSummary(t *testing.T) {
+	t.Parallel()
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{"report", "-f", "summary", "--root", t.TempDir()})
 
@@ -94,6 +100,7 @@ func TestReportSummary(t *testing.T) {
 }
 
 func TestReportJSON(t *testing.T) {
+	t.Parallel()
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 

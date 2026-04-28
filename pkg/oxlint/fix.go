@@ -8,10 +8,14 @@ import (
 	"strings"
 )
 
+// FixResult holds the output from running oxlint --fix.
 type FixResult struct {
 	Output string
 }
 
+// RunFix executes oxlint --fix in the given root directory.
+// Returns the combined stdout/stderr output. Non-zero exit codes
+// from oxlint are treated as findings, not failures.
 func RunFix(ctx context.Context, rootDir, configPath string) (*FixResult, error) {
 	args := []string{"--fix"}
 	if configPath != "" {

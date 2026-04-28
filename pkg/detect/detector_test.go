@@ -12,6 +12,7 @@ import (
 )
 
 func TestDetectUnknownProject(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	det := NewDetector(dir)
 	pc, types, err := det.Detect()
@@ -21,6 +22,7 @@ func TestDetectUnknownProject(t *testing.T) {
 }
 
 func TestDetectReactProject(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	pkgJSON := `{"dependencies": {"react": "^18.0.0", "react-dom": "^18.0.0"}}`
 	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
@@ -44,6 +46,7 @@ func TestDetectReactProject(t *testing.T) {
 }
 
 func TestDetectNextJSProject(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	pkgJSON := `{"dependencies": {"next": "^14.0.0", "react": "^18.0.0"}}`
 	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
@@ -66,6 +69,7 @@ func TestDetectNextJSProject(t *testing.T) {
 }
 
 func TestDetectVueProject(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	pkgJSON := `{"dependencies": {"vue": "^3.0.0"}}`
 	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
@@ -87,6 +91,7 @@ func TestDetectVueProject(t *testing.T) {
 }
 
 func TestDetectJestProject(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	pkgJSON := `{"devDependencies": {"jest": "^29.0.0"}}`
 	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
@@ -101,6 +106,7 @@ func TestDetectJestProject(t *testing.T) {
 }
 
 func TestDetectVitestProject(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	pkgJSON := `{"devDependencies": {"vitest": "^1.0.0"}}`
 	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
@@ -114,6 +120,7 @@ func TestDetectVitestProject(t *testing.T) {
 }
 
 func TestDetectTSProject(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	err := os.WriteFile(filepath.Join(dir, "tsconfig.json"), []byte("{}"), 0o644)
 	require.NoError(t, err)
@@ -132,6 +139,7 @@ func TestDetectTSProject(t *testing.T) {
 }
 
 func TestFormatTypes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(
 		t,
 		"react, nextjs",
@@ -141,6 +149,7 @@ func TestFormatTypes(t *testing.T) {
 }
 
 func TestProjectTypeString(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, "react", string(ProjectTypeReact))
 	assert.Equal(t, "nextjs", string(ProjectTypeNextJS))
 	assert.Equal(t, "vue", string(ProjectTypeVue))

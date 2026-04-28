@@ -8,6 +8,7 @@ import (
 )
 
 func TestDiffNoChanges(t *testing.T) {
+	t.Parallel()
 	before := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
 	after := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
 
@@ -17,6 +18,7 @@ func TestDiffNoChanges(t *testing.T) {
 }
 
 func TestDiffAdded(t *testing.T) {
+	t.Parallel()
 	before := &config.OxlintConfig{Rules: map[string]string{}}
 	after := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
 
@@ -28,6 +30,7 @@ func TestDiffAdded(t *testing.T) {
 }
 
 func TestDiffRemoved(t *testing.T) {
+	t.Parallel()
 	before := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
 	after := &config.OxlintConfig{Rules: map[string]string{}}
 
@@ -38,6 +41,7 @@ func TestDiffRemoved(t *testing.T) {
 }
 
 func TestDiffChanged(t *testing.T) {
+	t.Parallel()
 	before := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "warn"}}
 	after := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
 
@@ -50,6 +54,7 @@ func TestDiffChanged(t *testing.T) {
 }
 
 func TestDiffSummary(t *testing.T) {
+	t.Parallel()
 	before := &config.OxlintConfig{Rules: map[string]string{"a": "warn"}}
 	after := &config.OxlintConfig{Rules: map[string]string{"a": "error", "b": "error"}}
 
@@ -60,6 +65,7 @@ func TestDiffSummary(t *testing.T) {
 }
 
 func TestDiffFormatDiff(t *testing.T) {
+	t.Parallel()
 	before := &config.OxlintConfig{Rules: map[string]string{"a": "warn"}}
 	after := &config.OxlintConfig{Rules: map[string]string{"a": "error", "b": "error"}}
 

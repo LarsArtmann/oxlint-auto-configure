@@ -11,6 +11,7 @@ import (
 )
 
 func TestGeneratorRecommended(t *testing.T) {
+	t.Parallel()
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
@@ -32,6 +33,7 @@ func TestGeneratorRecommended(t *testing.T) {
 }
 
 func TestGeneratorMaximalTypesafe(t *testing.T) {
+	t.Parallel()
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
@@ -49,6 +51,7 @@ func TestGeneratorMaximalTypesafe(t *testing.T) {
 }
 
 func TestGeneratorWithReactProject(t *testing.T) {
+	t.Parallel()
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
@@ -62,6 +65,7 @@ func TestGeneratorWithReactProject(t *testing.T) {
 }
 
 func TestGeneratorWithAllPlugins(t *testing.T) {
+	t.Parallel()
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
@@ -82,6 +86,7 @@ func TestGeneratorWithAllPlugins(t *testing.T) {
 }
 
 func TestConfigToJSON(t *testing.T) {
+	t.Parallel()
 	cfg := &OxlintConfig{
 		Plugins:    []string{"typescript", "unicorn"},
 		Categories: map[string]string{"correctness": "error"},
@@ -99,6 +104,7 @@ func TestConfigToJSON(t *testing.T) {
 }
 
 func TestConfigRoundTrip(t *testing.T) {
+	t.Parallel()
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
@@ -116,6 +122,7 @@ func TestConfigRoundTrip(t *testing.T) {
 }
 
 func TestFromJSON(t *testing.T) {
+	t.Parallel()
 	input := `{
 		"plugins": ["typescript"],
 		"categories": {"correctness": "error"},
@@ -131,6 +138,7 @@ func TestFromJSON(t *testing.T) {
 }
 
 func TestMinimalProfileConfig(t *testing.T) {
+	t.Parallel()
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 

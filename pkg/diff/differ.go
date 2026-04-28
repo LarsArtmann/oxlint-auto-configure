@@ -21,10 +21,10 @@ type Change struct {
 type ChangeKind string
 
 const (
-	KindAdded     ChangeKind = "added"
-	KindRemoved   ChangeKind = "removed"
-	KindChanged   ChangeKind = "changed"
-	KindUnchanged ChangeKind = "unchanged"
+	KindAdded     ChangeKind = "added"     // rule/category was not present before
+	KindRemoved   ChangeKind = "removed"   // rule/category was present before but not after
+	KindChanged   ChangeKind = "changed"   // rule/category value changed
+	KindUnchanged ChangeKind = "unchanged" // rule/category value stayed the same
 )
 
 // Differ compares two OxlintConfig instances.
@@ -42,54 +42,28 @@ func NewDiffer(before, after *config.OxlintConfig) *Differ {
 func (d *Differ) Diff() []Change {
 	var changes []Change
 
-	for _, key := range d.collectAllKeys(d.before.Categories, d.after.Categories) {
-		before, hadBefore := d.before.Categories[key]
-		after, hasAfter := d.after.Categories[key]
+	changes = append(changes, d.compareMaps(d.before.Categories, d.after.Categories, "category:")...)
+	changes = append(changes, d.compareMaps(d.before.Rules, d.after.Rules, "")...)
+
+	return changes
+}
+
+// compareMaps returns changes between two string maps with an optional prefix.
+func (d *Differ) compareMaps(before, after map[string]string, prefix string) []Change {
+	var changes []Change
+
+	for _, key := range d.collectAllKeys(before, after) {
+		bv, hadBefore := before[key]
+		av, hasAfter := after[key]
+		name := prefix + key
 
 		switch {
 		case !hadBefore && hasAfter:
-			changes = append(
-				changes,
-				Change{Rule: "category:" + key, OldValue: "", NewValue: after, Kind: KindAdded},
-			)
+			changes = append(changes, Change{Rule: name, OldValue: "", NewValue: av, Kind: KindAdded})
 		case hadBefore && !hasAfter:
-			changes = append(
-				changes,
-				Change{Rule: "category:" + key, OldValue: before, NewValue: "", Kind: KindRemoved},
-			)
-		case hadBefore && hasAfter && before != after:
-			changes = append(
-				changes,
-				Change{
-					Rule:     "category:" + key,
-					OldValue: before,
-					NewValue: after,
-					Kind:     KindChanged,
-				},
-			)
-		}
-	}
-
-	for _, rule := range d.collectAllKeys(d.before.Rules, d.after.Rules) {
-		before, hadBefore := d.before.Rules[rule]
-		after, hasAfter := d.after.Rules[rule]
-
-		switch {
-		case !hadBefore && hasAfter:
-			changes = append(
-				changes,
-				Change{Rule: rule, OldValue: "", NewValue: after, Kind: KindAdded},
-			)
-		case hadBefore && !hasAfter:
-			changes = append(
-				changes,
-				Change{Rule: rule, OldValue: before, NewValue: "", Kind: KindRemoved},
-			)
-		case hadBefore && hasAfter && before != after:
-			changes = append(
-				changes,
-				Change{Rule: rule, OldValue: before, NewValue: after, Kind: KindChanged},
-			)
+			changes = append(changes, Change{Rule: name, OldValue: bv, NewValue: "", Kind: KindRemoved})
+		case hadBefore && hasAfter && bv != av:
+			changes = append(changes, Change{Rule: name, OldValue: bv, NewValue: av, Kind: KindChanged})
 		}
 	}
 
@@ -109,6 +83,8 @@ func (d *Differ) Summary() string {
 			removed++
 		case KindChanged:
 			changed++
+		case KindUnchanged:
+			// no-op
 		}
 	}
 
@@ -135,6 +111,8 @@ func (d *Differ) FormatDiff() string {
 			fmt.Fprintf(&b, "- %s: %s\n", c.Rule, c.OldValue)
 		case KindChanged:
 			fmt.Fprintf(&b, "~ %s: %s → %s\n", c.Rule, c.OldValue, c.NewValue)
+		case KindUnchanged:
+			// no-op
 		}
 	}
 

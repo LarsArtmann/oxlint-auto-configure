@@ -83,6 +83,7 @@ const realOxlintOutput = `{
 }`
 
 func TestParseRealOxlintOutput(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
@@ -90,6 +91,7 @@ func TestParseRealOxlintOutput(t *testing.T) {
 }
 
 func TestParseFindsCorrectRules(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
@@ -100,6 +102,7 @@ func TestParseFindsCorrectRules(t *testing.T) {
 }
 
 func TestParseFindsCorrectMessages(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
@@ -110,6 +113,7 @@ func TestParseFindsCorrectMessages(t *testing.T) {
 }
 
 func TestParseFindsCorrectPositions(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
@@ -128,6 +132,7 @@ func TestParseFindsCorrectPositions(t *testing.T) {
 }
 
 func TestParseMapsSeverity(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
@@ -138,6 +143,7 @@ func TestParseMapsSeverity(t *testing.T) {
 }
 
 func TestParseMapsCategories(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
@@ -148,6 +154,7 @@ func TestParseMapsCategories(t *testing.T) {
 }
 
 func TestParseExtractsURLAndHelp(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
@@ -158,6 +165,7 @@ func TestParseExtractsURLAndHelp(t *testing.T) {
 }
 
 func TestParseEmptyDiagnostics(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(`{"diagnostics":[]}`))
 	require.NoError(t, err)
@@ -165,6 +173,7 @@ func TestParseEmptyDiagnostics(t *testing.T) {
 }
 
 func TestParseCodeFormat(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		code         string
 		expectedRule string
@@ -188,12 +197,14 @@ func TestParseCodeFormat(t *testing.T) {
 }
 
 func TestDetectEmptyOutput(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	_, err := d.parseOutput([]byte{})
 	assert.Error(t, err)
 }
 
 func TestDetectEmptyJSON(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(`{"diagnostics":null}`))
 	assert.NoError(t, err)
@@ -201,6 +212,7 @@ func TestDetectEmptyJSON(t *testing.T) {
 }
 
 func TestDetectOnRealProject(t *testing.T) {
+	t.Parallel()
 	if os.Getenv("OXLINT_E2E") == "" {
 		t.Skip("Set OXLINT_E2E=1 to run e2e test with real oxlint")
 	}
@@ -220,6 +232,7 @@ func TestDetectOnRealProject(t *testing.T) {
 }
 
 func TestMapCategory(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		plugin   string
 		expected finding.Category
@@ -246,12 +259,14 @@ func TestMapCategory(t *testing.T) {
 }
 
 func TestPositionFromLabelsEmpty(t *testing.T) {
+	t.Parallel()
 	line, col := positionFromLabels(nil)
 	assert.Equal(t, 0, line)
 	assert.Equal(t, 0, col)
 }
 
 func TestJSONRoundTrip(t *testing.T) {
+	t.Parallel()
 	d := NewDetector(".")
 	findings, err := d.parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)

@@ -8,18 +8,21 @@ import (
 )
 
 func TestLoadRegistry(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 	assert.NotEmpty(t, reg.All())
 }
 
 func TestRegistryTotal(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 	assert.Equal(t, 716, reg.Len())
 }
 
 func TestRegistryByName(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -32,6 +35,7 @@ func TestRegistryByName(t *testing.T) {
 }
 
 func TestRegistryByNameWithTypeScript(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -42,6 +46,7 @@ func TestRegistryByNameWithTypeScript(t *testing.T) {
 }
 
 func TestRegistryByNameNotFound(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -50,6 +55,7 @@ func TestRegistryByNameNotFound(t *testing.T) {
 }
 
 func TestRegistryByCategory(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -61,6 +67,7 @@ func TestRegistryByCategory(t *testing.T) {
 }
 
 func TestRegistryByPlugin(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -72,6 +79,7 @@ func TestRegistryByPlugin(t *testing.T) {
 }
 
 func TestRegistryEnabledByDefault(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -83,6 +91,7 @@ func TestRegistryEnabledByDefault(t *testing.T) {
 }
 
 func TestRegistryDisabledByDefault(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -94,6 +103,7 @@ func TestRegistryDisabledByDefault(t *testing.T) {
 }
 
 func TestRegistryFixable(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -105,6 +115,7 @@ func TestRegistryFixable(t *testing.T) {
 }
 
 func TestRegistryTypeAware(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -116,6 +127,7 @@ func TestRegistryTypeAware(t *testing.T) {
 }
 
 func TestRuleFullName(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		rule     Rule
 		expected string
@@ -144,6 +156,7 @@ func TestRuleFullName(t *testing.T) {
 }
 
 func TestCategoryIsValid(t *testing.T) {
+	t.Parallel()
 	assert.True(t, CategoryCorrectness.IsValid())
 	assert.True(t, CategorySuspicious.IsValid())
 	assert.True(t, CategoryNursery.IsValid())
@@ -151,6 +164,7 @@ func TestCategoryIsValid(t *testing.T) {
 }
 
 func TestPluginIsValid(t *testing.T) {
+	t.Parallel()
 	assert.True(t, PluginESLint.IsValid())
 	assert.True(t, PluginTypeScript.IsValid())
 	assert.True(t, PluginVue.IsValid())
@@ -158,6 +172,7 @@ func TestPluginIsValid(t *testing.T) {
 }
 
 func TestMapFix(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		input    string
 		expected FixCapability
@@ -180,22 +195,26 @@ func TestMapFix(t *testing.T) {
 }
 
 func TestAllCategories(t *testing.T) {
+	t.Parallel()
 	cats := AllCategories()
 	assert.Len(t, cats, 7)
 }
 
 func TestAllPlugins(t *testing.T) {
+	t.Parallel()
 	plugins := AllPlugins()
 	assert.Len(t, plugins, 15)
 }
 
 func TestEmbeddedVersion(t *testing.T) {
+	t.Parallel()
 	ver := EmbeddedVersion()
 	assert.NotEmpty(t, ver)
 	assert.Equal(t, "1.59.0", ver)
 }
 
 func TestPluginCLIFlag(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		plugin   Plugin
 		expected string
@@ -222,6 +241,7 @@ func TestPluginCLIFlag(t *testing.T) {
 }
 
 func TestPluginNeedsFlag(t *testing.T) {
+	t.Parallel()
 	assert.False(t, PluginESLint.NeedsFlag())
 	assert.False(t, PluginTypeScript.NeedsFlag())
 	assert.False(t, PluginUnicorn.NeedsFlag())
@@ -232,6 +252,7 @@ func TestPluginNeedsFlag(t *testing.T) {
 }
 
 func TestRegistryFilter(t *testing.T) {
+	t.Parallel()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
 
@@ -243,6 +264,7 @@ func TestRegistryFilter(t *testing.T) {
 }
 
 func TestSeverityDecisionString(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, "error", string(SeverityError))
 	assert.Equal(t, "warn", string(SeverityWarn))
 	assert.Equal(t, "off", string(SeverityOff))

@@ -1,3 +1,4 @@
+// Command oxlint-auto-configure generates optimal oxlint configurations.
 package main
 
 import (

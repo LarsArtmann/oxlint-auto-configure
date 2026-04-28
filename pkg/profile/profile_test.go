@@ -8,6 +8,7 @@ import (
 )
 
 func TestProfileIsValid(t *testing.T) {
+	t.Parallel()
 	assert.True(t, ProfileMaximalTypesafe.IsValid())
 	assert.True(t, ProfileRecommended.IsValid())
 	assert.True(t, ProfileStrict.IsValid())
@@ -16,6 +17,7 @@ func TestProfileIsValid(t *testing.T) {
 }
 
 func TestProfileDescription(t *testing.T) {
+	t.Parallel()
 	assert.NotEmpty(t, ProfileMaximalTypesafe.Description())
 	assert.NotEmpty(t, ProfileRecommended.Description())
 	assert.NotEmpty(t, ProfileStrict.Description())
@@ -24,6 +26,7 @@ func TestProfileDescription(t *testing.T) {
 }
 
 func TestCategorizerMaximalTypesafe(t *testing.T) {
+	t.Parallel()
 	cat := NewCategorizer(ProfileMaximalTypesafe, PluginConfig{})
 
 	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryCorrectness}))
@@ -34,6 +37,7 @@ func TestCategorizerMaximalTypesafe(t *testing.T) {
 }
 
 func TestCategorizerRecommended(t *testing.T) {
+	t.Parallel()
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{})
 
 	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryCorrectness}))
@@ -46,6 +50,7 @@ func TestCategorizerRecommended(t *testing.T) {
 }
 
 func TestCategorizerStrict(t *testing.T) {
+	t.Parallel()
 	cat := NewCategorizer(ProfileStrict, PluginConfig{})
 
 	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryCorrectness}))
@@ -56,6 +61,7 @@ func TestCategorizerStrict(t *testing.T) {
 }
 
 func TestCategorizerMinimal(t *testing.T) {
+	t.Parallel()
 	cat := NewCategorizer(ProfileMinimal, PluginConfig{})
 
 	assert.Equal(
@@ -76,6 +82,7 @@ func TestCategorizerMinimal(t *testing.T) {
 }
 
 func TestPluginRelevance(t *testing.T) {
+	t.Parallel()
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{
 		rule.PluginReact:  true,
 		rule.PluginNextJS: true,
@@ -96,6 +103,7 @@ func TestPluginRelevance(t *testing.T) {
 }
 
 func TestEnabledPlugins(t *testing.T) {
+	t.Parallel()
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{
 		rule.PluginReact:   true,
 		rule.PluginJest:    true,
@@ -109,6 +117,7 @@ func TestEnabledPlugins(t *testing.T) {
 }
 
 func TestDecideAll(t *testing.T) {
+	t.Parallel()
 	reg, err := rule.LoadRegistry()
 	assert.NoError(t, err)
 
@@ -120,6 +129,7 @@ func TestDecideAll(t *testing.T) {
 }
 
 func TestAllProfiles(t *testing.T) {
+	t.Parallel()
 	profiles := AllProfiles()
 	assert.Len(t, profiles, 4)
 }
