@@ -7,13 +7,13 @@ install: build
     cp bin/oxlint-auto-configure $(GOPATH)/bin/oxlint-auto-configure
 
 test:
-    go test -race ./pkg/... -count=1
+    go test -race ./pkg/... ./internal/... -count=1
 
 bench:
-    go test -bench=. -benchmem ./pkg/...
+    go test -bench=. -benchmem ./pkg/... ./internal/...
 
 cover:
-    go test -race -coverprofile=coverage.out ./pkg/...
+    go test -race -coverprofile=coverage.out ./pkg/... ./internal/...
     go tool cover -func=coverage.out
 
 cover-html: cover
@@ -31,8 +31,11 @@ fmt-check:
 tidy:
     go mod tidy
 
-check: fmt-check lint test
+check: fmt-check vet lint test
     @echo "All checks passed."
+
+vet:
+    go vet ./...
 
 clean:
     rm -rf bin/ coverage.out coverage.html
