@@ -36,7 +36,7 @@ func (g *Generator) Generate() *OxlintConfig {
 		Plugins:    g.enabledPlugins(),
 		Categories: g.categorySeverityMap(),
 		Rules:      g.ruleSeverityMap(),
-		Settings:   defaultSettings(),
+		Settings:   g.buildSettings(),
 		Env:        map[string]bool{"builtin": true},
 	}
 	return cfg
@@ -158,35 +158,52 @@ func (g *Generator) ruleSeverityMap() map[string]string {
 	return rules
 }
 
-func defaultSettings() map[string]any {
-	return map[string]any{
-		"jsx-a11y": map[string]any{
-			"polymorphicPropName": nil,
-			"components":          map[string]any{},
-			"attributes":          map[string]any{},
-		},
-		"next": map[string]any{
-			"rootDir": []any{},
-		},
-		"react": map[string]any{
-			"formComponents":            []any{},
-			"linkComponents":            []any{},
-			"version":                   nil,
-			"componentWrapperFunctions": []any{},
-		},
-		"jsdoc": map[string]any{
-			"ignorePrivate":                     false,
-			"ignoreInternal":                    false,
-			"ignoreReplacesDocs":                true,
-			"overrideReplacesDocs":              true,
-			"augmentsExtendsReplacesDocs":       false,
-			"implementsReplacesDocs":            false,
-			"exemptDestructuredRootsFromChecks": false,
-			"tagNamePreference":                 map[string]any{},
-		},
-		"vitest": map[string]any{
-			"typecheck": false,
-		},
+// pluginSettings maps plugins to their oxlint settings key and defaults.
+var pluginSettings = map[rule.Plugin]struct {
+	key   string
+	value map[string]any
+}{
+	rule.PluginJSXA11y: {"jsx-a11y", map[string]any{
+		"polymorphicPropName": nil,
+		"components":          map[string]any{},
+		"attributes":          map[string]any{},
+	}},
+	rule.PluginNextJS: {"next", map[string]any{
+		"rootDir": []any{},
+	}},
+	rule.PluginReact: {"react", map[string]any{
+		"formComponents":            []any{},
+		"linkComponents":            []any{},
+		"version":                   nil,
+		"componentWrapperFunctions": []any{},
+	}},
+	rule.PluginJSDoc: {"jsdoc", map[string]any{
+		"ignorePrivate":                     false,
+		"ignoreInternal":                    false,
+		"ignoreReplacesDocs":                true,
+		"overrideReplacesDocs":              true,
+		"augmentsExtendsReplacesDocs":       false,
+		"implementsReplacesDocs":            false,
+		"exemptDestructuredRootsFromChecks": false,
+		"tagNamePreference":                 map[string]any{},
+	}},
+	rule.PluginVitest: {"vitest", map[string]any{
+		"typecheck": false,
+	}},
+}
+
+// buildSettings returns settings only for enabled plugins.
+func (g *Generator) buildSettings() map[string]any {
+	settings := make(map[string]any)
+	if g.categorizer == nil {
+		return settings
 	}
+
+	for _, p := range g.categorizer.EnabledPlugins() {
+		if ps, ok := pluginSettings[p]; ok {
+			settings[ps.key] = ps.value
+		}
+	}
+	return settings
 }
 
