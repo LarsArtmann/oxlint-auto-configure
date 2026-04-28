@@ -5,10 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 )
 
 //go:embed rules_data.json
 var rulesDataFS embed.FS
+
+//go:embed rules_version.txt
+var rulesVersionData string
+
+// EmbeddedVersion returns the oxlint version that generated the embedded rules.
+func EmbeddedVersion() string {
+	return strings.TrimSpace(rulesVersionData)
+}
 
 // rawRule maps the oxlint JSON rule format.
 type rawRule struct {

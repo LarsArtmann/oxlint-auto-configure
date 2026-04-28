@@ -55,6 +55,11 @@ Profiles:
 			}
 			fmt.Fprintf(os.Stderr, "Oxlint version: %s\n", oxlintVer)
 
+			embeddedVer := rule.EmbeddedVersion()
+			if embeddedVer != "" && embeddedVer != oxlintVer {
+				fmt.Fprintf(os.Stderr, "Warning: embedded rules from oxlint %s, but runtime is %s — rules may differ\n", embeddedVer, oxlintVer)
+			}
+
 			reg, err := rule.LoadRegistry()
 			if err != nil {
 				return fmt.Errorf("load rule registry: %w", err)

@@ -46,3 +46,4 @@ run: build
 # Update rules from oxlint
 update-rules:
     oxlint -f json --rules > pkg/rule/rules_data.json
+    oxlint --version | sed 's/Version: //' > pkg/rule/rules_version.txt
