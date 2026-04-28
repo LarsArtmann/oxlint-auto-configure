@@ -42,9 +42,21 @@ func NewDiffer(before, after *config.OxlintConfig) *Differ {
 func (d *Differ) Diff() []Change {
 	var changes []Change
 
-	allRules := d.collectAllRules()
+	for _, key := range d.collectAllKeys(d.before.Categories, d.after.Categories) {
+		before, hadBefore := d.before.Categories[key]
+		after, hasAfter := d.after.Categories[key]
 
-	for _, rule := range allRules {
+		switch {
+		case !hadBefore && hasAfter:
+			changes = append(changes, Change{Rule: "category:" + key, OldValue: "", NewValue: after, Kind: KindAdded})
+		case hadBefore && !hasAfter:
+			changes = append(changes, Change{Rule: "category:" + key, OldValue: before, NewValue: "", Kind: KindRemoved})
+		case hadBefore && hasAfter && before != after:
+			changes = append(changes, Change{Rule: "category:" + key, OldValue: before, NewValue: after, Kind: KindChanged})
+		}
+	}
+
+	for _, rule := range d.collectAllKeys(d.before.Rules, d.after.Rules) {
 		before, hadBefore := d.before.Rules[rule]
 		after, hasAfter := d.after.Rules[rule]
 
@@ -106,22 +118,22 @@ func (d *Differ) FormatDiff() string {
 	return b.String()
 }
 
-func (d *Differ) collectAllRules() []string {
+func (d *Differ) collectAllKeys(before, after map[string]string) []string {
 	seen := make(map[string]struct{})
-	var rules []string
+	var keys []string
 
-	for rule := range d.before.Rules {
-		if _, exists := seen[rule]; !exists {
-			seen[rule] = struct{}{}
-			rules = append(rules, rule)
+	for k := range before {
+		if _, exists := seen[k]; !exists {
+			seen[k] = struct{}{}
+			keys = append(keys, k)
 		}
 	}
-	for rule := range d.after.Rules {
-		if _, exists := seen[rule]; !exists {
-			seen[rule] = struct{}{}
-			rules = append(rules, rule)
+	for k := range after {
+		if _, exists := seen[k]; !exists {
+			seen[k] = struct{}{}
+			keys = append(keys, k)
 		}
 	}
 
-	return rules
+	return keys
 }
