@@ -4,7 +4,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"slices"
 	"sort"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
@@ -71,16 +70,24 @@ func FromJSON(data []byte) (*OxlintConfig, error) {
 
 // enabledPlugins returns the list of plugins that should be enabled.
 func (g *Generator) enabledPlugins() []string {
+	seen := make(map[string]struct{})
 	var plugins []string
 
-	plugins = append(plugins, "unicorn", "typescript", "oxc")
+	for _, p := range []string{"unicorn", "typescript", "oxc"} {
+		seen[p] = struct{}{}
+		plugins = append(plugins, p)
+	}
 
 	if g.categorizer != nil {
-		pc := g.categorizer.EnabledPlugins()
-		for _, p := range pc {
-			name := pluginFlagToName(p)
-			if name != "" && !slices.Contains(plugins, name) {
-				plugins = append(plugins, name)
+		for _, flag := range g.categorizer.EnabledPlugins() {
+			for _, p := range rule.AllPlugins() {
+				if p.CLIFlag() == flag {
+					name := string(p)
+					if _, ok := seen[name]; !ok {
+						seen[name] = struct{}{}
+						plugins = append(plugins, name)
+					}
+				}
 			}
 		}
 	}
@@ -91,10 +98,9 @@ func (g *Generator) enabledPlugins() []string {
 
 // allPlugins returns all possible plugins.
 func (g *Generator) allPlugins() []string {
-	plugins := []string{
-		"eslint", "import", "jest", "jsdoc", "jsx_a11y",
-		"nextjs", "node", "oxc", "promise", "react",
-		"react_perf", "typescript", "unicorn", "vitest", "vue",
+	plugins := make([]string, 0, len(rule.AllPlugins()))
+	for _, p := range rule.AllPlugins() {
+		plugins = append(plugins, string(p))
 	}
 	sort.Strings(plugins)
 	return plugins
@@ -187,19 +193,3 @@ func defaultSettings() map[string]any {
 	}
 }
 
-func pluginFlagToName(flag string) string {
-	m := map[string]string{
-		"--import-plugin":     "import",
-		"--react-plugin":      "react",
-		"--jsdoc-plugin":      "jsdoc",
-		"--jest-plugin":       "jest",
-		"--vitest-plugin":     "vitest",
-		"--jsx-a11y-plugin":   "jsx_a11y",
-		"--nextjs-plugin":     "nextjs",
-		"--react-perf-plugin": "react_perf",
-		"--promise-plugin":    "promise",
-		"--node-plugin":       "node",
-		"--vue-plugin":        "vue",
-	}
-	return m[flag]
-}

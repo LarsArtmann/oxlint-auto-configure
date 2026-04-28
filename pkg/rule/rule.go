@@ -81,6 +81,26 @@ func (p Plugin) IsValid() bool {
 // String returns the string representation.
 func (p Plugin) String() string { return string(p) }
 
+// CLIFlag returns the oxlint CLI flag to enable this plugin (e.g., "--react-plugin").
+// Returns empty string for always-on plugins (eslint, unicorn, typescript, oxc).
+func (p Plugin) CLIFlag() string {
+	switch p {
+	case PluginESLint, PluginUnicorn, PluginTypeScript, PluginOXC:
+		return ""
+	case PluginJSXA11y:
+		return "--jsx-a11y-plugin"
+	case PluginReactPerf:
+		return "--react-perf-plugin"
+	default:
+		return "--" + string(p) + "-plugin"
+	}
+}
+
+// NeedsFlag returns true if this plugin requires an explicit CLI flag to enable.
+func (p Plugin) NeedsFlag() bool {
+	return p.CLIFlag() != ""
+}
+
 // FixCapability indicates what kind of auto-fix a rule supports.
 type FixCapability string
 
