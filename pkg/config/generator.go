@@ -46,21 +46,8 @@ func (g *Generator) Generate() *OxlintConfig {
 // GenerateAllError creates a config where ALL rules are set to "error".
 // This is the maximal-typesafe profile.
 func (g *Generator) GenerateAllError() *OxlintConfig {
-	cfg := &OxlintConfig{
-		Plugins: g.allPlugins(),
-		Categories: map[string]string{
-			"correctness": "error",
-			"suspicious":  "error",
-			"pedantic":    "error",
-			"perf":        "error",
-			"style":       "error",
-			"restriction": "error",
-			"nursery":     "warn",
-		},
-		Rules:    map[string]string{},
-		Settings: defaultSettings(),
-		Env:      map[string]bool{"builtin": true},
-	}
+	cfg := g.Generate()
+	cfg.Plugins = g.allPlugins()
 	return cfg
 }
 
