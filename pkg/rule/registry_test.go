@@ -189,6 +189,59 @@ func TestAllPlugins(t *testing.T) {
 	assert.Len(t, plugins, 15)
 }
 
+func TestEmbeddedVersion(t *testing.T) {
+	ver := EmbeddedVersion()
+	assert.NotEmpty(t, ver)
+	assert.Equal(t, "1.59.0", ver)
+}
+
+func TestPluginCLIFlag(t *testing.T) {
+	tests := []struct {
+		plugin   Plugin
+		expected string
+	}{
+		{PluginESLint, ""},
+		{PluginUnicorn, ""},
+		{PluginTypeScript, ""},
+		{PluginOXC, ""},
+		{PluginReact, "--react-plugin"},
+		{PluginVue, "--vue-plugin"},
+		{PluginJest, "--jest-plugin"},
+		{PluginVitest, "--vitest-plugin"},
+		{PluginNextJS, "--nextjs-plugin"},
+		{PluginJSXA11y, "--jsx-a11y-plugin"},
+		{PluginReactPerf, "--react-perf-plugin"},
+		{PluginImport, "--import-plugin"},
+		{PluginPromise, "--promise-plugin"},
+		{PluginNode, "--node-plugin"},
+		{PluginJSDoc, "--jsdoc-plugin"},
+	}
+	for _, tt := range tests {
+		assert.Equal(t, tt.expected, tt.plugin.CLIFlag())
+	}
+}
+
+func TestPluginNeedsFlag(t *testing.T) {
+	assert.False(t, PluginESLint.NeedsFlag())
+	assert.False(t, PluginTypeScript.NeedsFlag())
+	assert.False(t, PluginUnicorn.NeedsFlag())
+	assert.False(t, PluginOXC.NeedsFlag())
+	assert.True(t, PluginReact.NeedsFlag())
+	assert.True(t, PluginVue.NeedsFlag())
+	assert.True(t, PluginJest.NeedsFlag())
+}
+
+func TestRegistryFilter(t *testing.T) {
+	reg, err := LoadRegistry()
+	require.NoError(t, err)
+
+	fixed := reg.Filter(func(r Rule) bool { return r.Fix == FixSafe })
+	assert.NotEmpty(t, fixed)
+	for _, r := range fixed {
+		assert.True(t, r.IsSafeFixable())
+	}
+}
+
 func TestSeverityDecisionString(t *testing.T) {
 	assert.Equal(t, "error", string(SeverityError))
 	assert.Equal(t, "warn", string(SeverityWarn))
