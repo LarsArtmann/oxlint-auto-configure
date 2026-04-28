@@ -25,15 +25,22 @@ Oxlint has 716 rules across 7 categories and 15 plugins. Only 108 are enabled by
 | `pkg/detect/detector.go` | Project type detection from package.json |
 | `pkg/diff/differ.go` | Config before/after comparison |
 | `pkg/oxlint/detector.go` | go-finding Detector for oxlint |
-| `internal/cli/commands.go` | Cobra CLI: configure, analyze, validate, report |
+| `pkg/oxlint/version.go` | oxlint version check and binary verification |
+| `pkg/oxlint/fix.go` | oxlint --fix wrapper |
+| `internal/cli/cmd_root.go` | Root command, shared constants (defaultConfigPath, defaultProfile, version) |
+| `internal/cli/cmd_configure.go` | configure command + helpers (writeDryRun, profileNames) |
+| `internal/cli/cmd_analyze.go` | analyze command with go-finding pipeline integration |
+| `internal/cli/cmd_validate.go` | validate command |
+| `internal/cli/cmd_report.go` | report command + format helpers (JSON, table, summary) |
 | `cmd/oxlint-auto-configure/main.go` | Entry point |
 
 ### Testing
 
 ```bash
-just test        # Run tests with -race
+just test        # Run tests with -race (pkg + internal)
 just cover       # Coverage report
-just check       # All checks (fmt + lint + test)
+just vet         # Run go vet
+just check       # All checks (fmt + vet + lint + test)
 ```
 
 ### Dependencies
@@ -74,7 +81,9 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Local replace** for go-finding — `go.mod` has `replace` directive pointing to `/home/lars/projects/go-finding`
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
-- **Version injected at build** — `main.version` via ldflags (default: "dev")
+- **Version injected at build** — `internal/cli.version` via ldflags (default: "dev")
+- **Per-command files** — Commands are in `internal/cli/cmd_*.go`, not a monolithic file
+- **SARIF output** — analyze command outputs SARIF to stdout, status to stderr
 
 ---
 
