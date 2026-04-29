@@ -42,9 +42,9 @@ func (g *Generator) Generate() *OxlintConfig {
 	return cfg
 }
 
-// GenerateAllError creates a config where ALL rules are set to "error".
+// GenerateMaximal creates a config for the maximal-typesafe profile (all plugins, all categories).
 // This is the maximal-typesafe profile.
-func (g *Generator) GenerateAllError() *OxlintConfig {
+func (g *Generator) GenerateMaximal() *OxlintConfig {
 	cfg := g.Generate()
 	cfg.Plugins = g.allPlugins()
 	return cfg

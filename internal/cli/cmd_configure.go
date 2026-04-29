@@ -142,7 +142,7 @@ func checkOxlintVersion(ctx context.Context) error {
 
 func genConfig(gen *config.Generator, p profile.Profile) *config.OxlintConfig {
 	if p == profile.ProfileMaximalTypesafe {
-		return gen.GenerateAllError()
+		return gen.GenerateMaximal()
 	}
 	return gen.Generate()
 }

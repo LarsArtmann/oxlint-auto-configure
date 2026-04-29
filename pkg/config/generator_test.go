@@ -39,7 +39,7 @@ func TestGeneratorMaximalTypesafe(t *testing.T) {
 
 	cat := profile.NewCategorizer(profile.ProfileMaximalTypesafe, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg)
-	cfg := gen.GenerateAllError()
+	cfg := gen.GenerateMaximal()
 
 	assert.Equal(t, "error", cfg.Categories["correctness"])
 	assert.Equal(t, "error", cfg.Categories["suspicious"])
