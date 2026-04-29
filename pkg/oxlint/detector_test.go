@@ -84,16 +84,16 @@ const realOxlintOutput = `{
 
 func TestParseRealOxlintOutput(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(realOxlintOutput))
+	
+	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 	require.Len(t, findings, 3)
 }
 
 func TestParseFindsCorrectRules(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(realOxlintOutput))
+	
+	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, "no-debugger", findings[0].Rule)
@@ -103,8 +103,8 @@ func TestParseFindsCorrectRules(t *testing.T) {
 
 func TestParseFindsCorrectMessages(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(realOxlintOutput))
+	
+	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Contains(t, findings[0].Message, "debugger")
@@ -114,8 +114,8 @@ func TestParseFindsCorrectMessages(t *testing.T) {
 
 func TestParseFindsCorrectPositions(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(realOxlintOutput))
+	
+	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, "test.ts", findings[0].Position.File)
@@ -133,8 +133,8 @@ func TestParseFindsCorrectPositions(t *testing.T) {
 
 func TestParseMapsSeverity(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(realOxlintOutput))
+	
+	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, finding.SeverityWarning, findings[0].Severity)
@@ -144,8 +144,8 @@ func TestParseMapsSeverity(t *testing.T) {
 
 func TestParseMapsCategories(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(realOxlintOutput))
+	
+	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, finding.CategoryCorrectness, findings[0].Category)
@@ -155,8 +155,8 @@ func TestParseMapsCategories(t *testing.T) {
 
 func TestParseExtractsURLAndHelp(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(realOxlintOutput))
+	
+	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, "https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-debugger.html",
@@ -166,8 +166,8 @@ func TestParseExtractsURLAndHelp(t *testing.T) {
 
 func TestParseEmptyDiagnostics(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(`{"diagnostics":[]}`))
+	
+	findings, err := parseOutput([]byte(`{"diagnostics":[]}`))
 	require.NoError(t, err)
 	assert.Empty(t, findings)
 }
@@ -198,15 +198,15 @@ func TestParseCodeFormat(t *testing.T) {
 
 func TestDetectEmptyOutput(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	_, err := d.parseOutput([]byte{})
+	
+	_, err := parseOutput([]byte{})
 	assert.Error(t, err)
 }
 
 func TestDetectEmptyJSON(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(`{"diagnostics":null}`))
+	
+	findings, err := parseOutput([]byte(`{"diagnostics":null}`))
 	assert.NoError(t, err)
 	assert.Empty(t, findings)
 }
@@ -267,8 +267,8 @@ func TestPositionFromLabelsEmpty(t *testing.T) {
 
 func TestJSONRoundTrip(t *testing.T) {
 	t.Parallel()
-	d := NewDetector(".")
-	findings, err := d.parseOutput([]byte(realOxlintOutput))
+	
+	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	for _, f := range findings {
@@ -278,4 +278,49 @@ func TestJSONRoundTrip(t *testing.T) {
 	data, err := json.Marshal(findings)
 	require.NoError(t, err)
 	assert.NotEmpty(t, data)
+}
+
+// mockRunner returns canned oxlint output for testing.
+type mockRunner struct {
+	output []byte
+	err    error
+}
+
+func (m mockRunner) Run(_ context.Context, _ string, _ []string, _ string) ([]byte, error) {
+	return m.output, m.err
+}
+
+func TestDetectWithMockRunner(t *testing.T) {
+	t.Parallel()
+	d := NewDetector(".", WithRunner(mockRunner{output: []byte(realOxlintOutput)}))
+	findings, err := d.Detect(context.Background())
+	require.NoError(t, err)
+	assert.Len(t, findings, 3)
+	assert.Equal(t, "no-debugger", findings[0].Rule)
+}
+
+func TestDetectWithMockRunnerEmptyOutput(t *testing.T) {
+	t.Parallel()
+	d := NewDetector(".", WithRunner(mockRunner{output: []byte("{}")}))
+	findings, err := d.Detect(context.Background())
+	require.NoError(t, err)
+	assert.Empty(t, findings)
+}
+
+func TestDetectorName(t *testing.T) {
+	t.Parallel()
+	d := NewDetector(".")
+	assert.Equal(t, "oxlint", d.Name())
+}
+
+func TestWithConfig(t *testing.T) {
+	t.Parallel()
+	d := NewDetector(".", WithConfig("/path/to/config"))
+	assert.Equal(t, "/path/to/config", d.config)
+}
+
+func TestWithArgs(t *testing.T) {
+	t.Parallel()
+	d := NewDetector(".", WithArgs("--verbose"))
+	assert.Contains(t, d.args, "--verbose")
 }

@@ -13,11 +13,26 @@ import (
 	finding "github.com/larsartmann/go-finding"
 )
 
+// Runner executes an oxlint command and returns its stdout.
+type Runner interface {
+	Run(ctx context.Context, name string, args []string, dir string) ([]byte, error)
+}
+
+// realRunner executes oxlint via exec.CommandContext.
+type realRunner struct{}
+
+func (realRunner) Run(ctx context.Context, name string, args []string, dir string) ([]byte, error) {
+	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Dir = dir
+	return cmd.Output()
+}
+
 // Detector runs oxlint and converts findings to the go-finding model.
 type Detector struct {
 	rootDir string
 	config  string
 	args    []string
+	runner  Runner
 }
 
 // Option configures the oxlint detector.
@@ -33,9 +48,14 @@ func WithArgs(args ...string) Option {
 	return func(d *Detector) { d.args = append(d.args, args...) }
 }
 
+// WithRunner sets the command runner (for testing).
+func WithRunner(r Runner) Option {
+	return func(d *Detector) { d.runner = r }
+}
+
 // NewDetector creates an oxlint detector for the given root directory.
 func NewDetector(rootDir string, opts ...Option) *Detector {
-	d := &Detector{rootDir: rootDir}
+	d := &Detector{rootDir: rootDir, runner: realRunner{}}
 	for _, opt := range opts {
 		opt(d)
 	}
@@ -49,22 +69,15 @@ func (d *Detector) Name() string { return "oxlint" }
 // oxlint exits with code 1 when it finds issues, which is not an error.
 func (d *Detector) Detect(ctx context.Context) ([]finding.Finding, error) {
 	args := d.buildArgs()
-	cmd := exec.CommandContext(ctx, "oxlint", args...)
-	cmd.Dir = d.rootDir
 
-	output, err := cmd.Output()
+	output, err := d.runner.Run(ctx, "oxlint", args, d.rootDir)
 	if err != nil {
-		// oxlint exits non-zero when findings exist — that's not an error for us.
-		// Only surface real failures (stderr output, command not found, etc.)
 		exitErr := &exec.ExitError{}
 		if errors.As(err, &exitErr) {
-			// If there's stderr, that's a real error
 			if len(exitErr.Stderr) > 0 {
 				return nil, fmt.Errorf("oxlint: %s", string(exitErr.Stderr))
 			}
-			// Exit code 1 with no stderr = findings found, not a failure
 		} else {
-			// Non-ExitError (e.g., oxlint not found in PATH)
 			return nil, fmt.Errorf("run oxlint: %w", err)
 		}
 	}
@@ -73,7 +86,7 @@ func (d *Detector) Detect(ctx context.Context) ([]finding.Finding, error) {
 		return nil, nil
 	}
 
-	return d.parseOutput(output)
+	return parseOutput(output)
 }
 
 func (d *Detector) buildArgs() []string {
@@ -119,7 +132,7 @@ type oxlintSpan struct {
 	Column int `json:"column"`
 }
 
-func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
+func parseOutput(data []byte) ([]finding.Finding, error) {
 	var output oxlintOutput
 	if err := json.Unmarshal(data, &output); err != nil {
 		return nil, fmt.Errorf("parse oxlint JSON: %w", err)
@@ -164,7 +177,6 @@ func positionFromLabels(labels []oxlintLabel) (line, col int) {
 // parseCode splits "eslint(no-debugger)" or "typescript/no-explicit-any"
 // into (rule-name, plugin).
 func parseCode(code string) (ruleName, plugin string) {
-	// Format 1: "plugin(rule-name)" e.g. "eslint(no-debugger)"
 	plugin, ruleName, found := strings.Cut(code, "(")
 	if found {
 		return strings.TrimSuffix(ruleName, ")"), plugin
