@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
-	"github.com/larsartmann/oxlint-auto-configure/pkg/oxlint"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/spf13/cobra"
@@ -37,7 +37,7 @@ func newReportCommand() *cobra.Command {
 
 			p := profile.Profile(profileFlag)
 			if !p.IsValid() {
-				return fmt.Errorf("%w %q", oxlint.ErrInvalidProfile, profileFlag)
+				return fmt.Errorf("%w %q", config.ErrInvalidProfile, profileFlag)
 			}
 
 			reg, err := rule.LoadRegistry()

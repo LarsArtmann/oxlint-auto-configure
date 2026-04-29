@@ -12,6 +12,9 @@ import (
 // ErrInvalidConfig is returned when a config file cannot be validated.
 var ErrInvalidConfig = errors.New("invalid config")
 
+// ErrInvalidProfile is returned when an unknown profile name is given.
+var ErrInvalidProfile = errors.New("invalid profile")
+
 // ValidateResult contains the outcome of validating an OxlintConfig.
 type ValidateResult struct {
 	UnknownRules      []string

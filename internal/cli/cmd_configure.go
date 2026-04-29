@@ -78,9 +78,9 @@ type ConfigureOptions struct {
 func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error {
 	if !opts.Profile.IsValid() {
 		return fmt.Errorf("%w %q: choose from %s",
-			oxlint.ErrInvalidProfile,
+			config.ErrInvalidProfile,
 			opts.Profile,
-			strings.Join(profileNames(), ", "),
+			strings.Join(cliProfileNames(), ", "),
 		)
 	}
 
@@ -103,10 +103,11 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 	slog.Info("profile", "name", opts.Profile)
 	slog.Info("rules loaded", "total", reg.Len())
 
-	cat := profile.NewCategorizer(opts.Profile, pluginConfig)
-	gen := config.NewGenerator(cat, reg, projectTypes)
+	cfg, err := config.GenerateProjectConfig(opts.Profile, reg, pluginConfig, projectTypes)
+	if err != nil {
+		return err
+	}
 
-	cfg := genConfig(gen, opts.Profile)
 	targetPath := resolveConfigPath(opts.ConfigPath, absRoot)
 
 	if opts.DryRun {
@@ -138,13 +139,6 @@ func checkOxlintVersion(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func genConfig(gen *config.Generator, p profile.Profile) *config.OxlintConfig {
-	if p == profile.ProfileMaximalTypesafe {
-		return gen.GenerateMaximal()
-	}
-	return gen.Generate()
 }
 
 func resolveConfigPath(configPath, absRoot string) string {
@@ -193,7 +187,6 @@ func runFixIfNeeded(ctx context.Context, absRoot, targetPath string, runFix bool
 	return nil
 }
 
-// showDiffIfExisting compares the existing config with the new one and logs the diff.
 func showDiffIfExisting(targetPath string, cfg *config.OxlintConfig) string {
 	existingData, err := os.ReadFile(targetPath)
 	if err != nil {
@@ -221,11 +214,12 @@ func writeDryRun(cfg *config.OxlintConfig, targetPath string) error {
 	return nil
 }
 
-func profileNames() []string {
+func cliProfileNames() []string {
 	ps := profile.AllProfiles()
 	names := make([]string, len(ps))
 	for i, p := range ps {
 		names[i] = string(p)
 	}
+
 	return names
 }
