@@ -190,6 +190,7 @@ func TestParseCodeFormat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.code, func(t *testing.T) {
+			t.Parallel()
 			rule, plugin := parseCode(tt.code)
 			assert.Equal(t, tt.expectedRule, rule)
 			assert.Equal(t, tt.expectedPlug, plugin)
@@ -254,6 +255,7 @@ func TestMapCategory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.plugin, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tt.expected, mapCategory(tt.plugin))
 		})
 	}

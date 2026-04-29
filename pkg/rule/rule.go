@@ -6,15 +6,15 @@ import "slices"
 // Category represents an oxlint rule category.
 type Category string
 
+// CategoryCorrectness and other category constants classify oxlint rules by concern.
 const (
-	// Category values for oxlint rule categories.
-	CategoryCorrectness Category = "correctness"
-	CategorySuspicious  Category = "suspicious"
-	CategoryPedantic    Category = "pedantic"
-	CategoryPerf        Category = "perf"
-	CategoryStyle       Category = "style"
-	CategoryRestriction Category = "restriction"
-	CategoryNursery     Category = "nursery"
+	CategoryCorrectness Category = "correctness" // correctness issues are bugs
+	CategorySuspicious  Category = "suspicious"  // suspicious code patterns
+	CategoryPedantic    Category = "pedantic"    // pedantic style rules
+	CategoryPerf        Category = "perf"        // performance issues
+	CategoryStyle       Category = "style"       // code style rules
+	CategoryRestriction Category = "restriction" // restrictive patterns
+	CategoryNursery     Category = "nursery"     // experimental rules
 )
 
 // AllCategories returns all known oxlint rule categories.
@@ -46,23 +46,23 @@ func (c Category) String() string { return string(c) }
 // Plugin represents an oxlint plugin source.
 type Plugin string
 
+// PluginESLint and other plugin constants represent oxlint plugin sources.
 const (
-	// Plugin values for oxlint plugin sources.
-	PluginESLint     Plugin = "eslint"
-	PluginImport     Plugin = "import"
-	PluginJest       Plugin = "jest"
-	PluginJSDoc      Plugin = "jsdoc"
-	PluginJSXA11y    Plugin = "jsx_a11y"
-	PluginNextJS     Plugin = "nextjs"
-	PluginNode       Plugin = "node"
-	PluginOXC        Plugin = "oxc"
-	PluginPromise    Plugin = "promise"
-	PluginReact      Plugin = "react"
-	PluginReactPerf  Plugin = "react_perf"
-	PluginTypeScript Plugin = "typescript"
-	PluginUnicorn    Plugin = "unicorn"
-	PluginVitest     Plugin = "vitest"
-	PluginVue        Plugin = "vue"
+	PluginESLint     Plugin = "eslint"     // always-on default rules
+	PluginImport     Plugin = "import"     // ES module import rules
+	PluginJest       Plugin = "jest"       // Jest test framework rules
+	PluginJSDoc      Plugin = "jsdoc"      // JSDoc annotation rules
+	PluginJSXA11y    Plugin = "jsx_a11y"   // JSX accessibility rules
+	PluginNextJS     Plugin = "nextjs"     // Next.js framework rules
+	PluginNode       Plugin = "node"       // Node.js runtime rules
+	PluginOXC        Plugin = "oxc"        // always-on OXC rules
+	PluginPromise    Plugin = "promise"    // Promise/async patterns
+	PluginReact      Plugin = "react"      // React component rules
+	PluginReactPerf  Plugin = "react_perf" // React performance rules
+	PluginTypeScript Plugin = "typescript" // always-on TypeScript rules
+	PluginUnicorn    Plugin = "unicorn"    // always-on Unicorn rules
+	PluginVitest     Plugin = "vitest"     // Vitest test framework rules
+	PluginVue        Plugin = "vue"        // Vue component rules
 )
 
 // AllPlugins returns all known oxlint plugins.
@@ -124,12 +124,12 @@ func (p Plugin) NeedsFlag() bool {
 // FixCapability indicates what kind of auto-fix a rule supports.
 type FixCapability string
 
+// FixNone and other capability constants indicate what auto-fix support a rule has.
 const (
-	// FixCapability values for rule auto-fix types.
-	FixNone       FixCapability = "none"
-	FixSafe       FixCapability = "safe"
-	FixSuggestion FixCapability = "suggestion"
-	FixDangerous  FixCapability = "dangerous"
+	FixNone       FixCapability = "none"       // no auto-fix available
+	FixSafe       FixCapability = "safe"       // safe auto-fix
+	FixSuggestion FixCapability = "suggestion" // suggested fix
+	FixDangerous  FixCapability = "dangerous"  // dangerous auto-fix
 )
 
 // Rule represents a single oxlint rule with all its metadata.
@@ -165,11 +165,11 @@ func (r Rule) IsSafeFixable() bool {
 // SeverityDecision represents the chosen severity for a rule.
 type SeverityDecision string
 
+// SeverityError and other severity constants represent rule violation outcomes.
 const (
-	// SeverityDecision values for rule severity.
-	SeverityError SeverityDecision = "error"
-	SeverityWarn  SeverityDecision = "warn"
-	SeverityOff   SeverityDecision = "off"
+	SeverityError SeverityDecision = "error" // rule violation is an error
+	SeverityWarn  SeverityDecision = "warn"  // rule violation is a warning
+	SeverityOff   SeverityDecision = "off"   // rule is disabled
 )
 
 // String returns the string representation.

@@ -35,7 +35,7 @@ func Validate(configPath string) error {
 		targetPath = defaultConfigPath
 	}
 
-	data, err := os.ReadFile(targetPath) //nolint:gosec // config path is user-provided by design
+	data, err := os.ReadFile(targetPath)
 	if err != nil {
 		return fmt.Errorf("read config %s: %w", targetPath, err)
 	}

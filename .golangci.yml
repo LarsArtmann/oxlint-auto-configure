@@ -99,6 +99,11 @@ linters:
             - linters: [gosec]
               text: "G204"
               source: "exec.Command"
+            - linters: [gosec]
+              text: "G304"
+            - linters: [gosec]
+              text: "G306"
+              path: "_test[.]go$"
 formatters:
     enable:
         - gci

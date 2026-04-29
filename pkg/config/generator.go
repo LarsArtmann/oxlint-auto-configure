@@ -156,7 +156,7 @@ func (g *Generator) ruleSeverityMap() map[string]string {
 }
 
 // pluginSettings maps plugins to their oxlint settings key and defaults.
-var pluginSettings = map[rule.Plugin]struct {
+var pluginSettings = map[rule.Plugin]struct { //nolint:gochecknoglobals // immutable lookup table
 	key   string
 	value map[string]any
 }{

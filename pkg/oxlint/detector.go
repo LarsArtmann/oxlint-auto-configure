@@ -24,7 +24,8 @@ type realRunner struct{}
 func (realRunner) Run(ctx context.Context, name string, args []string, dir string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Dir = dir
-	return cmd.Output()
+	out, err := cmd.Output()
+	return out, fmt.Errorf("run oxlint: %w", err)
 }
 
 // Detector runs oxlint and converts findings to the go-finding model.

@@ -15,15 +15,15 @@ import (
 // ProjectType represents the detected project framework/type.
 type ProjectType string
 
+// ProjectTypeUnknown and other project type constants represent detected framework categories.
 const (
-	// ProjectType values for detected project frameworks.
-	ProjectTypeUnknown ProjectType = "unknown"
-	ProjectTypeReact   ProjectType = "react"
-	ProjectTypeNextJS  ProjectType = "nextjs"
-	ProjectTypeVue     ProjectType = "vue"
-	ProjectTypeNode    ProjectType = "node"
-	ProjectTypePlainTS ProjectType = "typescript"
-	ProjectTypeLibrary ProjectType = "library"
+	ProjectTypeUnknown ProjectType = "unknown"    // no recognized framework
+	ProjectTypeReact   ProjectType = "react"      // React SPA
+	ProjectTypeNextJS  ProjectType = "nextjs"     // Next.js SSR
+	ProjectTypeVue     ProjectType = "vue"        // Vue SPA
+	ProjectTypeNode    ProjectType = "node"       // Node.js backend
+	ProjectTypePlainTS ProjectType = "typescript" // TypeScript without framework
+	ProjectTypeLibrary ProjectType = "library"    // shared library
 )
 
 // Detector detects project type from the filesystem.

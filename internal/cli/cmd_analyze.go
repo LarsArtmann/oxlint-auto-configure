@@ -130,11 +130,20 @@ func renderFindings(fmtFlag string, report *finding.Report, result *pipeline.Pip
 
 	switch fmtFlag {
 	case "summary":
-		return format.PrintSummary(os.Stderr, sv)
+		if err := format.PrintSummary(os.Stderr, sv); err != nil {
+			return fmt.Errorf("print summary: %w", err)
+		}
+		return nil
 	case "json":
-		return format.PrintFindingsJSON(os.Stdout, views)
+		if err := format.PrintFindingsJSON(os.Stdout, views); err != nil {
+			return fmt.Errorf("print json: %w", err)
+		}
+		return nil
 	case "table":
-		return format.PrintFindingsTable(os.Stdout, views)
+		if err := format.PrintFindingsTable(os.Stdout, views); err != nil {
+			return fmt.Errorf("print table: %w", err)
+		}
+		return nil
 	case "sarif":
 		return printSARIF(os.Stdout, report)
 	default:

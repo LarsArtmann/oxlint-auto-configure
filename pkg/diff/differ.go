@@ -22,8 +22,8 @@ type Change struct {
 // ChangeKind categorizes the type of change.
 type ChangeKind string
 
+// KindAdded and other change kind constants categorize config differences.
 const (
-	// ChangeKind values for config diff change types.
 	KindAdded     ChangeKind = "added"     // rule/category was not present before
 	KindRemoved   ChangeKind = "removed"   // rule/category was present before but not after
 	KindChanged   ChangeKind = "changed"   // rule/category value changed
