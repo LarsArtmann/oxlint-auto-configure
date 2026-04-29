@@ -1,16 +1,14 @@
 package cli
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"sort"
-	"strings"
 
 	finding "github.com/larsartmann/go-finding"
 	"github.com/larsartmann/go-finding/pipeline"
+	"github.com/larsartmann/oxlint-auto-configure/pkg/format"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/oxlint"
 	"github.com/spf13/cobra"
 )
@@ -18,7 +16,7 @@ import (
 func newAnalyzeCommand() *cobra.Command {
 	var (
 		rootDir string
-		format  string
+		formatFlag string
 	)
 
 	cmd := &cobra.Command{
@@ -42,7 +40,7 @@ Formats:
 			}
 
 			if err := oxlint.CheckBinary(cmd.Context()); err != nil {
-				return err
+				return fmt.Errorf("oxlint: %w", err)
 			}
 
 			configPath := filepath.Join(absRoot, defaultConfigPath)
@@ -78,62 +76,21 @@ Formats:
 			}
 			report.ComputeSummary()
 
-			switch format {
-			case "sarif":
-				return printSARIF(report)
-			case "json":
-				return printFindingsJSON(report)
-			case "table":
-				return printFindingsTable(report)
-			case "summary":
-				return printSummary(report, result)
-			default:
-				return fmt.Errorf("unknown format %q: choose from summary, json, sarif, table", format)
-			}
+			return renderFindings(formatFlag, report, result)
 		},
 	}
 
 	cmd.Flags().StringVar(&rootDir, "root", ".", "Project root directory")
-	cmd.Flags().StringVarP(&format, "format", "f", "summary", "Output format: summary, json, sarif, table")
+	cmd.Flags().StringVarP(&formatFlag, "format", "f", "summary", "Output format: summary, json, sarif, table")
 
 	return cmd
 }
 
-func printSummary(report *finding.Report, result *pipeline.PipelineResult) error {
-	slog.Info("findings",
-		"total", report.Summary.Total,
-		"by_severity", formatSeverityMap(report.Summary.BySeverity),
-		"by_category", formatCategoryMap(report.Summary.ByCategory),
-		"files_affected", report.Summary.FilesAffected,
-		"iterations", result.TotalIterations,
-		"stable", result.Stable,
-	)
-	return nil
-}
-
-func printSARIF(report *finding.Report) error {
-	sarif, err := report.ToSARIF()
-	if err != nil {
-		return fmt.Errorf("generate SARIF: %w", err)
-	}
-	fmt.Println(string(sarif))
-	return nil
-}
-
-func printFindingsJSON(report *finding.Report) error {
-	type entry struct {
-		Rule     string `json:"rule"`
-		Message  string `json:"message"`
-		Severity string `json:"severity"`
-		Category string `json:"category"`
-		File     string `json:"file"`
-		Line     int    `json:"line"`
-		Column   int    `json:"column"`
-	}
-
-	entries := make([]entry, 0, len(report.Findings))
+// renderFindings converts go-finding types to format views and delegates rendering.
+func renderFindings(fmtFlag string, report *finding.Report, result *pipeline.PipelineResult) error {
+	views := make([]format.FindingView, 0, len(report.Findings))
 	for _, f := range report.Findings {
-		entries = append(entries, entry{
+		views = append(views, format.FindingView{
 			Rule:     f.Rule,
 			Message:  f.Message,
 			Severity: string(f.Severity),
@@ -144,54 +101,44 @@ func printFindingsJSON(report *finding.Report) error {
 		})
 	}
 
-	data, err := json.MarshalIndent(entries, "", "  ")
+	bySev := make(map[string]int, len(report.Summary.BySeverity))
+	for k, v := range report.Summary.BySeverity {
+		bySev[string(k)] = v
+	}
+	byCat := make(map[string]int, len(report.Summary.ByCategory))
+	for k, v := range report.Summary.ByCategory {
+		byCat[string(k)] = v
+	}
+
+	sv := &format.SummaryView{
+		Total:         report.Summary.Total,
+		BySeverity:    bySev,
+		ByCategory:    byCat,
+		FilesAffected: report.Summary.FilesAffected,
+		Iterations:    result.TotalIterations,
+		Stable:        result.Stable,
+	}
+
+	switch fmtFlag {
+	case "summary":
+		return format.PrintSummary(os.Stderr, sv)
+	case "json":
+		return format.PrintFindingsJSON(os.Stdout, views)
+	case "table":
+		return format.PrintFindingsTable(os.Stdout, views)
+	case "sarif":
+		return printSARIF(report)
+	default:
+		return fmt.Errorf("unknown format %q: choose from summary, json, sarif, table", fmtFlag)
+	}
+}
+
+// printSARIF renders SARIF directly from go-finding Report (requires go-finding method).
+func printSARIF(report *finding.Report) error {
+	sarif, err := report.ToSARIF()
 	if err != nil {
-		return fmt.Errorf("marshal findings: %w", err)
+		return fmt.Errorf("generate SARIF: %w", err)
 	}
-	fmt.Println(string(data))
+	fmt.Println(string(sarif))
 	return nil
-}
-
-func printFindingsTable(report *finding.Report) error {
-	fmt.Println("| Rule | Severity | Category | File:Line | Message |")
-	fmt.Println("|------|----------|----------|-----------|---------|")
-
-	sorted := make([]finding.Finding, len(report.Findings))
-	copy(sorted, report.Findings)
-	sort.Slice(sorted, func(i, j int) bool {
-		if sorted[i].Position.File != sorted[j].Position.File {
-			return sorted[i].Position.File < sorted[j].Position.File
-		}
-		return sorted[i].Position.Line < sorted[j].Position.Line
-	})
-
-	for _, f := range sorted {
-		loc := fmt.Sprintf("%s:%d", f.Position.File, f.Position.Line)
-		msg := f.Message
-		if len(msg) > 60 {
-			msg = msg[:57] + "..."
-		}
-		msg = strings.ReplaceAll(msg, "|", "\\|")
-		fmt.Printf("| %s | %s | %s | %s | %s |\n",
-			f.Rule, f.Severity, f.Category, loc, msg)
-	}
-	return nil
-}
-
-func formatSeverityMap(m map[finding.Severity]int) string {
-	parts := make([]string, 0, len(m))
-	for k, v := range m {
-		parts = append(parts, fmt.Sprintf("%s=%d", k, v))
-	}
-	sort.Strings(parts)
-	return strings.Join(parts, ", ")
-}
-
-func formatCategoryMap(m map[finding.Category]int) string {
-	parts := make([]string, 0, len(m))
-	for k, v := range m {
-		parts = append(parts, fmt.Sprintf("%s=%d", k, v))
-	}
-	sort.Strings(parts)
-	return strings.Join(parts, ", ")
 }

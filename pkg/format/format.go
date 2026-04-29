@@ -1,0 +1,95 @@
+// Package format renders analysis findings in various output formats.
+package format
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"sort"
+	"strings"
+)
+
+// FindingView is a projection of a lint finding for rendering.
+type FindingView struct {
+	Rule     string
+	Message  string
+	Severity string
+	Category string
+	File     string
+	Line     int
+	Column   int
+}
+
+// SummaryView is a projection of analysis summary statistics.
+type SummaryView struct {
+	Total         int
+	BySeverity    map[string]int
+	ByCategory    map[string]int
+	FilesAffected int
+	Iterations    int
+	Stable        bool
+}
+
+// PrintSummary writes a human-readable summary to w.
+func PrintSummary(w io.Writer, sv *SummaryView) error {
+	fmt.Fprintf(w, "findings: total=%d, by_severity=%s, by_category=%s, files_affected=%d, iterations=%d, stable=%t\n",
+		sv.Total,
+		formatMap(sv.BySeverity),
+		formatMap(sv.ByCategory),
+		sv.FilesAffected,
+		sv.Iterations,
+		sv.Stable,
+	)
+	return nil
+}
+
+// PrintFindingsJSON writes findings as a JSON array to w.
+func PrintFindingsJSON(w io.Writer, findings []FindingView) error {
+	data, err := json.MarshalIndent(findings, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal findings: %w", err)
+	}
+	fmt.Fprintln(w, string(data))
+	return nil
+}
+
+// PrintFindingsTable writes findings as a Markdown table to w.
+func PrintFindingsTable(w io.Writer, findings []FindingView) error {
+	fmt.Fprintln(w, "| Rule | Severity | Category | File:Line | Message |")
+	fmt.Fprintln(w, "|------|----------|----------|-----------|---------|")
+
+	sorted := make([]FindingView, len(findings))
+	copy(sorted, findings)
+	sort.Slice(sorted, func(i, j int) bool {
+		if sorted[i].File != sorted[j].File {
+			return sorted[i].File < sorted[j].File
+		}
+		return sorted[i].Line < sorted[j].Line
+	})
+
+	for _, f := range sorted {
+		loc := fmt.Sprintf("%s:%d", f.File, f.Line)
+		msg := f.Message
+		if len(msg) > 60 {
+			msg = msg[:57] + "..."
+		}
+		msg = strings.ReplaceAll(msg, "|", "\\|")
+		fmt.Fprintf(w, "| %s | %s | %s | %s | %s |\n",
+			f.Rule, f.Severity, f.Category, loc, msg)
+	}
+	return nil
+}
+
+// FormatMap returns a sorted "key=count, ..." string for a map.
+func FormatMap(m map[string]int) string {
+	return formatMap(m)
+}
+
+func formatMap(m map[string]int) string {
+	parts := make([]string, 0, len(m))
+	for k, v := range m {
+		parts = append(parts, fmt.Sprintf("%s=%d", k, v))
+	}
+	sort.Strings(parts)
+	return strings.Join(parts, ", ")
+}
