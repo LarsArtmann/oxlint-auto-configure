@@ -7,6 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestProfileString(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "maximal-typesafe", ProfileMaximalTypesafe.String())
+	assert.Equal(t, "recommended", ProfileRecommended.String())
+	assert.Equal(t, "strict", ProfileStrict.String())
+	assert.Equal(t, "minimal", ProfileMinimal.String())
+}
+
 func TestProfileIsValid(t *testing.T) {
 	t.Parallel()
 	assert.True(t, ProfileMaximalTypesafe.IsValid())

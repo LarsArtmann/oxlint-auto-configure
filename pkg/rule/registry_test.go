@@ -269,3 +269,24 @@ func TestSeverityDecisionString(t *testing.T) {
 	assert.Equal(t, "warn", string(SeverityWarn))
 	assert.Equal(t, "off", string(SeverityOff))
 }
+
+func TestCategoryString(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "correctness", CategoryCorrectness.String())
+	assert.Equal(t, "suspicious", CategorySuspicious.String())
+	assert.Equal(t, "nursery", CategoryNursery.String())
+}
+
+func TestPluginString(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "eslint", PluginESLint.String())
+	assert.Equal(t, "typescript", PluginTypeScript.String())
+	assert.Equal(t, "react", PluginReact.String())
+}
+
+func TestSeverityDecisionStringMethod(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "error", SeverityError.String())
+	assert.Equal(t, "warn", SeverityWarn.String())
+	assert.Equal(t, "off", SeverityOff.String())
+}
