@@ -19,6 +19,13 @@ go install github.com/larsartmann/oxlint-auto-configure/cmd/oxlint-auto-configur
 
 Requires Go 1.26+ and [oxlint](https://oxc.rs/docs/guide/usage/linter.html) in PATH.
 
+> **Note:** This project depends on [go-finding](https://github.com/larsartmann/go-finding) (private repo).
+> For development, set `GOPRIVATE=github.com/larsartmann/go-finding`:
+> ```bash
+> export GOPRIVATE=github.com/larsartmann/go-finding
+> go install github.com/larsartmann/oxlint-auto-configure/cmd/oxlint-auto-configure@latest
+> ```
+
 ## Quick Start
 
 ```bash
@@ -48,7 +55,7 @@ oxlint-auto-configure report
 | **maximal-typesafe** | error | error | error | error | error | error | error | warn |
 | **strict** | error | error | error | warn | warn | warn | warn | off |
 | **recommended** | error | error | error | warn | warn | warn | warn | off |
-| **minimal** | error | warn | warn | warn | warn | warn | off | off |
+| **minimal** | error | default | default | default | default | default | default | default |
 
 ### Profile Details
 
@@ -165,6 +172,7 @@ oxlint-auto-configure/
 │   ├── config/                 # .oxlintrc.json generator
 │   ├── detect/                 # Project type detection
 │   ├── diff/                   # Config comparison
+│   ├── format/                 # Findings rendering (summary, JSON, table)
 │   ├── oxlint/                 # go-finding Detector for oxlint
 ├── internal/cli/               # CLI commands (Cobra)
 └── docs/                       # Documentation
