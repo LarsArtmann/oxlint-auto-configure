@@ -60,6 +60,40 @@ func TestCategorizerStrict(t *testing.T) {
 	assert.Equal(t, rule.SeverityOff, cat.Decide(rule.Rule{Category: rule.CategoryNursery}))
 }
 
+func TestDecideCategory(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		profile  Profile
+		category rule.Category
+		want     rule.SeverityDecision
+		include  bool
+	}{
+		{"maximal correctness", ProfileMaximalTypesafe, rule.CategoryCorrectness, rule.SeverityError, true},
+		{"maximal nursery", ProfileMaximalTypesafe, rule.CategoryNursery, rule.SeverityWarn, true},
+		{"recommended correctness", ProfileRecommended, rule.CategoryCorrectness, rule.SeverityError, true},
+		{"recommended style", ProfileRecommended, rule.CategoryStyle, rule.SeverityWarn, true},
+		{"recommended nursery", ProfileRecommended, rule.CategoryNursery, rule.SeverityOff, true},
+		{"strict correctness", ProfileStrict, rule.CategoryCorrectness, rule.SeverityError, true},
+		{"strict style", ProfileStrict, rule.CategoryStyle, rule.SeverityWarn, true},
+		{"strict nursery", ProfileStrict, rule.CategoryNursery, rule.SeverityOff, true},
+		{"minimal correctness", ProfileMinimal, rule.CategoryCorrectness, rule.SeverityError, true},
+		{"minimal style omitted", ProfileMinimal, rule.CategoryStyle, rule.SeverityOff, false},
+		{"minimal nursery omitted", ProfileMinimal, rule.CategoryNursery, rule.SeverityOff, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			cat := NewCategorizer(tt.profile, PluginConfig{})
+			got, include := cat.DecideCategory(tt.category)
+			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.include, include)
+		})
+	}
+}
+
 func TestCategorizerMinimal(t *testing.T) {
 	t.Parallel()
 	cat := NewCategorizer(ProfileMinimal, PluginConfig{})

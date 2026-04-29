@@ -104,33 +104,27 @@ func (g *Generator) allPlugins() []string {
 }
 
 // categorySeverityMap returns the category→severity mapping for the profile.
+// Uses Categorizer.DecideCategory instead of sampling rules, ensuring
+// correct category severities even for profiles with mixed-severity categories.
 func (g *Generator) categorySeverityMap() map[string]string {
 	if g.categorizer == nil {
 		return map[string]string{"correctness": "error"}
 	}
 
-	cats := map[string]rule.Category{
-		"correctness": rule.CategoryCorrectness,
-		"suspicious":  rule.CategorySuspicious,
-		"pedantic":    rule.CategoryPedantic,
-		"perf":        rule.CategoryPerf,
-		"style":       rule.CategoryStyle,
-		"restriction": rule.CategoryRestriction,
-		"nursery":     rule.CategoryNursery,
-	}
-
 	result := make(map[string]string)
-	for name, cat := range cats {
-		rules := g.registry.ByCategory(cat)
-		if len(rules) > 0 {
-			decision := g.categorizer.Decide(rules[0])
-			result[name] = string(decision)
+	for _, cat := range rule.AllCategories() {
+		severity, include := g.categorizer.DecideCategory(cat)
+		if include {
+			result[string(cat)] = string(severity)
 		}
 	}
 	return result
 }
 
 // ruleSeverityMap returns per-rule overrides that differ from the category default.
+// Only emits rules whose severity contradicts their category-level severity.
+// Rules from omitted categories (e.g., minimal's non-correctness categories)
+// are skipped entirely — oxlint defaults apply.
 func (g *Generator) ruleSeverityMap() map[string]string {
 	if g.categorizer == nil {
 		return map[string]string{}
@@ -145,13 +139,16 @@ func (g *Generator) ruleSeverityMap() map[string]string {
 			continue
 		}
 
-		fullName := d.Rule.FullName()
 		catSev, hasCat := catMap[string(d.Rule.Category)]
 
-		if d.Severity == rule.SeverityOff {
-			rules[fullName] = "off"
-		} else if hasCat && string(d.Severity) != catSev {
-			rules[fullName] = string(d.Severity)
+		// Skip rules from omitted categories — oxlint defaults apply.
+		if !hasCat {
+			continue
+		}
+
+		// Only emit when the rule's severity differs from its category.
+		if string(d.Severity) != catSev {
+			rules[d.Rule.FullName()] = string(d.Severity)
 		}
 	}
 

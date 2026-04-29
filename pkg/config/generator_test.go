@@ -147,4 +147,30 @@ func TestMinimalProfileConfig(t *testing.T) {
 	cfg := gen.Generate()
 
 	assert.Equal(t, "error", cfg.Categories["correctness"])
+	assert.NotContains(t, cfg.Categories, "style", "minimal should omit non-correctness categories")
+	assert.NotContains(t, cfg.Categories, "suspicious", "minimal should omit non-correctness categories")
+	assert.NotContains(t, cfg.Categories, "nursery", "minimal should omit non-correctness categories")
+	assert.Empty(t, cfg.Rules, "minimal should have no per-rule overrides")
+}
+
+func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
+	t.Parallel()
+	reg, err := rule.LoadRegistry()
+	require.NoError(t, err)
+
+	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	gen := NewGenerator(cat, reg)
+	cfg := gen.Generate()
+
+	for ruleName, ruleSev := range cfg.Rules {
+		r, ok := reg.ByName(ruleName)
+		if !ok {
+			continue
+		}
+		catSev, hasCat := cfg.Categories[string(r.Category)]
+		if hasCat {
+			assert.NotEqual(t, catSev, ruleSev,
+				"rule %q should not duplicate its category severity", ruleName)
+		}
+	}
 }

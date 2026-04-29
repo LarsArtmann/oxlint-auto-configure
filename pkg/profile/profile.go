@@ -154,6 +154,62 @@ func (c *Categorizer) decideMinimal(r rule.Rule) rule.SeverityDecision {
 	return rule.SeverityOff
 }
 
+// DecideCategory returns the category-level severity for the given category.
+// The bool indicates whether the category should be included in the config;
+// false means omit it (oxlint will use its defaults).
+func (c *Categorizer) DecideCategory(cat rule.Category) (rule.SeverityDecision, bool) {
+	switch c.profile {
+	case ProfileMaximalTypesafe:
+		return c.decideCategoryMaximal(cat)
+	case ProfileRecommended:
+		return c.decideCategoryRecommended(cat)
+	case ProfileStrict:
+		return c.decideCategoryStrict(cat)
+	case ProfileMinimal:
+		return c.decideCategoryMinimal(cat)
+	default:
+		return rule.SeverityOff, false
+	}
+}
+
+func (c *Categorizer) decideCategoryMaximal(cat rule.Category) (rule.SeverityDecision, bool) {
+	if cat == rule.CategoryNursery {
+		return rule.SeverityWarn, true
+	}
+	return rule.SeverityError, true
+}
+
+func (c *Categorizer) decideCategoryRecommended(cat rule.Category) (rule.SeverityDecision, bool) {
+	switch cat {
+	case rule.CategoryCorrectness, rule.CategorySuspicious:
+		return rule.SeverityError, true
+	case rule.CategoryPerf, rule.CategoryStyle, rule.CategoryPedantic, rule.CategoryRestriction:
+		return rule.SeverityWarn, true
+	case rule.CategoryNursery:
+		return rule.SeverityOff, true
+	default:
+		return rule.SeverityOff, true
+	}
+}
+
+func (c *Categorizer) decideCategoryStrict(cat rule.Category) (rule.SeverityDecision, bool) {
+	switch cat {
+	case rule.CategoryCorrectness, rule.CategorySuspicious:
+		return rule.SeverityError, true
+	case rule.CategoryNursery:
+		return rule.SeverityOff, true
+	default:
+		return rule.SeverityWarn, true
+	}
+}
+
+func (c *Categorizer) decideCategoryMinimal(cat rule.Category) (rule.SeverityDecision, bool) {
+	if cat == rule.CategoryCorrectness {
+		return rule.SeverityError, true
+	}
+	return rule.SeverityOff, false
+}
+
 // IsPluginRelevant returns true if a rule's plugin is relevant given the project config.
 func (c *Categorizer) IsPluginRelevant(r rule.Rule) bool {
 	if !r.Plugin.NeedsFlag() {
