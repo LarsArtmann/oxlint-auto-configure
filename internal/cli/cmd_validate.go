@@ -75,10 +75,9 @@ func validateRules(cfg *config.OxlintConfig, reg *rule.Registry) error {
 }
 
 func validateSeverities(cfg *config.OxlintConfig) error {
-	validSeverities := map[string]bool{"error": true, "warn": true, "off": true}
 	var invalid []string
 	for name, sev := range cfg.Rules {
-		if !validSeverities[sev] {
+		if !rule.SeverityDecision(sev).IsValid() {
 			invalid = append(invalid, fmt.Sprintf("%s=%s", name, sev))
 		}
 	}

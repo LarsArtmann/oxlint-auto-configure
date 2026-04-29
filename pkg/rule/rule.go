@@ -176,3 +176,12 @@ const (
 
 // String returns the string representation.
 func (s SeverityDecision) String() string { return string(s) }
+
+// IsValid returns true if the severity is a recognized value.
+func (s SeverityDecision) IsValid() bool {
+	switch s {
+	case SeverityError, SeverityWarn, SeverityOff:
+		return true
+	}
+	return false
+}
