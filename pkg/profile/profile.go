@@ -3,8 +3,10 @@
 package profile
 
 import (
+	"fmt"
 	"slices"
 	"sort"
+	"strings"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 )
@@ -44,20 +46,36 @@ func (p Profile) IsValid() bool {
 // String returns the string representation.
 func (p Profile) String() string { return string(p) }
 
-// Description returns a human-readable description of the profile.
+// Description returns a human-readable description derived from the profile's
+// category severity decisions. One source of truth — cannot drift from decide* logic.
 func (p Profile) Description() string {
-	switch p {
-	case ProfileMaximalTypesafe:
-		return "Enable ALL rules at 'error' — maximum type safety and correctness enforcement"
-	case ProfileRecommended:
-		return "Correctness+suspicious+TypeScript at error, perf+style+pedantic at warn, restriction at warn, nursery at off"
-	case ProfileStrict:
-		return "Correctness+suspicious+TypeScript+OXC at error, everything else at warn except nursery (off)"
-	case ProfileMinimal:
-		return "Only correctness at error, everything else uses oxlint defaults"
-	default:
+	if !p.IsValid() {
 		return "unknown profile"
 	}
+
+	cat := NewCategorizer(p, nil)
+	groups := make(map[string][]string) // severity → [category names]
+	for _, c := range rule.AllCategories() {
+		sev, include := cat.DecideCategory(c)
+		if !include {
+			groups["default"] = append(groups["default"], string(c))
+			continue
+		}
+		key := string(sev)
+		groups[key] = append(groups[key], string(c))
+	}
+
+	parts := make([]string, 0, len(groups))
+	for _, sev := range []string{"error", "warn", "off", "default"} {
+		cats, ok := groups[sev]
+		if !ok {
+			continue
+		}
+		sort.Strings(cats)
+		parts = append(parts, fmt.Sprintf("%s at %s", strings.Join(cats, "+"), sev))
+	}
+
+	return strings.Join(parts, ", ")
 }
 
 // Categorizer maps rules to severity decisions based on a profile.
