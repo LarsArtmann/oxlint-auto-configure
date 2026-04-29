@@ -290,3 +290,45 @@ func TestSeverityDecisionStringMethod(t *testing.T) {
 	assert.Equal(t, "warn", SeverityWarn.String())
 	assert.Equal(t, "off", SeverityOff.String())
 }
+
+func TestAlwaysOnPluginsConsistentWithAllPlugins(t *testing.T) {
+	t.Parallel()
+	for _, p := range AllPlugins() {
+		if alwaysOnPlugins[p] {
+			assert.False(t, p.NeedsFlag(), "always-on plugin %q should not need flag", p)
+		} else {
+			assert.True(t, p.NeedsFlag(), "non-always-on plugin %q should need flag", p)
+		}
+	}
+}
+
+func TestCLIFlagMapConsistentWithAllPlugins(t *testing.T) {
+	t.Parallel()
+	for _, p := range AllPlugins() {
+		if p.NeedsFlag() {
+			assert.NotEmpty(t, p.CLIFlag(), "plugin %q needs flag but CLIFlag() is empty", p)
+		}
+	}
+}
+
+func TestAlwaysOnPluginsSubsetOfAllPlugins(t *testing.T) {
+	t.Parallel()
+	allPluginsSet := make(map[Plugin]bool, len(AllPlugins()))
+	for _, p := range AllPlugins() {
+		allPluginsSet[p] = true
+	}
+	for p := range alwaysOnPlugins {
+		assert.True(t, allPluginsSet[p], "alwaysOnPlugins contains %q not in AllPlugins()", p)
+	}
+	for p := range cliFlagMap {
+		assert.True(t, allPluginsSet[p], "cliFlagMap contains %q not in AllPlugins()", p)
+	}
+}
+
+func TestSeverityDecisionIsValid(t *testing.T) {
+	t.Parallel()
+	assert.True(t, SeverityError.IsValid())
+	assert.True(t, SeverityWarn.IsValid())
+	assert.True(t, SeverityOff.IsValid())
+	assert.False(t, SeverityDecision("invalid").IsValid())
+}
