@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
@@ -22,6 +23,7 @@ type Change struct {
 type ChangeKind string
 
 const (
+	// ChangeKind values for config diff change types.
 	KindAdded     ChangeKind = "added"     // rule/category was not present before
 	KindRemoved   ChangeKind = "removed"   // rule/category was present before but not after
 	KindChanged   ChangeKind = "changed"   // rule/category value changed
@@ -41,7 +43,7 @@ func NewDiffer(before, after *config.OxlintConfig) *Differ {
 
 // Diff computes all changes between before and after configs.
 func (d *Differ) Diff() []Change {
-	var changes []Change
+	changes := make([]Change, 0, 8)
 
 	changes = append(changes, d.compareSlices(d.before.Plugins, d.after.Plugins, "plugin:")...)
 	changes = append(changes, d.compareMaps(d.before.Categories, d.after.Categories, "category:")...)
@@ -162,11 +164,11 @@ func (d *Differ) compareSlices(before, after []string, prefix string) []Change {
 func (d *Differ) compareBoolMaps(before, after map[string]bool, prefix string) []Change {
 	bStr := make(map[string]string, len(before))
 	for k, v := range before {
-		bStr[k] = fmt.Sprintf("%t", v)
+		bStr[k] = strconv.FormatBool(v)
 	}
 	aStr := make(map[string]string, len(after))
 	for k, v := range after {
-		aStr[k] = fmt.Sprintf("%t", v)
+		aStr[k] = strconv.FormatBool(v)
 	}
 	return d.compareMaps(bStr, aStr, prefix)
 }

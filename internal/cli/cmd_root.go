@@ -36,7 +36,7 @@ func NewRootCommand() *cobra.Command {
 It uses the go-finding library to run oxlint, collect findings, and
 auto-configure every available rule with the best severity setting.`,
 		Version: version,
-		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 			return setupLogging(verbose, quiet, os.Stderr)
 		},
 	}

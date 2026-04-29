@@ -98,7 +98,7 @@ func reportJSON(w io.Writer, decisions []profile.RuleDecision) error {
 	if err != nil {
 		return fmt.Errorf("marshal report: %w", err)
 	}
-	fmt.Fprintln(w, string(data))
+	_, _ = fmt.Fprintln(w, string(data))
 
 	return nil
 }

@@ -147,7 +147,7 @@ func printSARIF(w io.Writer, report *finding.Report) error {
 	if err != nil {
 		return fmt.Errorf("generate SARIF: %w", err)
 	}
-	fmt.Fprintln(w, string(sarif))
+	_, _ = fmt.Fprintln(w, string(sarif))
 
 	return nil
 }

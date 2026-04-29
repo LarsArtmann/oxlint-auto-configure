@@ -78,6 +78,27 @@ linters:
         - wastedassign
         - wrapcheck
         - zerologlint
+    exclusions:
+        rules:
+            - linters: [exhaustruct]
+              text: "cobra.Command is missing"
+            - linters: [exhaustruct]
+              text: "slog[.].*is missing"
+            - linters: [exhaustruct]
+              text: "exec[.]ExitError is missing"
+            - linters: [exhaustruct]
+              text: "finding[.]Position is missing"
+            - linters: [exhaustruct]
+              text: "config[.]OxlintConfig is missing"
+            - linters: [exhaustruct]
+              text: "rule[.]Rule is missing"
+            - linters: [exhaustruct]
+              text: "oxlint[.]"
+            - linters: [exhaustruct]
+              text: "format[.]FindingView is missing"
+            - linters: [gosec]
+              text: "G204"
+              source: "exec.Command"
 formatters:
     enable:
         - gci
@@ -87,17 +108,3 @@ formatters:
 issues:
     max-issues-per-linter: 50
     max-same-issues: 10
-    exclude-rules:
-        - linters: [exhaustruct]
-          text: "cobra.Command is missing fields"
-        - linters: [exhaustruct]
-          text: "slog.HandlerOptions is missing field AddSource"
-        - linters: [exhaustruct]
-          text: "slog.Attr is missing fields"
-        - linters: [exhaustruct]
-          text: "exec.ExitError is missing fields"
-        - linters: [exhaustruct]
-          text: "finding.Position is missing field Offset"
-        - linters: [gosec]
-          text: "G204"
-          source: "exec.Command"

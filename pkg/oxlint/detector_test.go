@@ -201,14 +201,14 @@ func TestDetectEmptyOutput(t *testing.T) {
 	t.Parallel()
 	
 	_, err := parseOutput([]byte{})
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestDetectEmptyJSON(t *testing.T) {
 	t.Parallel()
 	
 	findings, err := parseOutput([]byte(`{"diagnostics":null}`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, findings)
 }
 

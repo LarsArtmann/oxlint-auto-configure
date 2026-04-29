@@ -40,7 +40,7 @@ func TestConfigureInvalidProfile(t *testing.T) {
 	cmd.SetArgs([]string{"configure", "-p", "invalid", "--root", t.TempDir()})
 
 	err := cmd.Execute()
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid profile")
 }
 

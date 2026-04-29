@@ -32,7 +32,7 @@ type SummaryView struct {
 
 // PrintSummary writes a human-readable summary to w.
 func PrintSummary(w io.Writer, sv *SummaryView) error {
-	fmt.Fprintf(w, "findings: total=%d, by_severity=%s, by_category=%s, files_affected=%d, iterations=%d, stable=%t\n",
+	_, _ = fmt.Fprintf(w, "findings: total=%d, by_severity=%s, by_category=%s, files_affected=%d, iterations=%d, stable=%t\n",
 		sv.Total,
 		formatMap(sv.BySeverity),
 		formatMap(sv.ByCategory),
@@ -49,14 +49,14 @@ func PrintFindingsJSON(w io.Writer, findings []FindingView) error {
 	if err != nil {
 		return fmt.Errorf("marshal findings: %w", err)
 	}
-	fmt.Fprintln(w, string(data))
+	_, _ = fmt.Fprintln(w, string(data))
 	return nil
 }
 
 // PrintFindingsTable writes findings as a Markdown table to w.
 func PrintFindingsTable(w io.Writer, findings []FindingView) error {
-	fmt.Fprintln(w, "| Rule | Severity | Category | File:Line | Message |")
-	fmt.Fprintln(w, "|------|----------|----------|-----------|---------|")
+	_, _ = fmt.Fprintln(w, "| Rule | Severity | Category | File:Line | Message |")
+	_, _ = fmt.Fprintln(w, "|------|----------|----------|-----------|---------|")
 
 	sorted := make([]FindingView, len(findings))
 	copy(sorted, findings)
@@ -74,14 +74,14 @@ func PrintFindingsTable(w io.Writer, findings []FindingView) error {
 			msg = msg[:57] + "..."
 		}
 		msg = strings.ReplaceAll(msg, "|", "\\|")
-		fmt.Fprintf(w, "| %s | %s | %s | %s | %s |\n",
+		_, _ = fmt.Fprintf(w, "| %s | %s | %s | %s | %s |\n",
 			f.Rule, f.Severity, f.Category, loc, msg)
 	}
 	return nil
 }
 
-// FormatMap returns a sorted "key=count, ..." string for a map.
-func FormatMap(m map[string]int) string {
+// Map returns a sorted "key=count, ..." string for a map.
+func Map(m map[string]int) string {
 	return formatMap(m)
 }
 

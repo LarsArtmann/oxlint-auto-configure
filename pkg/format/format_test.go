@@ -107,7 +107,7 @@ func TestPrintFindingsTableTruncatesLongMessages(t *testing.T) {
 func TestFormatMap(t *testing.T) {
 	t.Parallel()
 	m := map[string]int{"warn": 5, "error": 3}
-	result := FormatMap(m)
+	result := Map(m)
 	assert.Contains(t, result, "error=3")
 	assert.Contains(t, result, "warn=5")
 }

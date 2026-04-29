@@ -16,6 +16,7 @@ import (
 type ProjectType string
 
 const (
+	// ProjectType values for detected project frameworks.
 	ProjectTypeUnknown ProjectType = "unknown"
 	ProjectTypeReact   ProjectType = "react"
 	ProjectTypeNextJS  ProjectType = "nextjs"
@@ -96,6 +97,8 @@ func (d *Detector) toPluginConfig(types []ProjectType, deps map[string]bool) pro
 			pc[rule.PluginVue] = true
 		case ProjectTypeNode:
 			pc[rule.PluginNode] = true
+		case ProjectTypeUnknown, ProjectTypePlainTS, ProjectTypeLibrary:
+			// no additional plugins
 		}
 	}
 

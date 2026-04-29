@@ -5,6 +5,7 @@ import (
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestProfileString(t *testing.T) {
@@ -161,7 +162,7 @@ func TestEnabledPlugins(t *testing.T) {
 func TestDecideAll(t *testing.T) {
 	t.Parallel()
 	reg, err := rule.LoadRegistry()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{})
 	decisions := cat.DecideAll(reg)

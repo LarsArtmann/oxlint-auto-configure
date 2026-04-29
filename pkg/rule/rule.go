@@ -7,6 +7,7 @@ import "slices"
 type Category string
 
 const (
+	// Category values for oxlint rule categories.
 	CategoryCorrectness Category = "correctness"
 	CategorySuspicious  Category = "suspicious"
 	CategoryPedantic    Category = "pedantic"
@@ -46,6 +47,7 @@ func (c Category) String() string { return string(c) }
 type Plugin string
 
 const (
+	// Plugin values for oxlint plugin sources.
 	PluginESLint     Plugin = "eslint"
 	PluginImport     Plugin = "import"
 	PluginJest       Plugin = "jest"
@@ -91,6 +93,24 @@ func (p Plugin) CLIFlag() string {
 		return "--jsx-a11y-plugin"
 	case PluginReactPerf:
 		return "--react-perf-plugin"
+	case PluginImport:
+		return "--import-plugin"
+	case PluginJest:
+		return "--jest-plugin"
+	case PluginJSDoc:
+		return "--jsdoc-plugin"
+	case PluginNextJS:
+		return "--nextjs-plugin"
+	case PluginNode:
+		return "--node-plugin"
+	case PluginPromise:
+		return "--promise-plugin"
+	case PluginReact:
+		return "--react-plugin"
+	case PluginVitest:
+		return "--vitest-plugin"
+	case PluginVue:
+		return "--vue-plugin"
 	default:
 		return "--" + string(p) + "-plugin"
 	}
@@ -105,6 +125,7 @@ func (p Plugin) NeedsFlag() bool {
 type FixCapability string
 
 const (
+	// FixCapability values for rule auto-fix types.
 	FixNone       FixCapability = "none"
 	FixSafe       FixCapability = "safe"
 	FixSuggestion FixCapability = "suggestion"
@@ -145,6 +166,7 @@ func (r Rule) IsSafeFixable() bool {
 type SeverityDecision string
 
 const (
+	// SeverityDecision values for rule severity.
 	SeverityError SeverityDecision = "error"
 	SeverityWarn  SeverityDecision = "warn"
 	SeverityOff   SeverityDecision = "off"

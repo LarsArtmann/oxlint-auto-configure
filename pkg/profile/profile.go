@@ -156,6 +156,9 @@ func (c *Categorizer) decideStrict(r rule.Rule) rule.SeverityDecision {
 	switch r.Category {
 	case rule.CategoryCorrectness, rule.CategorySuspicious:
 		return rule.SeverityError
+	case rule.CategoryPedantic, rule.CategoryPerf, rule.CategoryStyle,
+		rule.CategoryRestriction, rule.CategoryNursery:
+		return rule.SeverityWarn
 	default:
 		return rule.SeverityWarn
 	}
@@ -216,6 +219,9 @@ func (c *Categorizer) decideCategoryStrict(cat rule.Category) (rule.SeverityDeci
 		return rule.SeverityError, true
 	case rule.CategoryNursery:
 		return rule.SeverityOff, true
+	case rule.CategoryPedantic, rule.CategoryPerf, rule.CategoryStyle,
+		rule.CategoryRestriction:
+		return rule.SeverityWarn, true
 	default:
 		return rule.SeverityWarn, true
 	}
