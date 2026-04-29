@@ -83,42 +83,44 @@ func (p Plugin) IsValid() bool {
 // String returns the string representation.
 func (p Plugin) String() string { return string(p) }
 
-// CLIFlag returns the oxlint CLI flag to enable this plugin (e.g., "--react-plugin").
-// Returns empty string for always-on plugins (eslint, unicorn, typescript, oxc).
-func (p Plugin) CLIFlag() string {
-	switch p {
-	case PluginESLint, PluginUnicorn, PluginTypeScript, PluginOXC:
-		return ""
-	case PluginJSXA11y:
-		return "--jsx-a11y-plugin"
-	case PluginReactPerf:
-		return "--react-perf-plugin"
-	case PluginImport:
-		return "--import-plugin"
-	case PluginJest:
-		return "--jest-plugin"
-	case PluginJSDoc:
-		return "--jsdoc-plugin"
-	case PluginNextJS:
-		return "--nextjs-plugin"
-	case PluginNode:
-		return "--node-plugin"
-	case PluginPromise:
-		return "--promise-plugin"
-	case PluginReact:
-		return "--react-plugin"
-	case PluginVitest:
-		return "--vitest-plugin"
-	case PluginVue:
-		return "--vue-plugin"
-	default:
-		return "--" + string(p) + "-plugin"
-	}
+// alwaysOnPlugins are enabled by oxlint without any CLI flag.
+var alwaysOnPlugins = map[Plugin]bool{ //nolint:gochecknoglobals // immutable lookup table
+	PluginESLint:     true,
+	PluginUnicorn:    true,
+	PluginTypeScript: true,
+	PluginOXC:        true,
+}
+
+// cliFlagMap maps plugins to their oxlint CLI flag.
+var cliFlagMap = map[Plugin]string{ //nolint:gochecknoglobals // immutable lookup table
+	PluginJSXA11y:   "--jsx-a11y-plugin",
+	PluginReactPerf: "--react-perf-plugin",
+	PluginImport:    "--import-plugin",
+	PluginJest:      "--jest-plugin",
+	PluginJSDoc:     "--jsdoc-plugin",
+	PluginNextJS:    "--nextjs-plugin",
+	PluginNode:      "--node-plugin",
+	PluginPromise:   "--promise-plugin",
+	PluginReact:     "--react-plugin",
+	PluginVitest:    "--vitest-plugin",
+	PluginVue:       "--vue-plugin",
 }
 
 // NeedsFlag returns true if this plugin requires an explicit CLI flag to enable.
 func (p Plugin) NeedsFlag() bool {
-	return p.CLIFlag() != ""
+	return !alwaysOnPlugins[p]
+}
+
+// CLIFlag returns the oxlint CLI flag to enable this plugin (e.g., "--react-plugin").
+// Returns empty string for always-on plugins (eslint, unicorn, typescript, oxc).
+func (p Plugin) CLIFlag() string {
+	if flag, ok := cliFlagMap[p]; ok {
+		return flag
+	}
+	if !p.NeedsFlag() {
+		return ""
+	}
+	return "--" + string(p) + "-plugin"
 }
 
 // FixCapability indicates what kind of auto-fix a rule supports.
