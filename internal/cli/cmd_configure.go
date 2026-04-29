@@ -77,8 +77,8 @@ type ConfigureOptions struct {
 // Configure generates an oxlint configuration for the project at absRoot.
 func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error {
 	if !opts.Profile.IsValid() {
-		return fmt.Errorf(
-			"invalid profile %q: choose from %s",
+		return fmt.Errorf("%w %q: choose from %s",
+			oxlint.ErrInvalidProfile,
 			opts.Profile,
 			strings.Join(profileNames(), ", "),
 		)

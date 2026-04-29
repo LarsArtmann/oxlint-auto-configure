@@ -15,7 +15,7 @@ func CheckVersion(ctx context.Context) (string, error) {
 	cmd := exec.CommandContext(ctx, "oxlint", "--version")
 	output, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("oxlint not found: %w", err)
+		return "", fmt.Errorf("%w: %s", ErrNotFound, err)
 	}
 
 	version := strings.TrimSpace(string(output))
@@ -31,7 +31,7 @@ func CheckVersion(ctx context.Context) (string, error) {
 func CheckBinary(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "oxlint", "--version")
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("oxlint not found in PATH: %w", err)
+		return fmt.Errorf("%w in PATH: %w", ErrNotFound, err)
 	}
 	return nil
 }
