@@ -2,8 +2,6 @@ package oxlint
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -30,13 +28,8 @@ func RunFix(ctx context.Context, rootDir, configPath string) (*FixResult, error)
 	result := &FixResult{Output: strings.TrimSpace(string(output))}
 
 	if err != nil {
-		exitErr := &exec.ExitError{}
-		if errors.As(err, &exitErr) {
-			if len(exitErr.Stderr) > 0 {
-				return nil, fmt.Errorf("oxlint --fix: %s", string(exitErr.Stderr))
-			}
-		} else {
-			return nil, fmt.Errorf("run oxlint --fix: %w", err)
+		if exitErr := handleExitError(err, "oxlint --fix"); exitErr != nil {
+			return nil, exitErr
 		}
 	}
 

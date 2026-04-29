@@ -74,13 +74,8 @@ func (d *Detector) Detect(ctx context.Context) ([]finding.Finding, error) {
 
 	output, err := d.runner.Run(ctx, "oxlint", args, d.rootDir)
 	if err != nil {
-		exitErr := &exec.ExitError{}
-		if errors.As(err, &exitErr) {
-			if len(exitErr.Stderr) > 0 {
-				return nil, fmt.Errorf("oxlint: %s", string(exitErr.Stderr))
-			}
-		} else {
-			return nil, fmt.Errorf("run oxlint: %w", err)
+		if exitErr := handleExitError(err, "oxlint"); exitErr != nil {
+			return nil, exitErr
 		}
 	}
 
@@ -223,4 +218,18 @@ func mapCategory(pluginName string) finding.Category {
 		return cat
 	}
 	return finding.CategoryCorrectness
+}
+
+// handleExitError returns a meaningful error for exec.ExitError, or nil
+// if the exit code is just oxlint reporting findings (exit code 1).
+// Returns a non-nil error for unexpected failures.
+func handleExitError(err error, cmd string) error {
+	exitErr := &exec.ExitError{}
+	if errors.As(err, &exitErr) {
+		if len(exitErr.Stderr) > 0 {
+			return fmt.Errorf("%s: %s", cmd, string(exitErr.Stderr))
+		}
+		return nil
+	}
+	return fmt.Errorf("run %s: %w", cmd, err)
 }
