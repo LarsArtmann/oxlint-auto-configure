@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"fmt"
+	"errors"
 	"io"
 	"log/slog"
 	"os"
@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var logSetupMu sync.Mutex
+var logSetupMu sync.Mutex //nolint:gochecknoglobals // protects concurrent slog setup
 
 const (
 	defaultConfigPath = ".oxlintrc.json"
@@ -57,7 +57,7 @@ func setupLogging(verbose, quiet bool, w io.Writer) error {
 	defer logSetupMu.Unlock()
 
 	if verbose && quiet {
-		return fmt.Errorf("cannot use both --verbose and --quiet")
+		return errors.New("cannot use both --verbose and --quiet")
 	}
 
 	level := slog.LevelInfo

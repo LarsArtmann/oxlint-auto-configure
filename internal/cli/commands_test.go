@@ -1,7 +1,10 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"testing"
@@ -161,4 +164,127 @@ func TestReportJSON(t *testing.T) {
 	data, err := json.Marshal(entries)
 	require.NoError(t, err)
 	assert.Greater(t, len(data), 1000)
+}
+
+func TestReportJSONDirect(t *testing.T) {
+	t.Parallel()
+	reg, err := rule.LoadRegistry()
+	require.NoError(t, err)
+
+	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	decisions := cat.DecideAll(reg)
+
+	var buf bytes.Buffer
+	err = reportJSON(&buf, decisions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, buf.String())
+
+	var entries []map[string]interface{}
+	err = json.Unmarshal(buf.Bytes(), &entries)
+	require.NoError(t, err)
+	assert.Len(t, entries, 716)
+}
+
+func TestShowDiffExisting(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, ".oxlintrc.json")
+
+	reg, err := rule.LoadRegistry()
+	require.NoError(t, err)
+	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	gen := config.NewGenerator(cat, reg)
+	cfg := gen.Generate()
+	data, err := cfg.ToJSON()
+	require.NoError(t, err)
+	err = os.WriteFile(configPath, append(data, '\n'), 0o600)
+	require.NoError(t, err)
+
+	diff := showDiffIfExisting(configPath, cfg)
+	assert.NotEmpty(t, diff, "should produce diff summary when existing config matches (no changes)")
+}
+
+func TestShowDiffMalformed(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, ".oxlintrc.json")
+	err := os.WriteFile(configPath, []byte("not json"), 0o600)
+	require.NoError(t, err)
+
+	reg, err := rule.LoadRegistry()
+	require.NoError(t, err)
+	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	gen := config.NewGenerator(cat, reg)
+	cfg := gen.Generate()
+
+	diff := showDiffIfExisting(configPath, cfg)
+	assert.Empty(t, diff, "malformed config should return empty diff")
+}
+
+func TestShowDiffMissing(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, ".oxlintrc.json")
+
+	reg, err := rule.LoadRegistry()
+	require.NoError(t, err)
+	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	gen := config.NewGenerator(cat, reg)
+	cfg := gen.Generate()
+
+	diff := showDiffIfExisting(configPath, cfg)
+	assert.Empty(t, diff, "missing file should return empty diff")
+}
+
+func TestValidateInvalidSeverity(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, ".oxlintrc.json")
+
+	badConfig := `{"rules":{"no-debugger":"badsev"}}`
+	err := os.WriteFile(configPath, []byte(badConfig), 0o600)
+	require.NoError(t, err)
+
+	err = Validate(configPath)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid severities")
+}
+
+func TestSetupLoggingVerboseQuietConflict(t *testing.T) {
+	t.Parallel()
+	err := setupLogging(true, true, io.Discard)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "cannot use both")
+}
+
+func TestSetupLoggingVerbose(t *testing.T) {
+	t.Parallel()
+	err := setupLogging(true, false, io.Discard)
+	require.NoError(t, err)
+}
+
+func TestSetupLoggingQuiet(t *testing.T) {
+	t.Parallel()
+	err := setupLogging(false, true, io.Discard)
+	require.NoError(t, err)
+}
+
+func TestCompactLogAttrStripsTime(t *testing.T) {
+	t.Parallel()
+	attr := compactLogAttr(nil, slog.Attr{Key: slog.TimeKey})
+	assert.Equal(t, slog.Attr{}, attr)
+}
+
+func TestCompactLogAttrPreservesOther(t *testing.T) {
+	t.Parallel()
+	original := slog.Attr{Key: slog.MessageKey, Value: slog.StringValue("test")}
+	attr := compactLogAttr(nil, original)
+	assert.Equal(t, original, attr)
+}
+
+func TestProfileNames(t *testing.T) {
+	t.Parallel()
+	names := profileNames()
+	assert.Len(t, names, 4)
+	assert.Contains(t, names, "recommended")
 }

@@ -3,7 +3,9 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
+	"os"
 	"path/filepath"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
@@ -22,7 +24,7 @@ func newReportCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "report",
 		Short: "Generate a report of all rules and their recommended severity",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			if rootDir == "" {
 				rootDir = "."
 			}
@@ -53,7 +55,7 @@ func newReportCommand() *cobra.Command {
 
 			switch format {
 			case "json":
-				return reportJSON(decisions)
+				return reportJSON(os.Stdout, decisions)
 			case "summary":
 				return reportSummary(decisions, reg)
 			default:
@@ -70,7 +72,7 @@ func newReportCommand() *cobra.Command {
 	return cmd
 }
 
-func reportJSON(decisions []profile.RuleDecision) error {
+func reportJSON(w io.Writer, decisions []profile.RuleDecision) error {
 	type entry struct {
 		Rule     string `json:"rule"`
 		Plugin   string `json:"plugin"`
@@ -94,9 +96,10 @@ func reportJSON(decisions []profile.RuleDecision) error {
 
 	data, err := json.MarshalIndent(entries, "", "  ")
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal report: %w", err)
 	}
-	fmt.Println(string(data))
+	fmt.Fprintln(w, string(data))
+
 	return nil
 }
 

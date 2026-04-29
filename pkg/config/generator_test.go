@@ -174,3 +174,17 @@ func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
 		}
 	}
 }
+
+func TestFromJSONInvalid(t *testing.T) {
+	t.Parallel()
+	_, err := FromJSON([]byte("not json"))
+	require.Error(t, err)
+}
+
+func TestFromJSONEmptyObject(t *testing.T) {
+	t.Parallel()
+	cfg, err := FromJSON([]byte("{}"))
+	require.NoError(t, err)
+	assert.Empty(t, cfg.Categories)
+	assert.Empty(t, cfg.Rules)
+}

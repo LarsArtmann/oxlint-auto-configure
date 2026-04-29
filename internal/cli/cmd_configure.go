@@ -36,7 +36,7 @@ Profiles:
   recommended       Correctness+suspicious+TS at error, rest at warn (default)
   strict            Correctness+suspicious at error, everything else at warn
   minimal           Only correctness at error, rest uses oxlint defaults`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if rootDir == "" {
 				rootDir = "."
 			}
@@ -132,7 +132,10 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 		return writeDryRun(cfg, targetPath)
 	}
 
-	showDiffIfExisting(targetPath, cfg)
+	showDiff := showDiffIfExisting(targetPath, cfg)
+	if showDiff != "" {
+		slog.Info(showDiff)
+	}
 
 	data, err := cfg.ToJSON()
 	if err != nil {
@@ -161,19 +164,20 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 }
 
 // showDiffIfExisting compares the existing config with the new one and logs the diff.
-func showDiffIfExisting(targetPath string, cfg *config.OxlintConfig) {
+func showDiffIfExisting(targetPath string, cfg *config.OxlintConfig) string {
 	existingData, err := os.ReadFile(targetPath)
 	if err != nil {
-		return
+		return ""
 	}
 	existing, err := config.FromJSON(existingData)
 	if err != nil {
 		slog.Warn("existing config is malformed, skipping diff", "error", err)
-		return
+
+		return ""
 	}
 	d := diff.NewDiffer(existing, cfg)
-	slog.Info("changes\n" + d.FormatDiff())
-	slog.Info(d.Summary())
+
+	return d.Summary() + "\n" + d.FormatDiff()
 }
 
 func writeDryRun(cfg *config.OxlintConfig, targetPath string) error {

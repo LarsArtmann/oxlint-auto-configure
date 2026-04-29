@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -323,4 +324,45 @@ func TestWithArgs(t *testing.T) {
 	t.Parallel()
 	d := NewDetector(".", WithArgs("--verbose"))
 	assert.Contains(t, d.args, "--verbose")
+}
+
+func TestMapSeverityAllBranches(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		input    string
+		expected finding.Severity
+	}{
+		{"error", finding.SeverityError},
+		{"warning", finding.SeverityWarning},
+		{"warn", finding.SeverityWarning},
+		{"info", finding.SeverityInfo},
+		{"advice", finding.SeverityInfo},
+		{"unknown", finding.SeverityWarning},
+		{"", finding.SeverityWarning},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tt.expected, mapSeverity(tt.input))
+		})
+	}
+}
+
+func TestDetectNonExitError(t *testing.T) {
+	t.Parallel()
+	d := NewDetector(".", WithRunner(mockRunner{err: assert.AnError}))
+	findings, err := d.Detect(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "run oxlint")
+	assert.Nil(t, findings)
+}
+
+func TestDetectExitErrorWithStderr(t *testing.T) {
+	t.Parallel()
+	exitErr := &exec.ExitError{Stderr: []byte("something broke")}
+	d := NewDetector(".", WithRunner(mockRunner{err: exitErr}))
+	findings, err := d.Detect(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "something broke")
+	assert.Nil(t, findings)
 }

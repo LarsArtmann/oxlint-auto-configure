@@ -175,3 +175,36 @@ func TestAllProfiles(t *testing.T) {
 	profiles := AllProfiles()
 	assert.Len(t, profiles, 4)
 }
+
+func TestDecideCategoryUnknown(t *testing.T) {
+	t.Parallel()
+	unknownCat := rule.Category("unknown_category")
+
+	t.Run("minimal", func(t *testing.T) {
+		t.Parallel()
+		c := NewCategorizer(ProfileMinimal, nil)
+		_, hasCat := c.DecideCategory(unknownCat)
+		assert.False(t, hasCat, "unknown category should be omitted for minimal")
+	})
+
+	t.Run("maximal-typesafe", func(t *testing.T) {
+		t.Parallel()
+		c := NewCategorizer(ProfileMaximalTypesafe, nil)
+		_, hasCat := c.DecideCategory(unknownCat)
+		assert.True(t, hasCat, "unknown category should be included for maximal-typesafe (default severity)")
+	})
+
+	t.Run("recommended", func(t *testing.T) {
+		t.Parallel()
+		c := NewCategorizer(ProfileRecommended, nil)
+		_, hasCat := c.DecideCategory(unknownCat)
+		assert.True(t, hasCat, "unknown category gets default severity for recommended")
+	})
+
+	t.Run("strict", func(t *testing.T) {
+		t.Parallel()
+		c := NewCategorizer(ProfileStrict, nil)
+		_, hasCat := c.DecideCategory(unknownCat)
+		assert.True(t, hasCat, "unknown category gets default severity for strict")
+	})
+}
