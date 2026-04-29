@@ -2,6 +2,7 @@
 package diff
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -42,8 +43,11 @@ func NewDiffer(before, after *config.OxlintConfig) *Differ {
 func (d *Differ) Diff() []Change {
 	var changes []Change
 
+	changes = append(changes, d.compareSlices(d.before.Plugins, d.after.Plugins, "plugin:")...)
 	changes = append(changes, d.compareMaps(d.before.Categories, d.after.Categories, "category:")...)
 	changes = append(changes, d.compareMaps(d.before.Rules, d.after.Rules, "")...)
+	changes = append(changes, d.compareBoolMaps(d.before.Env, d.after.Env, "env:")...)
+	changes = append(changes, d.compareAnyMaps(d.before.Settings, d.after.Settings, "settings:")...)
 
 	return changes
 }
@@ -117,6 +121,71 @@ func (d *Differ) FormatDiff() string {
 	}
 
 	return b.String()
+}
+
+// compareSlices compares two string slices for added/removed items.
+func (d *Differ) compareSlices(before, after []string, prefix string) []Change {
+	beforeSet := make(map[string]bool, len(before))
+	for _, s := range before {
+		beforeSet[s] = true
+	}
+	afterSet := make(map[string]bool, len(after))
+	for _, s := range after {
+		afterSet[s] = true
+	}
+
+	var changes []Change
+	seen := make(map[string]bool)
+
+	for _, s := range before {
+		if seen[s] {
+			continue
+		}
+		seen[s] = true
+		if !afterSet[s] {
+			changes = append(changes, Change{Rule: prefix + s, OldValue: s, NewValue: "", Kind: KindRemoved})
+		}
+	}
+	for _, s := range after {
+		if seen[s] {
+			continue
+		}
+		seen[s] = true
+		if !beforeSet[s] {
+			changes = append(changes, Change{Rule: prefix + s, OldValue: "", NewValue: s, Kind: KindAdded})
+		}
+	}
+	return changes
+}
+
+// compareBoolMaps compares two map[string]bool by converting to string values.
+func (d *Differ) compareBoolMaps(before, after map[string]bool, prefix string) []Change {
+	bStr := make(map[string]string, len(before))
+	for k, v := range before {
+		bStr[k] = fmt.Sprintf("%t", v)
+	}
+	aStr := make(map[string]string, len(after))
+	for k, v := range after {
+		aStr[k] = fmt.Sprintf("%t", v)
+	}
+	return d.compareMaps(bStr, aStr, prefix)
+}
+
+// compareAnyMaps compares two map[string]any by JSON-serializing values for comparison.
+func (d *Differ) compareAnyMaps(before, after map[string]any, prefix string) []Change {
+	stringify := func(m map[string]any) map[string]string {
+		result := make(map[string]string, len(m))
+		for k, v := range m {
+			data, err := json.Marshal(v)
+			if err != nil {
+				result[k] = fmt.Sprintf("%v", v)
+				continue
+			}
+			result[k] = string(data)
+		}
+		return result
+	}
+	return d.compareMaps(stringify(before), stringify(after), prefix)
 }
 
 func (d *Differ) collectAllKeys(before, after map[string]string) []string {

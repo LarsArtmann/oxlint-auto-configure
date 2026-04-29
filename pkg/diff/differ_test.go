@@ -64,6 +64,71 @@ func TestDiffSummary(t *testing.T) {
 	assert.Contains(t, summary, "Changed: 1")
 }
 
+func TestDiffPluginsAdded(t *testing.T) {
+	t.Parallel()
+	before := &config.OxlintConfig{Plugins: []string{"typescript"}}
+	after := &config.OxlintConfig{Plugins: []string{"typescript", "react", "vue"}}
+
+	d := NewDiffer(before, after)
+	changes := d.Diff()
+	addedPlugins := filterChanges(changes, "plugin:")
+	assert.Len(t, addedPlugins, 2)
+	for _, c := range addedPlugins {
+		assert.Equal(t, KindAdded, c.Kind)
+	}
+}
+
+func TestDiffPluginsRemoved(t *testing.T) {
+	t.Parallel()
+	before := &config.OxlintConfig{Plugins: []string{"typescript", "react", "vue"}}
+	after := &config.OxlintConfig{Plugins: []string{"typescript"}}
+
+	d := NewDiffer(before, after)
+	changes := d.Diff()
+	removedPlugins := filterChanges(changes, "plugin:")
+	assert.Len(t, removedPlugins, 2)
+	for _, c := range removedPlugins {
+		assert.Equal(t, KindRemoved, c.Kind)
+	}
+}
+
+func TestDiffEnvChanged(t *testing.T) {
+	t.Parallel()
+	before := &config.OxlintConfig{Env: map[string]bool{"builtin": true, "browser": false}}
+	after := &config.OxlintConfig{Env: map[string]bool{"builtin": true, "node": true}}
+
+	d := NewDiffer(before, after)
+	changes := d.Diff()
+	envChanges := filterChanges(changes, "env:")
+	assert.Len(t, envChanges, 2) // browser removed, node added
+}
+
+func TestDiffSettingsChanged(t *testing.T) {
+	t.Parallel()
+	before := &config.OxlintConfig{Settings: map[string]any{
+		"react": map[string]any{"version": "detect"},
+	}}
+	after := &config.OxlintConfig{Settings: map[string]any{
+		"react": map[string]any{"version": "18.0"},
+		"jsx-a11y": map[string]any{"components": map[string]any{}},
+	}}
+
+	d := NewDiffer(before, after)
+	changes := d.Diff()
+	settingsChanges := filterChanges(changes, "settings:")
+	assert.Len(t, settingsChanges, 2) // react changed, jsx-a11y added
+}
+
+func filterChanges(changes []Change, prefix string) []Change {
+	var filtered []Change
+	for _, c := range changes {
+		if len(c.Rule) >= len(prefix) && c.Rule[:len(prefix)] == prefix {
+			filtered = append(filtered, c)
+		}
+	}
+	return filtered
+}
+
 func TestDiffFormatDiff(t *testing.T) {
 	t.Parallel()
 	before := &config.OxlintConfig{Rules: map[string]string{"a": "warn"}}
