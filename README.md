@@ -20,9 +20,9 @@ go install github.com/larsartmann/oxlint-auto-configure/cmd/oxlint-auto-configur
 Requires Go 1.26+ and [oxlint](https://oxc.rs/docs/guide/usage/linter.html) in PATH.
 
 > **Note:** This project depends on [go-finding](https://github.com/larsartmann/go-finding) (private repo).
-> For development, set `GOPRIVATE=github.com/larsartmann/go-finding`:
+> Set `GOPRIVATE` so Go can fetch it:
 > ```bash
-> export GOPRIVATE=github.com/larsartmann/go-finding
+> export GOPRIVATE=github.com/LarsArtmann/*
 > go install github.com/larsartmann/oxlint-auto-configure/cmd/oxlint-auto-configure@latest
 > ```
 

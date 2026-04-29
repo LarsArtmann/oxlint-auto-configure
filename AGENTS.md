@@ -20,15 +20,16 @@ Oxlint has 716 rules across 7 categories and 15 plugins. Only 108 are enabled by
 | `pkg/rule/rule.go` | Core types: Rule, Category, Plugin, FixCapability, SeverityDecision |
 | `pkg/rule/registry.go` | Rule registry loaded from embedded JSON (716 rules) |
 | `pkg/rule/rules_data.json` | Embedded oxlint rules data (from `oxlint -f json --rules`) |
-| `pkg/profile/profile.go` | Profile presets, Categorizer engine, PluginConfig |
+| `pkg/profile/profile.go` | Profile presets, Categorizer engine, `DecideCategory()`, PluginConfig |
 | `pkg/config/generator.go` | .oxlintrc.json generator |
 | `pkg/detect/detector.go` | Project type detection from package.json |
-| `pkg/diff/differ.go` | Config before/after comparison |
-| `pkg/oxlint/detector.go` | go-finding Detector for oxlint |
+| `pkg/diff/differ.go` | Config before/after comparison (all fields: plugins, categories, rules, env, settings) |
+| `pkg/format/format.go` | Rendering: FindingView, SummaryView, PrintSummary/PrintFindingsJSON/PrintFindingsTable |
+| `pkg/oxlint/detector.go` | go-finding Detector for oxlint; `Runner` interface seam |
 | `pkg/oxlint/version.go` | oxlint version check and binary verification |
 | `pkg/oxlint/fix.go` | oxlint --fix wrapper |
 | `internal/cli/cmd_root.go` | Root command, shared constants (defaultConfigPath, defaultProfile, version) |
-| `internal/cli/cmd_configure.go` | configure command + helpers (writeDryRun, profileNames) |
+| `internal/cli/cmd_configure.go` | configure command + extracted `Configure(ctx, absRoot, opts)` |
 | `internal/cli/cmd_analyze.go` | analyze command with go-finding pipeline integration |
 | `internal/cli/cmd_validate.go` | validate command |
 | `internal/cli/cmd_report.go` | report command + format helpers (JSON, table, summary) |
@@ -45,18 +46,20 @@ just check       # All checks (fmt + vet + lint + test)
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` — Unified static analysis model (local replace)
+- `github.com/larsartmann/go-finding` v0.2.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`)
 - `github.com/spf13/cobra` — CLI framework
 - `github.com/stretchr/testify` — Test assertions
 
 ### Design Principles
 
 1. **Embedded rules data** — Rules are embedded via `go:embed` for zero-dependency startup
-2. **Profile-driven** — All severity decisions flow from the chosen profile
+2. **Profile-driven** — All severity decisions flow from `DecideCategory()`; `Description()` derived from same source
 3. **Project-aware** — Auto-detects frameworks to enable relevant plugins
-4. **go-finding integration** — Uses Detector interface for oxlint integration
+4. **go-finding integration** — Uses Detector interface for oxlint integration; `Runner` seam for testability
 5. **Config round-trip** — Generated configs can be parsed back and compared
 6. **Self-describing types** — Plugin has `CLIFlag()`/`NeedsFlag()`; Registry has generic `Filter()`
+7. **Decoupled rendering** — `pkg/format` accepts plain view structs, not go-finding types
+8. **Testable commands** — `Configure()` extracted from cobra closure; independently callable
 
 ### Profiles
 
@@ -79,7 +82,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 
 ### Important Gotchas
 
-- **Local replace** for go-finding — `go.mod` has `replace` directive pointing to `/home/lars/projects/go-finding`
+- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v0.2.0+ from GitHub (no local replace)
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
 - **Version injected at build** — `internal/cli.version` via ldflags (default: "dev")
@@ -90,6 +93,10 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **PluginConfig** — `map[rule.Plugin]bool` (not a struct with bool fields)
 - **Self-describing Plugin** — `CLIFlag()` and `NeedsFlag()` methods on Plugin type
 - **Version-pinned rules** — `rules_version.txt` embedded; warns on mismatch
+- **DecideCategory** — Returns `(SeverityDecision, bool)`; bool controls whether category appears in config (false = omit)
+- **Differ completeness** — Compares all fields: Plugins, Categories, Rules, Env, Settings
+- **Runner seam** — `pkg/oxlint.Runner` interface; `realRunner` (production), `mockRunner` (tests)
+- **Configure extraction** — `Configure(ctx, absRoot, opts)` callable without cobra; malformed existing configs now log warnings
 
 ---
 

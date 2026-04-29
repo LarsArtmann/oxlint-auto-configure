@@ -2,10 +2,8 @@ module github.com/larsartmann/oxlint-auto-configure
 
 go 1.26.2
 
-replace github.com/larsartmann/go-finding => /home/lars/projects/go-finding
-
 require (
-	github.com/larsartmann/go-finding v0.0.0-00010101000000-000000000000
+	github.com/larsartmann/go-finding v0.2.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 )
