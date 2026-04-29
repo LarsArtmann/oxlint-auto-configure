@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	finding "github.com/larsartmann/go-finding"
+	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 )
 
 // Runner executes an oxlint command and returns its stdout.
@@ -202,25 +203,24 @@ func mapSeverity(s string) finding.Severity {
 	}
 }
 
-func mapCategory(plugin string) finding.Category {
-	switch plugin {
-	case "typescript":
-		return finding.CategoryTypeSafety
-	case "react", "react_perf":
-		return finding.CategoryCorrectness
-	case "jsx_a11y":
-		return finding.CategorySecurity
-	case "unicorn":
-		return finding.CategoryStyle
-	case "nextjs":
-		return finding.CategoryPerformance
-	case "import":
-		return finding.CategoryStructure
-	case "jest", "vitest":
-		return finding.CategoryTesting
-	case "oxc":
-		return finding.CategoryCorrectness
-	default:
-		return finding.CategoryCorrectness
+// pluginToCategory maps oxlint plugins to go-finding categories.
+var pluginToCategory = map[rule.Plugin]finding.Category{ //nolint:gochecknoglobals // immutable lookup table
+	rule.PluginTypeScript: finding.CategoryTypeSafety,
+	rule.PluginReact:      finding.CategoryCorrectness,
+	rule.PluginReactPerf:  finding.CategoryCorrectness,
+	rule.PluginJSXA11y:    finding.CategorySecurity,
+	rule.PluginUnicorn:    finding.CategoryStyle,
+	rule.PluginNextJS:     finding.CategoryPerformance,
+	rule.PluginImport:     finding.CategoryStructure,
+	rule.PluginJest:       finding.CategoryTesting,
+	rule.PluginVitest:     finding.CategoryTesting,
+	rule.PluginOXC:        finding.CategoryCorrectness,
+	rule.PluginESLint:     finding.CategoryCorrectness,
+}
+
+func mapCategory(pluginName string) finding.Category {
+	if cat, ok := pluginToCategory[rule.Plugin(pluginName)]; ok {
+		return cat
 	}
+	return finding.CategoryCorrectness
 }
