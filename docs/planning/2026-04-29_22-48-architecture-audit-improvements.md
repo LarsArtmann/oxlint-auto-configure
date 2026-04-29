@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-29_22-48  
 **Project:** oxlint-auto-configure  
-**Status:** Pre-Execution Review  
+**Status:** ✅ Complete (M01–M30, M25–M26 intentionally skipped)  
 
 ---
 
@@ -48,7 +48,7 @@
 4. **`samber/lo` is NOT needed** — Go 1.26 has `slices.Contains`, `maps.Keys`, `slices.Sort` etc. natively. Using lo would add a dependency for zero benefit.
 5. **`charmbracelet/fang` could replace manual cobra setup** — provides styled help, version, error handling. But it's experimental (`charm.land/fang/v2` import). **Decision: SKIP** — the current cobra setup works fine and fang is not stable enough.
 6. **`cockroachdb/errors` WOULD add value** — structured error types with error codes. But for this small CLI, sentinel errors + `errors.Is`/`errors.As` with custom types is sufficient without an external dependency.
-7. **`findingsToViews()` adapter should be eliminated** — `format` package should accept `finding.Finding` directly or an interface.
+7. **`findingsToViews()` adapter intentionally kept** — Removing it would make `pkg/format` depend on external `go-finding`. The adapter is proper separation of concerns. Ghost (DocsURL not surfaced) was fixed in M11–M12.
 
 ### 1e. Did We Lie? Did We Remove Something Useful?
 
@@ -178,8 +178,8 @@
 | M22 | Move `checkOxlintVersion`, `genConfig`, `writeConfig`, `runFixIfNeeded` to pkg | T09 | 12min |
 | M23 | Move `Configure()` core logic to `pkg/config/configure.go` | T09 | 12min |
 | M24 | Update `cmd_configure.go` to call `config.Configure()` | T09 | 12min |
-| M25 | Add `Findings()` method to format or accept `[]finding.Finding` directly | T10 | 12min |
-| M26 | Remove `FindingView` type, format package accepts `finding.Finding` | T10 | 12min |
+| M25 | ~~Add `Findings()` method to format or accept `[]finding.Finding` directly~~ **SKIPPED** | T10 | 12min |
+| M26 | ~~Remove `FindingView` type, format package accepts `finding.Finding`~~ **SKIPPED** | T10 | 12min |
 | M27 | Write tests for `summaryFromReport()` | T13 | 10min |
 | M28 | Write tests for `printFormatError()` | T13 | 5min |
 | M29 | Write test for `Profile.Description()` output format | T19 | 10min |
@@ -214,9 +214,7 @@ graph TD
     M21 --> M22[M22: Move helpers to pkg]
     M22 --> M23[M23: Move Configure to pkg]
     M23 --> M24[M24: Update cmd_configure]
-    M24 --> M25[M25: Format accepts finding.Finding]
-    M25 --> M26[M26: Remove FindingView adapter]
-    M26 --> M27[M27: Test summaryFromReport]
+    M24 -->|SKIPPED| M27[M27: Test summaryFromReport]
     M27 --> M28[M28: Test printFormatError]
     M28 --> M29[M29: Test Profile.Description]
     M29 --> M30[M30: Final lint + test verification]
@@ -251,7 +249,11 @@ graph TD
 
 ---
 
-## 7. Customer Value Assessment
+## 7. M25–M26 Skip Rationale
+
+`findingsToViews()` adapter between `finding.Finding` and `format.FindingView` was intentionally kept. Removing it would make `pkg/format` depend on the external `go-finding` library, violating separation of concerns. The adapter is a proper boundary — `format` owns its view model. The "ghost system" concern (DocsURL not surfaced) was already fixed in M11–M12 by populating `DocsURL` in the adapter.
+
+## 8. Customer Value Assessment
 
 Each task contributes to **reliability** (split brain fixes prevent silent bugs), **testability** (moving logic to pkg enables proper testing), and **usability** (exposing DocsURL, TypeAware in output). The highest-value items are the split brain fixes — they prevent the exact class of bugs that are hardest to diagnose (things working until a new plugin/severity is added and one mapping is forgotten).
 
