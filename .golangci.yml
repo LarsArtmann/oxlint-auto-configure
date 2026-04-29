@@ -96,6 +96,10 @@ linters:
               text: "oxlint[.]"
             - linters: [exhaustruct]
               text: "format[.]FindingView is missing"
+            - linters: [exhaustruct]
+              text: "pipeline[.]PipelineResult is missing"
+            - linters: [exhaustruct]
+              text: "finding[.]ToolInfo is missing"
             - linters: [gosec]
               text: "G204"
               source: "exec.Command"

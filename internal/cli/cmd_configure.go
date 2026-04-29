@@ -105,7 +105,7 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 
 	cfg, err := config.GenerateProjectConfig(opts.Profile, reg, pluginConfig, projectTypes)
 	if err != nil {
-		return err
+		return fmt.Errorf("generate config: %w", err)
 	}
 
 	targetPath := resolveConfigPath(opts.ConfigPath, absRoot)

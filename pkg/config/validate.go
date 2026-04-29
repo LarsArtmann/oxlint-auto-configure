@@ -26,7 +26,12 @@ type ValidateResult struct {
 // ValidateConfig checks an OxlintConfig for unknown rules and invalid severities.
 // Returns a ValidateResult with details, or an error if validation fails.
 func ValidateConfig(cfg *OxlintConfig, reg *rule.Registry) (*ValidateResult, error) {
-	result := &ValidateResult{}
+	result := &ValidateResult{
+		UnknownRules:      nil,
+		InvalidSeverities: nil,
+		EnabledCount:      0,
+		DisabledCount:     0,
+	}
 
 	if err := validateRules(cfg, reg, result); err != nil {
 		return nil, err

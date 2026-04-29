@@ -3,7 +3,7 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io"
 	"log/slog"
 	"os"
@@ -304,14 +304,14 @@ func TestPrintFormatErrorNil(t *testing.T) {
 
 func TestPrintFormatErrorWithErr(t *testing.T) {
 	t.Parallel()
-	err := printFormatError(fmt.Errorf("write failed"), "table")
-	assert.Error(t, err)
+	err := printFormatError(errors.New("write failed"), "table")
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "print table")
 }
 
 func TestSummaryFromReport(t *testing.T) {
 	t.Parallel()
-	report := finding.NewReport(finding.ToolInfo{Name: "test"})
+	report := finding.NewReport(finding.ToolInfo{Name: "test", Version: "0.0.0"})
 	f := finding.NewFinding("rule1", "test", "msg", finding.SeverityError,
 		finding.Position{File: "a.ts", Line: 1})
 	f.Category = finding.CategoryCorrectness

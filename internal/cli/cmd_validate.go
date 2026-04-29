@@ -51,7 +51,7 @@ func Validate(configPath string) error {
 
 	result, err := config.ValidateConfig(cfg, reg)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate config: %w", err)
 	}
 
 	slog.Info("config valid",

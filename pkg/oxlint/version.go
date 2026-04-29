@@ -15,7 +15,7 @@ func CheckVersion(ctx context.Context) (string, error) {
 	cmd := exec.CommandContext(ctx, "oxlint", "--version")
 	output, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("%w: %s", ErrNotFound, err)
+		return "", fmt.Errorf("%w: %w", ErrNotFound, err)
 	}
 
 	version := strings.TrimSpace(string(output))
