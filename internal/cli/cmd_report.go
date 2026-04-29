@@ -75,23 +75,27 @@ func newReportCommand() *cobra.Command {
 
 func reportJSON(w io.Writer, decisions []profile.RuleDecision) error {
 	type entry struct {
-		Rule     string `json:"rule"`
-		Plugin   string `json:"plugin"`
-		Category string `json:"category"`
-		Severity string `json:"severity"`
-		Default  bool   `json:"default"`
-		Fixable  bool   `json:"fixable"`
+		Rule      string `json:"rule"`
+		Plugin    string `json:"plugin"`
+		Category  string `json:"category"`
+		Severity  string `json:"severity"`
+		Default   bool   `json:"default"`
+		Fixable   bool   `json:"fixable"`
+		TypeAware bool   `json:"type_aware"`
+		DocsURL   string `json:"docs_url,omitempty"`
 	}
 
 	entries := make([]entry, 0, len(decisions))
 	for _, d := range decisions {
 		entries = append(entries, entry{
-			Rule:     d.Rule.FullName(),
-			Plugin:   string(d.Rule.Plugin),
-			Category: string(d.Rule.Category),
-			Severity: string(d.Severity),
-			Default:  d.Rule.Enabled,
-			Fixable:  d.Rule.IsFixable(),
+			Rule:      d.Rule.FullName(),
+			Plugin:    string(d.Rule.Plugin),
+			Category:  string(d.Rule.Category),
+			Severity:  string(d.Severity),
+			Default:   d.Rule.Enabled,
+			Fixable:   d.Rule.IsFixable(),
+			TypeAware: d.Rule.TypeAware,
+			DocsURL:   d.Rule.DocsURL,
 		})
 	}
 

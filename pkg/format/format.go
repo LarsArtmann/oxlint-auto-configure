@@ -18,6 +18,7 @@ type FindingView struct {
 	File     string `json:"file"`
 	Line     int    `json:"line"`
 	Column   int    `json:"column"`
+	DocsURL  string `json:"docs_url,omitempty"`
 }
 
 // SummaryView is a projection of analysis summary statistics.

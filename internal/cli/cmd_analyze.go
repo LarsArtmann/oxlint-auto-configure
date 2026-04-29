@@ -133,6 +133,7 @@ func findingsToViews(findings []finding.Finding) []format.FindingView {
 			File:     f.Position.File,
 			Line:     f.Position.Line,
 			Column:   f.Position.Column,
+			DocsURL:  f.Metadata["url"],
 		})
 	}
 	return views
