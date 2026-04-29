@@ -3,12 +3,15 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"testing"
 
+	finding "github.com/larsartmann/go-finding"
+	"github.com/larsartmann/go-finding/pipeline"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
@@ -291,4 +294,49 @@ func TestProfileNames(t *testing.T) {
 	names := cliProfileNames()
 	assert.Len(t, names, 4)
 	assert.Contains(t, names, "recommended")
+}
+
+func TestPrintFormatErrorNil(t *testing.T) {
+	t.Parallel()
+	err := printFormatError(nil, "json")
+	assert.NoError(t, err)
+}
+
+func TestPrintFormatErrorWithErr(t *testing.T) {
+	t.Parallel()
+	err := printFormatError(fmt.Errorf("write failed"), "table")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "print table")
+}
+
+func TestSummaryFromReport(t *testing.T) {
+	t.Parallel()
+	report := finding.NewReport(finding.ToolInfo{Name: "test"})
+	f := finding.NewFinding("rule1", "test", "msg", finding.SeverityError,
+		finding.Position{File: "a.ts", Line: 1})
+	f.Category = finding.CategoryCorrectness
+	report.AddFindings([]finding.Finding{f})
+	report.ComputeSummary()
+
+	sv := summaryFromReport(report, &pipeline.PipelineResult{
+		TotalIterations: 2,
+		Stable:          true,
+	})
+	assert.Equal(t, 1, sv.Total)
+	assert.True(t, sv.Stable)
+	assert.Equal(t, 2, sv.Iterations)
+}
+
+func TestFindingsToViews(t *testing.T) {
+	t.Parallel()
+	findings := []finding.Finding{
+		finding.NewFinding("no-debugger", "oxlint", "msg",
+			finding.SeverityWarning,
+			finding.Position{File: "test.ts", Line: 5, Column: 3}),
+	}
+	views := findingsToViews(findings)
+	require.Len(t, views, 1)
+	assert.Equal(t, "no-debugger", views[0].Rule)
+	assert.Equal(t, "test.ts", views[0].File)
+	assert.Equal(t, 5, views[0].Line)
 }
