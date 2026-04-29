@@ -368,3 +368,31 @@ func TestDetectExitErrorWithStderr(t *testing.T) {
 	assert.Contains(t, err.Error(), "something broke")
 	assert.Nil(t, findings)
 }
+
+func TestBuildArgsNoConfig(t *testing.T) {
+	t.Parallel()
+	d := NewDetector("/project")
+	args := d.buildArgs()
+	assert.Equal(t, []string{"-f", "json", "."}, args)
+}
+
+func TestBuildArgsWithConfig(t *testing.T) {
+	t.Parallel()
+	d := NewDetector("/project", WithConfig("/project/.oxlintrc.json"))
+	args := d.buildArgs()
+	assert.Equal(t, []string{"-f", "json", "-c", "/project/.oxlintrc.json", "."}, args)
+}
+
+func TestBuildArgsWithExtraArgs(t *testing.T) {
+	t.Parallel()
+	d := NewDetector("/project", WithArgs("--verbose", "--silent"))
+	args := d.buildArgs()
+	assert.Equal(t, []string{"-f", "json", "--verbose", "--silent", "."}, args)
+}
+
+func TestBuildArgsWithConfigAndExtraArgs(t *testing.T) {
+	t.Parallel()
+	d := NewDetector("/project", WithConfig("/project/.oxlintrc.json"), WithArgs("--verbose"))
+	args := d.buildArgs()
+	assert.Equal(t, []string{"-f", "json", "-c", "/project/.oxlintrc.json", "--verbose", "."}, args)
+}
