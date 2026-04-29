@@ -148,6 +148,49 @@ func TestFormatTypes(t *testing.T) {
 	assert.Equal(t, "unknown", FormatTypes(nil))
 }
 
+func TestDetectPromiseProject(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		pkgJSON string
+	}{
+		{"bluebird", `{"dependencies": {"bluebird": "^3.0.0"}}`},
+		{"es6-promise", `{"dependencies": {"es6-promise": "^4.0.0"}}`},
+		{"q", `{"dependencies": {"q": "^1.0.0"}}`},
+		{"rsvp", `{"dependencies": {"rsvp": "^4.0.0"}}`},
+		{"promise in name", `{"dependencies": {"promise-polyfill": "^1.0.0"}}`},
+		{"core-js", `{"dependencies": {"core-js": "^3.0.0"}}`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			dir := t.TempDir()
+			err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(tt.pkgJSON), 0o644)
+			require.NoError(t, err)
+
+			det := NewDetector(dir)
+			pc, _, err := det.Detect()
+			require.NoError(t, err)
+			assert.True(t, pc[rule.PluginPromise], "expected promise plugin for %s", tt.name)
+		})
+	}
+}
+
+func TestDetectNoFalsePromise(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	pkgJSON := `{"dependencies": {"lodash": "^4.0.0"}}`
+	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
+	require.NoError(t, err)
+
+	det := NewDetector(dir)
+	pc, _, err := det.Detect()
+	require.NoError(t, err)
+	assert.False(t, pc[rule.PluginPromise], "should not detect promise plugin from lodash")
+}
+
 func TestProjectTypeString(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, "react", string(ProjectTypeReact))

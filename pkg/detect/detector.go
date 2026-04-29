@@ -188,7 +188,26 @@ func (d *Detector) hasImportUsage() bool {
 }
 
 func (d *Detector) hasPromiseUsage(deps map[string]bool) bool {
-	return deps["bluebird"]
+	promiseDeps := []string{
+		"bluebird",
+		"es6-promise",
+		"promise",
+		"q",
+		"rsvp",
+		"promise-polyfill",
+		"core-js",
+	}
+	for _, dep := range promiseDeps {
+		if deps[dep] {
+			return true
+		}
+	}
+	for dep := range deps {
+		if strings.Contains(dep, "promise") {
+			return true
+		}
+	}
+	return false
 }
 
 // FormatTypes returns a human-readable string of detected types.
