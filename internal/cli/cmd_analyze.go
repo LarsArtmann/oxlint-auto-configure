@@ -97,8 +97,34 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag string) error {
 
 // renderFindings converts go-finding types to format views and delegates rendering.
 func renderFindings(fmtFlag string, report *finding.Report, result *pipeline.PipelineResult) error {
-	views := make([]format.FindingView, 0, len(report.Findings))
-	for _, f := range report.Findings {
+	views := findingsToViews(report.Findings)
+	sv := summaryFromReport(report, result)
+
+	switch fmtFlag {
+	case "summary":
+		return printFormatError(format.PrintSummary(os.Stderr, sv), "summary")
+	case "json":
+		return printFormatError(format.PrintFindingsJSON(os.Stdout, views), "json")
+	case "table":
+		return printFormatError(format.PrintFindingsTable(os.Stdout, views), "table")
+	case "sarif":
+		return printSARIF(os.Stdout, report)
+	default:
+		return fmt.Errorf("unknown format %q: choose from summary, json, sarif, table", fmtFlag)
+	}
+}
+
+func printFormatError(err error, label string) error {
+	if err != nil {
+		return fmt.Errorf("print %s: %w", label, err)
+	}
+	return nil
+}
+
+// findingsToViews converts go-finding Finding values to format views.
+func findingsToViews(findings []finding.Finding) []format.FindingView {
+	views := make([]format.FindingView, 0, len(findings))
+	for _, f := range findings {
 		views = append(views, format.FindingView{
 			Rule:     f.Rule,
 			Message:  f.Message,
@@ -109,7 +135,14 @@ func renderFindings(fmtFlag string, report *finding.Report, result *pipeline.Pip
 			Column:   f.Position.Column,
 		})
 	}
+	return views
+}
 
+// summaryFromReport builds a SummaryView from a go-finding Report and pipeline result.
+func summaryFromReport(
+	report *finding.Report,
+	result *pipeline.PipelineResult,
+) *format.SummaryView {
 	bySev := make(map[string]int, len(report.Summary.BySeverity))
 	for k, v := range report.Summary.BySeverity {
 		bySev[string(k)] = v
@@ -119,35 +152,13 @@ func renderFindings(fmtFlag string, report *finding.Report, result *pipeline.Pip
 		byCat[string(k)] = v
 	}
 
-	sv := &format.SummaryView{
+	return &format.SummaryView{
 		Total:         report.Summary.Total,
 		BySeverity:    bySev,
 		ByCategory:    byCat,
 		FilesAffected: report.Summary.FilesAffected,
 		Iterations:    result.TotalIterations,
 		Stable:        result.Stable,
-	}
-
-	switch fmtFlag {
-	case "summary":
-		if err := format.PrintSummary(os.Stderr, sv); err != nil {
-			return fmt.Errorf("print summary: %w", err)
-		}
-		return nil
-	case "json":
-		if err := format.PrintFindingsJSON(os.Stdout, views); err != nil {
-			return fmt.Errorf("print json: %w", err)
-		}
-		return nil
-	case "table":
-		if err := format.PrintFindingsTable(os.Stdout, views); err != nil {
-			return fmt.Errorf("print table: %w", err)
-		}
-		return nil
-	case "sarif":
-		return printSARIF(os.Stdout, report)
-	default:
-		return fmt.Errorf("unknown format %q: choose from summary, json, sarif, table", fmtFlag)
 	}
 }
 

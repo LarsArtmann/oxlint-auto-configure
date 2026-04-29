@@ -84,18 +84,8 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 		)
 	}
 
-	oxlintVer, err := oxlint.CheckVersion(ctx)
-	if err != nil {
-		return fmt.Errorf("oxlint: %w", err)
-	}
-	slog.Info("oxlint version", "version", oxlintVer)
-
-	embeddedVer := rule.EmbeddedVersion()
-	if embeddedVer != "" && embeddedVer != oxlintVer {
-		slog.Warn("embedded rules version mismatch",
-			"embedded", embeddedVer,
-			"runtime", oxlintVer,
-		)
+	if err := checkOxlintVersion(ctx); err != nil {
+		return err
 	}
 
 	reg, err := rule.LoadRegistry()
@@ -116,27 +106,61 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 	cat := profile.NewCategorizer(opts.Profile, pluginConfig)
 	gen := config.NewGenerator(cat, reg)
 
-	var cfg *config.OxlintConfig
-	if opts.Profile == profile.ProfileMaximalTypesafe {
-		cfg = gen.GenerateAllError()
-	} else {
-		cfg = gen.Generate()
-	}
-
-	targetPath := opts.ConfigPath
-	if targetPath == "" {
-		targetPath = filepath.Join(absRoot, defaultConfigPath)
-	}
+	cfg := genConfig(gen, opts.Profile)
+	targetPath := resolveConfigPath(opts.ConfigPath, absRoot)
 
 	if opts.DryRun {
 		return writeDryRun(cfg, targetPath)
 	}
 
-	showDiff := showDiffIfExisting(targetPath, cfg)
-	if showDiff != "" {
-		slog.Info(showDiff)
+	logDiffIfExisting(targetPath, cfg)
+
+	if err := writeConfig(cfg, targetPath); err != nil {
+		return err
 	}
 
+	return runFixIfNeeded(ctx, absRoot, targetPath, opts.Fix)
+}
+
+func checkOxlintVersion(ctx context.Context) error {
+	oxlintVer, err := oxlint.CheckVersion(ctx)
+	if err != nil {
+		return fmt.Errorf("oxlint: %w", err)
+	}
+	slog.Info("oxlint version", "version", oxlintVer)
+
+	embeddedVer := rule.EmbeddedVersion()
+	if embeddedVer != "" && embeddedVer != oxlintVer {
+		slog.Warn("embedded rules version mismatch",
+			"embedded", embeddedVer,
+			"runtime", oxlintVer,
+		)
+	}
+
+	return nil
+}
+
+func genConfig(gen *config.Generator, p profile.Profile) *config.OxlintConfig {
+	if p == profile.ProfileMaximalTypesafe {
+		return gen.GenerateAllError()
+	}
+	return gen.Generate()
+}
+
+func resolveConfigPath(configPath, absRoot string) string {
+	if configPath == "" {
+		return filepath.Join(absRoot, defaultConfigPath)
+	}
+	return configPath
+}
+
+func logDiffIfExisting(targetPath string, cfg *config.OxlintConfig) {
+	if diff := showDiffIfExisting(targetPath, cfg); diff != "" {
+		slog.Info(diff)
+	}
+}
+
+func writeConfig(cfg *config.OxlintConfig, targetPath string) error {
 	data, err := cfg.ToJSON()
 	if err != nil {
 		return fmt.Errorf("generate config JSON: %w", err)
@@ -148,17 +172,23 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 
 	slog.Info("configuration written", "path", targetPath)
 
-	if opts.Fix {
-		slog.Info("running oxlint fix")
-		fixResult, err := oxlint.RunFix(ctx, absRoot, targetPath)
-		if err != nil {
-			return fmt.Errorf("fix: %w", err)
-		}
-		if fixResult.Output != "" {
-			slog.Info("fix output", "detail", fixResult.Output)
-		}
-		slog.Info("fix complete")
+	return nil
+}
+
+func runFixIfNeeded(ctx context.Context, absRoot, targetPath string, runFix bool) error {
+	if !runFix {
+		return nil
 	}
+
+	slog.Info("running oxlint fix")
+	fixResult, err := oxlint.RunFix(ctx, absRoot, targetPath)
+	if err != nil {
+		return fmt.Errorf("fix: %w", err)
+	}
+	if fixResult.Output != "" {
+		slog.Info("fix output", "detail", fixResult.Output)
+	}
+	slog.Info("fix complete")
 
 	return nil
 }

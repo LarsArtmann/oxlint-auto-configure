@@ -47,46 +47,65 @@ func (d *Detector) Detect() (profile.PluginConfig, []ProjectType, error) {
 	return pc, types, nil
 }
 
+// depTypeRules maps dependency names to project types.
+// If any dep in a rule's list is present, the type is detected.
+var depTypeRules = []struct { //nolint:gochecknoglobals // immutable lookup table
+	deps []string
+	typ  ProjectType
+}{
+	{[]string{"next"}, ProjectTypeNextJS},
+	{[]string{"react", "react-dom"}, ProjectTypeReact},
+	{[]string{"vue"}, ProjectTypeVue},
+	{[]string{"jest"}, ProjectTypeNode},
+	{[]string{"vitest"}, ProjectTypeNode},
+}
+
 // detectProjectTypes determines project types from dependencies.
 func (d *Detector) detectProjectTypes(deps map[string]bool) []ProjectType {
 	var types []ProjectType
+	for _, rule := range depTypeRules {
+		if anyDep(deps, rule.deps) {
+			types = append(types, rule.typ)
+		}
+	}
+	if len(types) == 0 {
+		types = d.inferFallbackTypes()
+	}
+	return types
+}
 
-	if deps["next"] {
-		types = append(types, ProjectTypeNextJS)
+func anyDep(deps map[string]bool, names []string) bool {
+	for _, n := range names {
+		if deps[n] {
+			return true
+		}
 	}
-	if deps["react"] || deps["react-dom"] {
-		types = append(types, ProjectTypeReact)
+	return false
+}
+
+func (d *Detector) inferFallbackTypes() []ProjectType {
+	var types []ProjectType
+	if d.hasTSConfig() {
+		types = append(types, ProjectTypePlainTS)
 	}
-	if deps["vue"] {
-		types = append(types, ProjectTypeVue)
-	}
-	if deps["jest"] {
-		types = append(types, ProjectTypeNode) // Jest implies Node
-	}
-	if deps["vitest"] {
-		// Vitest implies Node for test runner environment
+	if d.hasNodeModules() || d.hasPackageJSON() {
 		types = append(types, ProjectTypeNode)
 	}
-
 	if len(types) == 0 {
-		if d.hasTSConfig() {
-			types = append(types, ProjectTypePlainTS)
-		}
-		if d.hasNodeModules() || d.hasPackageJSON() {
-			types = append(types, ProjectTypeNode)
-		}
-		if len(types) == 0 {
-			types = append(types, ProjectTypeUnknown)
-		}
+		types = append(types, ProjectTypeUnknown)
 	}
-
 	return types
 }
 
 // toPluginConfig converts detected types to plugin configuration.
 func (d *Detector) toPluginConfig(types []ProjectType, deps map[string]bool) profile.PluginConfig {
 	pc := make(profile.PluginConfig)
+	d.applyTypePlugins(types, pc)
+	d.applyDepPlugins(deps, pc)
+	return pc
+}
 
+func (d *Detector) applyTypePlugins(types []ProjectType, pc profile.PluginConfig) {
 	for _, t := range types {
 		switch t {
 		case ProjectTypeReact, ProjectTypeNextJS:
@@ -101,15 +120,20 @@ func (d *Detector) toPluginConfig(types []ProjectType, deps map[string]bool) pro
 			// no additional plugins
 		}
 	}
+}
 
-	if deps["next"] {
-		pc[rule.PluginNextJS] = true
-	}
-	if deps["jest"] {
-		pc[rule.PluginJest] = true
-	}
-	if deps["vitest"] {
-		pc[rule.PluginVitest] = true
+func (d *Detector) applyDepPlugins(deps map[string]bool, pc profile.PluginConfig) {
+	for _, r := range []struct {
+		dep    string
+		plugin rule.Plugin
+	}{
+		{"next", rule.PluginNextJS},
+		{"jest", rule.PluginJest},
+		{"vitest", rule.PluginVitest},
+	} {
+		if deps[r.dep] {
+			pc[r.plugin] = true
+		}
 	}
 	if d.hasJSDocUsage(deps) {
 		pc[rule.PluginJSDoc] = true
@@ -120,8 +144,6 @@ func (d *Detector) toPluginConfig(types []ProjectType, deps map[string]bool) pro
 	if d.hasPromiseUsage(deps) {
 		pc[rule.PluginPromise] = true
 	}
-
-	return pc
 }
 
 // packageJSON represents relevant fields from package.json.
