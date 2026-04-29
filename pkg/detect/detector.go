@@ -122,27 +122,33 @@ func (d *Detector) applyTypePlugins(types []ProjectType, pc profile.PluginConfig
 	}
 }
 
+// depPluginRules maps dependency names to plugins that should be enabled.
+// If any dep in a rule's list is present, the plugin is enabled.
+var depPluginRules = []struct { //nolint:gochecknoglobals // immutable lookup table
+	deps   []string
+	plugin rule.Plugin
+}{
+	{[]string{"next"}, rule.PluginNextJS},
+	{[]string{"jest"}, rule.PluginJest},
+	{[]string{"vitest"}, rule.PluginVitest},
+	{[]string{"jsdoc", "documentation"}, rule.PluginJSDoc},
+	{
+		[]string{"bluebird", "es6-promise", "promise", "q", "rsvp", "promise-polyfill", "core-js"},
+		rule.PluginPromise,
+	},
+}
+
 func (d *Detector) applyDepPlugins(deps map[string]bool, pc profile.PluginConfig) {
-	for _, r := range []struct {
-		dep    string
-		plugin rule.Plugin
-	}{
-		{"next", rule.PluginNextJS},
-		{"jest", rule.PluginJest},
-		{"vitest", rule.PluginVitest},
-	} {
-		if deps[r.dep] {
+	for _, r := range depPluginRules {
+		if anyDep(deps, r.deps) {
 			pc[r.plugin] = true
 		}
 	}
-	if d.hasJSDocUsage(deps) {
-		pc[rule.PluginJSDoc] = true
+	if d.hasPromiseSubstringDep(deps) {
+		pc[rule.PluginPromise] = true
 	}
 	if d.hasImportUsage() {
 		pc[rule.PluginImport] = true
-	}
-	if d.hasPromiseUsage(deps) {
-		pc[rule.PluginPromise] = true
 	}
 }
 
@@ -198,10 +204,6 @@ func (d *Detector) hasPackageJSON() bool {
 	return err == nil
 }
 
-func (d *Detector) hasJSDocUsage(deps map[string]bool) bool {
-	return deps["jsdoc"] || deps["documentation"]
-}
-
 func (d *Detector) hasImportUsage() bool {
 	matches, _ := filepath.Glob(filepath.Join(d.rootDir, "*.mjs"))
 	if len(matches) > 0 {
@@ -212,21 +214,7 @@ func (d *Detector) hasImportUsage() bool {
 	return len(matches) > 0
 }
 
-func (d *Detector) hasPromiseUsage(deps map[string]bool) bool {
-	promiseDeps := []string{
-		"bluebird",
-		"es6-promise",
-		"promise",
-		"q",
-		"rsvp",
-		"promise-polyfill",
-		"core-js",
-	}
-	for _, dep := range promiseDeps {
-		if deps[dep] {
-			return true
-		}
-	}
+func (d *Detector) hasPromiseSubstringDep(deps map[string]bool) bool {
 	for dep := range deps {
 		if strings.Contains(dep, "promise") {
 			return true
