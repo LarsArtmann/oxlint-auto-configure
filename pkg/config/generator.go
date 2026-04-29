@@ -203,4 +203,3 @@ func (g *Generator) buildSettings() map[string]any {
 	}
 	return settings
 }
-

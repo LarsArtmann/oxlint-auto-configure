@@ -85,7 +85,7 @@ const realOxlintOutput = `{
 
 func TestParseRealOxlintOutput(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 	require.Len(t, findings, 3)
@@ -93,7 +93,7 @@ func TestParseRealOxlintOutput(t *testing.T) {
 
 func TestParseFindsCorrectRules(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
@@ -104,7 +104,7 @@ func TestParseFindsCorrectRules(t *testing.T) {
 
 func TestParseFindsCorrectMessages(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
@@ -115,7 +115,7 @@ func TestParseFindsCorrectMessages(t *testing.T) {
 
 func TestParseFindsCorrectPositions(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
@@ -134,7 +134,7 @@ func TestParseFindsCorrectPositions(t *testing.T) {
 
 func TestParseMapsSeverity(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
@@ -145,7 +145,7 @@ func TestParseMapsSeverity(t *testing.T) {
 
 func TestParseMapsCategories(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
@@ -156,7 +156,7 @@ func TestParseMapsCategories(t *testing.T) {
 
 func TestParseExtractsURLAndHelp(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
@@ -167,7 +167,7 @@ func TestParseExtractsURLAndHelp(t *testing.T) {
 
 func TestParseEmptyDiagnostics(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(`{"diagnostics":[]}`))
 	require.NoError(t, err)
 	assert.Empty(t, findings)
@@ -199,14 +199,14 @@ func TestParseCodeFormat(t *testing.T) {
 
 func TestDetectEmptyOutput(t *testing.T) {
 	t.Parallel()
-	
+
 	_, err := parseOutput([]byte{})
 	require.Error(t, err)
 }
 
 func TestDetectEmptyJSON(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(`{"diagnostics":null}`))
 	require.NoError(t, err)
 	assert.Empty(t, findings)
@@ -268,7 +268,7 @@ func TestPositionFromLabelsEmpty(t *testing.T) {
 
 func TestJSONRoundTrip(t *testing.T) {
 	t.Parallel()
-	
+
 	findings, err := parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 

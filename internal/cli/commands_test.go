@@ -201,7 +201,11 @@ func TestShowDiffExisting(t *testing.T) {
 	require.NoError(t, err)
 
 	diff := showDiffIfExisting(configPath, cfg)
-	assert.NotEmpty(t, diff, "should produce diff summary when existing config matches (no changes)")
+	assert.NotEmpty(
+		t,
+		diff,
+		"should produce diff summary when existing config matches (no changes)",
+	)
 }
 
 func TestShowDiffMalformed(t *testing.T) {

@@ -18,7 +18,7 @@ import (
 
 func newAnalyzeCommand() *cobra.Command {
 	var (
-		rootDir string
+		rootDir    string
 		formatFlag string
 	)
 
@@ -38,7 +38,8 @@ Formats:
 	}
 
 	cmd.Flags().StringVar(&rootDir, "root", ".", "Project root directory")
-	cmd.Flags().StringVarP(&formatFlag, "format", "f", "summary", "Output format: summary, json, sarif, table")
+	cmd.Flags().
+		StringVarP(&formatFlag, "format", "f", "summary", "Output format: summary, json, sarif, table")
 
 	return cmd
 }

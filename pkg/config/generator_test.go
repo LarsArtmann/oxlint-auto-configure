@@ -55,7 +55,11 @@ func TestGeneratorWithReactProject(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	pc := profile.PluginConfig{rule.PluginReact: true, rule.PluginJSXA11y: true, rule.PluginReactPerf: true}
+	pc := profile.PluginConfig{
+		rule.PluginReact:     true,
+		rule.PluginJSXA11y:   true,
+		rule.PluginReactPerf: true,
+	}
 	cat := profile.NewCategorizer(profile.ProfileRecommended, pc)
 	gen := NewGenerator(cat, reg)
 	cfg := gen.Generate()
@@ -148,8 +152,18 @@ func TestMinimalProfileConfig(t *testing.T) {
 
 	assert.Equal(t, "error", cfg.Categories["correctness"])
 	assert.NotContains(t, cfg.Categories, "style", "minimal should omit non-correctness categories")
-	assert.NotContains(t, cfg.Categories, "suspicious", "minimal should omit non-correctness categories")
-	assert.NotContains(t, cfg.Categories, "nursery", "minimal should omit non-correctness categories")
+	assert.NotContains(
+		t,
+		cfg.Categories,
+		"suspicious",
+		"minimal should omit non-correctness categories",
+	)
+	assert.NotContains(
+		t,
+		cfg.Categories,
+		"nursery",
+		"minimal should omit non-correctness categories",
+	)
 	assert.Empty(t, cfg.Rules, "minimal should have no per-rule overrides")
 }
 

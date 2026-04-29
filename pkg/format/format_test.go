@@ -34,7 +34,15 @@ func TestPrintSummary(t *testing.T) {
 func TestPrintFindingsJSON(t *testing.T) {
 	t.Parallel()
 	findings := []FindingView{
-		{Rule: "no-debugger", Severity: "error", Category: "correctness", File: "test.js", Line: 10, Column: 5, Message: "Unexpected debugger statement"},
+		{
+			Rule:     "no-debugger",
+			Severity: "error",
+			Category: "correctness",
+			File:     "test.js",
+			Line:     10,
+			Column:   5,
+			Message:  "Unexpected debugger statement",
+		},
 	}
 
 	var buf bytes.Buffer
@@ -51,8 +59,24 @@ func TestPrintFindingsJSON(t *testing.T) {
 func TestPrintFindingsTable(t *testing.T) {
 	t.Parallel()
 	findings := []FindingView{
-		{Rule: "no-debugger", Severity: "error", Category: "correctness", File: "a.js", Line: 5, Column: 1, Message: "debugger"},
-		{Rule: "no-console", Severity: "warn", Category: "style", File: "b.js", Line: 3, Column: 1, Message: "console.log"},
+		{
+			Rule:     "no-debugger",
+			Severity: "error",
+			Category: "correctness",
+			File:     "a.js",
+			Line:     5,
+			Column:   1,
+			Message:  "debugger",
+		},
+		{
+			Rule:     "no-console",
+			Severity: "warn",
+			Category: "style",
+			File:     "b.js",
+			Line:     3,
+			Column:   1,
+			Message:  "console.log",
+		},
 	}
 
 	var buf bytes.Buffer
@@ -94,7 +118,14 @@ func TestPrintFindingsTableTruncatesLongMessages(t *testing.T) {
 	t.Parallel()
 	longMsg := strings.Repeat("x", 100)
 	findings := []FindingView{
-		{Rule: "test", Severity: "error", Category: "correctness", File: "f.js", Line: 1, Message: longMsg},
+		{
+			Rule:     "test",
+			Severity: "error",
+			Category: "correctness",
+			File:     "f.js",
+			Line:     1,
+			Message:  longMsg,
+		},
 	}
 
 	var buf bytes.Buffer

@@ -109,7 +109,7 @@ func TestDiffSettingsChanged(t *testing.T) {
 		"react": map[string]any{"version": "detect"},
 	}}
 	after := &config.OxlintConfig{Settings: map[string]any{
-		"react": map[string]any{"version": "18.0"},
+		"react":    map[string]any{"version": "18.0"},
 		"jsx-a11y": map[string]any{"components": map[string]any{}},
 	}}
 

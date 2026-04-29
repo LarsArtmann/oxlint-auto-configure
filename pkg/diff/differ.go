@@ -46,7 +46,9 @@ func (d *Differ) Diff() []Change {
 	changes := make([]Change, 0, 8)
 
 	changes = append(changes, d.compareSlices(d.before.Plugins, d.after.Plugins, "plugin:")...)
-	changes = append(changes, d.compareMaps(d.before.Categories, d.after.Categories, "category:")...)
+	changes = append(
+		changes,
+		d.compareMaps(d.before.Categories, d.after.Categories, "category:")...)
 	changes = append(changes, d.compareMaps(d.before.Rules, d.after.Rules, "")...)
 	changes = append(changes, d.compareBoolMaps(d.before.Env, d.after.Env, "env:")...)
 	changes = append(changes, d.compareAnyMaps(d.before.Settings, d.after.Settings, "settings:")...)
@@ -65,11 +67,20 @@ func (d *Differ) compareMaps(before, after map[string]string, prefix string) []C
 
 		switch {
 		case !hadBefore && hasAfter:
-			changes = append(changes, Change{Rule: name, OldValue: "", NewValue: av, Kind: KindAdded})
+			changes = append(
+				changes,
+				Change{Rule: name, OldValue: "", NewValue: av, Kind: KindAdded},
+			)
 		case hadBefore && !hasAfter:
-			changes = append(changes, Change{Rule: name, OldValue: bv, NewValue: "", Kind: KindRemoved})
+			changes = append(
+				changes,
+				Change{Rule: name, OldValue: bv, NewValue: "", Kind: KindRemoved},
+			)
 		case hadBefore && hasAfter && bv != av:
-			changes = append(changes, Change{Rule: name, OldValue: bv, NewValue: av, Kind: KindChanged})
+			changes = append(
+				changes,
+				Change{Rule: name, OldValue: bv, NewValue: av, Kind: KindChanged},
+			)
 		}
 	}
 
@@ -145,7 +156,10 @@ func (d *Differ) compareSlices(before, after []string, prefix string) []Change {
 		}
 		seen[s] = true
 		if !afterSet[s] {
-			changes = append(changes, Change{Rule: prefix + s, OldValue: s, NewValue: "", Kind: KindRemoved})
+			changes = append(
+				changes,
+				Change{Rule: prefix + s, OldValue: s, NewValue: "", Kind: KindRemoved},
+			)
 		}
 	}
 	for _, s := range after {
@@ -154,7 +168,10 @@ func (d *Differ) compareSlices(before, after []string, prefix string) []Change {
 		}
 		seen[s] = true
 		if !beforeSet[s] {
-			changes = append(changes, Change{Rule: prefix + s, OldValue: "", NewValue: s, Kind: KindAdded})
+			changes = append(
+				changes,
+				Change{Rule: prefix + s, OldValue: "", NewValue: s, Kind: KindAdded},
+			)
 		}
 	}
 	return changes

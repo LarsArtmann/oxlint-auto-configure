@@ -32,7 +32,9 @@ type SummaryView struct {
 
 // PrintSummary writes a human-readable summary to w.
 func PrintSummary(w io.Writer, sv *SummaryView) error {
-	_, _ = fmt.Fprintf(w, "findings: total=%d, by_severity=%s, by_category=%s, files_affected=%d, iterations=%d, stable=%t\n",
+	_, _ = fmt.Fprintf(
+		w,
+		"findings: total=%d, by_severity=%s, by_category=%s, files_affected=%d, iterations=%d, stable=%t\n",
 		sv.Total,
 		formatMap(sv.BySeverity),
 		formatMap(sv.ByCategory),

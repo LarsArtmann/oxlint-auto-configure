@@ -79,9 +79,21 @@ func TestDecideCategory(t *testing.T) {
 		want     rule.SeverityDecision
 		include  bool
 	}{
-		{"maximal correctness", ProfileMaximalTypesafe, rule.CategoryCorrectness, rule.SeverityError, true},
+		{
+			"maximal correctness",
+			ProfileMaximalTypesafe,
+			rule.CategoryCorrectness,
+			rule.SeverityError,
+			true,
+		},
 		{"maximal nursery", ProfileMaximalTypesafe, rule.CategoryNursery, rule.SeverityWarn, true},
-		{"recommended correctness", ProfileRecommended, rule.CategoryCorrectness, rule.SeverityError, true},
+		{
+			"recommended correctness",
+			ProfileRecommended,
+			rule.CategoryCorrectness,
+			rule.SeverityError,
+			true,
+		},
 		{"recommended style", ProfileRecommended, rule.CategoryStyle, rule.SeverityWarn, true},
 		{"recommended nursery", ProfileRecommended, rule.CategoryNursery, rule.SeverityOff, true},
 		{"strict correctness", ProfileStrict, rule.CategoryCorrectness, rule.SeverityError, true},
@@ -192,7 +204,11 @@ func TestDecideCategoryUnknown(t *testing.T) {
 		t.Parallel()
 		c := NewCategorizer(ProfileMaximalTypesafe, nil)
 		_, hasCat := c.DecideCategory(unknownCat)
-		assert.True(t, hasCat, "unknown category should be included for maximal-typesafe (default severity)")
+		assert.True(
+			t,
+			hasCat,
+			"unknown category should be included for maximal-typesafe (default severity)",
+		)
 	})
 
 	t.Run("recommended", func(t *testing.T) {
