@@ -147,7 +147,7 @@ func (c *Categorizer) decideRecommended(r rule.Rule) rule.SeverityDecision {
 	}
 }
 
-// decideStrict: correctness+suspicious+TS+OXC at error, everything else at warn except nursery.
+// decideStrict: correctness+suspicious at error, everything else at warn except nursery.
 func (c *Categorizer) decideStrict(r rule.Rule) rule.SeverityDecision {
 	if r.Category == rule.CategoryNursery {
 		return rule.SeverityOff
@@ -157,7 +157,7 @@ func (c *Categorizer) decideStrict(r rule.Rule) rule.SeverityDecision {
 	case rule.CategoryCorrectness, rule.CategorySuspicious:
 		return rule.SeverityError
 	case rule.CategoryPedantic, rule.CategoryPerf, rule.CategoryStyle,
-		rule.CategoryRestriction, rule.CategoryNursery:
+		rule.CategoryRestriction:
 		return rule.SeverityWarn
 	default:
 		return rule.SeverityWarn
