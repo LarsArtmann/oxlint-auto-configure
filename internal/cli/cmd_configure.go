@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -39,102 +40,18 @@ Profiles:
 			if rootDir == "" {
 				rootDir = "."
 			}
-
 			absRoot, err := filepath.Abs(rootDir)
 			if err != nil {
 				return fmt.Errorf("resolve root dir: %w", err)
 			}
 
-			p := profile.Profile(profileFlag)
-			if !p.IsValid() {
-				return fmt.Errorf(
-					"invalid profile %q: choose from %s",
-					profileFlag,
-					strings.Join(profileNames(), ", "),
-				)
+			opts := ConfigureOptions{
+				Profile:    profile.Profile(profileFlag),
+				ConfigPath: configPath,
+				DryRun:     dryRun,
+				Fix:        runFix,
 			}
-
-			oxlintVer, err := oxlint.CheckVersion(cmd.Context())
-			if err != nil {
-				return fmt.Errorf("oxlint: %w", err)
-			}
-			slog.Info("oxlint version", "version", oxlintVer)
-
-			embeddedVer := rule.EmbeddedVersion()
-			if embeddedVer != "" && embeddedVer != oxlintVer {
-				slog.Warn("embedded rules version mismatch",
-					"embedded", embeddedVer,
-					"runtime", oxlintVer,
-				)
-			}
-
-			reg, err := rule.LoadRegistry()
-			if err != nil {
-				return fmt.Errorf("load rule registry: %w", err)
-			}
-
-			det := detect.NewDetector(absRoot)
-			pluginConfig, projectTypes, err := det.Detect()
-			if err != nil {
-				return fmt.Errorf("detect project type: %w", err)
-			}
-
-			slog.Info("detected project", "types", detect.FormatTypes(projectTypes))
-			slog.Info("profile", "name", p)
-			slog.Info("rules loaded", "total", reg.Len())
-
-			cat := profile.NewCategorizer(p, pluginConfig)
-			gen := config.NewGenerator(cat, reg)
-
-			var cfg *config.OxlintConfig
-			if p == profile.ProfileMaximalTypesafe {
-				cfg = gen.GenerateAllError()
-			} else {
-				cfg = gen.Generate()
-			}
-
-			targetPath := configPath
-			if targetPath == "" {
-				targetPath = filepath.Join(absRoot, defaultConfigPath)
-			}
-
-			if dryRun {
-				return writeDryRun(cfg, targetPath)
-			}
-
-			if existingData, err := os.ReadFile(targetPath); err == nil {
-				existing, err := config.FromJSON(existingData)
-				if err == nil {
-					d := diff.NewDiffer(existing, cfg)
-					slog.Info("changes\n" + d.FormatDiff())
-					slog.Info(d.Summary())
-				}
-			}
-
-			data, err := cfg.ToJSON()
-			if err != nil {
-				return fmt.Errorf("generate config JSON: %w", err)
-			}
-
-			if err := os.WriteFile(targetPath, append(data, '\n'), 0o644); err != nil {
-				return fmt.Errorf("write config: %w", err)
-			}
-
-			slog.Info("configuration written", "path", targetPath)
-
-			if runFix {
-				slog.Info("running oxlint fix")
-				fixResult, err := oxlint.RunFix(cmd.Context(), absRoot, targetPath)
-				if err != nil {
-					return fmt.Errorf("fix: %w", err)
-				}
-				if fixResult.Output != "" {
-					slog.Info("fix output", "detail", fixResult.Output)
-				}
-				slog.Info("fix complete")
-			}
-
-			return nil
+			return Configure(cmd.Context(), absRoot, opts)
 		},
 	}
 
@@ -147,6 +64,116 @@ Profiles:
 	cmd.Flags().StringVar(&rootDir, "root", ".", "Project root directory")
 
 	return cmd
+}
+
+// ConfigureOptions holds the parameters for the configure operation.
+type ConfigureOptions struct {
+	Profile    profile.Profile
+	ConfigPath string
+	DryRun     bool
+	Fix        bool
+}
+
+// Configure generates an oxlint configuration for the project at absRoot.
+func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error {
+	if !opts.Profile.IsValid() {
+		return fmt.Errorf(
+			"invalid profile %q: choose from %s",
+			opts.Profile,
+			strings.Join(profileNames(), ", "),
+		)
+	}
+
+	oxlintVer, err := oxlint.CheckVersion(ctx)
+	if err != nil {
+		return fmt.Errorf("oxlint: %w", err)
+	}
+	slog.Info("oxlint version", "version", oxlintVer)
+
+	embeddedVer := rule.EmbeddedVersion()
+	if embeddedVer != "" && embeddedVer != oxlintVer {
+		slog.Warn("embedded rules version mismatch",
+			"embedded", embeddedVer,
+			"runtime", oxlintVer,
+		)
+	}
+
+	reg, err := rule.LoadRegistry()
+	if err != nil {
+		return fmt.Errorf("load rule registry: %w", err)
+	}
+
+	det := detect.NewDetector(absRoot)
+	pluginConfig, projectTypes, err := det.Detect()
+	if err != nil {
+		return fmt.Errorf("detect project type: %w", err)
+	}
+
+	slog.Info("detected project", "types", detect.FormatTypes(projectTypes))
+	slog.Info("profile", "name", opts.Profile)
+	slog.Info("rules loaded", "total", reg.Len())
+
+	cat := profile.NewCategorizer(opts.Profile, pluginConfig)
+	gen := config.NewGenerator(cat, reg)
+
+	var cfg *config.OxlintConfig
+	if opts.Profile == profile.ProfileMaximalTypesafe {
+		cfg = gen.GenerateAllError()
+	} else {
+		cfg = gen.Generate()
+	}
+
+	targetPath := opts.ConfigPath
+	if targetPath == "" {
+		targetPath = filepath.Join(absRoot, defaultConfigPath)
+	}
+
+	if opts.DryRun {
+		return writeDryRun(cfg, targetPath)
+	}
+
+	showDiffIfExisting(targetPath, cfg)
+
+	data, err := cfg.ToJSON()
+	if err != nil {
+		return fmt.Errorf("generate config JSON: %w", err)
+	}
+
+	if err := os.WriteFile(targetPath, append(data, '\n'), 0o600); err != nil {
+		return fmt.Errorf("write config: %w", err)
+	}
+
+	slog.Info("configuration written", "path", targetPath)
+
+	if opts.Fix {
+		slog.Info("running oxlint fix")
+		fixResult, err := oxlint.RunFix(ctx, absRoot, targetPath)
+		if err != nil {
+			return fmt.Errorf("fix: %w", err)
+		}
+		if fixResult.Output != "" {
+			slog.Info("fix output", "detail", fixResult.Output)
+		}
+		slog.Info("fix complete")
+	}
+
+	return nil
+}
+
+// showDiffIfExisting compares the existing config with the new one and logs the diff.
+func showDiffIfExisting(targetPath string, cfg *config.OxlintConfig) {
+	existingData, err := os.ReadFile(targetPath)
+	if err != nil {
+		return
+	}
+	existing, err := config.FromJSON(existingData)
+	if err != nil {
+		slog.Warn("existing config is malformed, skipping diff", "error", err)
+		return
+	}
+	d := diff.NewDiffer(existing, cfg)
+	slog.Info("changes\n" + d.FormatDiff())
+	slog.Info(d.Summary())
 }
 
 func writeDryRun(cfg *config.OxlintConfig, targetPath string) error {
