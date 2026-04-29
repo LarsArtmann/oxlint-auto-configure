@@ -12,6 +12,9 @@ import (
 
 func TestRunFixRemovesDebugger(t *testing.T) {
 	t.Parallel()
+	if os.Getenv("OXLINT_E2E") == "" {
+		t.Skip("Set OXLINT_E2E=1 to run e2e test with real oxlint")
+	}
 
 	dir := t.TempDir()
 	jsPath := filepath.Join(dir, "test.js")
@@ -30,6 +33,9 @@ func TestRunFixRemovesDebugger(t *testing.T) {
 
 func TestRunFixNoIssues(t *testing.T) {
 	t.Parallel()
+	if os.Getenv("OXLINT_E2E") == "" {
+		t.Skip("Set OXLINT_E2E=1 to run e2e test with real oxlint")
+	}
 
 	dir := t.TempDir()
 	jsPath := filepath.Join(dir, "clean.js")
@@ -48,6 +54,9 @@ func TestRunFixNoIssues(t *testing.T) {
 
 func TestRunFixWithConfig(t *testing.T) {
 	t.Parallel()
+	if os.Getenv("OXLINT_E2E") == "" {
+		t.Skip("Set OXLINT_E2E=1 to run e2e test with real oxlint")
+	}
 
 	dir := t.TempDir()
 	configPath := filepath.Join(dir, ".oxlintrc.json")
