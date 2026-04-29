@@ -104,7 +104,7 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 	slog.Info("rules loaded", "total", reg.Len())
 
 	cat := profile.NewCategorizer(opts.Profile, pluginConfig)
-	gen := config.NewGenerator(cat, reg)
+	gen := config.NewGenerator(cat, reg, projectTypes)
 
 	cfg := genConfig(gen, opts.Profile)
 	targetPath := resolveConfigPath(opts.ConfigPath, absRoot)

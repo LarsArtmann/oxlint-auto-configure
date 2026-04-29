@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +17,7 @@ func TestGeneratorRecommended(t *testing.T) {
 	require.NoError(t, err)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg)
+	gen := NewGenerator(cat, reg, nil)
 	cfg := gen.Generate()
 
 	assert.Contains(t, cfg.Plugins, "typescript")
@@ -38,7 +39,7 @@ func TestGeneratorMaximalTypesafe(t *testing.T) {
 	require.NoError(t, err)
 
 	cat := profile.NewCategorizer(profile.ProfileMaximalTypesafe, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg)
+	gen := NewGenerator(cat, reg, nil)
 	cfg := gen.GenerateMaximal()
 
 	assert.Equal(t, "error", cfg.Categories["correctness"])
@@ -61,11 +62,13 @@ func TestGeneratorWithReactProject(t *testing.T) {
 		rule.PluginReactPerf: true,
 	}
 	cat := profile.NewCategorizer(profile.ProfileRecommended, pc)
-	gen := NewGenerator(cat, reg)
+	gen := NewGenerator(cat, reg, []detect.ProjectType{detect.ProjectTypeReact})
 	cfg := gen.Generate()
 
 	assert.Contains(t, cfg.Plugins, "react")
 	assert.Contains(t, cfg.Plugins, "jsx_a11y")
+	assert.True(t, cfg.Env["builtin"])
+	assert.False(t, cfg.Env["node"], "React without Node should not add node env")
 }
 
 func TestGeneratorWithAllPlugins(t *testing.T) {
@@ -80,13 +83,14 @@ func TestGeneratorWithAllPlugins(t *testing.T) {
 		rule.PluginPromise: true, rule.PluginReactPerf: true,
 	}
 	cat := profile.NewCategorizer(profile.ProfileRecommended, pc)
-	gen := NewGenerator(cat, reg)
+	gen := NewGenerator(cat, reg, []detect.ProjectType{detect.ProjectTypeNode})
 	cfg := gen.Generate()
 
 	assert.Contains(t, cfg.Plugins, "react")
 	assert.Contains(t, cfg.Plugins, "vue")
 	assert.Contains(t, cfg.Plugins, "jest")
 	assert.Contains(t, cfg.Plugins, "vitest")
+	assert.True(t, cfg.Env["node"], "Node project type should add node env")
 }
 
 func TestConfigToJSON(t *testing.T) {
@@ -113,7 +117,7 @@ func TestConfigRoundTrip(t *testing.T) {
 	require.NoError(t, err)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg)
+	gen := NewGenerator(cat, reg, nil)
 	cfg := gen.Generate()
 
 	data, err := cfg.ToJSON()
@@ -147,7 +151,7 @@ func TestMinimalProfileConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	cat := profile.NewCategorizer(profile.ProfileMinimal, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg)
+	gen := NewGenerator(cat, reg, nil)
 	cfg := gen.Generate()
 
 	assert.Equal(t, "error", cfg.Categories["correctness"])
@@ -173,7 +177,7 @@ func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
 	require.NoError(t, err)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg)
+	gen := NewGenerator(cat, reg, nil)
 	cfg := gen.Generate()
 
 	for ruleName, ruleSev := range cfg.Rules {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 )
@@ -21,13 +22,18 @@ type OxlintConfig struct {
 
 // Generator creates oxlint configuration from profile decisions.
 type Generator struct {
-	categorizer *profile.Categorizer
-	registry    *rule.Registry
+	categorizer  *profile.Categorizer
+	registry     *rule.Registry
+	projectTypes []detect.ProjectType
 }
 
 // NewGenerator creates a config generator.
-func NewGenerator(c *profile.Categorizer, r *rule.Registry) *Generator {
-	return &Generator{categorizer: c, registry: r}
+func NewGenerator(
+	c *profile.Categorizer,
+	r *rule.Registry,
+	projectTypes []detect.ProjectType,
+) *Generator {
+	return &Generator{categorizer: c, registry: r, projectTypes: projectTypes}
 }
 
 // Generate creates an OxlintConfig based on the categorizer's decisions.
@@ -37,7 +43,7 @@ func (g *Generator) Generate() *OxlintConfig {
 		Categories: g.categorySeverityMap(),
 		Rules:      g.ruleSeverityMap(),
 		Settings:   g.buildSettings(),
-		Env:        map[string]bool{"builtin": true},
+		Env:        g.buildEnv(),
 	}
 	return cfg
 }
@@ -66,6 +72,18 @@ func FromJSON(data []byte) (*OxlintConfig, error) {
 		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
 	return &cfg, nil
+}
+
+// buildEnv returns the env map based on detected project types.
+// Always includes "builtin"; adds "node" when a Node.js project is detected.
+func (g *Generator) buildEnv() map[string]bool {
+	env := map[string]bool{"builtin": true}
+	for _, pt := range g.projectTypes {
+		if pt == detect.ProjectTypeNode {
+			env["node"] = true
+		}
+	}
+	return env
 }
 
 // enabledPlugins returns the list of plugins that should be enabled.
