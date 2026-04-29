@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strings"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
@@ -50,55 +49,15 @@ func Validate(configPath string) error {
 		return fmt.Errorf("load registry: %w", err)
 	}
 
-	if err := validateRules(cfg, reg); err != nil {
+	result, err := config.ValidateConfig(cfg, reg)
+	if err != nil {
 		return err
-	}
-
-	return validateSeverities(cfg)
-}
-
-func validateRules(cfg *config.OxlintConfig, reg *rule.Registry) error {
-	var unknown []string
-	for name := range cfg.Rules {
-		if _, ok := reg.ByName(name); !ok {
-			unknown = append(unknown, name)
-		}
-	}
-
-	if len(unknown) > 0 {
-		slog.Error("unknown rules", "rules", strings.Join(unknown, ", "))
-
-		return fmt.Errorf("%d unknown rules found", len(unknown))
-	}
-
-	return nil
-}
-
-func validateSeverities(cfg *config.OxlintConfig) error {
-	var invalid []string
-	for name, sev := range cfg.Rules {
-		if !rule.SeverityDecision(sev).IsValid() {
-			invalid = append(invalid, fmt.Sprintf("%s=%s", name, sev))
-		}
-	}
-
-	if len(invalid) > 0 {
-		slog.Error("invalid severities", "rules", strings.Join(invalid, ", "))
-
-		return fmt.Errorf("%d invalid severities found", len(invalid))
-	}
-
-	enabled := 0
-	for _, sev := range cfg.Rules {
-		if sev != "off" {
-			enabled++
-		}
 	}
 
 	slog.Info("config valid",
 		"rules", len(cfg.Rules),
-		"enabled", enabled,
-		"disabled", len(cfg.Rules)-enabled,
+		"enabled", result.EnabledCount,
+		"disabled", result.DisabledCount,
 		"plugins", cfg.Plugins,
 		"categories", cfg.Categories,
 	)
