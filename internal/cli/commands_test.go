@@ -370,3 +370,54 @@ func TestPrintReportJSON(t *testing.T) {
 	findings := parsed["findings"].([]any)
 	assert.Len(t, findings, 1)
 }
+
+func TestParseOptionalSeverity(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		input string
+		want  finding.Severity
+		err   bool
+	}{
+		{"", "", false},
+		{"error", finding.SeverityError, false},
+		{"warning", finding.SeverityWarning, false},
+		{"info", finding.SeverityInfo, false},
+		{"bad", "", true},
+	}
+
+	for _, tt := range tests {
+		got, err := parseOptionalSeverity(tt.input)
+		if tt.err {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		}
+	}
+}
+
+func TestActiveWithFilter(t *testing.T) {
+	t.Parallel()
+
+	report := finding.NewReport(finding.ToolInfo{Name: "test"})
+	report.AddFindings([]finding.Finding{
+		finding.NewFinding("r1", "test", "msg", finding.SeverityError,
+			finding.Position{File: "a.ts", Line: 1}),
+		finding.NewFinding("r2", "test", "msg", finding.SeverityWarning,
+			finding.Position{File: "b.ts", Line: 2}),
+		finding.NewFinding("r3", "test", "msg", finding.SeverityInfo,
+			finding.Position{File: "c.ts", Line: 3}),
+	})
+	report.ComputeSummary()
+
+	all := activeWithFilter(report, "")
+	assert.Len(t, all, 3)
+
+	errors := activeWithFilter(report, finding.SeverityError)
+	assert.Len(t, errors, 1)
+	assert.Equal(t, "r1", errors[0].Rule)
+
+	warnings := activeWithFilter(report, finding.SeverityWarning)
+	assert.Len(t, warnings, 2)
+}

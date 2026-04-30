@@ -22,6 +22,7 @@ func newAnalyzeCommand() *cobra.Command {
 	var (
 		rootDir    string
 		formatFlag string
+		sevFlag    string
 	)
 
 	cmd := &cobra.Command{
@@ -36,18 +37,20 @@ Formats:
   sarif    SARIF format to stdout (for CI/GitHub integration)
   table    Markdown table to stdout`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return runAnalyze(cmd.Context(), rootDir, formatFlag)
+			return runAnalyze(cmd.Context(), rootDir, formatFlag, sevFlag)
 		},
 	}
 
 	cmd.Flags().StringVar(&rootDir, "root", ".", "Project root directory")
 	cmd.Flags().
 		StringVarP(&formatFlag, "format", "f", "summary", "Output format: summary, json, report, sarif, table")
+	cmd.Flags().
+		StringVarP(&sevFlag, "severity", "s", "", "Minimum severity filter: error, warning, info")
 
 	return cmd
 }
 
-func runAnalyze(ctx context.Context, rootDir, formatFlag string) error {
+func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error {
 	if rootDir == "" {
 		rootDir = "."
 	}
@@ -127,31 +130,72 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag string) error {
 	}
 	report.ComputeSummary()
 
-	return renderFindings(formatFlag, report, result)
+	minSev, err := parseOptionalSeverity(sevFlag)
+	if err != nil {
+		return err
+	}
+
+	return renderFindings(formatFlag, report, result, minSev)
+}
+
+func parseOptionalSeverity(s string) (finding.Severity, error) {
+	if s == "" {
+		return "", nil
+	}
+
+	sev := finding.Severity(s)
+	if !sev.IsValid() {
+		return "", fmt.Errorf("invalid severity %q: choose from error, warning, info", s)
+	}
+
+	return sev, nil
+}
+
+// activeWithFilter returns active findings optionally filtered by minimum severity.
+func activeWithFilter(report *finding.Report, minSev finding.Severity) []finding.Finding {
+	active := report.ActiveFindings()
+	if minSev == "" {
+		return active
+	}
+
+	return finding.Filter(active, finding.BySeverityAtLeast(minSev))
 }
 
 // renderFindings converts go-finding types to format views and delegates rendering.
-func renderFindings(fmtFlag string, report *finding.Report, result *pipeline.PipelineResult) error {
+func renderFindings(fmtFlag string, report *finding.Report, result *pipeline.PipelineResult, minSev finding.Severity) error {
+	filtered := activeWithFilter(report, minSev)
+
+	if len(filtered) == 0 && minSev != "" {
+		slog.Info("no findings match severity filter", "min_severity", string(minSev))
+		return nil
+	}
+
 	sv := summaryFromReport(report, result)
 
 	switch fmtFlag {
 	case "summary":
 		return printFormatError(format.PrintSummary(os.Stderr, sv), "summary")
 	case "json":
-		views := findingsToViews(report.ActiveFindings())
+		views := findingsToViews(filtered)
 		return printFormatError(format.PrintFindingsJSON(os.Stdout, views), "json")
 	case "report":
 		return printReportJSON(os.Stdout, report)
 	case "table":
-		sorted := report.ActiveFindings()
-		finding.SortByPosition(sorted)
+		sorted := sortedByPosition(filtered)
 		views := findingsToViews(sorted)
 		return printFormatError(format.PrintFindingsTable(os.Stdout, views), "table")
 	case "sarif":
-		return printSARIF(os.Stdout, report)
+		return printSARIF(os.Stdout, report, minSev)
 	default:
 		return fmt.Errorf("unknown format %q: choose from summary, json, report, sarif, table", fmtFlag)
 	}
+}
+
+func sortedByPosition(findings []finding.Finding) []finding.Finding {
+	sorted := make([]finding.Finding, len(findings))
+	copy(sorted, findings)
+	finding.SortByPosition(sorted)
+	return sorted
 }
 
 func printFormatError(err error, label string) error {
@@ -206,9 +250,18 @@ func summaryFromReport(
 	}
 }
 
-// printSARIF renders SARIF directly from go-finding Report (requires go-finding method).
-func printSARIF(w io.Writer, report *finding.Report) error {
-	sarif, err := report.ToSARIF()
+// printSARIF renders SARIF directly from go-finding Report.
+// Uses ToSARIFFiltered when a minimum severity is specified.
+func printSARIF(w io.Writer, report *finding.Report, minSev finding.Severity) error {
+	var sarif []byte
+	var err error
+
+	if minSev != "" {
+		sarif, err = report.ToSARIFFiltered(minSev)
+	} else {
+		sarif, err = report.ToSARIF()
+	}
+
 	if err != nil {
 		return fmt.Errorf("generate SARIF: %w", err)
 	}
