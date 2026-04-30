@@ -15,20 +15,33 @@ func TestPrintSummary(t *testing.T) {
 	var buf bytes.Buffer
 	sv := &SummaryView{
 		Total:         5,
-		BySeverity:    map[string]int{"error": 3, "warn": 2},
+		BySeverity:    map[string]int{"error": 3, "warning": 2},
 		ByCategory:    map[string]int{"correctness": 5},
+		ByFixStrategy: map[string]int{"none": 3, "suggest": 2},
 		FilesAffected: 3,
 		Iterations:    1,
 		Stable:        true,
+		Findings: []FindingView{
+			{Rule: "no-unused-vars", File: "a.ts", Line: 1},
+			{Rule: "no-unused-vars", File: "b.ts", Line: 2},
+			{Rule: "no-console", File: "a.ts", Line: 3},
+			{Rule: "no-debugger", File: "c.ts", Line: 4},
+			{Rule: "eqeqeq", File: "d.ts", Line: 5},
+		},
 	}
 
 	err := PrintSummary(&buf, sv)
 	require.NoError(t, err)
 	output := buf.String()
-	assert.Contains(t, output, "total=5")
-	assert.Contains(t, output, "error=3")
-	assert.Contains(t, output, "files_affected=3")
-	assert.Contains(t, output, "stable=true")
+	assert.Contains(t, output, "5 finding(s) across 3 file(s)")
+	assert.Contains(t, output, "error")
+	assert.Contains(t, output, "3")
+	assert.Contains(t, output, "warning")
+	assert.Contains(t, output, "2")
+	assert.Contains(t, output, "correctness")
+	assert.Contains(t, output, "Top rules")
+	assert.Contains(t, output, "Top files")
+	assert.Contains(t, output, "no-unused-vars")
 }
 
 func TestPrintFindingsJSON(t *testing.T) {

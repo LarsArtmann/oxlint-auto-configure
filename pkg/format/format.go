@@ -33,22 +33,100 @@ type SummaryView struct {
 	FilesAffected int
 	Iterations    int
 	Stable        bool
+	Findings      []FindingView
 }
 
 // PrintSummary writes a human-readable summary to w.
 func PrintSummary(w io.Writer, sv *SummaryView) error {
-	_, _ = fmt.Fprintf(
-		w,
-		"findings: total=%d, by_severity=%s, by_category=%s, by_fix=%s, files_affected=%d, iterations=%d, stable=%t\n",
-		sv.Total,
-		formatMap(sv.BySeverity),
-		formatMap(sv.ByCategory),
-		formatMap(sv.ByFixStrategy),
-		sv.FilesAffected,
-		sv.Iterations,
-		sv.Stable,
-	)
+	fmt.Fprintf(w, "\n=== Analysis Results ===\n")
+	fmt.Fprintf(w, "\n%d finding(s) across %d file(s)", sv.Total, sv.FilesAffected)
+	if sv.Iterations > 1 {
+		fmt.Fprintf(w, " (%d iterations, stable=%t)", sv.Iterations, sv.Stable)
+	}
+	fmt.Fprintln(w)
+
+	fmt.Fprintln(w, "\nBy severity:")
+	for _, sev := range sortedKeys(sv.BySeverity) {
+		fmt.Fprintf(w, "  %-10s %d\n", sev, sv.BySeverity[sev])
+	}
+
+	fmt.Fprintln(w, "\nBy category:")
+	for _, cat := range sortedKeys(sv.ByCategory) {
+		fmt.Fprintf(w, "  %-15s %d\n", cat, sv.ByCategory[cat])
+	}
+
+	if len(sv.ByFixStrategy) > 0 {
+		fmt.Fprintln(w, "\nBy fix strategy:")
+		for _, fix := range sortedKeys(sv.ByFixStrategy) {
+			fmt.Fprintf(w, "  %-15s %d\n", fix, sv.ByFixStrategy[fix])
+		}
+	}
+
+	topRules := topByRule(sv.Findings, 10)
+	if len(topRules) > 0 {
+		fmt.Fprintln(w, "\nTop rules:")
+		for _, entry := range topRules {
+			fmt.Fprintf(w, "  %-45s %d\n", entry.name, entry.count)
+		}
+	}
+
+	topFiles := topByFile(sv.Findings, 10)
+	if len(topFiles) > 0 {
+		fmt.Fprintln(w, "\nTop files:")
+		for _, entry := range topFiles {
+			fmt.Fprintf(w, "  %-45s %d\n", entry.name, entry.count)
+		}
+	}
+
+	fmt.Fprintln(w)
 	return nil
+}
+
+type namedCount struct {
+	name  string
+	count int
+}
+
+func topByRule(findings []FindingView, n int) []namedCount {
+	counts := make(map[string]int)
+	for _, f := range findings {
+		counts[f.Rule]++
+	}
+	return topN(counts, n)
+}
+
+func topByFile(findings []FindingView, n int) []namedCount {
+	counts := make(map[string]int)
+	for _, f := range findings {
+		counts[f.File]++
+	}
+	return topN(counts, n)
+}
+
+func topN(counts map[string]int, n int) []namedCount {
+	entries := make([]namedCount, 0, len(counts))
+	for k, v := range counts {
+		entries = append(entries, namedCount{k, v})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].count != entries[j].count {
+			return entries[i].count > entries[j].count
+		}
+		return entries[i].name < entries[j].name
+	})
+	if len(entries) > n {
+		entries = entries[:n]
+	}
+	return entries
+}
+
+func sortedKeys(m map[string]int) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 // PrintFindingsJSON writes findings as a JSON array to w.

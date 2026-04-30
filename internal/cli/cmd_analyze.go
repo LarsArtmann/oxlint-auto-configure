@@ -98,7 +98,7 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 		slog.Debug("finding", "rule", f.Rule, "file", f.Position.File, "line", f.Position.Line)
 	}
 	pipelineCfg.OnIteration = func(iter int, findings []finding.Finding) {
-		slog.Info("iteration complete", "iter", iter, "findings", len(findings))
+		slog.Debug("iteration complete", "iter", iter, "findings", len(findings))
 	}
 
 	p, err := pipeline.New(pipelineCfg, absRoot, detector)
@@ -252,6 +252,7 @@ func summaryFromReport(
 		FilesAffected: report.Summary.FilesAffected,
 		Iterations:    result.TotalIterations,
 		Stable:        result.Stable,
+		Findings:      findingsToViews(report.ActiveFindings()),
 	}
 }
 
