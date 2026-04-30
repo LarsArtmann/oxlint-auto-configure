@@ -239,11 +239,16 @@ func summaryFromReport(
 	for k, v := range report.Summary.ByCategory {
 		byCat[string(k)] = v
 	}
+	byFix := make(map[string]int, len(report.Summary.ByFixStrategy))
+	for k, v := range report.Summary.ByFixStrategy {
+		byFix[string(k)] = v
+	}
 
 	return &format.SummaryView{
 		Total:         report.Summary.Total,
 		BySeverity:    bySev,
 		ByCategory:    byCat,
+		ByFixStrategy: byFix,
 		FilesAffected: report.Summary.FilesAffected,
 		Iterations:    result.TotalIterations,
 		Stable:        result.Stable,

@@ -29,6 +29,7 @@ type SummaryView struct {
 	Total         int
 	BySeverity    map[string]int
 	ByCategory    map[string]int
+	ByFixStrategy map[string]int
 	FilesAffected int
 	Iterations    int
 	Stable        bool
@@ -38,10 +39,11 @@ type SummaryView struct {
 func PrintSummary(w io.Writer, sv *SummaryView) error {
 	_, _ = fmt.Fprintf(
 		w,
-		"findings: total=%d, by_severity=%s, by_category=%s, files_affected=%d, iterations=%d, stable=%t\n",
+		"findings: total=%d, by_severity=%s, by_category=%s, by_fix=%s, files_affected=%d, iterations=%d, stable=%t\n",
 		sv.Total,
 		formatMap(sv.BySeverity),
 		formatMap(sv.ByCategory),
+		formatMap(sv.ByFixStrategy),
 		sv.FilesAffected,
 		sv.Iterations,
 		sv.Stable,
