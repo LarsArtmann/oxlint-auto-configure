@@ -340,3 +340,33 @@ func TestFindingsToViews(t *testing.T) {
 	assert.Equal(t, "test.ts", views[0].File)
 	assert.Equal(t, 5, views[0].Line)
 }
+
+func TestPrintReportJSON(t *testing.T) {
+	t.Parallel()
+	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: "1.0.0"})
+	f := finding.NewFinding("no-unused-vars", "oxlint", "unused variable",
+		finding.SeverityError,
+		finding.Position{File: "a.ts", Line: 10, Column: 5})
+	f.Category = finding.CategoryCorrectness
+	f.FixStrategy = finding.FixStrategyDirect
+	report.AddFindings([]finding.Finding{f})
+	report.ComputeSummary()
+
+	var buf bytes.Buffer
+	err := printReportJSON(&buf, report)
+	require.NoError(t, err)
+
+	var parsed map[string]any
+	err = json.Unmarshal(buf.Bytes(), &parsed)
+	require.NoError(t, err)
+
+	tool := parsed["tool"].(map[string]any)
+	assert.Equal(t, "oxlint", tool["name"])
+	assert.Equal(t, "1.0.0", tool["version"])
+
+	summary := parsed["summary"].(map[string]any)
+	assert.Equal(t, float64(1), summary["total"])
+
+	findings := parsed["findings"].([]any)
+	assert.Len(t, findings, 1)
+}
