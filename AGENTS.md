@@ -132,6 +132,10 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Profile name dedup** — `profile.AllProfileNames()` is single source; no more `cliProfileNames`/`config.profileNames`
 - **Detect logging** — `pkg/detect` logs warnings on malformed package.json (but not missing — that's normal for Go projects)
 - **Summary enrichment** — `SummaryView.ByFixStrategy` populated from `Report.Summary.ByFixStrategy`
+- **SummaryView.Findings** — Carries `[]FindingView` for top-rules/top-files computation in `PrintSummary`
+- **Iteration logging** — OnIteration callback uses `slog.Debug` (only visible with `-v`); no more raw slog spam
+- **ProjectTypeTest** — `vitest`/`jest` now detected as `ProjectTypeTest` (not `ProjectTypeNode`); enables both `PluginNode` AND the correct test plugin via `depPluginRules`
+- **GOWORK=off** — Parent workspace at `/home/lars/projects/go.work` interferes; always use `GOWORK=off` for `go run`/`go test`
 
 ---
 
