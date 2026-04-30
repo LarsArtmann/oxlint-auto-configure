@@ -18,13 +18,14 @@ type ProjectType string
 
 // ProjectTypeUnknown and other project type constants represent detected framework categories.
 const (
-	ProjectTypeUnknown ProjectType = "unknown"    // no recognized framework
-	ProjectTypeReact   ProjectType = "react"      // React SPA
-	ProjectTypeNextJS  ProjectType = "nextjs"     // Next.js SSR
-	ProjectTypeVue     ProjectType = "vue"        // Vue SPA
-	ProjectTypeNode    ProjectType = "node"       // Node.js backend
-	ProjectTypePlainTS ProjectType = "typescript" // TypeScript without framework
-	ProjectTypeLibrary ProjectType = "library"    // shared library
+	ProjectTypeUnknown   ProjectType = "unknown"    // no recognized framework
+	ProjectTypeReact    ProjectType = "react"      // React SPA
+	ProjectTypeNextJS   ProjectType = "nextjs"     // Next.js SSR
+	ProjectTypeVue      ProjectType = "vue"        // Vue SPA
+	ProjectTypeNode     ProjectType = "node"       // Node.js backend
+	ProjectTypeTest     ProjectType = "test"       // test framework (vitest/jest)
+	ProjectTypePlainTS  ProjectType = "typescript" // TypeScript without framework
+	ProjectTypeLibrary  ProjectType = "library"    // shared library
 )
 
 // Detector detects project type from the filesystem.
@@ -57,8 +58,8 @@ var depTypeRules = []struct { //nolint:gochecknoglobals // immutable lookup tabl
 	{[]string{"next"}, ProjectTypeNextJS},
 	{[]string{"react", "react-dom"}, ProjectTypeReact},
 	{[]string{"vue"}, ProjectTypeVue},
-	{[]string{"jest"}, ProjectTypeNode},
-	{[]string{"vitest"}, ProjectTypeNode},
+	{[]string{"jest"}, ProjectTypeTest},
+	{[]string{"vitest"}, ProjectTypeTest},
 }
 
 // detectProjectTypes determines project types from dependencies.
@@ -115,6 +116,8 @@ func (d *Detector) applyTypePlugins(types []ProjectType, pc profile.PluginConfig
 			pc[rule.PluginReactPerf] = true
 		case ProjectTypeVue:
 			pc[rule.PluginVue] = true
+		case ProjectTypeTest:
+			pc[rule.PluginNode] = true
 		case ProjectTypeNode:
 			pc[rule.PluginNode] = true
 		case ProjectTypeUnknown, ProjectTypePlainTS, ProjectTypeLibrary:

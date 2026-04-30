@@ -98,11 +98,19 @@ func TestDetectJestProject(t *testing.T) {
 	require.NoError(t, err)
 
 	det := NewDetector(dir)
-	pc, _, err := det.Detect()
+	pc, types, err := det.Detect()
 	require.NoError(t, err)
 
 	assert.True(t, pc[rule.PluginJest])
 	assert.True(t, pc[rule.PluginNode])
+
+	var hasTest bool
+	for _, typ := range types {
+		if typ == ProjectTypeTest {
+			hasTest = true
+		}
+	}
+	assert.True(t, hasTest, "expected ProjectTypeTest in detected types")
 }
 
 func TestDetectVitestProject(t *testing.T) {
@@ -113,10 +121,19 @@ func TestDetectVitestProject(t *testing.T) {
 	require.NoError(t, err)
 
 	det := NewDetector(dir)
-	pc, _, err := det.Detect()
+	pc, types, err := det.Detect()
 	require.NoError(t, err)
 
 	assert.True(t, pc[rule.PluginVitest])
+	assert.True(t, pc[rule.PluginNode])
+
+	var hasTest bool
+	for _, typ := range types {
+		if typ == ProjectTypeTest {
+			hasTest = true
+		}
+	}
+	assert.True(t, hasTest, "expected ProjectTypeTest in detected types")
 }
 
 func TestDetectTSProject(t *testing.T) {

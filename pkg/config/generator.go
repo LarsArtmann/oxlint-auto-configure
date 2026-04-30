@@ -79,7 +79,7 @@ func FromJSON(data []byte) (*OxlintConfig, error) {
 func (g *Generator) buildEnv() map[string]bool {
 	env := map[string]bool{"builtin": true}
 	for _, pt := range g.projectTypes {
-		if pt == detect.ProjectTypeNode {
+		if pt == detect.ProjectTypeNode || pt == detect.ProjectTypeTest {
 			env["node"] = true
 		}
 	}
