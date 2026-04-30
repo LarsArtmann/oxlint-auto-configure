@@ -4,6 +4,7 @@ package detect
 
 import (
 	"encoding/json"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -163,11 +164,15 @@ func (d *Detector) readPackageJSON() *packageJSON {
 	path := filepath.Join(d.rootDir, "package.json")
 	data, err := os.ReadFile(path)
 	if err != nil {
+		if !os.IsNotExist(err) {
+			slog.Warn("cannot read package.json", "path", path, "error", err)
+		}
 		return nil
 	}
 
 	var pkg packageJSON
 	if err := json.Unmarshal(data, &pkg); err != nil {
+		slog.Warn("malformed package.json, skipping dependency detection", "path", path, "error", err)
 		return nil
 	}
 	return &pkg
