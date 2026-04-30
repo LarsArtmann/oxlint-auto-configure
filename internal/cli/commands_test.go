@@ -182,7 +182,7 @@ func TestReportJSONDirect(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, buf.String())
 
-	var entries []map[string]interface{}
+	var entries []map[string]any
 	err = json.Unmarshal(buf.Bytes(), &entries)
 	require.NoError(t, err)
 	assert.Len(t, entries, 716)
