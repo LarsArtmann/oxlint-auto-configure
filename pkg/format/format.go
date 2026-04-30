@@ -11,14 +11,17 @@ import (
 
 // FindingView is a projection of a lint finding for rendering.
 type FindingView struct {
-	Rule     string `json:"rule"`
-	Message  string `json:"message"`
-	Severity string `json:"severity"`
-	Category string `json:"category"`
-	File     string `json:"file"`
-	Line     int    `json:"line"`
-	Column   int    `json:"column"`
-	DocsURL  string `json:"docs_url,omitempty"`
+	Rule        string `json:"rule"`
+	Message     string `json:"message"`
+	Severity    string `json:"severity"`
+	Category    string `json:"category"`
+	File        string `json:"file"`
+	Line        int    `json:"line"`
+	Column      int    `json:"column"`
+	DocsURL     string `json:"docs_url,omitempty"`
+	FixStrategy string `json:"fix_strategy,omitempty"`
+	Tag         string `json:"tag,omitempty"`
+	Snippet     string `json:"snippet,omitempty"`
 }
 
 // SummaryView is a projection of analysis summary statistics.

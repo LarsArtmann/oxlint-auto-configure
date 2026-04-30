@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	finding "github.com/larsartmann/go-finding"
+	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -86,7 +87,7 @@ const realOxlintOutput = `{
 func TestParseRealOxlintOutput(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(realOxlintOutput))
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 	require.Len(t, findings, 3)
 }
@@ -94,7 +95,7 @@ func TestParseRealOxlintOutput(t *testing.T) {
 func TestParseFindsCorrectRules(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(realOxlintOutput))
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, "no-debugger", findings[0].Rule)
@@ -105,7 +106,7 @@ func TestParseFindsCorrectRules(t *testing.T) {
 func TestParseFindsCorrectMessages(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(realOxlintOutput))
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Contains(t, findings[0].Message, "debugger")
@@ -116,7 +117,7 @@ func TestParseFindsCorrectMessages(t *testing.T) {
 func TestParseFindsCorrectPositions(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(realOxlintOutput))
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, "test.ts", findings[0].Position.File)
@@ -135,7 +136,7 @@ func TestParseFindsCorrectPositions(t *testing.T) {
 func TestParseMapsSeverity(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(realOxlintOutput))
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, finding.SeverityWarning, findings[0].Severity)
@@ -146,7 +147,7 @@ func TestParseMapsSeverity(t *testing.T) {
 func TestParseMapsCategories(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(realOxlintOutput))
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, finding.CategoryCorrectness, findings[0].Category)
@@ -157,7 +158,7 @@ func TestParseMapsCategories(t *testing.T) {
 func TestParseExtractsURLAndHelp(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(realOxlintOutput))
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	assert.Equal(t, "https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-debugger.html",
@@ -168,7 +169,7 @@ func TestParseExtractsURLAndHelp(t *testing.T) {
 func TestParseEmptyDiagnostics(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(`{"diagnostics":[]}`))
+	findings, err := new(Detector).parseOutput([]byte(`{"diagnostics":[]}`))
 	require.NoError(t, err)
 	assert.Empty(t, findings)
 }
@@ -201,14 +202,14 @@ func TestParseCodeFormat(t *testing.T) {
 func TestDetectEmptyOutput(t *testing.T) {
 	t.Parallel()
 
-	_, err := parseOutput([]byte{})
+	_, err := new(Detector).parseOutput([]byte{})
 	require.Error(t, err)
 }
 
 func TestDetectEmptyJSON(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(`{"diagnostics":null}`))
+	findings, err := new(Detector).parseOutput([]byte(`{"diagnostics":null}`))
 	require.NoError(t, err)
 	assert.Empty(t, findings)
 }
@@ -268,10 +269,70 @@ func TestPositionFromLabelsEmpty(t *testing.T) {
 	assert.Equal(t, 0, col)
 }
 
+func TestRangeFromLabels(t *testing.T) {
+	t.Parallel()
+	t.Run("nil_labels", func(t *testing.T) {
+		t.Parallel()
+		assert.Nil(t, rangeFromLabels("test.ts", nil))
+	})
+
+	t.Run("empty_labels", func(t *testing.T) {
+		t.Parallel()
+		assert.Nil(t, rangeFromLabels("test.ts", []oxlintLabel{}))
+	})
+
+	t.Run("zero_length", func(t *testing.T) {
+		t.Parallel()
+		labels := []oxlintLabel{{Span: oxlintSpan{Line: 5, Column: 3, Offset: 42, Length: 0}}}
+		assert.Nil(t, rangeFromLabels("test.ts", labels))
+	})
+
+	t.Run("single_line_span", func(t *testing.T) {
+		t.Parallel()
+		labels := []oxlintLabel{{Span: oxlintSpan{Line: 2, Column: 1, Offset: 18, Length: 9}}}
+		r := rangeFromLabels("test.ts", labels)
+		require.NotNil(t, r)
+		assert.Equal(t, 2, r.Start.Line)
+		assert.Equal(t, 1, r.Start.Column)
+		assert.Equal(t, 18, r.Start.Offset)
+		assert.Equal(t, 2, r.End.Line)
+		assert.Equal(t, 10, r.End.Column) // 1 + 9
+		assert.Equal(t, 27, r.End.Offset) // 18 + 9
+		assert.Equal(t, "test.ts", r.Start.File)
+	})
+}
+
+func TestParseOutputPopulatesRange(t *testing.T) {
+	t.Parallel()
+
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
+	require.NoError(t, err)
+
+	require.Len(t, findings, 3)
+
+	r0 := findings[0].Range
+	require.NotNil(t, r0, "first finding should have a range")
+	assert.Equal(t, 2, r0.Start.Line)
+	assert.Equal(t, 1, r0.Start.Column)
+	assert.Equal(t, 10, r0.End.Column) // 1 + 9 (length of "debugger")
+
+	r1 := findings[1].Range
+	require.NotNil(t, r1, "second finding should have a range")
+	assert.Equal(t, 1, r1.Start.Line)
+	assert.Equal(t, 7, r1.Start.Column)
+	assert.Equal(t, 8, r1.End.Column) // 7 + 1 (length of "x")
+
+	r2 := findings[2].Range
+	require.NotNil(t, r2, "third finding should have a range")
+	assert.Equal(t, 10, r2.Start.Line)
+	assert.Equal(t, 5, r2.Start.Column)
+	assert.Equal(t, 8, r2.End.Column) // 5 + 3 (length of "any")
+}
+
 func TestJSONRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	findings, err := parseOutput([]byte(realOxlintOutput))
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
 	for _, f := range findings {
@@ -395,4 +456,98 @@ func TestBuildArgsWithConfigAndExtraArgs(t *testing.T) {
 	d := NewDetector("/project", WithConfig("/project/.oxlintrc.json"), WithArgs("--verbose"))
 	args := d.buildArgs()
 	assert.Equal(t, []string{"-f", "json", "-c", "/project/.oxlintrc.json", "--verbose", "."}, args)
+}
+
+func TestParseOutputSetsTag(t *testing.T) {
+	t.Parallel()
+
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
+	require.NoError(t, err)
+
+	assert.Equal(t, "eslint", findings[0].Tag)
+	assert.Equal(t, "eslint", findings[1].Tag)
+	assert.Equal(t, "typescript", findings[2].Tag)
+}
+
+func TestParseOutputSetsSnippet(t *testing.T) {
+	t.Parallel()
+
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
+	require.NoError(t, err)
+
+	assert.Empty(t, findings[0].Snippet, "no label text")
+	assert.Equal(t, "'x' is declared here", findings[1].Snippet)
+}
+
+func TestParseOutputFixStrategyWithoutRegistry(t *testing.T) {
+	t.Parallel()
+
+	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
+	require.NoError(t, err)
+
+	for _, f := range findings {
+		assert.Equal(t, finding.FixStrategyNone, f.FixStrategy,
+			"without registry, all findings should have FixStrategyNone")
+	}
+}
+
+func TestParseOutputFixStrategyWithRegistry(t *testing.T) {
+	t.Parallel()
+
+	reg, err := rule.LoadRegistry()
+	require.NoError(t, err)
+
+	d := NewDetector(".", WithRegistry(reg))
+	findings, err := d.parseOutput([]byte(realOxlintOutput))
+	require.NoError(t, err)
+	require.Len(t, findings, 3)
+
+	assert.Equal(t, finding.FixStrategyDirect, findings[0].FixStrategy,
+		"no-debugger is safe-fixable")
+	assert.Equal(t, finding.FixStrategySuggest, findings[2].FixStrategy,
+		"no-explicit-any is suggestion-fixable")
+}
+
+func TestMapFixStrategy(t *testing.T) {
+	t.Parallel()
+
+	reg, err := rule.LoadRegistry()
+	require.NoError(t, err)
+
+	d := NewDetector(".", WithRegistry(reg))
+
+	tests := []struct {
+		name     string
+		rule     string
+		plugin   string
+		expected finding.FixStrategy
+	}{
+		{"no-debugger is safe", "no-debugger", "eslint", finding.FixStrategyDirect},
+		{"no-explicit-any is suggestion", "no-explicit-any", "typescript", finding.FixStrategySuggest},
+		{"unknown rule defaults to none", "nonexistent", "eslint", finding.FixStrategyNone},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tt.expected, d.mapFixStrategy(tt.rule, tt.plugin))
+		})
+	}
+}
+
+func TestMapFixStrategyNoRegistry(t *testing.T) {
+	t.Parallel()
+
+	d := NewDetector(".")
+	assert.Equal(t, finding.FixStrategyNone, d.mapFixStrategy("no-debugger", "eslint"))
+}
+
+func TestWithRegistry(t *testing.T) {
+	t.Parallel()
+
+	reg, err := rule.LoadRegistry()
+	require.NoError(t, err)
+
+	d := NewDetector(".", WithRegistry(reg))
+	assert.NotNil(t, d.registry)
 }

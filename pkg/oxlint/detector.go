@@ -26,15 +26,16 @@ func (realRunner) Run(ctx context.Context, name string, args []string, dir strin
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Dir = dir
 	out, err := cmd.Output()
-	return out, fmt.Errorf("run oxlint: %w", err)
+	return out, finding.NewIOError("run oxlint", err)
 }
 
 // Detector runs oxlint and converts findings to the go-finding model.
 type Detector struct {
-	rootDir string
-	config  string
-	args    []string
-	runner  Runner
+	rootDir  string
+	config   string
+	args     []string
+	runner   Runner
+	registry *rule.Registry
 }
 
 // Option configures the oxlint detector.
@@ -53,6 +54,11 @@ func WithArgs(args ...string) Option {
 // WithRunner sets the command runner (for testing).
 func WithRunner(r Runner) Option {
 	return func(d *Detector) { d.runner = r }
+}
+
+// WithRegistry sets the rule registry for fix-strategy lookup.
+func WithRegistry(reg *rule.Registry) Option {
+	return func(d *Detector) { d.registry = reg }
 }
 
 // NewDetector creates an oxlint detector for the given root directory.
@@ -83,7 +89,7 @@ func (d *Detector) Detect(ctx context.Context) ([]finding.Finding, error) {
 		return nil, nil
 	}
 
-	return parseOutput(output)
+	return d.parseOutput(output)
 }
 
 func (d *Detector) buildArgs() []string {
@@ -129,10 +135,11 @@ type oxlintSpan struct {
 	Column int `json:"column"`
 }
 
-func parseOutput(data []byte) ([]finding.Finding, error) {
+// parseOutput converts raw oxlint JSON into go-finding findings.
+func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
 	var output oxlintOutput
 	if err := json.Unmarshal(data, &output); err != nil {
-		return nil, fmt.Errorf("parse oxlint JSON: %w", err)
+		return nil, finding.NewParseError("oxlint JSON", err)
 	}
 
 	findings := make([]finding.Finding, 0, len(output.Diagnostics))
@@ -149,12 +156,21 @@ func parseOutput(data []byte) ([]finding.Finding, error) {
 		)
 
 		f.Category = mapCategory(pluginName)
+		f.Range = rangeFromLabels(diag.Filename, diag.Labels)
+		f.FixStrategy = d.mapFixStrategy(ruleName, pluginName)
+		f.Tag = pluginName
 
 		if diag.URL != "" {
-			f.Metadata = map[string]string{"url": diag.URL}
+			if f.Metadata == nil {
+				f.Metadata = make(map[string]string)
+			}
+			f.Metadata["url"] = diag.URL
 		}
 		if diag.Help != "" {
 			f.Suggestion = diag.Help
+		}
+		if len(diag.Labels) > 0 && diag.Labels[0].Label != "" {
+			f.Snippet = diag.Labels[0].Label
 		}
 
 		findings = append(findings, f)
@@ -169,6 +185,32 @@ func positionFromLabels(labels []oxlintLabel) (line, col int) {
 		return labels[0].Span.Line, labels[0].Span.Column
 	}
 	return 0, 0
+}
+
+// rangeFromLabels constructs a Range from the first label's span.
+// Uses offset+length to compute end position. For single-line spans
+// (the common case), end column is start column + length.
+// Returns nil if no labels are present.
+func rangeFromLabels(filename string, labels []oxlintLabel) *finding.Range {
+	if len(labels) == 0 {
+		return nil
+	}
+
+	span := labels[0].Span
+	start := finding.Position{File: filename, Line: span.Line, Column: span.Column, Offset: span.Offset}
+
+	if span.Length == 0 {
+		return nil
+	}
+
+	end := finding.Position{
+		File:   filename,
+		Line:   span.Line,
+		Column: span.Column + span.Length,
+		Offset: span.Offset + span.Length,
+	}
+
+	return &finding.Range{Start: start, End: end}
 }
 
 // parseCode splits "eslint(no-debugger)" or "typescript/no-explicit-any"
@@ -220,6 +262,33 @@ func mapCategory(pluginName string) finding.Category {
 	return finding.CategoryCorrectness
 }
 
+// mapFixStrategy returns the go-finding FixStrategy for the given rule.
+// Uses the registry when available; falls back to FixStrategyNone.
+func (d *Detector) mapFixStrategy(ruleName, pluginName string) finding.FixStrategy {
+	if d.registry == nil {
+		return finding.FixStrategyNone
+	}
+
+	fullName := ruleName
+	if pluginName != "eslint" {
+		fullName = pluginName + "/" + ruleName
+	}
+
+	r, ok := d.registry.ByName(fullName)
+	if !ok {
+		return finding.FixStrategyNone
+	}
+
+	switch r.Fix {
+	case rule.FixSafe:
+		return finding.FixStrategyDirect
+	case rule.FixSuggestion, rule.FixDangerous:
+		return finding.FixStrategySuggest
+	default:
+		return finding.FixStrategyNone
+	}
+}
+
 // handleExitError returns a meaningful error for exec.ExitError, or nil
 // if the exit code is just oxlint reporting findings (exit code 1).
 // Returns a non-nil error for unexpected failures.
@@ -227,9 +296,9 @@ func handleExitError(err error, cmd string) error {
 	exitErr := &exec.ExitError{}
 	if errors.As(err, &exitErr) {
 		if len(exitErr.Stderr) > 0 {
-			return fmt.Errorf("%s: %s", cmd, string(exitErr.Stderr))
+			return finding.NewIOError(cmd, fmt.Errorf("%s", string(exitErr.Stderr)))
 		}
 		return nil
 	}
-	return fmt.Errorf("run %s: %w", cmd, err)
+	return finding.NewIOError("run "+cmd, err)
 }

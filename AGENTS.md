@@ -55,7 +55,7 @@ just check       # All checks (fmt + vet + lint + test)
 1. **Embedded rules data** — Rules are embedded via `go:embed` for zero-dependency startup
 2. **Profile-driven** — All severity decisions flow from `DecideCategory()`; `Description()` derived from same source
 3. **Project-aware** — Auto-detects frameworks to enable relevant plugins
-4. **go-finding integration** — Uses Detector interface for oxlint integration; `Runner` seam for testability
+4. **go-finding integration** — Full detect→triage→fix→verify pipeline; Detector interface; FixStrategy from registry; Range from oxlint labels; structured FindingError; Metrics/Retry/Callbacks; Report.PrettyJSON/ToSARIF/ToSARIFFiltered; SortByPosition/ActiveFindings
 5. **Config round-trip** — Generated configs can be parsed back and compared
 6. **Self-describing types** — Plugin has `CLIFlag()`/`NeedsFlag()`; Registry has generic `Filter()`
 7. **Decoupled rendering** — `pkg/format` accepts plain view structs, not go-finding types
@@ -97,6 +97,11 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Differ completeness** — Compares all fields: Plugins, Categories, Rules, Env, Settings
 - **Runner seam** — `pkg/oxlint.Runner` interface; `realRunner` (production), `mockRunner` (tests)
 - **Configure extraction** — `Configure(ctx, absRoot, opts)` callable without cobra; malformed existing configs now log warnings
+- **go-finding Finding enrichment** — Detector populates Range (from oxlint label spans), FixStrategy (from registry FixCapability), Tag (plugin name), Snippet (label text), Metadata (url), Suggestion (help)
+- **go-finding FindingError** — All detector errors use structured `finding.NewIOError`/`NewParseError` for `errors.Is()` support
+- **Pipeline config** — Analyze command wires Metrics, Retry (2 retries, 100ms base), OnFinding/OnIteration callbacks; oxlint version in ToolInfo
+- **Analyze formats** — `summary`, `json` (flat FindingView array), `report` (full go-finding Report JSON), `sarif`, `table`
+- **WithRegistry option** — `oxlint.WithRegistry(reg)` enables FixStrategy lookup per-finding
 
 ---
 
