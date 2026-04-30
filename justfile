@@ -47,3 +47,15 @@ run: build
 update-rules:
     oxlint -f json --rules > pkg/rule/rules_data.json
     oxlint --version | sed 's/Version: //' > pkg/rule/rules_version.txt
+
+# Vendor Go dependencies (required for nix build)
+vendor:
+    GOWORK=off go mod vendor
+
+# Nix build
+nix-build:
+    nix build .
+
+# Enter nix dev shell
+nix-shell:
+    nix develop .

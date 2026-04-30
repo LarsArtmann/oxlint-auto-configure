@@ -35,6 +35,20 @@ Oxlint has 716 rules across 7 categories and 15 plugins. Only 108 are enabled by
 | `internal/cli/cmd_report.go` | report command + format helpers (JSON, table, summary) |
 | `cmd/oxlint-auto-configure/main.go` | Entry point |
 
+### Nix
+
+The project has a `flake.nix` for reproducible builds and dev shells.
+
+```bash
+nix build .                    # Build binary (tests run, oxlint included)
+nix run . -- configure .      # Run with oxlint in PATH
+nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint, just
+```
+
+- **Vendored deps** — `vendor/` committed for nix sandbox compatibility (private go-finding dep)
+- **`just vendor`** — Re-vendor after `go.mod` changes (`GOWORK=off` required)
+- **Runtime dep** — `oxlint` is a runtime dependency; wrapped in `nix run` via `makeWrapper`
+
 ### Testing
 
 ```bash
@@ -102,6 +116,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Pipeline config** — Analyze command wires Metrics, Retry (2 retries, 100ms base), OnFinding/OnIteration callbacks; oxlint version in ToolInfo
 - **Analyze formats** — `summary`, `json` (flat FindingView array), `report` (full go-finding Report JSON), `sarif`, `table`
 - **WithRegistry option** — `oxlint.WithRegistry(reg)` enables FixStrategy lookup per-finding
+- **Nix build** — `vendor/` committed; `vendorHash = null` in flake; `GOWORK=off` for vendor
 
 ---
 
