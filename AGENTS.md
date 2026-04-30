@@ -2,7 +2,18 @@
 
 ## Project Overview
 
-**oxlint-auto-configure** is a Go CLI that automatically generates optimal `.oxlintrc.json` configurations for maximum type safety. It uses [go-finding](https://github.com/larsartmann/go-finding) as its core library for the detect→triage→fix→verify pipeline.
+**oxlint-auto-configure** is a Go CLI that generates optimal `.oxlintrc.json` configurations for maximum type safety.
+
+### SCOPE BOUNDARY — READ THIS FIRST
+
+**This tool generates `.oxlintrc.json`. Nothing else.**
+
+- ✅ **Our job:** Detect project type → pick profile → generate config → validate config
+- ❌ **NOT our job:** Running oxlint, auto-fixing code, enforcing lint rules, replacing oxlint
+- The `analyze` command is a **diagnostic aid** to help decide which profile to use — not a linter replacement
+- `pkg/oxlint/fix.go` and `configure --fix` exist for convenience but are **not core purpose**
+- The go-finding pipeline's fix+verify loop stays `DryRun=true` — we detect and report, we do not fix
+- Do NOT add features that duplicate oxlint's job (auto-fix, watch mode, enforcement)
 
 ### Core Purpose
 
@@ -69,7 +80,7 @@ just check       # All checks (fmt + vet + lint + test)
 1. **Embedded rules data** — Rules are embedded via `go:embed` for zero-dependency startup
 2. **Profile-driven** — All severity decisions flow from `DecideCategory()`; `Description()` derived from same source
 3. **Project-aware** — Auto-detects frameworks to enable relevant plugins
-4. **go-finding integration** — Full detect→triage→fix→verify pipeline; Detector interface; FixStrategy from registry; Range from oxlint labels; structured FindingError; Metrics/Retry/Callbacks; Report.PrettyJSON/ToSARIF/ToSARIFFiltered; SortByPosition/ActiveFindings
+4. **go-finding integration** — Detection and reporting only (DryRun=true, no auto-fix); Detector interface; FixStrategy from registry (for reporting, not for fixing); Range from oxlint labels; structured FindingError; Metrics/Retry/Callbacks; Report.PrettyJSON/ToSARIF/ToSARIFFiltered; SortByPosition/ActiveFindings; finding.Filter for --severity
 5. **Config round-trip** — Generated configs can be parsed back and compared
 6. **Self-describing types** — Plugin has `CLIFlag()`/`NeedsFlag()`; Registry has generic `Filter()`
 7. **Decoupled rendering** — `pkg/format` accepts plain view structs, not go-finding types

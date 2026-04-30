@@ -1,6 +1,8 @@
 # oxlint-auto-configure
 
-Automatically configure [oxlint](https://oxc.rs/docs/guide/usage/linter.html) for maximum type safety. Uses [go-finding](https://github.com/larsartmann/go-finding) to run oxlint, collect findings, and auto-configure every available rule with the best severity setting.
+**Generate the optimal `.oxlintrc.json` — not a linter, a configurator.**
+
+This tool's one job: inspect your project and write the best possible [oxlint](https://oxc.rs/docs/guide/usage/linter.html) config. It does **not** lint, fix, or replace oxlint — it configures oxlint so you don't have to.
 
 ## Why
 
@@ -10,6 +12,8 @@ Oxlint has **716 rules** across **7 categories** and **15 plugins**. Only 108 ar
 - Enables relevant plugins automatically
 - Sets optimal severity for every rule based on your chosen profile
 - Generates a ready-to-use `.oxlintrc.json`
+
+> **Scope boundary:** This tool generates `.oxlintrc.json`. Running oxlint, auto-fixing code, and enforcing lint rules are oxlint's job. The `analyze` command is a diagnostic aid to help you decide which profile to use — not a replacement for running oxlint itself.
 
 ## Installation
 

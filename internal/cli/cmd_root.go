@@ -30,11 +30,13 @@ func NewRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "oxlint-auto-configure",
 		Short: "Automatically configure oxlint for maximum type safety",
-		Long: `oxlint-auto-configure analyzes your project and generates the optimal
-.oxlintrc.json configuration for maximum type safety and correctness enforcement.
+		Long: `oxlint-auto-configure generates the optimal .oxlintrc.json for your project.
 
-It uses the go-finding library to run oxlint, collect findings, and
-auto-configure every available rule with the best severity setting.`,
+This tool configures oxlint — it does not replace it. Running oxlint,
+auto-fixing code, and enforcing rules are oxlint's job.
+
+It detects your project type, picks the right plugins, and sets every
+rule to the best severity based on your chosen profile.`,
 		Version: version,
 		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 			return setupLogging(verbose, quiet, os.Stderr)
