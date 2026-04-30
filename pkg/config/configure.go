@@ -19,7 +19,7 @@ func GenerateProjectConfig(
 ) (*OxlintConfig, error) {
 	if !p.IsValid() {
 		return nil, fmt.Errorf("%w %q: choose from %s",
-			ErrInvalidProfile, p, strings.Join(profileNames(), ", "))
+			ErrInvalidProfile, p, strings.Join(profile.AllProfileNames(), ", "))
 	}
 
 	cat := profile.NewCategorizer(p, pluginConfig)
@@ -32,12 +32,3 @@ func GenerateProjectConfig(
 	return gen.Generate(), nil
 }
 
-func profileNames() []string {
-	ps := profile.AllProfiles()
-	names := make([]string, len(ps))
-	for i, p := range ps {
-		names[i] = string(p)
-	}
-
-	return names
-}

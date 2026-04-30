@@ -80,7 +80,7 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 		return fmt.Errorf("%w %q: choose from %s",
 			config.ErrInvalidProfile,
 			opts.Profile,
-			strings.Join(cliProfileNames(), ", "),
+			strings.Join(profile.AllProfileNames(), ", "),
 		)
 	}
 
@@ -212,14 +212,4 @@ func writeDryRun(cfg *config.OxlintConfig, targetPath string) error {
 	slog.Info("dry run", "path", targetPath)
 	fmt.Println(string(data))
 	return nil
-}
-
-func cliProfileNames() []string {
-	ps := profile.AllProfiles()
-	names := make([]string, len(ps))
-	for i, p := range ps {
-		names[i] = string(p)
-	}
-
-	return names
 }

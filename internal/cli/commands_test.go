@@ -291,7 +291,7 @@ func TestCompactLogAttrPreservesOther(t *testing.T) {
 
 func TestProfileNames(t *testing.T) {
 	t.Parallel()
-	names := cliProfileNames()
+	names := profile.AllProfileNames()
 	assert.Len(t, names, 4)
 	assert.Contains(t, names, "recommended")
 }

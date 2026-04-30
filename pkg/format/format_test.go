@@ -92,8 +92,8 @@ func TestPrintFindingsTable(t *testing.T) {
 func TestPrintFindingsTableSortsByFile(t *testing.T) {
 	t.Parallel()
 	findings := []FindingView{
-		{Rule: "z-rule", File: "z.js", Line: 1},
 		{Rule: "a-rule", File: "a.js", Line: 1},
+		{Rule: "z-rule", File: "z.js", Line: 1},
 	}
 
 	var buf bytes.Buffer
@@ -101,17 +101,17 @@ func TestPrintFindingsTableSortsByFile(t *testing.T) {
 	require.NoError(t, err)
 
 	lines := strings.Split(buf.String(), "\n")
-	aLine := 0
-	zLine := 0
+	aIdx := 0
+	zIdx := 0
 	for i, line := range lines {
 		if strings.Contains(line, "a-rule") {
-			aLine = i
+			aIdx = i
 		}
 		if strings.Contains(line, "z-rule") {
-			zLine = i
+			zIdx = i
 		}
 	}
-	assert.Less(t, aLine, zLine, "a.js should appear before z.js")
+	assert.Less(t, aIdx, zIdx, "a.js should appear before z.js (caller must pre-sort)")
 }
 
 func TestPrintFindingsTableTruncatesLongMessages(t *testing.T) {

@@ -38,6 +38,16 @@ func AllProfiles() []Profile {
 	return []Profile{ProfileMaximalTypesafe, ProfileRecommended, ProfileStrict, ProfileMinimal}
 }
 
+// AllProfileNames returns all profile names as strings.
+func AllProfileNames() []string {
+	ps := AllProfiles()
+	names := make([]string, len(ps))
+	for i, p := range ps {
+		names[i] = string(p)
+	}
+	return names
+}
+
 // IsValid returns true if the profile is recognized.
 func (p Profile) IsValid() bool {
 	return slices.Contains(AllProfiles(), p)

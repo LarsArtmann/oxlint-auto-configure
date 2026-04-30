@@ -42,7 +42,7 @@ Formats:
 
 	cmd.Flags().StringVar(&rootDir, "root", ".", "Project root directory")
 	cmd.Flags().
-		StringVarP(&formatFlag, "format", "f", "summary", "Output format: summary, json, sarif, table")
+		StringVarP(&formatFlag, "format", "f", "summary", "Output format: summary, json, report, sarif, table")
 
 	return cmd
 }
@@ -66,7 +66,10 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag string) error {
 		return fmt.Errorf("load rules: %w", err)
 	}
 
-	oxlintVersion, _ := oxlint.CheckVersion(ctx)
+	oxlintVersion, err := oxlint.CheckVersion(ctx)
+	if err != nil {
+		slog.Warn("could not determine oxlint version", "error", err)
+	}
 
 	configPath := filepath.Join(absRoot, defaultConfigPath)
 	var opts []oxlint.Option

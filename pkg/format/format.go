@@ -60,20 +60,12 @@ func PrintFindingsJSON(w io.Writer, findings []FindingView) error {
 }
 
 // PrintFindingsTable writes findings as a Markdown table to w.
+// Findings should be pre-sorted by the caller (e.g., finding.SortByPosition).
 func PrintFindingsTable(w io.Writer, findings []FindingView) error {
 	_, _ = fmt.Fprintln(w, "| Rule | Severity | Category | File:Line | Message |")
 	_, _ = fmt.Fprintln(w, "|------|----------|----------|-----------|---------|")
 
-	sorted := make([]FindingView, len(findings))
-	copy(sorted, findings)
-	sort.Slice(sorted, func(i, j int) bool {
-		if sorted[i].File != sorted[j].File {
-			return sorted[i].File < sorted[j].File
-		}
-		return sorted[i].Line < sorted[j].Line
-	})
-
-	for _, f := range sorted {
+	for _, f := range findings {
 		loc := fmt.Sprintf("%s:%d", f.File, f.Line)
 		msg := f.Message
 		if len(msg) > 60 {
