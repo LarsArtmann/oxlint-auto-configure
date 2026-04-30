@@ -13,18 +13,31 @@ Oxlint has **716 rules** across **7 categories** and **15 plugins**. Only 108 ar
 
 ## Installation
 
+### Nix (recommended)
+
 ```bash
+# Build and run directly (oxlint included)
+nix run github:larsartmann/oxlint-auto-configure -- configure
+
+# Or install to your nix profile
+nix profile install github:larsartmann/oxlint-auto-configure
+
+# Dev shell with go, oxlint, gopls, golangci-lint, just
+nix develop github:larsartmann/oxlint-auto-configure
+```
+
+### Go
+
+```bash
+export GOPRIVATE=github.com/LarsArtmann/*
 go install github.com/larsartmann/oxlint-auto-configure/cmd/oxlint-auto-configure@latest
 ```
 
 Requires Go 1.26+ and [oxlint](https://oxc.rs/docs/guide/usage/linter.html) in PATH.
 
-> **Note:** This project depends on [go-finding](https://github.com/larsartmann/go-finding) (private repo).
-> Set `GOPRIVATE` so Go can fetch it:
-> ```bash
-> export GOPRIVATE=github.com/LarsArtmann/*
-> go install github.com/larsartmann/oxlint-auto-configure/cmd/oxlint-auto-configure@latest
-> ```
+> **Note:** The Go install method requires access to the private
+> [go-finding](https://github.com/larsartmann/go-finding) dependency.
+> The nix method works without any Go setup or Git authentication.
 
 ## Quick Start
 
@@ -100,7 +113,7 @@ oxlint-auto-configure configure [flags]
 Run oxlint and show findings using the go-finding pipeline:
 
 ```bash
-oxlint-auto-configure analyze [--root .] [-f summary|json|sarif|table]
+oxlint-auto-configure analyze [--root .] [-f summary|json|report|sarif|table]
 ```
 
 ### `validate`
@@ -153,12 +166,15 @@ oxlint-auto-configure report [-p recommended] [-f table|json|summary]
 ## Development
 
 ```bash
-just build       # Build CLI binary
-just test        # Run tests with -race
-just lint        # Run golangci-lint
-just cover       # Coverage report
-just check       # All checks
+just build        # Build CLI binary
+just test         # Run tests with -race
+just lint         # Run golangci-lint
+just cover        # Coverage report
+just check        # All checks
 just update-rules # Refresh rules from oxlint
+just vendor       # Re-vendor deps (needed after go.mod changes)
+nix build .       # Build via nix (runs tests)
+nix run . -- configure  # Run via nix (oxlint included)
 ```
 
 ## Architecture
