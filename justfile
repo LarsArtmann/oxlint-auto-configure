@@ -38,7 +38,7 @@ vet:
     go vet ./...
 
 clean:
-    rm -rf bin/ coverage.out coverage.html
+    trash bin/ coverage.out coverage.html 2>/dev/null || rm -rf bin/ coverage.out coverage.html
 
 run: build
     ./bin/oxlint-auto-configure {{argv}}

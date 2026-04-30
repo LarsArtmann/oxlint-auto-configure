@@ -18,4 +18,6 @@ Thumbs.db
 # Oxlint config (generated)
 .oxlintrc.json
 
+# Nix build result symlink
+result
 
