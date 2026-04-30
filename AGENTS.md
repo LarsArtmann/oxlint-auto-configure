@@ -117,6 +117,10 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Analyze formats** — `summary`, `json` (flat FindingView array), `report` (full go-finding Report JSON), `sarif`, `table`
 - **WithRegistry option** — `oxlint.WithRegistry(reg)` enables FixStrategy lookup per-finding
 - **Nix build** — `vendor/` committed; `vendorHash = null` in flake; `GOWORK=off` for vendor
+- **Severity filter** — Analyze `-s/--severity` flag uses `finding.Filter(BySeverityAtLeast)` for json/table; `ToSARIFFiltered` for SARIF
+- **Profile name dedup** — `profile.AllProfileNames()` is single source; no more `cliProfileNames`/`config.profileNames`
+- **Detect logging** — `pkg/detect` logs warnings on malformed package.json (but not missing — that's normal for Go projects)
+- **Summary enrichment** — `SummaryView.ByFixStrategy` populated from `Report.Summary.ByFixStrategy`
 
 ---
 
