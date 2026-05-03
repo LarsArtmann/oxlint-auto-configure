@@ -2,7 +2,7 @@
   description = "Auto-generate optimal .oxlintrc.json configurations for maximum type safety";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   outputs = { self, nixpkgs }:
@@ -81,5 +81,7 @@
       overlays.default = final: prev: {
         oxlint-auto-configure = self.packages.${final.stdenv.hostPlatform.system}.default;
       };
+
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
     };
 }
