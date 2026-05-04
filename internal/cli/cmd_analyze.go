@@ -162,7 +162,12 @@ func activeWithFilter(report *finding.Report, minSev finding.Severity) []finding
 }
 
 // renderFindings converts go-finding types to format views and delegates rendering.
-func renderFindings(fmtFlag string, report *finding.Report, result *pipeline.PipelineResult, minSev finding.Severity) error {
+func renderFindings(
+	fmtFlag string,
+	report *finding.Report,
+	result *pipeline.PipelineResult,
+	minSev finding.Severity,
+) error {
 	filtered := activeWithFilter(report, minSev)
 
 	if len(filtered) == 0 && minSev != "" {
@@ -187,7 +192,10 @@ func renderFindings(fmtFlag string, report *finding.Report, result *pipeline.Pip
 	case "sarif":
 		return printSARIF(os.Stdout, report, minSev)
 	default:
-		return fmt.Errorf("unknown format %q: choose from summary, json, report, sarif, table", fmtFlag)
+		return fmt.Errorf(
+			"unknown format %q: choose from summary, json, report, sarif, table",
+			fmtFlag,
+		)
 	}
 }
 

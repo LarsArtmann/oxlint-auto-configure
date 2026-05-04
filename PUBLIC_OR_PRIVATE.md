@@ -14,13 +14,13 @@
 
 ## Project Summary
 
-| Aspect | Detail |
-|--------|--------|
-| **What** | Go CLI that generates optimal `.oxlintrc.json` for oxlint |
-| **Maturity** | 84 commits, ~1 week old, actively developed |
-| **Code quality** | Clean architecture, tests, CI, nix flakes, linting |
-| **License** | MIT |
-| **Unique?** | No direct competitor exists (Sourcegraph search confirms) |
+| Aspect           | Detail                                                    |
+| ---------------- | --------------------------------------------------------- |
+| **What**         | Go CLI that generates optimal `.oxlintrc.json` for oxlint |
+| **Maturity**     | 84 commits, ~1 week old, actively developed               |
+| **Code quality** | Clean architecture, tests, CI, nix flakes, linting        |
+| **License**      | MIT                                                       |
+| **Unique?**      | No direct competitor exists (Sourcegraph search confirms) |
 
 ---
 
@@ -63,7 +63,7 @@ Oxlint has 716 rules, only 108 enabled by default. No tool exists to auto-config
 ### 6. No competitive risk
 
 - The "secret sauce" is the profile decision engine + rule categorization — not something competitors can steal meaningful value from
-- The value is in *maintenance* (keeping rules_data.json updated with oxlint releases) — that requires ongoing effort regardless of visibility
+- The value is in _maintenance_ (keeping rules_data.json updated with oxlint releases) — that requires ongoing effort regardless of visibility
 
 ### 7. Vendored go-finding code is NOT committed
 
@@ -84,6 +84,7 @@ Oxlint has 716 rules, only 108 enabled by default. No tool exists to auto-config
 - The nix method works (vendored) but the Go method won't
 
 **Resolution options:**
+
 1. **Best:** Make `go-finding` public too (it's a generic static analysis model — no reason to be private)
 2. **Workaround:** Replace `go-finding` with a minimal internal implementation (only uses a subset: Finding, Report, SARIF, Filter, Severity)
 3. **Acceptable:** Document nix-only installation, accept that `go install` is restricted
@@ -143,16 +144,16 @@ The README already uses `github:larsartmann/oxlint-auto-configure` URLs that onl
 
 ## Decision Matrix
 
-| Factor | Public | Private |
-|--------|--------|---------|
-| Community adoption | +++ | — |
-| Portfolio value | +++ | — |
-| Ecosystem contribution | +++ | — |
-| Maintenance burden | ++ (issues/PRs) | — |
-| Dependency complexity | — (private dep) | + |
-| Competitive exposure | negligible | + |
-| First-mover advantage | +++ | — |
-| **Net** | **Strong positive** | Neutral |
+| Factor                 | Public              | Private |
+| ---------------------- | ------------------- | ------- |
+| Community adoption     | +++                 | —       |
+| Portfolio value        | +++                 | —       |
+| Ecosystem contribution | +++                 | —       |
+| Maintenance burden     | ++ (issues/PRs)     | —       |
+| Dependency complexity  | — (private dep)     | +       |
+| Competitive exposure   | negligible          | +       |
+| First-mover advantage  | +++                 | —       |
+| **Net**                | **Strong positive** | Neutral |
 
 ---
 

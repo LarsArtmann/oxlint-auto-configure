@@ -26,25 +26,25 @@ Oxlint has 716 rules across 7 categories and 15 plugins. Only 108 are enabled by
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `pkg/rule/rule.go` | Core types: Rule, Category, Plugin, FixCapability, SeverityDecision |
-| `pkg/rule/registry.go` | Rule registry loaded from embedded JSON (716 rules) |
-| `pkg/rule/rules_data.json` | Embedded oxlint rules data (from `oxlint -f json --rules`) |
-| `pkg/profile/profile.go` | Profile presets, Categorizer engine, `DecideCategory()`, PluginConfig |
-| `pkg/config/generator.go` | .oxlintrc.json generator |
-| `pkg/detect/detector.go` | Project type detection from package.json |
-| `pkg/diff/differ.go` | Config before/after comparison (all fields: plugins, categories, rules, env, settings) |
-| `pkg/format/format.go` | Rendering: FindingView, SummaryView, PrintSummary/PrintFindingsJSON/PrintFindingsTable |
-| `pkg/oxlint/detector.go` | go-finding Detector for oxlint; `Runner` interface seam |
-| `pkg/oxlint/version.go` | oxlint version check and binary verification |
-| `pkg/oxlint/fix.go` | oxlint --fix wrapper |
-| `internal/cli/cmd_root.go` | Root command, shared constants (defaultConfigPath, defaultProfile, version) |
-| `internal/cli/cmd_configure.go` | configure command + extracted `Configure(ctx, absRoot, opts)` |
-| `internal/cli/cmd_analyze.go` | analyze command with go-finding pipeline integration |
-| `internal/cli/cmd_validate.go` | validate command |
-| `internal/cli/cmd_report.go` | report command + format helpers (JSON, table, summary) |
-| `cmd/oxlint-auto-configure/main.go` | Entry point |
+| File                                | Purpose                                                                                |
+| ----------------------------------- | -------------------------------------------------------------------------------------- |
+| `pkg/rule/rule.go`                  | Core types: Rule, Category, Plugin, FixCapability, SeverityDecision                    |
+| `pkg/rule/registry.go`              | Rule registry loaded from embedded JSON (716 rules)                                    |
+| `pkg/rule/rules_data.json`          | Embedded oxlint rules data (from `oxlint -f json --rules`)                             |
+| `pkg/profile/profile.go`            | Profile presets, Categorizer engine, `DecideCategory()`, PluginConfig                  |
+| `pkg/config/generator.go`           | .oxlintrc.json generator                                                               |
+| `pkg/detect/detector.go`            | Project type detection from package.json                                               |
+| `pkg/diff/differ.go`                | Config before/after comparison (all fields: plugins, categories, rules, env, settings) |
+| `pkg/format/format.go`              | Rendering: FindingView, SummaryView, PrintSummary/PrintFindingsJSON/PrintFindingsTable |
+| `pkg/oxlint/detector.go`            | go-finding Detector for oxlint; `Runner` interface seam                                |
+| `pkg/oxlint/version.go`             | oxlint version check and binary verification                                           |
+| `pkg/oxlint/fix.go`                 | oxlint --fix wrapper                                                                   |
+| `internal/cli/cmd_root.go`          | Root command, shared constants (defaultConfigPath, defaultProfile, version)            |
+| `internal/cli/cmd_configure.go`     | configure command + extracted `Configure(ctx, absRoot, opts)`                          |
+| `internal/cli/cmd_analyze.go`       | analyze command with go-finding pipeline integration                                   |
+| `internal/cli/cmd_validate.go`      | validate command                                                                       |
+| `internal/cli/cmd_report.go`        | report command + format helpers (JSON, table, summary)                                 |
+| `cmd/oxlint-auto-configure/main.go` | Entry point                                                                            |
 
 ### Nix
 
@@ -88,12 +88,12 @@ just check       # All checks (fmt + vet + lint + test)
 
 ### Profiles
 
-| Profile | Description |
-|---------|-------------|
-| `maximal-typesafe` | ALL rules at error (nursery at warn) |
-| `recommended` | Correctness+suspicious+TS at error, rest at warn, nursery off |
-| `strict` | Correctness+suspicious at error, rest at warn, nursery off |
-| `minimal` | Only correctness at error, rest uses defaults |
+| Profile            | Description                                                   |
+| ------------------ | ------------------------------------------------------------- |
+| `maximal-typesafe` | ALL rules at error (nursery at warn)                          |
+| `recommended`      | Correctness+suspicious+TS at error, rest at warn, nursery off |
+| `strict`           | Correctness+suspicious at error, rest at warn, nursery off    |
+| `minimal`          | Only correctness at error, rest uses defaults                 |
 
 ### Updating Rules
 

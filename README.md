@@ -67,12 +67,12 @@ oxlint-auto-configure report
 
 ## Profiles
 
-| Profile | Correctness | Suspicious | TypeScript | Style | Perf | Pedantic | Restriction | Nursery |
-|---------|------------|------------|------------|-------|------|----------|-------------|---------|
-| **maximal-typesafe** | error | error | error | error | error | error | error | warn |
-| **strict** | error | error | error | warn | warn | warn | warn | off |
-| **recommended** | error | error | error | warn | warn | warn | warn | off |
-| **minimal** | error | default | default | default | default | default | default | default |
+| Profile              | Correctness | Suspicious | TypeScript | Style   | Perf    | Pedantic | Restriction | Nursery |
+| -------------------- | ----------- | ---------- | ---------- | ------- | ------- | -------- | ----------- | ------- |
+| **maximal-typesafe** | error       | error      | error      | error   | error   | error    | error       | warn    |
+| **strict**           | error       | error      | error      | warn    | warn    | warn     | warn        | off     |
+| **recommended**      | error       | error      | error      | warn    | warn    | warn     | warn        | off     |
+| **minimal**          | error       | default    | default    | default | default | default  | default     | default |
 
 ### Profile Details
 
@@ -85,14 +85,14 @@ oxlint-auto-configure report
 
 The tool auto-detects your project type and enables relevant plugins:
 
-| Detected | Plugins Enabled |
-|----------|----------------|
-| React | `react`, `jsx-a11y`, `react-perf` |
-| Next.js | `nextjs`, `react`, `jsx-a11y` |
-| Vue | `vue` |
-| Jest | `jest`, `node` |
-| Vitest | `vitest` |
-| TypeScript | `typescript` (always on) |
+| Detected   | Plugins Enabled                   |
+| ---------- | --------------------------------- |
+| React      | `react`, `jsx-a11y`, `react-perf` |
+| Next.js    | `nextjs`, `react`, `jsx-a11y`     |
+| Vue        | `vue`                             |
+| Jest       | `jest`, `node`                    |
+| Vitest     | `vitest`                          |
+| TypeScript | `typescript` (always on)          |
 
 ## Commands
 
@@ -104,13 +104,13 @@ Generate the optimal `.oxlintrc.json`:
 oxlint-auto-configure configure [flags]
 ```
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `-p, --profile` | `recommended` | Configuration profile |
-| `-c, --config` | `.oxlintrc.json` | Output config file path |
-| `-d, --dry-run` | false | Show changes without writing |
-| `--fix` | false | Run oxlint --fix after writing config |
-| `--root` | `.` | Project root directory |
+| Flag            | Default          | Description                           |
+| --------------- | ---------------- | ------------------------------------- |
+| `-p, --profile` | `recommended`    | Configuration profile                 |
+| `-c, --config`  | `.oxlintrc.json` | Output config file path               |
+| `-d, --dry-run` | false            | Show changes without writing          |
+| `--fix`         | false            | Run oxlint --fix after writing config |
+| `--root`        | `.`              | Project root directory                |
 
 ### `analyze`
 
@@ -138,34 +138,34 @@ oxlint-auto-configure report [-p recommended] [-f table|json|summary]
 
 ## Rule Statistics
 
-| Category | Count | Default |
-|----------|-------|---------|
-| Correctness | 216 | 108 enabled |
-| Style | 211 | mostly disabled |
-| Pedantic | 115 | disabled |
-| Restriction | 91 | disabled |
-| Suspicious | 52 | disabled |
-| Perf | 13 | disabled |
-| Nursery | 18 | disabled |
-| **Total** | **716** | **108 enabled** |
+| Category    | Count   | Default         |
+| ----------- | ------- | --------------- |
+| Correctness | 216     | 108 enabled     |
+| Style       | 211     | mostly disabled |
+| Pedantic    | 115     | disabled        |
+| Restriction | 91      | disabled        |
+| Suspicious  | 52      | disabled        |
+| Perf        | 13      | disabled        |
+| Nursery     | 18      | disabled        |
+| **Total**   | **716** | **108 enabled** |
 
-| Plugin | Rules |
-|--------|-------|
-| eslint | 173 |
-| unicorn | 128 |
-| typescript | 108 |
-| react | 57 |
-| jest | 56 |
-| import | 32 |
-| jsx_a11y | 31 |
-| vitest | 23 |
-| nextjs | 21 |
-| jsdoc | 18 |
-| vue | 17 |
-| promise | 16 |
-| oxc | 26 |
-| node | 6 |
-| react_perf | 4 |
+| Plugin     | Rules |
+| ---------- | ----- |
+| eslint     | 173   |
+| unicorn    | 128   |
+| typescript | 108   |
+| react      | 57    |
+| jest       | 56    |
+| import     | 32    |
+| jsx_a11y   | 31    |
+| vitest     | 23    |
+| nextjs     | 21    |
+| jsdoc      | 18    |
+| vue        | 17    |
+| promise    | 16    |
+| oxc        | 26    |
+| node       | 6     |
+| react_perf | 4     |
 
 ## Development
 

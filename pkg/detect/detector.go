@@ -18,14 +18,14 @@ type ProjectType string
 
 // ProjectTypeUnknown and other project type constants represent detected framework categories.
 const (
-	ProjectTypeUnknown   ProjectType = "unknown"    // no recognized framework
-	ProjectTypeReact    ProjectType = "react"      // React SPA
-	ProjectTypeNextJS   ProjectType = "nextjs"     // Next.js SSR
-	ProjectTypeVue      ProjectType = "vue"        // Vue SPA
-	ProjectTypeNode     ProjectType = "node"       // Node.js backend
-	ProjectTypeTest     ProjectType = "test"       // test framework (vitest/jest)
-	ProjectTypePlainTS  ProjectType = "typescript" // TypeScript without framework
-	ProjectTypeLibrary  ProjectType = "library"    // shared library
+	ProjectTypeUnknown ProjectType = "unknown"    // no recognized framework
+	ProjectTypeReact   ProjectType = "react"      // React SPA
+	ProjectTypeNextJS  ProjectType = "nextjs"     // Next.js SSR
+	ProjectTypeVue     ProjectType = "vue"        // Vue SPA
+	ProjectTypeNode    ProjectType = "node"       // Node.js backend
+	ProjectTypeTest    ProjectType = "test"       // test framework (vitest/jest)
+	ProjectTypePlainTS ProjectType = "typescript" // TypeScript without framework
+	ProjectTypeLibrary ProjectType = "library"    // shared library
 )
 
 // Detector detects project type from the filesystem.
@@ -175,7 +175,13 @@ func (d *Detector) readPackageJSON() *packageJSON {
 
 	var pkg packageJSON
 	if err := json.Unmarshal(data, &pkg); err != nil {
-		slog.Warn("malformed package.json, skipping dependency detection", "path", path, "error", err)
+		slog.Warn(
+			"malformed package.json, skipping dependency detection",
+			"path",
+			path,
+			"error",
+			err,
+		)
 		return nil
 	}
 	return &pkg

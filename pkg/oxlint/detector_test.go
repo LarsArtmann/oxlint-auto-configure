@@ -523,7 +523,12 @@ func TestMapFixStrategy(t *testing.T) {
 		expected finding.FixStrategy
 	}{
 		{"no-debugger is safe", "no-debugger", "eslint", finding.FixStrategyDirect},
-		{"no-explicit-any is suggestion", "no-explicit-any", "typescript", finding.FixStrategySuggest},
+		{
+			"no-explicit-any is suggestion",
+			"no-explicit-any",
+			"typescript",
+			finding.FixStrategySuggest,
+		},
 		{"unknown rule defaults to none", "nonexistent", "eslint", finding.FixStrategyNone},
 	}
 

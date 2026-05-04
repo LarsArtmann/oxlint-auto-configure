@@ -31,4 +31,3 @@ func GenerateProjectConfig(
 
 	return gen.Generate(), nil
 }
-

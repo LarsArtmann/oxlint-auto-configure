@@ -197,7 +197,12 @@ func rangeFromLabels(filename string, labels []oxlintLabel) *finding.Range {
 	}
 
 	span := labels[0].Span
-	start := finding.Position{File: filename, Line: span.Line, Column: span.Column, Offset: span.Offset}
+	start := finding.Position{
+		File:   filename,
+		Line:   span.Line,
+		Column: span.Column,
+		Offset: span.Offset,
+	}
 
 	if span.Length == 0 {
 		return nil
