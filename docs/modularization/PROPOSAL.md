@@ -18,6 +18,7 @@
 **What changes:** Split into 3 modules — `core` (domain), `analysis` (go-finding integration), and the existing root module (CLI binary). No package moves; only `go.mod` boundaries and import paths change.
 
 **Expected benefits:**
+
 - Core library is publishable and reusable without CLI deps
 - `go-finding` dependency isolated to `analysis` module only
 - CLI module stays thin — wiring only
@@ -29,8 +30,8 @@
 
 ### 2.1 Module Landscape
 
-| Module | Path | Internal Deps | External Deps | State |
-|--------|------|---------------|---------------|-------|
+| Module                                         | Path        | Internal Deps  | External Deps                    | State    |
+| ---------------------------------------------- | ----------- | -------------- | -------------------------------- | -------- |
 | `github.com/larsartmann/oxlint-auto-configure` | `./` (root) | All 9 packages | `cobra`, `go-finding`, `testify` | Monolith |
 
 ### 2.2 Package Dependency Graph
@@ -61,7 +62,7 @@
               │  pkg/rule  ◄────────┘─────────┘
               │  (leaf)
               └───────────
-    
+
     ┌──────────────┐
     │  pkg/format  │  ← leaf, no internal deps
     └──────────────┘
@@ -69,16 +70,16 @@
 
 ### 2.3 External Dependency Usage
 
-| Package | `cobra` | `go-finding` | `testify` | stdlib only |
-|---------|---------|--------------|-----------|-------------|
-| `internal/cli` | ✅ (all cmd files) | ✅ (cmd_analyze) | — | — |
-| `pkg/oxlint` | — | ✅ (detector) | — | — |
-| `pkg/rule` | — | — | — | ✅ |
-| `pkg/profile` | — | — | — | ✅ |
-| `pkg/detect` | — | — | — | ✅ |
-| `pkg/config` | — | — | — | ✅ |
-| `pkg/diff` | — | — | — | ✅ |
-| `pkg/format` | — | — | — | ✅ |
+| Package        | `cobra`            | `go-finding`     | `testify` | stdlib only |
+| -------------- | ------------------ | ---------------- | --------- | ----------- |
+| `internal/cli` | ✅ (all cmd files) | ✅ (cmd_analyze) | —         | —           |
+| `pkg/oxlint`   | —                  | ✅ (detector)    | —         | —           |
+| `pkg/rule`     | —                  | —                | —         | ✅          |
+| `pkg/profile`  | —                  | —                | —         | ✅          |
+| `pkg/detect`   | —                  | —                | —         | ✅          |
+| `pkg/config`   | —                  | —                | —         | ✅          |
+| `pkg/diff`     | —                  | —                | —         | ✅          |
+| `pkg/format`   | —                  | —                | —         | ✅          |
 
 **Key insight:** Only 2 packages need `go-finding`. Only 1 package needs `cobra`. 6 of 8 `pkg/` packages are pure stdlib.
 
@@ -91,19 +92,20 @@
 ### 2.5 God-Package Detection
 
 No single package qualifies as a god-package (15+ files or 30+ exported symbols):
+
 - `pkg/rule` has the most exported symbols (~30) but is cohesive — all relate to rule types and registry
 - `internal/cli` is the largest by line count but is split across multiple files already (`cmd_*.go`)
 - All packages have a clear, single concern
 
 ### 2.6 Test Dependencies
 
-| Test File | Cross-Package Internal Imports |
-|-----------|-------------------------------|
-| `pkg/config/*_test.go` | `pkg/detect`, `pkg/profile`, `pkg/rule` |
-| `pkg/detect/*_test.go` | `pkg/profile`, `pkg/rule` |
-| `pkg/profile/*_test.go` | `pkg/rule` |
-| `pkg/oxlint/*_test.go` | `pkg/rule` |
-| `pkg/diff/*_test.go` | `pkg/config` |
+| Test File                | Cross-Package Internal Imports          |
+| ------------------------ | --------------------------------------- |
+| `pkg/config/*_test.go`   | `pkg/detect`, `pkg/profile`, `pkg/rule` |
+| `pkg/detect/*_test.go`   | `pkg/profile`, `pkg/rule`               |
+| `pkg/profile/*_test.go`  | `pkg/rule`                              |
+| `pkg/oxlint/*_test.go`   | `pkg/rule`                              |
+| `pkg/diff/*_test.go`     | `pkg/config`                            |
 | `internal/cli/*_test.go` | `pkg/config`, `pkg/profile`, `pkg/rule` |
 
 All test dependencies follow the same DAG direction as production code.
@@ -114,17 +116,17 @@ All test dependencies follow the same DAG direction as production code.
 
 ### 3.1 Module Definitions
 
-| Field | Module 1: Core | Module 2: Analysis | Module 3: CLI (root) |
-|-------|---------------|-------------------|---------------------|
-| **Name** | `oxlint-core` | `oxlint-analysis` | `oxlint-auto-configure` |
-| **Path** | `./core` | `./analysis` | `./` (root) |
-| **Go module** | `github.com/larsartmann/oxlint-auto-configure/core` | `github.com/larsartmann/oxlint-auto-configure/analysis` | `github.com/larsartmann/oxlint-auto-configure` |
-| **Purpose** | Domain types, rule registry, profiles, project detection, config generation, diff, format | Oxlint binary integration via go-finding | CLI binary with cobra commands |
-| **Packages** | `rule`, `profile`, `detect`, `config`, `diff`, `format` | `oxlint` | `cmd/oxlint-auto-configure`, `internal/cli` |
-| **Prod deps (internal)** | None | `core` | `core`, `analysis` |
-| **Prod deps (external)** | None | `go-finding` | `cobra` |
-| **Test deps (external)** | `testify` | `testify` | `testify` |
-| **Public API** | All 6 pkg/ public APIs | `Runner`, `Detector`, `NewDetector`, `Option`, `CheckVersion`, `CheckBinary`, `RunFix` | `Configure()`, `ConfigureOptions` (re-exported) |
+| Field                    | Module 1: Core                                                                            | Module 2: Analysis                                                                     | Module 3: CLI (root)                            |
+| ------------------------ | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **Name**                 | `oxlint-core`                                                                             | `oxlint-analysis`                                                                      | `oxlint-auto-configure`                         |
+| **Path**                 | `./core`                                                                                  | `./analysis`                                                                           | `./` (root)                                     |
+| **Go module**            | `github.com/larsartmann/oxlint-auto-configure/core`                                       | `github.com/larsartmann/oxlint-auto-configure/analysis`                                | `github.com/larsartmann/oxlint-auto-configure`  |
+| **Purpose**              | Domain types, rule registry, profiles, project detection, config generation, diff, format | Oxlint binary integration via go-finding                                               | CLI binary with cobra commands                  |
+| **Packages**             | `rule`, `profile`, `detect`, `config`, `diff`, `format`                                   | `oxlint`                                                                               | `cmd/oxlint-auto-configure`, `internal/cli`     |
+| **Prod deps (internal)** | None                                                                                      | `core`                                                                                 | `core`, `analysis`                              |
+| **Prod deps (external)** | None                                                                                      | `go-finding`                                                                           | `cobra`                                         |
+| **Test deps (external)** | `testify`                                                                                 | `testify`                                                                              | `testify`                                       |
+| **Public API**           | All 6 pkg/ public APIs                                                                    | `Runner`, `Detector`, `NewDetector`, `Option`, `CheckVersion`, `CheckBinary`, `RunFix` | `Configure()`, `ConfigureOptions` (re-exported) |
 
 ### 3.2 Proposed Dependency Graph (DAG)
 
@@ -163,6 +165,7 @@ All test dependencies follow the same DAG direction as production code.
 **Recommendation: `go.work` at repo root**
 
 Rationale:
+
 - 3 modules is enough to benefit from a workspace file
 - No `replace` directives in any `go.mod` — cleaner
 - `go.work` is ignored by consumers when the modules are published
@@ -183,6 +186,7 @@ use (
 ### go.mod files
 
 **`core/go.mod`:**
+
 ```
 module github.com/larsartmann/oxlint-auto-configure/core
 go 1.26.2
@@ -190,6 +194,7 @@ require github.com/stretchr/testify v1.11.1
 ```
 
 **`analysis/go.mod`:**
+
 ```
 module github.com/larsartmann/oxlint-auto-configure/analysis
 go 1.26.2
@@ -202,6 +207,7 @@ replace github.com/larsartmann/oxlint-auto-configure/core => ../core
 ```
 
 **Root `go.mod` (simplified):**
+
 ```
 module github.com/larsartmann/oxlint-auto-configure
 go 1.26.2
@@ -223,11 +229,11 @@ When using `go.work`, the `replace` directives in go.mod are technically redunda
 
 ## 5. Test Dependency Isolation
 
-| Module | Production go.mod | Test-only deps |
-|--------|------------------|----------------|
-| **Core** | `testify` | All deps are test-only except stdlib |
-| **Analysis** | `go-finding`, `core` | `testify` (also used in analysis tests) |
-| **CLI** | `cobra`, `core`, `analysis` | `testify` |
+| Module       | Production go.mod           | Test-only deps                          |
+| ------------ | --------------------------- | --------------------------------------- |
+| **Core**     | `testify`                   | All deps are test-only except stdlib    |
+| **Analysis** | `go-finding`, `core`        | `testify` (also used in analysis tests) |
+| **CLI**      | `cobra`, `core`, `analysis` | `testify`                               |
 
 **Note:** `testify` appears in production `require` blocks because Go doesn't distinguish test-only requires in go.mod. This is standard Go practice and not a concern.
 
@@ -252,12 +258,14 @@ If future consumers need thinner interfaces (e.g., a plugin system), interfaces 
 **Recommendation: Root-only versioning**
 
 Rationale:
+
 - This is an internal CLI tool, not a published library
 - No external consumers of the core or analysis modules
 - Single git tag `vX.Y.Z` at repo root
 - Sub-modules use `v0.0.0` with `replace` directives
 
 If the core library is ever published for external consumption:
+
 - Switch to independent semver: `core/v1.0.0`, `analysis/v1.0.0`
 - Remove `replace` directives
 - Add proper git tag format: `core/v1.2.3`
@@ -284,14 +292,14 @@ If the core library is ever published for external consumption:
 
 ## 9. Risk Assessment
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| Import path breaks across 30+ files | High | Medium | Use `sed`/`gofmt` for mechanical replacement; verify with `go build` |
-| Vendor directory needs full rebuild | High | Low | `just vendor` already handles this; `GOWORK=off` required |
-| flake.nix build breaks | Medium | High | Update flake to reference new module paths; test with `nix build` |
-| Test discoverability changes | Low | Low | `go test ./...` works identically in workspace mode |
-| Circular import after move | Very Low | High | DAG verified in proposal; no cycles exist |
-| go.work interferes with parent workspace | Medium | Medium | Parent `go.work` at `/home/lars/projects/go.work` already an issue; `GOWORK=off` pattern established |
+| Risk                                     | Likelihood | Impact | Mitigation                                                                                           |
+| ---------------------------------------- | ---------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| Import path breaks across 30+ files      | High       | Medium | Use `sed`/`gofmt` for mechanical replacement; verify with `go build`                                 |
+| Vendor directory needs full rebuild      | High       | Low    | `just vendor` already handles this; `GOWORK=off` required                                            |
+| flake.nix build breaks                   | Medium     | High   | Update flake to reference new module paths; test with `nix build`                                    |
+| Test discoverability changes             | Low        | Low    | `go test ./...` works identically in workspace mode                                                  |
+| Circular import after move               | Very Low   | High   | DAG verified in proposal; no cycles exist                                                            |
+| go.work interferes with parent workspace | Medium     | Medium | Parent `go.work` at `/home/lars/projects/go.work` already an issue; `GOWORK=off` pattern established |
 
 ---
 
@@ -333,24 +341,25 @@ _Next: Phase 4 — Brutal Self-Review of this proposal_
 
 ### 4.1 Critical Questions Answered
 
-| # | Question | Answer |
-|---|----------|--------|
-| 1 | What did we forget? | Embedded resources (`rules_data.json`, `rules_version.txt`) in `pkg/rule` — confirmed they move cleanly with the package. No issue. |
-| 2 | What could be better? | The `pkg/` prefix removal (`core/rule` not `core/pkg/rule`) is a judgment call. Keeping `pkg/` inside core would minimize import path changes but add redundancy. Removing it is cleaner. |
-| 3 | What could we still improve? | Consider whether `pkg/format` belongs in core or analysis. Format views are populated from go-finding types in `cmd_analyze.go`, but the types themselves are pure data structs with no go-finding dependency. Core is correct. |
-| 4 | Split brains? | None. Each package maps to exactly one module. No types are duplicated across modules. |
-| 5 | Granularity right? | Yes. 3 modules is the minimum meaningful split for this codebase. Further splitting (e.g., rule as its own module) would be over-engineering for a 3K-line project. |
-| 6 | Existing code reuse? | All packages stay as-is. No new packages created. Only module boundaries change. |
-| 7 | Type model improvements? | No changes needed. Current types are clean. |
-| 8 | Leveraging established libs? | Already using stdlib for core, go-finding for analysis. No improvements needed. |
-| 9 | Replace/workspace strategy works? | `go.work` + `replace` directives verified. Parent workspace at `/home/lars/projects/go.work` is a known issue handled by `GOWORK=off` pattern. |
-| 10 | Test deps isolated? | Yes. `testify` in go.mod is standard Go practice. No test-only production deps. |
-| 11 | CI actually faster? | Marginal improvement — project is small. Main benefit is dependency isolation, not build speed. |
-| 12 | Versioning realistic? | Root-only versioning is appropriate for an internal tool. No external consumers. |
+| #   | Question                          | Answer                                                                                                                                                                                                                          |
+| --- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | What did we forget?               | Embedded resources (`rules_data.json`, `rules_version.txt`) in `pkg/rule` — confirmed they move cleanly with the package. No issue.                                                                                             |
+| 2   | What could be better?             | The `pkg/` prefix removal (`core/rule` not `core/pkg/rule`) is a judgment call. Keeping `pkg/` inside core would minimize import path changes but add redundancy. Removing it is cleaner.                                       |
+| 3   | What could we still improve?      | Consider whether `pkg/format` belongs in core or analysis. Format views are populated from go-finding types in `cmd_analyze.go`, but the types themselves are pure data structs with no go-finding dependency. Core is correct. |
+| 4   | Split brains?                     | None. Each package maps to exactly one module. No types are duplicated across modules.                                                                                                                                          |
+| 5   | Granularity right?                | Yes. 3 modules is the minimum meaningful split for this codebase. Further splitting (e.g., rule as its own module) would be over-engineering for a 3K-line project.                                                             |
+| 6   | Existing code reuse?              | All packages stay as-is. No new packages created. Only module boundaries change.                                                                                                                                                |
+| 7   | Type model improvements?          | No changes needed. Current types are clean.                                                                                                                                                                                     |
+| 8   | Leveraging established libs?      | Already using stdlib for core, go-finding for analysis. No improvements needed.                                                                                                                                                 |
+| 9   | Replace/workspace strategy works? | `go.work` + `replace` directives verified. Parent workspace at `/home/lars/projects/go.work` is a known issue handled by `GOWORK=off` pattern.                                                                                  |
+| 10  | Test deps isolated?               | Yes. `testify` in go.mod is standard Go practice. No test-only production deps.                                                                                                                                                 |
+| 11  | CI actually faster?               | Marginal improvement — project is small. Main benefit is dependency isolation, not build speed.                                                                                                                                 |
+| 12  | Versioning realistic?             | Root-only versioning is appropriate for an internal tool. No external consumers.                                                                                                                                                |
 
 ### 4.2 Key Risk: Import Path Churn
 
 The biggest mechanical risk is updating ~30+ import paths across all files. This is:
+
 - Entirely mechanical (find-and-replace)
 - Verifiable by `go build ./...`
 - Reversible in a single commit
@@ -360,6 +369,7 @@ Mitigation: Use `sed` for bulk replacement, then `go build` to verify.
 ### 4.3 Key Risk: Vendor Directory
 
 The vendor directory must be regenerated after modularization:
+
 - `just vendor` already handles this with `GOWORK=off`
 - All 3 modules' deps must be vendored
 - flake.nix uses `vendorHash = null` — needs update after re-vendoring
@@ -371,6 +381,7 @@ The proposal stands as-is. No changes needed after self-review. The 3-module spl
 ### 4.5 Alternative Considered: 2-Module Split
 
 A 2-module split (core + CLI-with-analysis) was considered:
+
 - **Pro:** Fewer modules, simpler structure
 - **Con:** `go-finding` stays in the CLI module, defeating the primary benefit of isolation
 - **Decision:** 3 modules. The extra module is worth the cleaner dependency story.

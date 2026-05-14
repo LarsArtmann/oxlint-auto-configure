@@ -8,21 +8,21 @@
 
 ## Task Overview
 
-| # | Task | Tier | Effort | Depends On |
-|---|------|------|--------|------------|
-| 1 | Create core module skeleton | 1% → 51% | 15 min | — |
-| 2 | Move core packages to `core/` | 1% → 51% | 20 min | 1 |
-| 3 | Update core internal imports | 1% → 51% | 15 min | 2 |
-| 4 | Create analysis module skeleton | 4% → 64% | 10 min | 1 |
-| 5 | Move oxlint package to `analysis/` | 4% → 64% | 10 min | 4 |
-| 6 | Update analysis imports | 4% → 64% | 15 min | 3, 5 |
-| 7 | Update root go.mod and CLI imports | 4% → 64% | 20 min | 3, 6 |
-| 8 | Create go.work | 20% → 80% | 5 min | 7 |
-| 9 | Verify build and tests | 20% → 80% | 10 min | 8 |
-| 10 | Re-vendor dependencies | 20% → 80% | 10 min | 9 |
-| 11 | Update flake.nix | 20% → 80% | 15 min | 10 |
-| 12 | Update documentation | Remaining | 10 min | 9 |
-| 13 | Final verification | Remaining | 10 min | 11, 12 |
+| #   | Task                               | Tier      | Effort | Depends On |
+| --- | ---------------------------------- | --------- | ------ | ---------- |
+| 1   | Create core module skeleton        | 1% → 51%  | 15 min | —          |
+| 2   | Move core packages to `core/`      | 1% → 51%  | 20 min | 1          |
+| 3   | Update core internal imports       | 1% → 51%  | 15 min | 2          |
+| 4   | Create analysis module skeleton    | 4% → 64%  | 10 min | 1          |
+| 5   | Move oxlint package to `analysis/` | 4% → 64%  | 10 min | 4          |
+| 6   | Update analysis imports            | 4% → 64%  | 15 min | 3, 5       |
+| 7   | Update root go.mod and CLI imports | 4% → 64%  | 20 min | 3, 6       |
+| 8   | Create go.work                     | 20% → 80% | 5 min  | 7          |
+| 9   | Verify build and tests             | 20% → 80% | 10 min | 8          |
+| 10  | Re-vendor dependencies             | 20% → 80% | 10 min | 9          |
+| 11  | Update flake.nix                   | 20% → 80% | 15 min | 10         |
+| 12  | Update documentation               | Remaining | 10 min | 9          |
+| 13  | Final verification                 | Remaining | 10 min | 11, 12     |
 
 ---
 
@@ -33,6 +33,7 @@
 **What:** Create `core/` directory and `core/go.mod` with the core module definition.
 
 **Steps:**
+
 ```bash
 mkdir -p core
 cat > core/go.mod << 'EOF'
@@ -55,6 +56,7 @@ EOF
 **What:** Move 6 packages from `pkg/` to `core/` using `git mv`.
 
 **Steps:**
+
 ```bash
 mkdir -p core
 git mv pkg/rule core/rule
@@ -66,6 +68,7 @@ git mv pkg/format core/format
 ```
 
 **Files affected:**
+
 - `pkg/rule/*` → `core/rule/*` (3 files + 2 embedded)
 - `pkg/profile/*` → `core/profile/*` (1 file)
 - `pkg/detect/*` → `core/detect/*` (1 file)
@@ -84,6 +87,7 @@ git mv pkg/format core/format
 **What:** Replace all internal import paths within core packages.
 
 **Import path changes:**
+
 ```
 github.com/larsartmann/oxlint-auto-configure/pkg/rule     → github.com/larsartmann/oxlint-auto-configure/core/rule
 github.com/larsartmann/oxlint-auto-configure/pkg/profile   → github.com/larsartmann/oxlint-auto-configure/core/profile
@@ -95,30 +99,32 @@ github.com/larsartmann/oxlint-auto-configure/pkg/format    → github.com/larsar
 
 **Files to update (within core/):**
 
-| File | Current Internal Imports |
-|------|------------------------|
-| `core/config/generator.go` | `pkg/detect`, `pkg/profile`, `pkg/rule` |
-| `core/config/configure.go` | `pkg/detect`, `pkg/profile`, `pkg/rule` |
-| `core/config/validate.go` | `pkg/rule` |
-| `core/detect/detector.go` | `pkg/profile`, `pkg/rule` |
-| `core/diff/differ.go` | `pkg/config` |
-| `core/profile/profile.go` | `pkg/rule` |
+| File                            | Current Internal Imports                |
+| ------------------------------- | --------------------------------------- |
+| `core/config/generator.go`      | `pkg/detect`, `pkg/profile`, `pkg/rule` |
+| `core/config/configure.go`      | `pkg/detect`, `pkg/profile`, `pkg/rule` |
+| `core/config/validate.go`       | `pkg/rule`                              |
+| `core/detect/detector.go`       | `pkg/profile`, `pkg/rule`               |
+| `core/diff/differ.go`           | `pkg/config`                            |
+| `core/profile/profile.go`       | `pkg/rule`                              |
 | `core/config/generator_test.go` | `pkg/detect`, `pkg/profile`, `pkg/rule` |
 | `core/config/configure_test.go` | `pkg/detect`, `pkg/profile`, `pkg/rule` |
-| `core/config/validate_test.go` | `pkg/rule` |
-| `core/detect/detector_test.go` | `pkg/profile`, `pkg/rule` |
-| `core/diff/differ_test.go` | `pkg/config` |
-| `core/profile/profile_test.go` | `pkg/rule` |
-| `core/rule/registry_test.go` | (none internal) |
-| `core/format/format_test.go` | (none internal) |
+| `core/config/validate_test.go`  | `pkg/rule`                              |
+| `core/detect/detector_test.go`  | `pkg/profile`, `pkg/rule`               |
+| `core/diff/differ_test.go`      | `pkg/config`                            |
+| `core/profile/profile_test.go`  | `pkg/rule`                              |
+| `core/rule/registry_test.go`    | (none internal)                         |
+| `core/format/format_test.go`    | (none internal)                         |
 
 **Steps:**
+
 ```bash
 find core/ -name '*.go' -exec sed -i \
   's|github.com/larsartmann/oxlint-auto-configure/pkg/|github.com/larsartmann/oxlint-auto-configure/core/|g' {} +
 ```
 
 **Verify:**
+
 ```bash
 cd core && GOWORK=off go build ./...
 cd core && GOWORK=off go test ./...
@@ -133,6 +139,7 @@ cd core && GOWORK=off go test ./...
 **What:** Create `analysis/` directory and `analysis/go.mod`.
 
 **Steps:**
+
 ```bash
 mkdir -p analysis
 cat > analysis/go.mod << 'EOF'
@@ -161,12 +168,14 @@ EOF
 **What:** Move `pkg/oxlint` to `analysis/oxlint` using `git mv`.
 
 **Steps:**
+
 ```bash
 git mv pkg/oxlint analysis/oxlint
 rmdir pkg  # should be empty now
 ```
 
 **Files affected:**
+
 - `pkg/oxlint/detector.go` → `analysis/oxlint/detector.go`
 - `pkg/oxlint/detector_test.go` → `analysis/oxlint/detector_test.go`
 - `pkg/oxlint/version.go` → `analysis/oxlint/version.go`
@@ -186,21 +195,25 @@ rmdir pkg  # should be empty now
 **What:** Update import paths in analysis module files.
 
 **Import path changes:**
+
 ```
 github.com/larsartmann/oxlint-auto-configure/pkg/rule → github.com/larsartmann/oxlint-auto-configure/core/rule
 ```
 
 **Files to update:**
+
 - `analysis/oxlint/detector.go` — imports `pkg/rule`
 - `analysis/oxlint/detector_test.go` — imports `pkg/rule`
 
 **Steps:**
+
 ```bash
 find analysis/ -name '*.go' -exec sed -i \
   's|github.com/larsartmann/oxlint-auto-configure/pkg/|github.com/larsartmann/oxlint-auto-configure/core/|g' {} +
 ```
 
 **Verify:**
+
 ```bash
 cd analysis && GOWORK=off go build ./...
 cd analysis && GOWORK=off go test ./...
@@ -215,6 +228,7 @@ cd analysis && GOWORK=off go test ./...
 **What:** Update root `go.mod` to depend on core + analysis, update all CLI imports.
 
 **Root go.mod becomes:**
+
 ```
 module github.com/larsartmann/oxlint-auto-configure
 
@@ -246,16 +260,17 @@ replace (
 
 **Import path changes in CLI:**
 
-| File | Old Imports | New Imports |
-|------|------------|-------------|
-| `internal/cli/cmd_analyze.go` | `pkg/format`, `pkg/oxlint`, `pkg/rule` | `core/format`, `analysis/oxlint`, `core/rule` |
+| File                            | Old Imports                                                                     | New Imports                                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `internal/cli/cmd_analyze.go`   | `pkg/format`, `pkg/oxlint`, `pkg/rule`                                          | `core/format`, `analysis/oxlint`, `core/rule`                                             |
 | `internal/cli/cmd_configure.go` | `pkg/config`, `pkg/detect`, `pkg/diff`, `pkg/oxlint`, `pkg/profile`, `pkg/rule` | `core/config`, `core/detect`, `core/diff`, `analysis/oxlint`, `core/profile`, `core/rule` |
-| `internal/cli/cmd_report.go` | needs check | may reference pkg/ types |
-| `internal/cli/cmd_validate.go` | needs check | may reference pkg/ types |
-| `internal/cli/cmd_root.go` | needs check | may reference pkg/ types |
-| `internal/cli/commands_test.go` | `pkg/config`, `pkg/profile`, `pkg/rule` | `core/config`, `core/profile`, `core/rule` |
+| `internal/cli/cmd_report.go`    | needs check                                                                     | may reference pkg/ types                                                                  |
+| `internal/cli/cmd_validate.go`  | needs check                                                                     | may reference pkg/ types                                                                  |
+| `internal/cli/cmd_root.go`      | needs check                                                                     | may reference pkg/ types                                                                  |
+| `internal/cli/commands_test.go` | `pkg/config`, `pkg/profile`, `pkg/rule`                                         | `core/config`, `core/profile`, `core/rule`                                                |
 
 **Steps:**
+
 ```bash
 # Update all imports in internal/cli and cmd/
 find internal/ cmd/ -name '*.go' -exec sed -i \
@@ -270,6 +285,7 @@ GOWORK=off go mod tidy
 ```
 
 **Verify:**
+
 ```bash
 GOWORK=off go build ./...
 GOWORK=off go vet ./...
@@ -284,6 +300,7 @@ GOWORK=off go vet ./...
 **What:** Create `go.work` at repo root.
 
 **Steps:**
+
 ```bash
 cat > go.work << 'EOF'
 go 1.26.2
@@ -307,6 +324,7 @@ EOF
 **What:** Full verification that everything works.
 
 **Steps:**
+
 ```bash
 # Workspace mode (developer experience)
 go build ./...
@@ -332,6 +350,7 @@ GOWORK=off go build ./...
 **What:** Regenerate vendor directory with multi-module structure.
 
 **Steps:**
+
 ```bash
 GOWORK=off go mod tidy
 GOWORK=off go mod vendor
@@ -350,6 +369,7 @@ GOWORK=off go mod vendor
 **What:** Update flake.nix to handle multi-module structure.
 
 **Key changes:**
+
 - Build command may need adjustment if vendor layout changes
 - Test command (`nix run .#test`) must work with workspace
 - Verify `vendorHash` or `vendorPath` is correct after re-vendoring
@@ -366,6 +386,7 @@ GOWORK=off go mod vendor
 **What:** Update AGENTS.md and README.md to reflect new structure.
 
 **AGENTS.md changes:**
+
 - Update "Key Files" table with new paths (`core/rule`, `analysis/oxlint`)
 - Update "Testing" section with per-module test commands
 - Update "Nix" section if build commands changed
@@ -383,6 +404,7 @@ GOWORK=off go mod vendor
 **What:** End-to-end verification of the complete modularization.
 
 **Checklist:**
+
 - [ ] `go build ./...` passes at root
 - [ ] `go test ./...` passes at root
 - [ ] `go vet ./...` passes at root
@@ -426,16 +448,16 @@ Task 4 (analysis skeleton)                         │
 
 ## Commit Plan
 
-| After Task | Commit Message |
-|-----------|---------------|
-| 3 | `refactor(core): extract core module with rule, profile, detect, config, diff, format` |
-| 6 | `refactor(analysis): extract analysis module with oxlint go-finding integration` |
-| 7+8 | `refactor: wire root module with core + analysis, add go.work` |
-| 9 | `chore: verify multi-module build and tests pass` |
-| 10 | `chore: re-vendor dependencies for multi-module structure` |
-| 11 | `build(nix): update flake.nix for multi-module structure` |
-| 12 | `docs: update AGENTS.md and README.md for modular structure` |
-| 13 | `chore: final multi-module verification` |
+| After Task | Commit Message                                                                         |
+| ---------- | -------------------------------------------------------------------------------------- |
+| 3          | `refactor(core): extract core module with rule, profile, detect, config, diff, format` |
+| 6          | `refactor(analysis): extract analysis module with oxlint go-finding integration`       |
+| 7+8        | `refactor: wire root module with core + analysis, add go.work`                         |
+| 9          | `chore: verify multi-module build and tests pass`                                      |
+| 10         | `chore: re-vendor dependencies for multi-module structure`                             |
+| 11         | `build(nix): update flake.nix for multi-module structure`                              |
+| 12         | `docs: update AGENTS.md and README.md for modular structure`                           |
+| 13         | `chore: final multi-module verification`                                               |
 
 Each commit leaves the project in a buildable, testable state.
 
@@ -443,9 +465,9 @@ Each commit leaves the project in a buildable, testable state.
 
 ## Pareto Impact Summary
 
-| Tier | Tasks | Impact |
-|------|-------|--------|
-| **1% → 51%** (Foundational) | Tasks 1-3 | Core module with zero external deps — publishable, reusable |
-| **4% → 64%** (High leverage) | Tasks 4-7 | go-finding isolated to analysis module |
-| **20% → 80%** (Broad value) | Tasks 8-11 | go.work, vendor, nix — complete working system |
-| **Remaining** (Polish) | Tasks 12-13 | Documentation and final verification |
+| Tier                         | Tasks       | Impact                                                      |
+| ---------------------------- | ----------- | ----------------------------------------------------------- |
+| **1% → 51%** (Foundational)  | Tasks 1-3   | Core module with zero external deps — publishable, reusable |
+| **4% → 64%** (High leverage) | Tasks 4-7   | go-finding isolated to analysis module                      |
+| **20% → 80%** (Broad value)  | Tasks 8-11  | go.work, vendor, nix — complete working system              |
+| **Remaining** (Polish)       | Tasks 12-13 | Documentation and final verification                        |

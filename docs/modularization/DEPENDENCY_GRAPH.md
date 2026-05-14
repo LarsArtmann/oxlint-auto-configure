@@ -119,21 +119,21 @@ Single direction. No cycles. No upward dependencies from Core.
 
 ### Proposed External Dependency Isolation
 
-| Module | Production External Deps |
-|--------|------------------------|
-| Core | **None** (stdlib only) |
-| Analysis | `go-finding` |
-| CLI | `cobra` |
+| Module   | Production External Deps |
+| -------- | ------------------------ |
+| Core     | **None** (stdlib only)   |
+| Analysis | `go-finding`             |
+| CLI      | `cobra`                  |
 
 `go-finding` is isolated to the Analysis module. Consumers who only need the core rule engine (profiles, config generation, detection) can import the Core module with zero heavy dependencies.
 
 ### Test Cross-Module Dependencies
 
-| Module | Tests import from |
-|--------|------------------|
-| Core | Core only |
-| Analysis | Core + Analysis |
-| CLI | Core + Analysis + CLI |
+| Module   | Tests import from     |
+| -------- | --------------------- |
+| Core     | Core only             |
+| Analysis | Core + Analysis       |
+| CLI      | Core + Analysis + CLI |
 
 All follow the DAG direction. No bidirectional test deps.
 
@@ -162,18 +162,18 @@ All follow the DAG direction. No bidirectional test deps.
 
 ## Size Metrics
 
-| Package | Files | Lines (prod) | Lines (test) | Exported Symbols |
-|---------|-------|--------------|--------------|-----------------|
-| `pkg/rule` | 3 | ~390 | ~334 | ~30 |
-| `pkg/profile` | 1 | ~272 | ~227 | ~12 |
-| `pkg/detect` | 1 | ~250 | ~216 | ~12 |
-| `pkg/config` | 3 | ~343 | ~377 | ~8 |
-| `pkg/diff` | 1 | ~228 | ~141 | ~8 |
-| `pkg/format` | 1 | ~173 | ~157 | ~5 |
-| `pkg/oxlint` | 4 | ~383 | ~635 | ~10 |
-| `internal/cli` | 5 | ~862 | ~423 | ~2 |
-| `cmd/...` | 1 | ~12 | 0 | 0 |
-| **Total** | **20** | **~2913** | **~2510** | **~87** |
+| Package        | Files  | Lines (prod) | Lines (test) | Exported Symbols |
+| -------------- | ------ | ------------ | ------------ | ---------------- |
+| `pkg/rule`     | 3      | ~390         | ~334         | ~30              |
+| `pkg/profile`  | 1      | ~272         | ~227         | ~12              |
+| `pkg/detect`   | 1      | ~250         | ~216         | ~12              |
+| `pkg/config`   | 3      | ~343         | ~377         | ~8               |
+| `pkg/diff`     | 1      | ~228         | ~141         | ~8               |
+| `pkg/format`   | 1      | ~173         | ~157         | ~5               |
+| `pkg/oxlint`   | 4      | ~383         | ~635         | ~10              |
+| `internal/cli` | 5      | ~862         | ~423         | ~2               |
+| `cmd/...`      | 1      | ~12          | 0            | 0                |
+| **Total**      | **20** | **~2913**    | **~2510**    | **~87**          |
 
 **Core module:** ~1656 prod lines, 6 packages, ~75 exported symbols
 **Analysis module:** ~383 prod lines, 1 package, ~10 exported symbols
