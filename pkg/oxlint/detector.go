@@ -153,12 +153,13 @@ func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
 			diag.Message,
 			mapSeverity(diag.Severity),
 			finding.Position{File: diag.Filename, Line: line, Column: col},
+			1.0,
 		)
 
 		f.Category = mapCategory(pluginName)
 		f.Range = rangeFromLabels(diag.Filename, diag.Labels)
 		f.FixStrategy = d.mapFixStrategy(ruleName, pluginName)
-		f.Tag = pluginName
+		f.Tags = []finding.Tag{finding.Tag(pluginName)}
 
 		if diag.URL != "" {
 			if f.Metadata == nil {
@@ -289,6 +290,8 @@ func (d *Detector) mapFixStrategy(ruleName, pluginName string) finding.FixStrate
 		return finding.FixStrategyDirect
 	case rule.FixSuggestion, rule.FixDangerous:
 		return finding.FixStrategySuggest
+	case rule.FixNone:
+		return finding.FixStrategyNone
 	default:
 		return finding.FixStrategyNone
 	}

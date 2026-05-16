@@ -50,23 +50,29 @@ Formats:
 	return cmd
 }
 
-func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error {
+type analyzeSetup struct {
+	absRoot       string
+	oxlintVersion string
+	reg           *rule.Registry
+}
+
+func initAnalyze(ctx context.Context, rootDir string) (*analyzeSetup, error) {
 	if rootDir == "" {
 		rootDir = "."
 	}
 
 	absRoot, err := filepath.Abs(rootDir)
 	if err != nil {
-		return fmt.Errorf("resolve root dir: %w", err)
+		return nil, fmt.Errorf("resolve root dir: %w", err)
 	}
 
 	if err := oxlint.CheckBinary(ctx); err != nil {
-		return fmt.Errorf("check oxlint: %w", err)
+		return nil, fmt.Errorf("check oxlint: %w", err)
 	}
 
 	reg, err := rule.LoadRegistry()
 	if err != nil {
-		return fmt.Errorf("load rules: %w", err)
+		return nil, fmt.Errorf("load rules: %w", err)
 	}
 
 	oxlintVersion, err := oxlint.CheckVersion(ctx)
@@ -74,34 +80,19 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 		slog.Warn("could not determine oxlint version", "error", err)
 	}
 
-	configPath := filepath.Join(absRoot, defaultConfigPath)
-	var opts []oxlint.Option
-	if _, err := os.Stat(configPath); err == nil {
-		opts = append(opts, oxlint.WithConfig(configPath))
-	}
-	opts = append(opts, oxlint.WithRegistry(reg))
+	return &analyzeSetup{absRoot: absRoot, oxlintVersion: oxlintVersion, reg: reg}, nil
+}
 
-	detector := oxlint.NewDetector(absRoot, opts...)
-
-	metrics := pipeline.NewMetrics()
-	pipelineCfg := pipeline.DefaultConfig()
-	pipelineCfg.DryRun = true
-	pipelineCfg.VerifyAfterFix = false
-	pipelineCfg.GracefulDegradation = true
-	pipelineCfg.Metrics = metrics
-	pipelineCfg.Retry = &pipeline.RetryConfig{
-		MaxRetries: 2,
-		BaseDelay:  100 * time.Millisecond,
-		MaxDelay:   2 * time.Second,
-	}
-	pipelineCfg.OnFinding = func(f finding.Finding) {
-		slog.Debug("finding", "rule", f.Rule, "file", f.Position.File, "line", f.Position.Line)
-	}
-	pipelineCfg.OnIteration = func(iter int, findings []finding.Finding) {
-		slog.Debug("iteration complete", "iter", iter, "findings", len(findings))
+func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error {
+	setup, err := initAnalyze(ctx, rootDir)
+	if err != nil {
+		return err
 	}
 
-	p, err := pipeline.New(pipelineCfg, absRoot, detector)
+	detector := newDetector(setup.absRoot, setup.reg)
+
+	pipelineCfg := newAnalyzePipelineConfig()
+	p, err := pipeline.New(pipelineCfg, setup.absRoot, detector)
 	if err != nil {
 		return fmt.Errorf("create pipeline: %w", err)
 	}
@@ -124,7 +115,7 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 		return nil
 	}
 
-	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: oxlintVersion})
+	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: setup.oxlintVersion})
 	for _, iter := range result.Iterations {
 		report.AddFindings(iter.Findings())
 	}
@@ -136,6 +127,38 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 	}
 
 	return renderFindings(formatFlag, report, result, minSev)
+}
+
+func newDetector(absRoot string, reg *rule.Registry) *oxlint.Detector {
+	configPath := filepath.Join(absRoot, defaultConfigPath)
+	var opts []oxlint.Option
+	if _, err := os.Stat(configPath); err == nil {
+		opts = append(opts, oxlint.WithConfig(configPath))
+	}
+	opts = append(opts, oxlint.WithRegistry(reg))
+
+	return oxlint.NewDetector(absRoot, opts...)
+}
+
+func newAnalyzePipelineConfig() pipeline.Config {
+	cfg := pipeline.DefaultConfig()
+	cfg.DryRun = true
+	cfg.VerifyAfterFix = false
+	cfg.GracefulDegradation = true
+	cfg.Metrics = pipeline.NewMetrics()
+	cfg.Retry = &pipeline.RetryConfig{
+		MaxRetries: 2,
+		BaseDelay:  100 * time.Millisecond,
+		MaxDelay:   2 * time.Second,
+	}
+	cfg.OnFinding = func(f finding.Finding) {
+		slog.Debug("finding", "rule", f.Rule, "file", f.Position.File, "line", f.Position.Line)
+	}
+	cfg.OnIteration = func(iter int, findings []finding.Finding) {
+		slog.Debug("iteration complete", "iter", iter, "findings", len(findings))
+	}
+
+	return cfg
 }
 
 func parseOptionalSeverity(s string) (finding.Severity, error) {
@@ -227,7 +250,6 @@ func findingsToViews(findings []finding.Finding) []format.FindingView {
 			Column:      f.Position.Column,
 			DocsURL:     f.Metadata["url"],
 			FixStrategy: string(f.FixStrategy),
-			Tag:         f.Tag,
 			Snippet:     f.Snippet,
 		})
 	}

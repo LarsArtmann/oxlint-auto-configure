@@ -313,7 +313,7 @@ func TestSummaryFromReport(t *testing.T) {
 	t.Parallel()
 	report := finding.NewReport(finding.ToolInfo{Name: "test", Version: "0.0.0"})
 	f := finding.NewFinding("rule1", "test", "msg", finding.SeverityError,
-		finding.Position{File: "a.ts", Line: 1})
+		finding.Position{File: "a.ts", Line: 1}, 1.0)
 	f.Category = finding.CategoryCorrectness
 	report.AddFindings([]finding.Finding{f})
 	report.ComputeSummary()
@@ -332,7 +332,7 @@ func TestFindingsToViews(t *testing.T) {
 	findings := []finding.Finding{
 		finding.NewFinding("no-debugger", "oxlint", "msg",
 			finding.SeverityWarning,
-			finding.Position{File: "test.ts", Line: 5, Column: 3}),
+			finding.Position{File: "test.ts", Line: 5, Column: 3}, 1.0),
 	}
 	views := findingsToViews(findings)
 	require.Len(t, views, 1)
@@ -346,7 +346,7 @@ func TestPrintReportJSON(t *testing.T) {
 	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: "1.0.0"})
 	f := finding.NewFinding("no-unused-vars", "oxlint", "unused variable",
 		finding.SeverityError,
-		finding.Position{File: "a.ts", Line: 10, Column: 5})
+		finding.Position{File: "a.ts", Line: 10, Column: 5}, 1.0)
 	f.Category = finding.CategoryCorrectness
 	f.FixStrategy = finding.FixStrategyDirect
 	report.AddFindings([]finding.Finding{f})
@@ -360,14 +360,14 @@ func TestPrintReportJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &parsed)
 	require.NoError(t, err)
 
-	tool := parsed["tool"].(map[string]any)
+	tool := parsed["tool"].(map[string]any) //nolint:forcetypeassert // test knows the shape
 	assert.Equal(t, "oxlint", tool["name"])
 	assert.Equal(t, "1.0.0", tool["version"])
 
-	summary := parsed["summary"].(map[string]any)
-	assert.Equal(t, float64(1), summary["total"])
+	summary := parsed["summary"].(map[string]any) //nolint:forcetypeassert // test knows the shape
+	assert.InEpsilon(t, 1, summary["total"], 0.0001)
 
-	findings := parsed["findings"].([]any)
+	findings := parsed["findings"].([]any) //nolint:forcetypeassert // test knows the shape
 	assert.Len(t, findings, 1)
 }
 
@@ -389,9 +389,9 @@ func TestParseOptionalSeverity(t *testing.T) {
 	for _, tt := range tests {
 		got, err := parseOptionalSeverity(tt.input)
 		if tt.err {
-			assert.Error(t, err)
+			require.Error(t, err)
 		} else {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		}
 	}
@@ -403,11 +403,11 @@ func TestActiveWithFilter(t *testing.T) {
 	report := finding.NewReport(finding.ToolInfo{Name: "test"})
 	report.AddFindings([]finding.Finding{
 		finding.NewFinding("r1", "test", "msg", finding.SeverityError,
-			finding.Position{File: "a.ts", Line: 1}),
+			finding.Position{File: "a.ts", Line: 1}, 1.0),
 		finding.NewFinding("r2", "test", "msg", finding.SeverityWarning,
-			finding.Position{File: "b.ts", Line: 2}),
+			finding.Position{File: "b.ts", Line: 2}, 1.0),
 		finding.NewFinding("r3", "test", "msg", finding.SeverityInfo,
-			finding.Position{File: "c.ts", Line: 3}),
+			finding.Position{File: "c.ts", Line: 3}, 1.0),
 	})
 	report.ComputeSummary()
 

@@ -20,7 +20,6 @@ type FindingView struct {
 	Column      int    `json:"column"`
 	DocsURL     string `json:"docs_url,omitempty"`
 	FixStrategy string `json:"fix_strategy,omitempty"`
-	Tag         string `json:"tag,omitempty"`
 	Snippet     string `json:"snippet,omitempty"`
 }
 
@@ -38,47 +37,47 @@ type SummaryView struct {
 
 // PrintSummary writes a human-readable summary to w.
 func PrintSummary(w io.Writer, sv *SummaryView) error {
-	fmt.Fprintf(w, "\n=== Analysis Results ===\n")
-	fmt.Fprintf(w, "\n%d finding(s) across %d file(s)", sv.Total, sv.FilesAffected)
+	_, _ = fmt.Fprintf(w, "\n=== Analysis Results ===\n")
+	_, _ = fmt.Fprintf(w, "\n%d finding(s) across %d file(s)", sv.Total, sv.FilesAffected)
 	if sv.Iterations > 1 {
-		fmt.Fprintf(w, " (%d iterations, stable=%t)", sv.Iterations, sv.Stable)
+		_, _ = fmt.Fprintf(w, " (%d iterations, stable=%t)", sv.Iterations, sv.Stable)
 	}
-	fmt.Fprintln(w)
+	_, _ = fmt.Fprintln(w)
 
-	fmt.Fprintln(w, "\nBy severity:")
+	_, _ = fmt.Fprintln(w, "\nBy severity:")
 	for _, sev := range sortedKeys(sv.BySeverity) {
-		fmt.Fprintf(w, "  %-10s %d\n", sev, sv.BySeverity[sev])
+		_, _ = fmt.Fprintf(w, "  %-10s %d\n", sev, sv.BySeverity[sev])
 	}
 
-	fmt.Fprintln(w, "\nBy category:")
+	_, _ = fmt.Fprintln(w, "\nBy category:")
 	for _, cat := range sortedKeys(sv.ByCategory) {
-		fmt.Fprintf(w, "  %-15s %d\n", cat, sv.ByCategory[cat])
+		_, _ = fmt.Fprintf(w, "  %-15s %d\n", cat, sv.ByCategory[cat])
 	}
 
 	if len(sv.ByFixStrategy) > 0 {
-		fmt.Fprintln(w, "\nBy fix strategy:")
+		_, _ = fmt.Fprintln(w, "\nBy fix strategy:")
 		for _, fix := range sortedKeys(sv.ByFixStrategy) {
-			fmt.Fprintf(w, "  %-15s %d\n", fix, sv.ByFixStrategy[fix])
+			_, _ = fmt.Fprintf(w, "  %-15s %d\n", fix, sv.ByFixStrategy[fix])
 		}
 	}
 
 	topRules := topByRule(sv.Findings, 10)
 	if len(topRules) > 0 {
-		fmt.Fprintln(w, "\nTop rules:")
+		_, _ = fmt.Fprintln(w, "\nTop rules:")
 		for _, entry := range topRules {
-			fmt.Fprintf(w, "  %-45s %d\n", entry.name, entry.count)
+			_, _ = fmt.Fprintf(w, "  %-45s %d\n", entry.name, entry.count)
 		}
 	}
 
 	topFiles := topByFile(sv.Findings, 10)
 	if len(topFiles) > 0 {
-		fmt.Fprintln(w, "\nTop files:")
+		_, _ = fmt.Fprintln(w, "\nTop files:")
 		for _, entry := range topFiles {
-			fmt.Fprintf(w, "  %-45s %d\n", entry.name, entry.count)
+			_, _ = fmt.Fprintf(w, "  %-45s %d\n", entry.name, entry.count)
 		}
 	}
 
-	fmt.Fprintln(w)
+	_, _ = fmt.Fprintln(w)
 	return nil
 }
 

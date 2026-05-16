@@ -464,9 +464,9 @@ func TestParseOutputSetsTag(t *testing.T) {
 	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
-	assert.Equal(t, "eslint", findings[0].Tag)
-	assert.Equal(t, "eslint", findings[1].Tag)
-	assert.Equal(t, "typescript", findings[2].Tag)
+	assert.Equal(t, "eslint", string(findings[0].Tags[0]))
+	assert.Equal(t, "eslint", string(findings[1].Tags[0]))
+	assert.Equal(t, "typescript", string(findings[2].Tags[0]))
 }
 
 func TestParseOutputSetsSnippet(t *testing.T) {
