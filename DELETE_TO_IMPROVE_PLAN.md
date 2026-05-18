@@ -9,18 +9,18 @@
 
 ## TL;DR — Deletion Priority Matrix
 
-| # | Item | Lines | Impact | Risk | Action |
-|---|------|-------|--------|------|--------|
-| 1 | 8 stale status reports | ~1,675 | HIGH | Zero | **DELETE** |
-| 2 | 1 completed planning doc | ~263 | HIGH | Zero | **DELETE** |
-| 3 | 12 dead linters in `.golangci.yml` | 12 | HIGH | Zero | **REMOVE** |
-| 4 | 5 dead build tags in `.golangci.yml` | 5 | HIGH | Zero | **REMOVE** |
-| 5 | `PUBLIC_OR_PRIVATE.md` | 172 | MEDIUM | Zero | **DELETE** |
-| 6 | Stale `CHANGELOG.md` | 27 | MEDIUM | Zero | **DELETE** |
-| 7 | Dead ldflags (Dockerfile + goreleaser) | 6 | MEDIUM | Low | **FIX** (add vars or remove ldflags) |
-| 8 | Stale `.gitignore` entries | 3 | LOW | Zero | **REMOVE** |
-| 9 | Dead goreleaser `darwin/386` ignore | 2 | LOW | Zero | **REMOVE** |
-| 10 | Redundant `justfile` `vet` in `check` | 1 | LOW | Zero | **REMOVE** |
+| #   | Item                                   | Lines  | Impact | Risk | Action                               |
+| --- | -------------------------------------- | ------ | ------ | ---- | ------------------------------------ |
+| 1   | 8 stale status reports                 | ~1,675 | HIGH   | Zero | **DELETE**                           |
+| 2   | 1 completed planning doc               | ~263   | HIGH   | Zero | **DELETE**                           |
+| 3   | 12 dead linters in `.golangci.yml`     | 12     | HIGH   | Zero | **REMOVE**                           |
+| 4   | 5 dead build tags in `.golangci.yml`   | 5      | HIGH   | Zero | **REMOVE**                           |
+| 5   | `PUBLIC_OR_PRIVATE.md`                 | 172    | MEDIUM | Zero | **DELETE**                           |
+| 6   | Stale `CHANGELOG.md`                   | 27     | MEDIUM | Zero | **DELETE**                           |
+| 7   | Dead ldflags (Dockerfile + goreleaser) | 6      | MEDIUM | Low  | **FIX** (add vars or remove ldflags) |
+| 8   | Stale `.gitignore` entries             | 3      | LOW    | Zero | **REMOVE**                           |
+| 9   | Dead goreleaser `darwin/386` ignore    | 2      | LOW    | Zero | **REMOVE**                           |
+| 10  | Redundant `justfile` `vet` in `check`  | 1      | LOW    | Zero | **REMOVE**                           |
 
 ---
 
@@ -29,16 +29,16 @@
 **Path:** `docs/status/`
 **Files:**
 
-| File | Lines | Why It's Dead |
-|------|-------|---------------|
-| `2026-04-28_17-20_comprehensive-status.md` | 172 | References D1/D3 critical bugs that were fixed. 56 tests — now 86+. Coverage was 56% — now 73-95%. |
-| `2026-04-28_18-47_pipeline-integration-and-refactor.md` | 159 | "No CI, no README, no planning docs" — all now exist. Pure historical snapshot. |
-| `2026-04-29_21-06_full-project-audit.md` | 213 | Lists 17 functions at 0% coverage — all now tested. "go-finding published?" — yes, v0.2.0. |
-| `2026-04-29_22-13_architecture-deepening-complete.md` | 183 | 121 golangci-lint warnings — now zero. Local replace directive — removed. |
-| `2026-04-29_23-11_architecture-audit-complete.md` | 228 | All M01-M30 executed. Historical record of completed audit. |
-| `2026-04-30_03-07_go-finding-full-utilization.md` | 222 | 21 gaps found, 9 implemented. Remaining gaps tracked in AGENTS.md. |
-| `2026-04-30_03-58_nix-installation-and-code-quality.md` | 150 | Nix setup done and current. "Not started" items tracked elsewhere. |
-| `2026-04-30_04-41_session-complete-nix-quality-features.md` | 200 | 89.6% coverage, zero lint — all done. |
+| File                                                        | Lines | Why It's Dead                                                                                      |
+| ----------------------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------- |
+| `2026-04-28_17-20_comprehensive-status.md`                  | 172   | References D1/D3 critical bugs that were fixed. 56 tests — now 86+. Coverage was 56% — now 73-95%. |
+| `2026-04-28_18-47_pipeline-integration-and-refactor.md`     | 159   | "No CI, no README, no planning docs" — all now exist. Pure historical snapshot.                    |
+| `2026-04-29_21-06_full-project-audit.md`                    | 213   | Lists 17 functions at 0% coverage — all now tested. "go-finding published?" — yes, v0.2.0.         |
+| `2026-04-29_22-13_architecture-deepening-complete.md`       | 183   | 121 golangci-lint warnings — now zero. Local replace directive — removed.                          |
+| `2026-04-29_23-11_architecture-audit-complete.md`           | 228   | All M01-M30 executed. Historical record of completed audit.                                        |
+| `2026-04-30_03-07_go-finding-full-utilization.md`           | 222   | 21 gaps found, 9 implemented. Remaining gaps tracked in AGENTS.md.                                 |
+| `2026-04-30_03-58_nix-installation-and-code-quality.md`     | 150   | Nix setup done and current. "Not started" items tracked elsewhere.                                 |
+| `2026-04-30_04-41_session-complete-nix-quality-features.md` | 200   | 89.6% coverage, zero lint — all done.                                                              |
 
 **Why delete:** These are point-in-time session snapshots from AI-assisted development. Every "not started" item is tracked in AGENTS.md or the modularization docs. Keeping 9 stale status reports creates confusion about what's current. The git history preserves this information forever.
 
@@ -130,6 +130,7 @@ The checklist items are either done or tracked in AGENTS.md. The analysis is pre
 ## 7. DELETE: `CHANGELOG.md` (27 lines)
 
 **Why:**
+
 - Contains a **wrong date** (`2026-01-01` — project was created 2026-04-28)
 - Has empty boilerplate sections that were never filled in
 - `.goreleaser.yaml` already has a `changelog` section that auto-generates from git history
@@ -145,6 +146,7 @@ The checklist items are either done or tracked in AGENTS.md. The analysis is pre
 ### The Problem
 
 Both `Dockerfile` and `.goreleaser.yaml` inject these ldflags:
+
 ```
 -X main.commit=${COMMIT}
 -X main.date=${BUILD_DATE}
@@ -156,6 +158,7 @@ But `cmd/oxlint-auto-configure/main.go` only has `var version = "dev"`. There ar
 ### Options
 
 **Option A (Recommended):** Add the missing variables to `main.go` and wire them into `--version` output:
+
 ```go
 var (
     version = "dev"
@@ -192,7 +195,7 @@ The `jscpd-report.json` entry references a copy/paste detection tool that was ne
 # REMOVE — 386 is not in the goarch list, so this rule can never match
 ignore:
   - goos: darwin
-    goarch: 386    # ← dead: only amd64 and arm64 are built
+    goarch: 386 # ← dead: only amd64 and arm64 are built
 ```
 
 The `goarch` list only has `amd64` and `arm64`. The `darwin/386` ignore rule is unreachable dead config.
@@ -213,6 +216,7 @@ check: fmt-check vet lint test
 ## 12. BONUS: `go.sum` Cleanup
 
 Run `go mod tidy` to remove 4-5 stale entries:
+
 - `github.com/cpuguy83/go-md2man/v2` — stale transitive
 - `github.com/russross/blackfriday/v2` — stale transitive
 - `go.yaml.in/yaml/v3` — only `/go.mod` line, likely stale
@@ -223,18 +227,18 @@ Run `go mod tidy` to remove 4-5 stale entries:
 
 ## Summary: What Stays
 
-| Item | Why |
-|------|-----|
-| `docs/modularization/` (3 files) | Active proposal, not yet executed |
-| `docs/planning/2026-04-29_22-15_*.md` | Partially done, still has open items |
-| `docs/status/2026-04-30_05-15_*.md` | Most recent status (but consider folding into AGENTS.md) |
-| `justfile` | Active and used (just remove redundant `vet` from `check`) |
-| `.goreleaser.yaml` | Active (just clean dead entries) |
-| `Dockerfile` | Active (just fix ldflags) |
-| `git-town.toml` | Active |
-| `AUTHORS` | Active |
-| `flake.nix` + `flake.lock` | Active |
-| `AGENTS.md` | The living document — this is the single source of truth |
+| Item                                  | Why                                                        |
+| ------------------------------------- | ---------------------------------------------------------- |
+| `docs/modularization/` (3 files)      | Active proposal, not yet executed                          |
+| `docs/planning/2026-04-29_22-15_*.md` | Partially done, still has open items                       |
+| `docs/status/2026-04-30_05-15_*.md`   | Most recent status (but consider folding into AGENTS.md)   |
+| `justfile`                            | Active and used (just remove redundant `vet` from `check`) |
+| `.goreleaser.yaml`                    | Active (just clean dead entries)                           |
+| `Dockerfile`                          | Active (just fix ldflags)                                  |
+| `git-town.toml`                       | Active                                                     |
+| `AUTHORS`                             | Active                                                     |
+| `flake.nix` + `flake.lock`            | Active                                                     |
+| `AGENTS.md`                           | The living document — this is the single source of truth   |
 
 ---
 
