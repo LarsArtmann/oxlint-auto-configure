@@ -14,7 +14,7 @@ func newValidateCommand() *cobra.Command {
 	var configPath string
 
 	cmd := &cobra.Command{
-		Use:   "validate",
+		Use:   CmdValidate,
 		Short: "Validate an existing .oxlintrc.json configuration",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return Validate(configPath)

@@ -24,13 +24,13 @@ func TestGeneratorRecommended(t *testing.T) {
 	assert.Contains(t, cfg.Plugins, "unicorn")
 	assert.Contains(t, cfg.Plugins, "oxc")
 
-	assert.Equal(t, "error", cfg.Categories["correctness"])
-	assert.Equal(t, "error", cfg.Categories["suspicious"])
-	assert.Equal(t, "warn", cfg.Categories["style"])
-	assert.Equal(t, "warn", cfg.Categories["perf"])
-	assert.Equal(t, "warn", cfg.Categories["pedantic"])
-	assert.Equal(t, "warn", cfg.Categories["restriction"])
-	assert.Equal(t, "off", cfg.Categories["nursery"])
+	assert.Equal(t, SeverityError, cfg.Categories["correctness"])
+	assert.Equal(t, SeverityError, cfg.Categories["suspicious"])
+	assert.Equal(t, SeverityWarn, cfg.Categories["style"])
+	assert.Equal(t, SeverityWarn, cfg.Categories["perf"])
+	assert.Equal(t, SeverityWarn, cfg.Categories["pedantic"])
+	assert.Equal(t, SeverityWarn, cfg.Categories["restriction"])
+	assert.Equal(t, SeverityOff, cfg.Categories["nursery"])
 }
 
 func TestGeneratorMaximalTypesafe(t *testing.T) {
@@ -42,13 +42,13 @@ func TestGeneratorMaximalTypesafe(t *testing.T) {
 	gen := NewGenerator(cat, reg, nil)
 	cfg := gen.GenerateMaximal()
 
-	assert.Equal(t, "error", cfg.Categories["correctness"])
-	assert.Equal(t, "error", cfg.Categories["suspicious"])
-	assert.Equal(t, "error", cfg.Categories["style"])
-	assert.Equal(t, "error", cfg.Categories["perf"])
-	assert.Equal(t, "error", cfg.Categories["pedantic"])
-	assert.Equal(t, "error", cfg.Categories["restriction"])
-	assert.Equal(t, "warn", cfg.Categories["nursery"])
+	assert.Equal(t, SeverityError, cfg.Categories["correctness"])
+	assert.Equal(t, SeverityError, cfg.Categories["suspicious"])
+	assert.Equal(t, SeverityError, cfg.Categories["style"])
+	assert.Equal(t, SeverityError, cfg.Categories["perf"])
+	assert.Equal(t, SeverityError, cfg.Categories["pedantic"])
+	assert.Equal(t, SeverityError, cfg.Categories["restriction"])
+	assert.Equal(t, SeverityWarn, cfg.Categories["nursery"])
 }
 
 func TestGeneratorWithReactProject(t *testing.T) {
@@ -97,8 +97,8 @@ func TestConfigToJSON(t *testing.T) {
 	t.Parallel()
 	cfg := &OxlintConfig{
 		Plugins:    []string{"typescript", "unicorn"},
-		Categories: map[string]string{"correctness": "error"},
-		Rules:      map[string]string{"no-unused-vars": "error"},
+		Categories: map[string]string{"correctness": SeverityError},
+		Rules:      map[string]string{"no-unused-vars": SeverityError},
 		Env:        map[string]bool{"builtin": true},
 	}
 
@@ -141,8 +141,8 @@ func TestFromJSON(t *testing.T) {
 	cfg, err := FromJSON([]byte(input))
 	require.NoError(t, err)
 	assert.Contains(t, cfg.Plugins, "typescript")
-	assert.Equal(t, "error", cfg.Categories["correctness"])
-	assert.Equal(t, "error", cfg.Rules["no-unused-vars"])
+	assert.Equal(t, SeverityError, cfg.Categories["correctness"])
+	assert.Equal(t, SeverityError, cfg.Rules["no-unused-vars"])
 }
 
 func TestMinimalProfileConfig(t *testing.T) {
@@ -154,7 +154,7 @@ func TestMinimalProfileConfig(t *testing.T) {
 	gen := NewGenerator(cat, reg, nil)
 	cfg := gen.Generate()
 
-	assert.Equal(t, "error", cfg.Categories["correctness"])
+	assert.Equal(t, SeverityError, cfg.Categories["correctness"])
 	assert.NotContains(t, cfg.Categories, "style", "minimal should omit non-correctness categories")
 	assert.NotContains(
 		t,

@@ -23,7 +23,7 @@ func newReportCommand() *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "report",
+		Use:   CmdReport,
 		Short: "Generate a report of all rules and their recommended severity",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			if rootDir == "" {
@@ -55,9 +55,9 @@ func newReportCommand() *cobra.Command {
 			decisions := cat.DecideAll(reg)
 
 			switch format {
-			case "json":
+			case FormatJSON:
 				return reportJSON(os.Stdout, decisions)
-			case "summary":
+			case FormatSummary:
 				return reportSummary(decisions, reg)
 			default:
 				return reportTable(decisions)

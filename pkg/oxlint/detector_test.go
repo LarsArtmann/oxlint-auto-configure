@@ -181,8 +181,8 @@ func TestParseCodeFormat(t *testing.T) {
 		expectedRule string
 		expectedPlug string
 	}{
-		{"eslint(no-debugger)", "no-debugger", "eslint"},
-		{"typescript/no-explicit-any", "no-explicit-any", "typescript"},
+		{"eslint(no-debugger)", "no-debugger", PluginESLint},
+		{"typescript/no-explicit-any", "no-explicit-any", PluginTypeScript},
 		{"react/exhaustive-deps", "exhaustive-deps", "react"},
 		{"unicorn/no-empty-file", "no-empty-file", "unicorn"},
 		{"jsx_a11y/alt-text", "alt-text", "jsx_a11y"},
@@ -240,8 +240,8 @@ func TestMapCategory(t *testing.T) {
 		plugin   string
 		expected finding.Category
 	}{
-		{"eslint", finding.CategoryCorrectness},
-		{"typescript", finding.CategoryTypeSafety},
+		{PluginESLint, finding.CategoryCorrectness},
+		{PluginTypeScript, finding.CategoryTypeSafety},
 		{"react", finding.CategoryCorrectness},
 		{"react_perf", finding.CategoryCorrectness},
 		{"jsx_a11y", finding.CategorySecurity},
@@ -434,28 +434,32 @@ func TestBuildArgsNoConfig(t *testing.T) {
 	t.Parallel()
 	d := NewDetector("/project")
 	args := d.buildArgs()
-	assert.Equal(t, []string{"-f", "json", "."}, args)
+	assert.Equal(t, []string{"-f", FormatJSON, "."}, args)
 }
 
 func TestBuildArgsWithConfig(t *testing.T) {
 	t.Parallel()
 	d := NewDetector("/project", WithConfig("/project/.oxlintrc.json"))
 	args := d.buildArgs()
-	assert.Equal(t, []string{"-f", "json", "-c", "/project/.oxlintrc.json", "."}, args)
+	assert.Equal(t, []string{"-f", FormatJSON, "-c", "/project/.oxlintrc.json", "."}, args)
 }
 
 func TestBuildArgsWithExtraArgs(t *testing.T) {
 	t.Parallel()
 	d := NewDetector("/project", WithArgs("--verbose", "--silent"))
 	args := d.buildArgs()
-	assert.Equal(t, []string{"-f", "json", "--verbose", "--silent", "."}, args)
+	assert.Equal(t, []string{"-f", FormatJSON, "--verbose", "--silent", "."}, args)
 }
 
 func TestBuildArgsWithConfigAndExtraArgs(t *testing.T) {
 	t.Parallel()
 	d := NewDetector("/project", WithConfig("/project/.oxlintrc.json"), WithArgs("--verbose"))
 	args := d.buildArgs()
-	assert.Equal(t, []string{"-f", "json", "-c", "/project/.oxlintrc.json", "--verbose", "."}, args)
+	assert.Equal(
+		t,
+		[]string{"-f", FormatJSON, "-c", "/project/.oxlintrc.json", "--verbose", "."},
+		args,
+	)
 }
 
 func TestParseOutputSetsTag(t *testing.T) {
@@ -464,9 +468,9 @@ func TestParseOutputSetsTag(t *testing.T) {
 	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
 
-	assert.Equal(t, "eslint", string(findings[0].Tags[0]))
-	assert.Equal(t, "eslint", string(findings[1].Tags[0]))
-	assert.Equal(t, "typescript", string(findings[2].Tags[0]))
+	assert.Equal(t, PluginESLint, string(findings[0].Tags[0]))
+	assert.Equal(t, PluginESLint, string(findings[1].Tags[0]))
+	assert.Equal(t, PluginTypeScript, string(findings[2].Tags[0]))
 }
 
 func TestParseOutputSetsSnippet(t *testing.T) {
@@ -522,14 +526,14 @@ func TestMapFixStrategy(t *testing.T) {
 		plugin   string
 		expected finding.FixStrategy
 	}{
-		{"no-debugger is safe", "no-debugger", "eslint", finding.FixStrategyDirect},
+		{"no-debugger is safe", "no-debugger", PluginESLint, finding.FixStrategyDirect},
 		{
 			"no-explicit-any is suggestion",
 			"no-explicit-any",
-			"typescript",
+			PluginTypeScript,
 			finding.FixStrategySuggest,
 		},
-		{"unknown rule defaults to none", "nonexistent", "eslint", finding.FixStrategyNone},
+		{"unknown rule defaults to none", "nonexistent", PluginESLint, finding.FixStrategyNone},
 	}
 
 	for _, tt := range tests {
@@ -544,7 +548,7 @@ func TestMapFixStrategyNoRegistry(t *testing.T) {
 	t.Parallel()
 
 	d := NewDetector(".")
-	assert.Equal(t, finding.FixStrategyNone, d.mapFixStrategy("no-debugger", "eslint"))
+	assert.Equal(t, finding.FixStrategyNone, d.mapFixStrategy("no-debugger", PluginESLint))
 }
 
 func TestWithRegistry(t *testing.T) {

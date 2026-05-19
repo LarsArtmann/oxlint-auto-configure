@@ -7,10 +7,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	testSeverityError    = "error"
+	testSeverityWarn     = "warn"
+	testSeverityOff      = "off"
+	testPluginTS         = "typescript"
+	testPluginReact      = "react"
+	testPluginVue        = "vue"
+	testRuleNoUnusedVars = "no-unused-vars"
+)
+
 func TestDiffNoChanges(t *testing.T) {
 	t.Parallel()
-	before := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
-	after := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
+	before := &config.OxlintConfig{
+		Rules: map[string]string{testRuleNoUnusedVars: testSeverityError},
+	}
+	after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityError}}
 
 	d := NewDiffer(before, after)
 	changes := d.Diff()
@@ -20,18 +32,20 @@ func TestDiffNoChanges(t *testing.T) {
 func TestDiffAdded(t *testing.T) {
 	t.Parallel()
 	before := &config.OxlintConfig{Rules: map[string]string{}}
-	after := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
+	after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityError}}
 
 	d := NewDiffer(before, after)
 	changes := d.Diff()
 	assert.Len(t, changes, 1)
 	assert.Equal(t, KindAdded, changes[0].Kind)
-	assert.Equal(t, "no-unused-vars", changes[0].Rule)
+	assert.Equal(t, testRuleNoUnusedVars, changes[0].Rule)
 }
 
 func TestDiffRemoved(t *testing.T) {
 	t.Parallel()
-	before := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
+	before := &config.OxlintConfig{
+		Rules: map[string]string{testRuleNoUnusedVars: testSeverityError},
+	}
 	after := &config.OxlintConfig{Rules: map[string]string{}}
 
 	d := NewDiffer(before, after)
@@ -42,21 +56,23 @@ func TestDiffRemoved(t *testing.T) {
 
 func TestDiffChanged(t *testing.T) {
 	t.Parallel()
-	before := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "warn"}}
-	after := &config.OxlintConfig{Rules: map[string]string{"no-unused-vars": "error"}}
+	before := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityWarn}}
+	after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityError}}
 
 	d := NewDiffer(before, after)
 	changes := d.Diff()
 	assert.Len(t, changes, 1)
 	assert.Equal(t, KindChanged, changes[0].Kind)
-	assert.Equal(t, "warn", changes[0].OldValue)
-	assert.Equal(t, "error", changes[0].NewValue)
+	assert.Equal(t, testSeverityWarn, changes[0].OldValue)
+	assert.Equal(t, testSeverityError, changes[0].NewValue)
 }
 
 func TestDiffSummary(t *testing.T) {
 	t.Parallel()
-	before := &config.OxlintConfig{Rules: map[string]string{"a": "warn"}}
-	after := &config.OxlintConfig{Rules: map[string]string{"a": "error", "b": "error"}}
+	before := &config.OxlintConfig{Rules: map[string]string{"a": testSeverityWarn}}
+	after := &config.OxlintConfig{
+		Rules: map[string]string{"a": testSeverityError, "b": testSeverityError},
+	}
 
 	d := NewDiffer(before, after)
 	summary := d.Summary()
@@ -66,8 +82,8 @@ func TestDiffSummary(t *testing.T) {
 
 func TestDiffPluginsAdded(t *testing.T) {
 	t.Parallel()
-	before := &config.OxlintConfig{Plugins: []string{"typescript"}}
-	after := &config.OxlintConfig{Plugins: []string{"typescript", "react", "vue"}}
+	before := &config.OxlintConfig{Plugins: []string{testPluginTS}}
+	after := &config.OxlintConfig{Plugins: []string{testPluginTS, testPluginReact, testPluginVue}}
 
 	d := NewDiffer(before, after)
 	changes := d.Diff()
@@ -80,8 +96,8 @@ func TestDiffPluginsAdded(t *testing.T) {
 
 func TestDiffPluginsRemoved(t *testing.T) {
 	t.Parallel()
-	before := &config.OxlintConfig{Plugins: []string{"typescript", "react", "vue"}}
-	after := &config.OxlintConfig{Plugins: []string{"typescript"}}
+	before := &config.OxlintConfig{Plugins: []string{testPluginTS, testPluginReact, testPluginVue}}
+	after := &config.OxlintConfig{Plugins: []string{testPluginTS}}
 
 	d := NewDiffer(before, after)
 	changes := d.Diff()
@@ -131,8 +147,10 @@ func filterChanges(changes []Change, prefix string) []Change {
 
 func TestDiffFormatDiff(t *testing.T) {
 	t.Parallel()
-	before := &config.OxlintConfig{Rules: map[string]string{"a": "warn"}}
-	after := &config.OxlintConfig{Rules: map[string]string{"a": "error", "b": "error"}}
+	before := &config.OxlintConfig{Rules: map[string]string{"a": testSeverityWarn}}
+	after := &config.OxlintConfig{
+		Rules: map[string]string{"a": testSeverityError, "b": testSeverityError},
+	}
 
 	d := NewDiffer(before, after)
 	output := d.FormatDiff()

@@ -6,8 +6,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	testRuleNoDebugger      = "no-debugger"
+	testCategoryCorrectness = "correctness"
 )
 
 func TestPrintSummary(t *testing.T) {
@@ -15,8 +21,8 @@ func TestPrintSummary(t *testing.T) {
 	var buf bytes.Buffer
 	sv := &SummaryView{
 		Total:         5,
-		BySeverity:    map[string]int{"error": 3, "warning": 2},
-		ByCategory:    map[string]int{"correctness": 5},
+		BySeverity:    map[string]int{config.SeverityError: 3, "warning": 2},
+		ByCategory:    map[string]int{testCategoryCorrectness: 5},
 		ByFixStrategy: map[string]int{"none": 3, "suggest": 2},
 		FilesAffected: 3,
 		Iterations:    1,
@@ -25,7 +31,7 @@ func TestPrintSummary(t *testing.T) {
 			{Rule: "no-unused-vars", File: "a.ts", Line: 1},
 			{Rule: "no-unused-vars", File: "b.ts", Line: 2},
 			{Rule: "no-console", File: "a.ts", Line: 3},
-			{Rule: "no-debugger", File: "c.ts", Line: 4},
+			{Rule: testRuleNoDebugger, File: "c.ts", Line: 4},
 			{Rule: "eqeqeq", File: "d.ts", Line: 5},
 		},
 	}
@@ -48,9 +54,9 @@ func TestPrintFindingsJSON(t *testing.T) {
 	t.Parallel()
 	findings := []FindingView{
 		{
-			Rule:     "no-debugger",
-			Severity: "error",
-			Category: "correctness",
+			Rule:     testRuleNoDebugger,
+			Severity: config.SeverityError,
+			Category: testCategoryCorrectness,
 			File:     "test.js",
 			Line:     10,
 			Column:   5,
@@ -66,16 +72,16 @@ func TestPrintFindingsJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &parsed)
 	require.NoError(t, err)
 	assert.Len(t, parsed, 1)
-	assert.Equal(t, "no-debugger", parsed[0].Rule)
+	assert.Equal(t, testRuleNoDebugger, parsed[0].Rule)
 }
 
 func TestPrintFindingsTable(t *testing.T) {
 	t.Parallel()
 	findings := []FindingView{
 		{
-			Rule:     "no-debugger",
-			Severity: "error",
-			Category: "correctness",
+			Rule:     testRuleNoDebugger,
+			Severity: config.SeverityError,
+			Category: testCategoryCorrectness,
 			File:     "a.js",
 			Line:     5,
 			Column:   1,
@@ -133,8 +139,8 @@ func TestPrintFindingsTableTruncatesLongMessages(t *testing.T) {
 	findings := []FindingView{
 		{
 			Rule:     "test",
-			Severity: "error",
-			Category: "correctness",
+			Severity: config.SeverityError,
+			Category: testCategoryCorrectness,
 			File:     "f.js",
 			Line:     1,
 			Message:  longMsg,

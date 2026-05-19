@@ -8,13 +8,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testRuleNoDebugger = "no-debugger"
+
 func TestValidateConfigValid(t *testing.T) {
 	t.Parallel()
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{"no-debugger": "error"},
+		Rules: map[string]string{testRuleNoDebugger: SeverityError},
 	}
 
 	result, err := ValidateConfig(cfg, reg)
@@ -31,7 +33,7 @@ func TestValidateConfigUnknownRules(t *testing.T) {
 	require.NoError(t, err)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{"nonexistent-rule-xyz": "error"},
+		Rules: map[string]string{"nonexistent-rule-xyz": SeverityError},
 	}
 
 	result, err := ValidateConfig(cfg, reg)
@@ -46,7 +48,7 @@ func TestValidateConfigInvalidSeverity(t *testing.T) {
 	require.NoError(t, err)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{"no-debugger": "badsev"},
+		Rules: map[string]string{testRuleNoDebugger: "badsev"},
 	}
 
 	result, err := ValidateConfig(cfg, reg)
@@ -61,7 +63,7 @@ func TestValidateConfigDisabledRule(t *testing.T) {
 	require.NoError(t, err)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{"no-debugger": "off"},
+		Rules: map[string]string{testRuleNoDebugger: SeverityOff},
 	}
 
 	result, err := ValidateConfig(cfg, reg)
@@ -89,7 +91,7 @@ func TestValidateConfigErrInvalidConfigWrapped(t *testing.T) {
 	require.NoError(t, err)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{"nonexistent-rule-xyz": "error"},
+		Rules: map[string]string{"nonexistent-rule-xyz": SeverityError},
 	}
 
 	_, err = ValidateConfig(cfg, reg)

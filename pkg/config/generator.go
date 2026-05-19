@@ -11,6 +11,13 @@ import (
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 )
 
+// Severity constants for oxlint configuration values.
+const (
+	SeverityError = "error"
+	SeverityWarn  = "warn"
+	SeverityOff   = "off"
+)
+
 // OxlintConfig represents the .oxlintrc.json structure.
 type OxlintConfig struct {
 	Plugins    []string          `json:"plugins,omitempty"`
@@ -126,7 +133,7 @@ func (g *Generator) allPlugins() []string {
 // correct category severities even for profiles with mixed-severity categories.
 func (g *Generator) categorySeverityMap() map[string]string {
 	if g.categorizer == nil {
-		return map[string]string{"correctness": "error"}
+		return map[string]string{"correctness": SeverityError}
 	}
 
 	result := make(map[string]string)

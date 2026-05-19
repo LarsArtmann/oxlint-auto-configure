@@ -18,6 +18,23 @@ const (
 	defaultProfile    = profile.ProfileRecommended
 )
 
+// Command names (used across cmd files and tests).
+const (
+	CmdConfigure = "configure"
+	CmdReport    = "report"
+	CmdValidate  = "validate"
+	CmdAnalyze   = "analyze"
+)
+
+// Output formats for analyze and report commands.
+const (
+	FormatSummary = "summary"
+	FormatReport  = "report"
+	FormatJSON    = "json"
+	FormatTable   = "table"
+	FormatSARIF   = "sarif"
+)
+
 var version = "dev"
 
 // NewRootCommand creates the root CLI command.

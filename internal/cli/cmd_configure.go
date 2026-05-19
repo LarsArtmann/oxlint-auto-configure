@@ -27,7 +27,7 @@ func newConfigureCommand() *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "configure",
+		Use:   CmdConfigure,
 		Short: "Generate optimal .oxlintrc.json configuration",
 		Long: `Analyze the project and generate the best oxlint configuration.
 

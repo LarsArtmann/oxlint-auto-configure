@@ -19,10 +19,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	testFlagRoot = "--root"
+	testFileATS  = "a.ts"
+)
+
 func TestConfigureDryRunRecommended(t *testing.T) {
 	t.Parallel()
 	cmd := NewRootCommand()
-	cmd.SetArgs([]string{"configure", "--dry-run", "--root", t.TempDir()})
+	cmd.SetArgs([]string{CmdConfigure, "--dry-run", testFlagRoot, t.TempDir()})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
@@ -31,7 +36,9 @@ func TestConfigureDryRunRecommended(t *testing.T) {
 func TestConfigureDryRunMaximalTypesafe(t *testing.T) {
 	t.Parallel()
 	cmd := NewRootCommand()
-	cmd.SetArgs([]string{"configure", "--dry-run", "-p", "maximal-typesafe", "--root", t.TempDir()})
+	cmd.SetArgs(
+		[]string{CmdConfigure, "--dry-run", "-p", "maximal-typesafe", testFlagRoot, t.TempDir()},
+	)
 
 	err := cmd.Execute()
 	require.NoError(t, err)
@@ -40,7 +47,7 @@ func TestConfigureDryRunMaximalTypesafe(t *testing.T) {
 func TestConfigureInvalidProfile(t *testing.T) {
 	t.Parallel()
 	cmd := NewRootCommand()
-	cmd.SetArgs([]string{"configure", "-p", "invalid", "--root", t.TempDir()})
+	cmd.SetArgs([]string{CmdConfigure, "-p", "invalid", testFlagRoot, t.TempDir()})
 
 	err := cmd.Execute()
 	require.Error(t, err)
@@ -53,7 +60,7 @@ func TestConfigureWritesFile(t *testing.T) {
 	configPath := filepath.Join(dir, ".oxlintrc.json")
 
 	cmd := NewRootCommand()
-	cmd.SetArgs([]string{"configure", "-c", configPath, "--root", dir})
+	cmd.SetArgs([]string{CmdConfigure, "-c", configPath, testFlagRoot, dir})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
@@ -85,7 +92,7 @@ func TestValidateConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	cmd := NewRootCommand()
-	cmd.SetArgs([]string{"validate", "-c", configPath})
+	cmd.SetArgs([]string{CmdValidate, "-c", configPath})
 
 	err = cmd.Execute()
 	require.NoError(t, err)
@@ -101,7 +108,7 @@ func TestValidateUnknownRules(t *testing.T) {
 	require.NoError(t, err)
 
 	cmd := NewRootCommand()
-	cmd.SetArgs([]string{"validate", "-c", configPath})
+	cmd.SetArgs([]string{CmdValidate, "-c", configPath})
 
 	err = cmd.Execute()
 	require.Error(t, err)
@@ -111,7 +118,7 @@ func TestValidateUnknownRules(t *testing.T) {
 func TestReportTable(t *testing.T) {
 	t.Parallel()
 	cmd := NewRootCommand()
-	cmd.SetArgs([]string{"report", "-f", "table", "--root", t.TempDir()})
+	cmd.SetArgs([]string{CmdReport, "-f", "table", testFlagRoot, t.TempDir()})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
@@ -121,7 +128,7 @@ func TestAnalyzeCleanProject(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 	cmd := NewRootCommand()
-	cmd.SetArgs([]string{"analyze", "--root", dir})
+	cmd.SetArgs([]string{"analyze", testFlagRoot, dir})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
@@ -139,7 +146,7 @@ func TestVersionFlag(t *testing.T) {
 func TestReportSummary(t *testing.T) {
 	t.Parallel()
 	cmd := NewRootCommand()
-	cmd.SetArgs([]string{"report", "-f", "summary", "--root", t.TempDir()})
+	cmd.SetArgs([]string{CmdReport, "-f", FormatSummary, testFlagRoot, t.TempDir()})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
@@ -313,7 +320,7 @@ func TestSummaryFromReport(t *testing.T) {
 	t.Parallel()
 	report := finding.NewReport(finding.ToolInfo{Name: "test", Version: "0.0.0"})
 	f := finding.NewFinding("rule1", "test", "msg", finding.SeverityError,
-		finding.Position{File: "a.ts", Line: 1}, 1.0)
+		finding.Position{File: testFileATS, Line: 1}, 1.0)
 	f.Category = finding.CategoryCorrectness
 	report.AddFindings([]finding.Finding{f})
 	report.ComputeSummary()
@@ -346,7 +353,7 @@ func TestPrintReportJSON(t *testing.T) {
 	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: "1.0.0"})
 	f := finding.NewFinding("no-unused-vars", "oxlint", "unused variable",
 		finding.SeverityError,
-		finding.Position{File: "a.ts", Line: 10, Column: 5}, 1.0)
+		finding.Position{File: testFileATS, Line: 10, Column: 5}, 1.0)
 	f.Category = finding.CategoryCorrectness
 	f.FixStrategy = finding.FixStrategyDirect
 	report.AddFindings([]finding.Finding{f})
@@ -403,7 +410,7 @@ func TestActiveWithFilter(t *testing.T) {
 	report := finding.NewReport(finding.ToolInfo{Name: "test"})
 	report.AddFindings([]finding.Finding{
 		finding.NewFinding("r1", "test", "msg", finding.SeverityError,
-			finding.Position{File: "a.ts", Line: 1}, 1.0),
+			finding.Position{File: testFileATS, Line: 1}, 1.0),
 		finding.NewFinding("r2", "test", "msg", finding.SeverityWarning,
 			finding.Position{File: "b.ts", Line: 2}, 1.0),
 		finding.NewFinding("r3", "test", "msg", finding.SeverityInfo,

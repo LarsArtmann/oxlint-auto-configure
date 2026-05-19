@@ -19,6 +19,13 @@ type Runner interface {
 	Run(ctx context.Context, name string, args []string, dir string) ([]byte, error)
 }
 
+// Plugin name constants.
+const (
+	PluginESLint     = "eslint"
+	PluginTypeScript = "typescript"
+	FormatJSON       = "json"
+)
+
 // realRunner executes oxlint via exec.CommandContext.
 type realRunner struct{}
 
@@ -230,7 +237,7 @@ func parseCode(code string) (ruleName, plugin string) {
 	if found {
 		return ruleName, plugin
 	}
-	return code, "eslint"
+	return code, PluginESLint
 }
 
 func mapSeverity(s string) finding.Severity {
@@ -276,7 +283,7 @@ func (d *Detector) mapFixStrategy(ruleName, pluginName string) finding.FixStrate
 	}
 
 	fullName := ruleName
-	if pluginName != "eslint" {
+	if pluginName != PluginESLint {
 		fullName = pluginName + "/" + ruleName
 	}
 

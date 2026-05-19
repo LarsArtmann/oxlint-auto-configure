@@ -43,7 +43,7 @@ Formats:
 
 	cmd.Flags().StringVar(&rootDir, "root", ".", "Project root directory")
 	cmd.Flags().
-		StringVarP(&formatFlag, "format", "f", "summary", "Output format: summary, json, report, sarif, table")
+		StringVarP(&formatFlag, "format", "f", FormatSummary, "Output format: summary, json, report, sarif, table")
 	cmd.Flags().
 		StringVarP(&sevFlag, "severity", "s", "", "Minimum severity filter: error, warning, info")
 
@@ -201,18 +201,18 @@ func renderFindings(
 	sv := summaryFromReport(report, result)
 
 	switch fmtFlag {
-	case "summary":
-		return printFormatError(format.PrintSummary(os.Stderr, sv), "summary")
-	case "json":
+	case FormatSummary:
+		return printFormatError(format.PrintSummary(os.Stderr, sv), FormatSummary)
+	case FormatJSON:
 		views := findingsToViews(filtered)
-		return printFormatError(format.PrintFindingsJSON(os.Stdout, views), "json")
-	case "report":
+		return printFormatError(format.PrintFindingsJSON(os.Stdout, views), FormatJSON)
+	case FormatReport:
 		return printReportJSON(os.Stdout, report)
-	case "table":
+	case FormatTable:
 		sorted := sortedByPosition(filtered)
 		views := findingsToViews(sorted)
-		return printFormatError(format.PrintFindingsTable(os.Stdout, views), "table")
-	case "sarif":
+		return printFormatError(format.PrintFindingsTable(os.Stdout, views), FormatTable)
+	case FormatSARIF:
 		return printSARIF(os.Stdout, report, minSev)
 	default:
 		return fmt.Errorf(
