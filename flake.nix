@@ -75,6 +75,8 @@
             shellHook = ''
               export GOPRIVATE=github.com/LarsArtmann/*
             '';
+
+            GOWORK = "off";
           };
         });
 
