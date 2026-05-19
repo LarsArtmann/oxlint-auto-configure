@@ -64,7 +64,7 @@
         {
           default = pkgs.mkShell {
             packages = with pkgs; [
-              go
+              go_1_26
               gopls
               gotools
               golangci-lint
@@ -81,6 +81,10 @@
       overlays.default = final: prev: {
         oxlint-auto-configure = self.packages.${final.stdenv.hostPlatform.system}.default;
       };
+
+      checks = forAllSystems (system: {
+        build = self.packages.${system}.default;
+      });
 
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
     };
