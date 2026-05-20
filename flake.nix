@@ -7,7 +7,7 @@
 
   outputs = { self, nixpkgs }:
     let
-      version = self.shortRev or "dev";
+      version = "0.1.0";
       supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     in
