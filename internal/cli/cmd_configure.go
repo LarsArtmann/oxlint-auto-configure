@@ -42,7 +42,7 @@ Profiles:
 			}
 			absRoot, err := filepath.Abs(rootDir)
 			if err != nil {
-				return fmt.Errorf("resolve root dir: %w", err)
+				return fmt.Errorf("profileFlag=%s: resolve root dir: %w", profileFlag, err)
 			}
 
 			opts := ConfigureOptions{
@@ -90,13 +90,13 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 
 	reg, err := rule.LoadRegistry()
 	if err != nil {
-		return fmt.Errorf("load rule registry: %w", err)
+		return fmt.Errorf("absRoot=%s: load rule registry: %w", absRoot, err)
 	}
 
 	det := detect.NewDetector(absRoot)
 	pluginConfig, projectTypes, err := det.Detect()
 	if err != nil {
-		return fmt.Errorf("detect project type: %w", err)
+		return fmt.Errorf("absRoot=%s: detect project type: %w", absRoot, err)
 	}
 
 	slog.Info("detected project", "types", detect.FormatTypes(projectTypes))
@@ -105,7 +105,7 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 
 	cfg, err := config.GenerateProjectConfig(opts.Profile, reg, pluginConfig, projectTypes)
 	if err != nil {
-		return fmt.Errorf("generate config: %w", err)
+		return fmt.Errorf("absRoot=%s: generate config: %w", absRoot, err)
 	}
 
 	targetPath := resolveConfigPath(opts.ConfigPath, absRoot)
@@ -177,7 +177,7 @@ func runFixIfNeeded(ctx context.Context, absRoot, targetPath string, runFix bool
 	slog.Info("running oxlint fix")
 	fixResult, err := oxlint.RunFix(ctx, absRoot, targetPath)
 	if err != nil {
-		return fmt.Errorf("fix: %w", err)
+		return fmt.Errorf("absRoot=%s: fix: %w", absRoot, err)
 	}
 	if fixResult.Output != "" {
 		slog.Info("fix output", "detail", fixResult.Output)

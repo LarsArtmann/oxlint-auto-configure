@@ -86,7 +86,7 @@ func initAnalyze(ctx context.Context, rootDir string) (*analyzeSetup, error) {
 func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error {
 	setup, err := initAnalyze(ctx, rootDir)
 	if err != nil {
-		return err
+		return fmt.Errorf("formatFlag=%s sevFlag=%s: %w", formatFlag, sevFlag, err)
 	}
 
 	detector := newDetector(setup.absRoot, setup.reg)
@@ -94,12 +94,12 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 	pipelineCfg := newAnalyzePipelineConfig()
 	p, err := pipeline.New(pipelineCfg, setup.absRoot, detector)
 	if err != nil {
-		return fmt.Errorf("create pipeline: %w", err)
+		return fmt.Errorf("formatFlag=%s sevFlag=%s: create pipeline: %w", formatFlag, sevFlag, err)
 	}
 
 	result, err := p.Run(ctx)
 	if err != nil {
-		return fmt.Errorf("pipeline: %w", err)
+		return fmt.Errorf("formatFlag=%s sevFlag=%s: pipeline: %w", formatFlag, sevFlag, err)
 	}
 
 	if snap := result.Metrics; !snap.StartTime.IsZero() {
@@ -123,7 +123,7 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 
 	minSev, err := parseOptionalSeverity(sevFlag)
 	if err != nil {
-		return err
+		return fmt.Errorf("formatFlag=%s: %w", formatFlag, err)
 	}
 
 	return renderFindings(formatFlag, report, result, minSev)
@@ -202,22 +202,23 @@ func renderFindings(
 
 	switch fmtFlag {
 	case FormatSummary:
-		return printFormatError(format.PrintSummary(os.Stderr, sv), FormatSummary)
+		return printFormatError(format.PrintSummary(os.Stderr, sv), FormatSummary, minSev)
 	case FormatJSON:
 		views := findingsToViews(filtered)
-		return printFormatError(format.PrintFindingsJSON(os.Stdout, views), FormatJSON)
+		return printFormatError(format.PrintFindingsJSON(os.Stdout, views), FormatJSON, minSev)
 	case FormatReport:
 		return printReportJSON(os.Stdout, report)
 	case FormatTable:
 		sorted := sortedByPosition(filtered)
 		views := findingsToViews(sorted)
-		return printFormatError(format.PrintFindingsTable(os.Stdout, views), FormatTable)
+		return printFormatError(format.PrintFindingsTable(os.Stdout, views), FormatTable, minSev)
 	case FormatSARIF:
 		return printSARIF(os.Stdout, report, minSev)
 	default:
 		return fmt.Errorf(
-			"unknown format %q: choose from summary, json, report, sarif, table",
+			"unknown format %q: choose from summary, json, report, sarif, table (minSev=%s)",
 			fmtFlag,
+			minSev,
 		)
 	}
 }
@@ -229,9 +230,9 @@ func sortedByPosition(findings []finding.Finding) []finding.Finding {
 	return sorted
 }
 
-func printFormatError(err error, label string) error {
+func printFormatError(err error, label string, minSev finding.Severity) error {
 	if err != nil {
-		return fmt.Errorf("print %s: %w", label, err)
+		return fmt.Errorf("print %s (minSev=%s): %w", label, minSev, err)
 	}
 	return nil
 }
@@ -299,7 +300,7 @@ func printSARIF(w io.Writer, report *finding.Report, minSev finding.Severity) er
 	}
 
 	if err != nil {
-		return fmt.Errorf("generate SARIF: %w", err)
+		return fmt.Errorf("generate SARIF (minSev=%s): %w", minSev, err)
 	}
 	_, _ = fmt.Fprintln(w, string(sarif))
 

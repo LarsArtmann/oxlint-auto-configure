@@ -305,13 +305,13 @@ func TestProfileNames(t *testing.T) {
 
 func TestPrintFormatErrorNil(t *testing.T) {
 	t.Parallel()
-	err := printFormatError(nil, "json")
+	err := printFormatError(nil, "json", "")
 	assert.NoError(t, err)
 }
 
 func TestPrintFormatErrorWithErr(t *testing.T) {
 	t.Parallel()
-	err := printFormatError(errors.New("write failed"), "table")
+	err := printFormatError(errors.New("write failed"), "table", "")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "print table")
 }
