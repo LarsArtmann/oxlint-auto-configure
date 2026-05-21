@@ -103,7 +103,8 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 	}
 
 	if snap := result.Metrics; !snap.StartTime.IsZero() {
-		slog.Info("pipeline metrics",
+		slog.Info(
+			"pipeline metrics",
 			"duration", snap.TotalDuration.String(),
 			"fixes_applied", snap.FixesApplied,
 		)

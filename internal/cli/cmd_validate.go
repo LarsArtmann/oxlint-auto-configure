@@ -54,7 +54,8 @@ func Validate(configPath string) error {
 		return fmt.Errorf("validate config: %w", err)
 	}
 
-	slog.Info("config valid",
+	slog.Info(
+		"config valid",
 		"rules", len(cfg.Rules),
 		"enabled", result.EnabledCount,
 		"disabled", result.DisabledCount,

@@ -114,7 +114,8 @@ func reportSummary(decisions []profile.RuleDecision, reg *rule.Registry) error {
 		counts[string(d.Severity)]++
 	}
 
-	slog.Info("rule summary",
+	slog.Info(
+		"rule summary",
 		"total", reg.Len(),
 		"error", counts["error"],
 		"warn", counts["warn"],

@@ -77,7 +77,8 @@ type ConfigureOptions struct {
 // Configure generates an oxlint configuration for the project at absRoot.
 func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error {
 	if !opts.Profile.IsValid() {
-		return fmt.Errorf("%w %q: choose from %s",
+		return fmt.Errorf(
+			"%w %q: choose from %s",
 			config.ErrInvalidProfile,
 			opts.Profile,
 			strings.Join(profile.AllProfileNames(), ", "),
@@ -132,7 +133,8 @@ func checkOxlintVersion(ctx context.Context) error {
 
 	embeddedVer := rule.EmbeddedVersion()
 	if embeddedVer != "" && embeddedVer != oxlintVer {
-		slog.Warn("embedded rules version mismatch",
+		slog.Warn(
+			"embedded rules version mismatch",
 			"embedded", embeddedVer,
 			"runtime", oxlintVer,
 		)

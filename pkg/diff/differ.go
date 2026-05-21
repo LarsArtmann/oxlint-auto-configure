@@ -48,7 +48,8 @@ func (d *Differ) Diff() []Change {
 	changes = append(changes, d.compareSlices(d.before.Plugins, d.after.Plugins, "plugin:")...)
 	changes = append(
 		changes,
-		d.compareMaps(d.before.Categories, d.after.Categories, "category:")...)
+		d.compareMaps(d.before.Categories, d.after.Categories, "category:")...,
+	)
 	changes = append(changes, d.compareMaps(d.before.Rules, d.after.Rules, "")...)
 	changes = append(changes, d.compareBoolMaps(d.before.Env, d.after.Env, "env:")...)
 	changes = append(changes, d.compareAnyMaps(d.before.Settings, d.after.Settings, "settings:")...)
