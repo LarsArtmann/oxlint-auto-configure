@@ -203,28 +203,29 @@ func (d *Detector) collectDependencies(pkg *packageJSON) map[string]bool {
 	return deps
 }
 
-func (d *Detector) hasTSConfig() bool {
-	_, err := os.Stat(filepath.Join(d.rootDir, "tsconfig.json"))
+func (d *Detector) hasFile(filename string) bool {
+	_, err := os.Stat(filepath.Join(d.rootDir, filename))
 	return err == nil
+}
+
+func (d *Detector) hasTSConfig() bool {
+	return d.hasFile("tsconfig.json")
 }
 
 func (d *Detector) hasNodeModules() bool {
-	_, err := os.Stat(filepath.Join(d.rootDir, "node_modules"))
-	return err == nil
+	return d.hasFile("node_modules")
 }
 
 func (d *Detector) hasPackageJSON() bool {
-	_, err := os.Stat(filepath.Join(d.rootDir, "package.json"))
-	return err == nil
+	return d.hasFile("package.json")
 }
 
 func (d *Detector) hasImportUsage() bool {
-	matches, _ := filepath.Glob(filepath.Join(d.rootDir, "*.mjs"))
-	if len(matches) > 0 {
-		return true
-	}
+	return d.hasGlob("*.mjs") || d.hasGlob("*.mts")
+}
 
-	matches, _ = filepath.Glob(filepath.Join(d.rootDir, "*.mts"))
+func (d *Detector) hasGlob(pattern string) bool {
+	matches, _ := filepath.Glob(filepath.Join(d.rootDir, pattern))
 	return len(matches) > 0
 }
 

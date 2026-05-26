@@ -63,18 +63,12 @@ func PrintSummary(w io.Writer, sv *SummaryView) error {
 
 	topRules := topByRule(sv.Findings, 10)
 	if len(topRules) > 0 {
-		_, _ = fmt.Fprintln(w, "\nTop rules:")
-		for _, entry := range topRules {
-			_, _ = fmt.Fprintf(w, "  %-45s %d\n", entry.name, entry.count)
-		}
+		printTopEntries(w, "Top rules:", topRules, 45)
 	}
 
 	topFiles := topByFile(sv.Findings, 10)
 	if len(topFiles) > 0 {
-		_, _ = fmt.Fprintln(w, "\nTop files:")
-		for _, entry := range topFiles {
-			_, _ = fmt.Fprintf(w, "  %-45s %d\n", entry.name, entry.count)
-		}
+		printTopEntries(w, "Top files:", topFiles, 45)
 	}
 
 	_, _ = fmt.Fprintln(w)
@@ -84,6 +78,13 @@ func PrintSummary(w io.Writer, sv *SummaryView) error {
 type namedCount struct {
 	name  string
 	count int
+}
+
+func printTopEntries(w io.Writer, title string, entries []namedCount, nameWidth int) {
+	_, _ = fmt.Fprintln(w, "\n"+title)
+	for _, entry := range entries {
+		_, _ = fmt.Fprintf(w, "  %-*s %d\n", nameWidth, entry.name, entry.count)
+	}
 }
 
 func topByRule(findings []FindingView, n int) []namedCount {

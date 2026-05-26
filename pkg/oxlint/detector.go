@@ -86,10 +86,8 @@ func (d *Detector) Detect(ctx context.Context) ([]finding.Finding, error) {
 	args := d.buildArgs()
 
 	output, err := d.runner.Run(ctx, "oxlint", args, d.rootDir)
-	if err != nil {
-		if exitErr := handleExitError(err, "oxlint"); exitErr != nil {
-			return nil, exitErr
-		}
+	if err := checkExitError(err, "oxlint"); err != nil {
+		return nil, err
 	}
 
 	if len(output) == 0 {
@@ -316,4 +314,14 @@ func handleExitError(err error, cmd string) error {
 		return nil
 	}
 	return finding.NewIOError("run "+cmd, err)
+}
+
+// checkExitError checks the error and returns it if it's a real error (not just findings).
+func checkExitError(err error, cmd string) error {
+	if err != nil {
+		if exitErr := handleExitError(err, cmd); exitErr != nil {
+			return exitErr
+		}
+	}
+	return nil
 }

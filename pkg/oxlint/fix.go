@@ -27,10 +27,8 @@ func RunFix(ctx context.Context, rootDir, configPath string) (*FixResult, error)
 	output, err := cmd.CombinedOutput()
 	result := &FixResult{Output: strings.TrimSpace(string(output))}
 
-	if err != nil {
-		if exitErr := handleExitError(err, "oxlint --fix"); exitErr != nil {
-			return nil, exitErr
-		}
+	if err := checkExitError(err, "oxlint --fix"); err != nil {
+		return nil, err
 	}
 
 	return result, nil

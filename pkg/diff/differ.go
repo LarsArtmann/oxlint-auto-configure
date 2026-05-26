@@ -212,18 +212,17 @@ func (d *Differ) collectAllKeys(before, after map[string]string) []string {
 	seen := make(map[string]struct{})
 	var keys []string
 
-	for k := range before {
-		if _, exists := seen[k]; !exists {
-			seen[k] = struct{}{}
-			keys = append(keys, k)
-		}
-	}
-	for k := range after {
-		if _, exists := seen[k]; !exists {
-			seen[k] = struct{}{}
-			keys = append(keys, k)
-		}
-	}
+	addUnseenKeys(seen, &keys, before)
+	addUnseenKeys(seen, &keys, after)
 
 	return keys
+}
+
+func addUnseenKeys(seen map[string]struct{}, keys *[]string, m map[string]string) {
+	for k := range m {
+		if _, exists := seen[k]; !exists {
+			seen[k] = struct{}{}
+			*keys = append(*keys, k)
+		}
+	}
 }
