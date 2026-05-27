@@ -53,12 +53,17 @@ The project has a `flake.nix` for reproducible builds and dev shells.
 ```bash
 nix build .                    # Build binary (tests run, oxlint included)
 nix run . -- configure .      # Run with oxlint in PATH
-nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint, just
+nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint
 ```
 
 - **Vendored deps** — `vendor/` committed for nix sandbox compatibility (private go-finding dep)
-- **`just vendor`** — Re-vendor after `go.mod` changes (`GOWORK=off` required)
+- **`GOWORK=off go mod vendor`** — Re-vendor after `go.mod` changes (private go-finding dep requires committed vendor/ for nix sandbox)
 - **Runtime dep** — `oxlint` is a runtime dependency; wrapped in `nix run` via `makeWrapper`
+- **Git-derived version** — `self.rev or self.dirtyRev or "dev"` injected via ldflags
+- **`lib.fileset`** — Precise source filtering (go.mod, go.sum, cmd/, internal/, pkg/, vendor/)
+- **`nix-systems/default`** — System list via flake input instead of hardcoded
+- **Checks** — `build` and `test` (reuses goModules from package)
+- **Formatter** — `nixfmt` via `formatter` output
 
 ### Testing
 
@@ -71,7 +76,7 @@ just check       # All checks (fmt + vet + lint + test)
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` v0.2.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`)
+- `github.com/larsartmann/go-finding` v0.3.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`)
 - `github.com/spf13/cobra` — CLI framework
 - `github.com/stretchr/testify` — Test assertions
 

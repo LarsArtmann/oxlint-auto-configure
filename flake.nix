@@ -3,19 +3,31 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    systems.url = "github:nix-systems/default";
   };
 
   outputs =
-    { self, nixpkgs }:
+    {
+      self,
+      nixpkgs,
+      systems,
+    }:
     let
-      version = "0.1.0";
-      supportedSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
+      version = self.rev or self.dirtyRev or "dev";
+      supportedSystems = import systems;
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+
+      src = nixpkgs.lib.fileset.toSource {
+        root = ./.;
+        fileset = nixpkgs.lib.fileset.unions [
+          ./go.mod
+          ./go.sum
+          ./cmd
+          ./internal
+          ./pkg
+          ./vendor
+        ];
+      };
     in
     {
       packages = forAllSystems (
@@ -26,8 +38,7 @@
         {
           default = pkgs.buildGoModule {
             pname = "oxlint-auto-configure";
-            inherit version;
-            src = ./.;
+            inherit version src;
             vendorHash = null;
             ldflags = [
               "-s"
@@ -83,13 +94,9 @@
               gotools
               golangci-lint
               oxlint
-              just
             ];
 
-            shellHook = ''
-              export GOPRIVATE=github.com/LarsArtmann/*
-            '';
-
+            GOPRIVATE = "github.com/LarsArtmann/*";
             GOWORK = "off";
           };
         }
@@ -99,9 +106,18 @@
         oxlint-auto-configure = self.packages.${final.stdenv.hostPlatform.system}.default;
       };
 
-      checks = forAllSystems (system: {
-        build = self.packages.${system}.default;
-      });
+      checks = forAllSystems (
+        system:
+        let
+          pkg = self.packages.${system}.default;
+        in
+        {
+          build = pkg;
+          test = pkg.overrideAttrs (_: {
+            doCheck = true;
+          });
+        }
+      );
 
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
     };
