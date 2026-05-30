@@ -16,49 +16,50 @@ Successfully completed a deduplication session targeting clone groups identified
 
 ### a) FULLY DONE ✅
 
-| Task | Status | Details |
-|------|--------|---------|
-| `pkg/detect/detector.go` | ✅ DONE | Extracted `hasFile()` + `hasGlob()` helpers; eliminated 3 clone groups |
-| `pkg/diff/differ.go` | ✅ DONE | Extracted `addUnseenKeys()` helper; eliminated 2 clone groups |
-| `pkg/format/format.go` | ✅ DONE | Extracted `printTopEntries()` helper; eliminated 1 clone group |
-| `pkg/oxlint/detector.go` + `fix.go` | ✅ DONE | Extracted `checkExitError()` helper; eliminated 1 clone group |
-| `internal/cli/` profile flag | ✅ DONE | Extracted `AddProfileFlag()` + `profileFlag` var to `cmd_root.go`; eliminated 1 clone group |
+| Task                                | Status  | Details                                                                                     |
+| ----------------------------------- | ------- | ------------------------------------------------------------------------------------------- |
+| `pkg/detect/detector.go`            | ✅ DONE | Extracted `hasFile()` + `hasGlob()` helpers; eliminated 3 clone groups                      |
+| `pkg/diff/differ.go`                | ✅ DONE | Extracted `addUnseenKeys()` helper; eliminated 2 clone groups                               |
+| `pkg/format/format.go`              | ✅ DONE | Extracted `printTopEntries()` helper; eliminated 1 clone group                              |
+| `pkg/oxlint/detector.go` + `fix.go` | ✅ DONE | Extracted `checkExitError()` helper; eliminated 1 clone group                               |
+| `internal/cli/` profile flag        | ✅ DONE | Extracted `AddProfileFlag()` + `profileFlag` var to `cmd_root.go`; eliminated 1 clone group |
 
 ### b) PARTIALLY DONE ⏳
 
-| Task | Status | Details |
-|------|--------|---------|
+| Task                    | Status                    | Details                                               |
+| ----------------------- | ------------------------- | ----------------------------------------------------- |
 | Test file deduplication | ⏳ 18 clone groups remain | All in `*_test.go` files; following Go testing idioms |
 
 ### c) NOT STARTED 🚫
 
-| Task | Status | Details |
-|------|--------|---------|
-| Test file clone elimination | N/A | Skipped per skill guidance (test patterns are intentional) |
+| Task                        | Status | Details                                                    |
+| --------------------------- | ------ | ---------------------------------------------------------- |
+| Test file clone elimination | N/A    | Skipped per skill guidance (test patterns are intentional) |
 
 ### d) TOTALLY FUCKED UP! 💀
 
-| Task | Status | Details |
-|------|--------|---------|
-| None | ✅ | All builds pass, all tests pass |
+| Task | Status | Details                         |
+| ---- | ------ | ------------------------------- |
+| None | ✅     | All builds pass, all tests pass |
 
 ---
 
 ## Metrics
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| Clone groups | 24 | 18 | -6 (-25%) |
-| Production code clones | 6 groups | 0 groups | ✅ ELIMINATED |
-| Test code clones | 18 groups | 18 groups | Unchanged (intentional) |
-| Files modified | — | 8 | +8 |
-| Lines changed | — | 109 | +60/-49 |
+| Metric                 | Before    | After     | Change                  |
+| ---------------------- | --------- | --------- | ----------------------- |
+| Clone groups           | 24        | 18        | -6 (-25%)               |
+| Production code clones | 6 groups  | 0 groups  | ✅ ELIMINATED           |
+| Test code clones       | 18 groups | 18 groups | Unchanged (intentional) |
+| Files modified         | —         | 8         | +8                      |
+| Lines changed          | —         | 109       | +60/-49                 |
 
 ---
 
 ## Changes Summary
 
 ### `pkg/detect/detector.go`
+
 ```go
 // BEFORE: 3 duplicated hasFile patterns
 func (d *Detector) hasTSConfig() bool {
@@ -79,6 +80,7 @@ func (d *Detector) hasGlob(pattern string) bool {
 ```
 
 ### `pkg/diff/differ.go`
+
 ```go
 // BEFORE: Duplicated "add to seen if not exists" logic
 // AFTER: Extracted addUnseenKeys() helper
@@ -86,6 +88,7 @@ func addUnseenKeys(seen map[string]struct{}, keys *[]string, m map[string]string
 ```
 
 ### `pkg/format/format.go`
+
 ```go
 // BEFORE: Duplicated "print top N entries" loop
 // AFTER: Shared printTopEntries() helper
@@ -93,6 +96,7 @@ func printTopEntries(w io.Writer, title string, entries []namedCount, nameWidth 
 ```
 
 ### `pkg/oxlint/` (detector.go + fix.go)
+
 ```go
 // BEFORE: Duplicated error handling pattern
 if err != nil {
@@ -108,6 +112,7 @@ if err := checkExitError(err, "oxlint"); err != nil {
 ```
 
 ### `internal/cli/cmd_root.go` + commands
+
 ```go
 // BEFORE: profileFlag redeclared in each command
 // AFTER: Shared AddProfileFlag() function + package-level var
@@ -122,11 +127,11 @@ func AddProfileFlag(cmd *cobra.Command) {
 
 ## Quality Gates ✅
 
-| Check | Status |
-|-------|--------|
-| `go build ./...` | ✅ Pass |
-| `go vet ./...` | ✅ Pass |
-| `go test ./...` | ✅ All pass |
+| Check                        | Status      |
+| ---------------------------- | ----------- |
+| `go build ./...`             | ✅ Pass     |
+| `go vet ./...`               | ✅ Pass     |
+| `go test ./...`              | ✅ All pass |
 | `art-dupl` production clones | ✅ 0 groups |
 
 ---
@@ -134,19 +139,23 @@ func AddProfileFlag(cmd *cobra.Command) {
 ## What We Should Improve
 
 ### Critical (Should Fix Now)
+
 1. **Zero production code clones** — ✅ ACHIEVED
 
 ### High Priority (Should Do Soon)
+
 2. **Add integration tests** for the full configure → validate → analyze pipeline
 3. **Document the `AddProfileFlag()` pattern** for future CLI flag extraction
 4. **Consider extracting `handleExitError()` as a reusable package** (currently in `pkg/oxlint/detector.go`)
 
 ### Medium Priority (Nice to Have)
+
 5. **Performance test** for large rule registries (716 rules)
 6. **Benchmark the detect → profile → configure pipeline**
 7. **Add `-t` threshold tuning** for art-dupl to catch smaller clones
 
 ### Low Priority (When Time Permits)
+
 8. **Extract `hasFile()` and `hasGlob()` to a small `pkg/fsutil/` package** for potential reuse
 9. **Create a `pkg/strutil/` for `addUnseenKeys()` patterns**
 10. **Add CLAUDE.md** alongside AGENTS.md for project-specific AI guidance
@@ -196,6 +205,7 @@ after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: tes
 ```
 
 **Options I'm considering:**
+
 1. **Leave as-is** — Test patterns are idiomatic Go; readability > DRY
 2. **Extract test helpers** — Create `testConfig(rules ...string) *config.OxlintConfig`
 3. **Lower art-dupl threshold** — Use `-t 25` to only catch larger problematic clones
@@ -207,16 +217,16 @@ after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: tes
 
 ## Files Changed
 
-| File | Change Type | Lines |
-|------|-------------|-------|
-| `pkg/detect/detector.go` | Refactor | +12/-9 |
-| `pkg/diff/differ.go` | Refactor | +8/-10 |
-| `pkg/format/format.go` | Refactor | +10/-8 |
-| `pkg/oxlint/detector.go` | Refactor | +12/-4 |
-| `pkg/oxlint/fix.go` | Refactor | +2/-4 |
-| `internal/cli/cmd_root.go` | Refactor | +8/-2 |
-| `internal/cli/cmd_configure.go` | Refactor | +3/-6 |
-| `internal/cli/cmd_report.go` | Refactor | +3/-6 |
+| File                            | Change Type | Lines  |
+| ------------------------------- | ----------- | ------ |
+| `pkg/detect/detector.go`        | Refactor    | +12/-9 |
+| `pkg/diff/differ.go`            | Refactor    | +8/-10 |
+| `pkg/format/format.go`          | Refactor    | +10/-8 |
+| `pkg/oxlint/detector.go`        | Refactor    | +12/-4 |
+| `pkg/oxlint/fix.go`             | Refactor    | +2/-4  |
+| `internal/cli/cmd_root.go`      | Refactor    | +8/-2  |
+| `internal/cli/cmd_configure.go` | Refactor    | +3/-6  |
+| `internal/cli/cmd_report.go`    | Refactor    | +3/-6  |
 
 ---
 
@@ -229,4 +239,4 @@ after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: tes
 
 ---
 
-*Generated by Crush deduplication session — 2026-05-26*
+_Generated by Crush deduplication session — 2026-05-26_
