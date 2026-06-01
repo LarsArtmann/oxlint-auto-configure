@@ -3,13 +3,13 @@ module github.com/larsartmann/oxlint-auto-configure
 go 1.26.3
 
 require (
-	github.com/larsartmann/go-finding v0.4.1
+	github.com/larsartmann/go-finding v0.4.2
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 )
 
 require (
-	github.com/LarsArtmann/gogenfilter/v3 v3.0.2 // indirect
+	github.com/LarsArtmann/gogenfilter/v3 v3.0.3-0.20260527072437-63f00cf54986 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
