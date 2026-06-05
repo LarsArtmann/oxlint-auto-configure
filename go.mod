@@ -9,7 +9,7 @@ require (
 )
 
 require (
-	github.com/LarsArtmann/gogenfilter/v3 v3.0.3-0.20260603092628-6c28a428a37d // indirect
+	github.com/LarsArtmann/gogenfilter/v3 v3.1.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
