@@ -54,10 +54,13 @@
             projectRootFile = "go.mod";
             programs = {
               gofumpt.enable = true;
+              goimports.enable = true;
               nixfmt.enable = true;
             };
           };
 
+          checks.format = config.treefmt.build.check self;
+          checks.build = config.packages.default;
           packages.default = pkgs.buildGoModule {
             pname = "oxlint-auto-configure";
             inherit version src;
@@ -113,8 +116,8 @@
               ];
 
               GOWORK = "off";
-            };
-          };
+            GOPRIVATE = "github.com/LarsArtmann/*";
+            };          };
 
           checks = {
             build = config.packages.default;
@@ -124,7 +127,7 @@
           };
         };
 
-      flake.overlays.default = final: prev: {
+      flake.overlays.default = final: _prev: {
         oxlint-auto-configure = self.packages.${final.stdenv.hostPlatform.system}.default;
       };
     };
