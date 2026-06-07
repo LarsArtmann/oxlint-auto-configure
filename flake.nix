@@ -3,19 +3,27 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
     systems.url = "github:nix-systems/default";
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    {
+    inputs@{
       self,
       nixpkgs,
+      flake-parts,
       systems,
+      treefmt-nix,
     }:
     let
       version = self.rev or self.dirtyRev or "dev";
-      supportedSystems = import systems;
-      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
       src = nixpkgs.lib.fileset.toSource {
         root = ./.;
@@ -25,18 +33,32 @@
           ./cmd
           ./internal
           ./pkg
-          ./vendor
         ];
       };
     in
-    {
-      packages = forAllSystems (
-        system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-        in
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = import systems;
+
+      imports = [
+        treefmt-nix.flakeModule
+      ];
+
+      perSystem =
         {
-          default = pkgs.buildGoModule {
+          config,
+          pkgs,
+          ...
+        }:
+        {
+          treefmt = {
+            projectRootFile = "go.mod";
+            programs = {
+              gofumpt.enable = true;
+              nixfmt.enable = true;
+            };
+          };
+
+          packages.default = pkgs.buildGoModule {
             pname = "oxlint-auto-configure";
             inherit version src;
             vendorHash = null;
@@ -53,72 +75,57 @@
               mainProgram = "oxlint-auto-configure";
             };
           };
-        }
-      );
 
-      apps = forAllSystems (
-        system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-          pkg = self.packages.${system}.default;
-          wrapped =
-            pkgs.runCommandLocal "oxlint-auto-configure"
-              {
-                nativeBuildInputs = [ pkgs.makeWrapper ];
-                meta.mainProgram = "oxlint-auto-configure";
-              }
-              ''
-                mkdir -p $out/bin
-                makeWrapper ${pkgs.lib.getExe pkg} $out/bin/oxlint-auto-configure \
-                  --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.oxlint ]}
-              '';
-        in
-        {
-          default = {
+          apps.default = {
             type = "app";
-            program = "${wrapped}/bin/oxlint-auto-configure";
+            program = "${
+              pkgs.runCommandLocal "oxlint-auto-configure"
+                {
+                  nativeBuildInputs = [ pkgs.makeWrapper ];
+                  meta.mainProgram = "oxlint-auto-configure";
+                }
+                ''
+                  mkdir -p $out/bin
+                  makeWrapper ${pkgs.lib.getExe config.packages.default} $out/bin/oxlint-auto-configure \
+                    --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.oxlint ]}
+                ''
+            }/bin/oxlint-auto-configure";
           };
-        }
-      );
 
-      devShells = forAllSystems (
-        system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-        in
-        {
-          default = pkgs.mkShell {
-            packages = with pkgs; [
-              go_1_26
-              gopls
-              gotools
-              golangci-lint
-              oxlint
-            ];
+          devShells = {
+            default = pkgs.mkShell {
+              packages = with pkgs; [
+                go_1_26
+                gopls
+                gotools
+                golangci-lint
+                oxlint
+              ];
 
-            GOPRIVATE = "github.com/LarsArtmann/*";
-            GOWORK = "off";
+              GOPRIVATE = "github.com/LarsArtmann/*";
+              GOWORK = "off";
+            };
+
+            ci = pkgs.mkShellNoCC {
+              packages = [
+                pkgs.go_1_26
+                pkgs.golangci-lint
+              ];
+
+              GOWORK = "off";
+            };
           };
-        }
-      );
 
-      overlays.default = final: prev: {
+          checks = {
+            build = config.packages.default;
+            test = config.packages.default.overrideAttrs (_: {
+              doCheck = true;
+            });
+          };
+        };
+
+      flake.overlays.default = final: prev: {
         oxlint-auto-configure = self.packages.${final.stdenv.hostPlatform.system}.default;
       };
-
-      checks = forAllSystems (
-        system:
-        let
-          pkg = self.packages.${system}.default;
-        in
-        {
-          build = pkg;
-          test = pkg.overrideAttrs (_: {
-            doCheck = true;
-          });
-        }
-      );
-
-      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
     };
 }
