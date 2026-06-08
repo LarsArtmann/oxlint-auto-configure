@@ -63,6 +63,7 @@
             pname = "oxlint-auto-configure";
             inherit version src;
             vendorHash = null;
+            proxyVendor = true;
             ldflags = [
               "-s"
               "-w"
