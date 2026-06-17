@@ -115,8 +115,9 @@
               ];
 
               GOWORK = "off";
-            GOPRIVATE = "github.com/LarsArtmann/*";
-            };          };
+              GOPRIVATE = "github.com/LarsArtmann/*";
+            };
+          };
 
           checks = {
             format = config.treefmt.build.check self;
