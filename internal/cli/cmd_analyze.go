@@ -283,7 +283,7 @@ func summaryFromReport(
 		ByFixStrategy: byFix,
 		FilesAffected: report.Summary.FilesAffected,
 		Iterations:    result.TotalIterations,
-		Stable:        result.Stable,
+		Stable:        result.Stable(),
 		Findings:      findingsToViews(report.ActiveFindings()),
 	}
 }
