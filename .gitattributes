@@ -1,3 +1,5 @@
 vendor/ linguist-generated
 # Exclude from language statistics
 docs/status/*.md linguist-documentation
+# Exclude from language statistics
+reports/** linguist-generated
