@@ -10,10 +10,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGenerateProjectConfigRecommended(t *testing.T) {
-	t.Parallel()
+func loadTestRegistry(t *testing.T) *rule.Registry {
+	t.Helper()
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
+	return reg
+}
+
+func TestGenerateProjectConfigRecommended(t *testing.T) {
+	t.Parallel()
+	reg := loadTestRegistry(t)
 
 	cfg, err := GenerateProjectConfig(profile.ProfileRecommended, reg, nil, nil)
 	require.NoError(t, err)
@@ -23,8 +29,7 @@ func TestGenerateProjectConfigRecommended(t *testing.T) {
 
 func TestGenerateProjectConfigMaximal(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cfg, err := GenerateProjectConfig(profile.ProfileMaximalTypesafe, reg, nil, nil)
 	require.NoError(t, err)
@@ -34,18 +39,16 @@ func TestGenerateProjectConfigMaximal(t *testing.T) {
 
 func TestGenerateProjectConfigInvalidProfile(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
-	_, err = GenerateProjectConfig(profile.Profile("invalid"), reg, nil, nil)
+	_, err := GenerateProjectConfig(profile.Profile("invalid"), reg, nil, nil)
 	require.Error(t, err)
 	assert.ErrorIs(t, err, ErrInvalidProfile)
 }
 
 func TestGenerateProjectConfigWithNodeProject(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cfg, err := GenerateProjectConfig(
 		profile.ProfileRecommended, reg, nil,
@@ -57,8 +60,7 @@ func TestGenerateProjectConfigWithNodeProject(t *testing.T) {
 
 func TestGenerateProjectConfigWithReactPlugins(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	pc := profile.PluginConfig{
 		rule.PluginReact:   true,

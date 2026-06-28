@@ -7,24 +7,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoadRegistry(t *testing.T) {
-	t.Parallel()
+func loadTestRegistry(t *testing.T) *Registry {
+	t.Helper()
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
+	return reg
+}
+
+func TestLoadRegistry(t *testing.T) {
+	t.Parallel()
+	reg := loadTestRegistry(t)
 	assert.NotEmpty(t, reg.All())
 }
 
 func TestRegistryTotal(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 	assert.Equal(t, 716, reg.Len())
 }
 
 func TestRegistryByName(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	r, ok := reg.ByName("no-unused-vars")
 	assert.True(t, ok)
@@ -36,8 +40,7 @@ func TestRegistryByName(t *testing.T) {
 
 func TestRegistryByNameWithTypeScript(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	r, ok := reg.ByName("typescript/no-floating-promises")
 	assert.True(t, ok)
@@ -47,8 +50,7 @@ func TestRegistryByNameWithTypeScript(t *testing.T) {
 
 func TestRegistryByNameNotFound(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	_, ok := reg.ByName("nonexistent-rule")
 	assert.False(t, ok)
@@ -56,8 +58,7 @@ func TestRegistryByNameNotFound(t *testing.T) {
 
 func TestRegistryByCategory(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	correctness := reg.ByCategory(CategoryCorrectness)
 	assert.NotEmpty(t, correctness)
@@ -68,8 +69,7 @@ func TestRegistryByCategory(t *testing.T) {
 
 func TestRegistryByPlugin(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	ts := reg.ByPlugin(PluginTypeScript)
 	assert.NotEmpty(t, ts)
@@ -80,8 +80,7 @@ func TestRegistryByPlugin(t *testing.T) {
 
 func TestRegistryEnabledByDefault(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	enabled := reg.EnabledByDefault()
 	assert.NotEmpty(t, enabled)
@@ -92,8 +91,7 @@ func TestRegistryEnabledByDefault(t *testing.T) {
 
 func TestRegistryDisabledByDefault(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	disabled := reg.DisabledByDefault()
 	assert.NotEmpty(t, disabled)
@@ -104,8 +102,7 @@ func TestRegistryDisabledByDefault(t *testing.T) {
 
 func TestRegistryFixable(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	fixable := reg.Fixable()
 	assert.NotEmpty(t, fixable)
@@ -116,8 +113,7 @@ func TestRegistryFixable(t *testing.T) {
 
 func TestRegistryTypeAware(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	ta := reg.TypeAwareRules()
 	assert.NotEmpty(t, ta)
@@ -253,8 +249,7 @@ func TestPluginNeedsFlag(t *testing.T) {
 
 func TestRegistryFilter(t *testing.T) {
 	t.Parallel()
-	reg, err := LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	fixed := reg.Filter(func(r Rule) bool { return r.Fix == FixSafe })
 	assert.NotEmpty(t, fixed)

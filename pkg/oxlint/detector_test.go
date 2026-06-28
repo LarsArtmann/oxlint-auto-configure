@@ -84,19 +84,24 @@ const realOxlintOutput = `{
   "start_time": 0.017410818
 }`
 
+func parseTestFindings(t *testing.T, input string) []finding.Finding {
+	t.Helper()
+	findings, err := new(Detector).parseOutput([]byte(input))
+	require.NoError(t, err)
+	return findings
+}
+
 func TestParseRealOxlintOutput(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 	require.Len(t, findings, 3)
 }
 
 func TestParseFindsCorrectRules(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	assert.Equal(t, "no-debugger", findings[0].Rule)
 	assert.Equal(t, "no-unused-vars", findings[1].Rule)
@@ -106,8 +111,7 @@ func TestParseFindsCorrectRules(t *testing.T) {
 func TestParseFindsCorrectMessages(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	assert.Contains(t, findings[0].Message, "debugger")
 	assert.Contains(t, findings[1].Message, "declared but never used")
@@ -117,8 +121,7 @@ func TestParseFindsCorrectMessages(t *testing.T) {
 func TestParseFindsCorrectPositions(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	assert.Equal(t, "test.ts", findings[0].Position.File)
 	assert.Equal(t, 2, findings[0].Position.Line)
@@ -136,8 +139,7 @@ func TestParseFindsCorrectPositions(t *testing.T) {
 func TestParseMapsSeverity(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	assert.Equal(t, finding.SeverityWarning, findings[0].Severity)
 	assert.Equal(t, finding.SeverityWarning, findings[1].Severity)
@@ -147,8 +149,7 @@ func TestParseMapsSeverity(t *testing.T) {
 func TestParseMapsCategories(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	assert.Equal(t, finding.CategoryCorrectness, findings[0].Category)
 	assert.Equal(t, finding.CategoryCorrectness, findings[1].Category)
@@ -158,8 +159,7 @@ func TestParseMapsCategories(t *testing.T) {
 func TestParseExtractsURLAndHelp(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	assert.Equal(t, "https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-debugger.html",
 		findings[0].Metadata["url"])
@@ -305,8 +305,7 @@ func TestRangeFromLabels(t *testing.T) {
 func TestParseOutputPopulatesRange(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	require.Len(t, findings, 3)
 
@@ -332,8 +331,7 @@ func TestParseOutputPopulatesRange(t *testing.T) {
 func TestJSONRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	for _, f := range findings {
 		assert.True(t, f.IsValid(), "finding %s should be valid", f.Rule)
@@ -465,8 +463,7 @@ func TestBuildArgsWithConfigAndExtraArgs(t *testing.T) {
 func TestParseOutputSetsTag(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	assert.Equal(t, PluginESLint, string(findings[0].Tags[0]))
 	assert.Equal(t, PluginESLint, string(findings[1].Tags[0]))
@@ -476,8 +473,7 @@ func TestParseOutputSetsTag(t *testing.T) {
 func TestParseOutputSetsSnippet(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	assert.Empty(t, findings[0].Snippet, "no label text")
 	assert.Equal(t, "'x' is declared here", findings[1].Snippet)
@@ -486,8 +482,7 @@ func TestParseOutputSetsSnippet(t *testing.T) {
 func TestParseOutputFixStrategyWithoutRegistry(t *testing.T) {
 	t.Parallel()
 
-	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
-	require.NoError(t, err)
+	findings := parseTestFindings(t, realOxlintOutput)
 
 	for _, f := range findings {
 		assert.Equal(t, finding.FixStrategyNone, f.FixStrategy,

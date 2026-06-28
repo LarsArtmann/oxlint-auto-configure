@@ -13,8 +13,7 @@ import (
 
 func TestGeneratorRecommended(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)
@@ -35,8 +34,7 @@ func TestGeneratorRecommended(t *testing.T) {
 
 func TestGeneratorMaximalTypesafe(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cat := profile.NewCategorizer(profile.ProfileMaximalTypesafe, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)
@@ -53,8 +51,7 @@ func TestGeneratorMaximalTypesafe(t *testing.T) {
 
 func TestGeneratorWithReactProject(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	pc := profile.PluginConfig{
 		rule.PluginReact:     true,
@@ -73,8 +70,7 @@ func TestGeneratorWithReactProject(t *testing.T) {
 
 func TestGeneratorWithAllPlugins(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	pc := profile.PluginConfig{
 		rule.PluginReact: true, rule.PluginNextJS: true, rule.PluginVue: true,
@@ -113,8 +109,7 @@ func TestConfigToJSON(t *testing.T) {
 
 func TestConfigRoundTrip(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)
@@ -147,8 +142,7 @@ func TestFromJSON(t *testing.T) {
 
 func TestMinimalProfileConfig(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cat := profile.NewCategorizer(profile.ProfileMinimal, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)
@@ -173,8 +167,7 @@ func TestMinimalProfileConfig(t *testing.T) {
 
 func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)

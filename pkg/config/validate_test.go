@@ -3,7 +3,6 @@ package config
 import (
 	"testing"
 
-	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -12,8 +11,7 @@ const testRuleNoDebugger = "no-debugger"
 
 func TestValidateConfigValid(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cfg := &OxlintConfig{
 		Rules: map[string]string{testRuleNoDebugger: SeverityError},
@@ -29,8 +27,7 @@ func TestValidateConfigValid(t *testing.T) {
 
 func TestValidateConfigUnknownRules(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cfg := &OxlintConfig{
 		Rules: map[string]string{"nonexistent-rule-xyz": SeverityError},
@@ -44,8 +41,7 @@ func TestValidateConfigUnknownRules(t *testing.T) {
 
 func TestValidateConfigInvalidSeverity(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cfg := &OxlintConfig{
 		Rules: map[string]string{testRuleNoDebugger: "badsev"},
@@ -59,8 +55,7 @@ func TestValidateConfigInvalidSeverity(t *testing.T) {
 
 func TestValidateConfigDisabledRule(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cfg := &OxlintConfig{
 		Rules: map[string]string{testRuleNoDebugger: SeverityOff},
@@ -74,8 +69,7 @@ func TestValidateConfigDisabledRule(t *testing.T) {
 
 func TestValidateConfigEmptyRules(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cfg := &OxlintConfig{Rules: map[string]string{}}
 
@@ -87,14 +81,13 @@ func TestValidateConfigEmptyRules(t *testing.T) {
 
 func TestValidateConfigErrInvalidConfigWrapped(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cfg := &OxlintConfig{
 		Rules: map[string]string{"nonexistent-rule-xyz": SeverityError},
 	}
 
-	_, err = ValidateConfig(cfg, reg)
+	_, err := ValidateConfig(cfg, reg)
 	require.Error(t, err)
 	assert.ErrorIs(t, err, ErrInvalidConfig)
 }

@@ -1,9 +1,9 @@
 module github.com/larsartmann/oxlint-auto-configure
 
-go 1.26.3
+go 1.26.4
 
 require (
-	github.com/larsartmann/go-finding v0.9.1
+	github.com/larsartmann/go-finding v1.0.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 )

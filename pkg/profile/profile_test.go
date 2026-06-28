@@ -8,6 +8,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func loadTestRegistry(t *testing.T) *rule.Registry {
+	t.Helper()
+	reg, err := rule.LoadRegistry()
+	require.NoError(t, err)
+	return reg
+}
+
 func TestProfileString(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, "maximal-typesafe", ProfileMaximalTypesafe.String())
@@ -173,8 +180,7 @@ func TestEnabledPlugins(t *testing.T) {
 
 func TestDecideAll(t *testing.T) {
 	t.Parallel()
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
+	reg := loadTestRegistry(t)
 
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{})
 	decisions := cat.DecideAll(reg)
