@@ -19,10 +19,11 @@ import (
 
 func newConfigureCommand() *cobra.Command {
 	var (
-		configPath string
-		dryRun     bool
-		runFix     bool
-		rootDir    string
+		configPath  string
+		dryRun      bool
+		runFix      bool
+		rootDir     string
+		profileFlag string
 	)
 
 	cmd := &cobra.Command{
@@ -54,7 +55,7 @@ Profiles:
 		},
 	}
 
-	AddProfileFlag(cmd)
+	AddProfileFlag(cmd, &profileFlag)
 	cmd.Flags().
 		StringVarP(&configPath, "config", "c", "", "Output config file path (default: .oxlintrc.json)")
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "d", false, "Show what would change without writing")

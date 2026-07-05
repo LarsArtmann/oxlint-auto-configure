@@ -37,12 +37,11 @@ const (
 
 var version = "dev"
 
-// profileFlag is shared across commands that need the --profile flag.
-var profileFlag string
-
 // AddProfileFlag adds the shared profile flag to the given command.
-func AddProfileFlag(cmd *cobra.Command) {
-	cmd.Flags().StringVarP(&profileFlag, "profile", "p", string(defaultProfile), "Configuration profile")
+// The p parameter receives the flag value; each command should pass its own
+// local variable to avoid shared mutable state between commands.
+func AddProfileFlag(cmd *cobra.Command, p *string) {
+	cmd.Flags().StringVarP(p, "profile", "p", string(defaultProfile), "Configuration profile")
 }
 
 // NewRootCommand creates the root CLI command.

@@ -17,8 +17,9 @@ import (
 
 func newReportCommand() *cobra.Command {
 	var (
-		format  string
-		rootDir string
+		format      string
+		rootDir     string
+		profileFlag string
 	)
 
 	cmd := &cobra.Command{
@@ -64,7 +65,7 @@ func newReportCommand() *cobra.Command {
 		},
 	}
 
-	AddProfileFlag(cmd)
+	AddProfileFlag(cmd, &profileFlag)
 	cmd.Flags().StringVarP(&format, "format", "f", "table", "Output format: table, json, summary")
 	cmd.Flags().StringVar(&rootDir, "root", ".", "Project root directory")
 
