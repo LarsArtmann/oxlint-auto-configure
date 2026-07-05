@@ -103,9 +103,9 @@ func TestParseFindsCorrectRules(t *testing.T) {
 
 	findings := parseTestFindings(t, realOxlintOutput)
 
-	assert.Equal(t, "no-debugger", findings[0].Rule)
-	assert.Equal(t, "no-unused-vars", findings[1].Rule)
-	assert.Equal(t, "no-explicit-any", findings[2].Rule)
+	assert.Equal(t, finding.RuleName("no-debugger"), findings[0].Rule)
+	assert.Equal(t, finding.RuleName("no-unused-vars"), findings[1].Rule)
+	assert.Equal(t, finding.RuleName("no-explicit-any"), findings[2].Rule)
 }
 
 func TestParseFindsCorrectMessages(t *testing.T) {
@@ -358,7 +358,7 @@ func TestDetectWithMockRunner(t *testing.T) {
 	findings, err := d.Detect(context.Background())
 	require.NoError(t, err)
 	assert.Len(t, findings, 3)
-	assert.Equal(t, "no-debugger", findings[0].Rule)
+	assert.Equal(t, finding.RuleName("no-debugger"), findings[0].Rule)
 }
 
 func TestDetectWithMockRunnerEmptyOutput(t *testing.T) {

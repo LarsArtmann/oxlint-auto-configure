@@ -319,7 +319,7 @@ func TestPrintFormatErrorWithErr(t *testing.T) {
 func TestSummaryFromReport(t *testing.T) {
 	t.Parallel()
 	report := finding.NewReport(finding.ToolInfo{Name: "test", Version: "0.0.0"})
-	f := finding.NewFinding("rule1", "test", "msg", finding.SeverityError,
+	f := finding.NewFinding(finding.RuleName("rule1"), finding.ToolName("test"), "msg", finding.SeverityError,
 		finding.Position{File: testFileATS, Line: 1}, 1.0)
 	f.Category = finding.CategoryCorrectness
 	report.AddFindings([]finding.Finding{f})
@@ -327,7 +327,7 @@ func TestSummaryFromReport(t *testing.T) {
 
 	sv := summaryFromReport(report, &pipeline.PipelineResult{
 		TotalIterations: 2,
-		Stable:          true,
+		Reason:          pipeline.ReasonStable,
 	})
 	assert.Equal(t, 1, sv.Total)
 	assert.True(t, sv.Stable)
@@ -337,7 +337,7 @@ func TestSummaryFromReport(t *testing.T) {
 func TestFindingsToViews(t *testing.T) {
 	t.Parallel()
 	findings := []finding.Finding{
-		finding.NewFinding("no-debugger", "oxlint", "msg",
+		finding.NewFinding(finding.RuleName("no-debugger"), finding.ToolName("oxlint"), "msg",
 			finding.SeverityWarning,
 			finding.Position{File: "test.ts", Line: 5, Column: 3}, 1.0),
 	}
@@ -351,7 +351,7 @@ func TestFindingsToViews(t *testing.T) {
 func TestPrintReportJSON(t *testing.T) {
 	t.Parallel()
 	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: "1.0.0"})
-	f := finding.NewFinding("no-unused-vars", "oxlint", "unused variable",
+	f := finding.NewFinding(finding.RuleName("no-unused-vars"), finding.ToolName("oxlint"), "unused variable",
 		finding.SeverityError,
 		finding.Position{File: testFileATS, Line: 10, Column: 5}, 1.0)
 	f.Category = finding.CategoryCorrectness
@@ -409,11 +409,11 @@ func TestActiveWithFilter(t *testing.T) {
 
 	report := finding.NewReport(finding.ToolInfo{Name: "test"})
 	report.AddFindings([]finding.Finding{
-		finding.NewFinding("r1", "test", "msg", finding.SeverityError,
+		finding.NewFinding(finding.RuleName("r1"), finding.ToolName("test"), "msg", finding.SeverityError,
 			finding.Position{File: testFileATS, Line: 1}, 1.0),
-		finding.NewFinding("r2", "test", "msg", finding.SeverityWarning,
+		finding.NewFinding(finding.RuleName("r2"), finding.ToolName("test"), "msg", finding.SeverityWarning,
 			finding.Position{File: "b.ts", Line: 2}, 1.0),
-		finding.NewFinding("r3", "test", "msg", finding.SeverityInfo,
+		finding.NewFinding(finding.RuleName("r3"), finding.ToolName("test"), "msg", finding.SeverityInfo,
 			finding.Position{File: "c.ts", Line: 3}, 1.0),
 	})
 	report.ComputeSummary()
@@ -423,7 +423,7 @@ func TestActiveWithFilter(t *testing.T) {
 
 	errors := activeWithFilter(report, finding.SeverityError)
 	assert.Len(t, errors, 1)
-	assert.Equal(t, "r1", errors[0].Rule)
+	assert.Equal(t, finding.RuleName("r1"), errors[0].Rule)
 
 	warnings := activeWithFilter(report, finding.SeverityWarning)
 	assert.Len(t, warnings, 2)

@@ -153,8 +153,8 @@ func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
 		ruleName, pluginName := parseCode(diag.Code)
 
 		f := finding.NewFinding(
-			ruleName,
-			"oxlint",
+			finding.RuleName(ruleName),
+			finding.ToolName("oxlint"),
 			diag.Message,
 			mapSeverity(diag.Severity),
 			finding.Position{File: diag.Filename, Line: line, Column: col},

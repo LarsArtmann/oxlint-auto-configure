@@ -243,7 +243,7 @@ func findingsToViews(findings []finding.Finding) []format.FindingView {
 	views := make([]format.FindingView, 0, len(findings))
 	for _, f := range findings {
 		views = append(views, format.FindingView{
-			Rule:        f.Rule,
+			Rule:        string(f.Rule),
 			Message:     f.Message,
 			Severity:    string(f.Severity),
 			Category:    string(f.Category),

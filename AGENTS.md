@@ -56,8 +56,8 @@ nix run . -- configure .      # Run with oxlint in PATH
 nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint
 ```
 
-- **Vendored deps** — `vendor/` committed for nix sandbox compatibility (private go-finding dep)
-- **`GOWORK=off go mod vendor`** — Re-vendor after `go.mod` changes (private go-finding dep requires committed vendor/ for nix sandbox)
+- **Vendored deps** — `vendor/` is gitignored (auto-generated via `go mod vendor`); nix uses `vendorHash = null` for on-the-fly vendoring
+- **`GOWORK=off go mod vendor`** — Re-vendor after `go.mod` changes (private go-finding dep requires GOPRIVATE=github.com/LarsArtmann/\* for module fetch)
 - **Runtime dep** — `oxlint` is a runtime dependency; wrapped in `nix run` via `makeWrapper`
 - **Git-derived version** — `self.rev or self.dirtyRev or "dev"` injected via ldflags
 - **`lib.fileset`** — Precise source filtering (go.mod, go.sum, cmd/, internal/, pkg/, vendor/)
@@ -76,7 +76,7 @@ just check       # All checks (fmt + vet + lint + test)
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` v0.3.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`)
+- `github.com/larsartmann/go-finding` v1.0.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID` in `NewFinding`)
 - `github.com/spf13/cobra` — CLI framework
 - `github.com/stretchr/testify` — Test assertions
 
@@ -112,7 +112,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 
 ### Important Gotchas
 
-- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v0.2.0+ from GitHub (no local replace)
+- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.0.0 from GitHub (no local replace)
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
 - **Version injected at build** — `internal/cli.version` via ldflags (default: "dev")
@@ -127,12 +127,14 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Differ completeness** — Compares all fields: Plugins, Categories, Rules, Env, Settings
 - **Runner seam** — `pkg/oxlint.Runner` interface; `realRunner` (production), `mockRunner` (tests)
 - **Configure extraction** — `Configure(ctx, absRoot, opts)` callable without cobra; malformed existing configs now log warnings
+- **go-finding branded types** — `Finding.Rule` is `finding.RuleName`, `Finding.ToolName` is `finding.ToolName`. `NewFinding` requires branded conversions: `finding.RuleName(s)`, `finding.ToolName(s)`. Use `string(f.Rule)` when assigning to plain-string fields (e.g., `FindingView.Rule`).
+- **go-finding PipelineResult.Stable** — `Stable()` is a method, not a field. Use `Reason: pipeline.ReasonStable` in struct literals.
 - **go-finding Finding enrichment** — Detector populates Range (from oxlint label spans), FixStrategy (from registry FixCapability), Tag (plugin name), Snippet (label text), Metadata (url), Suggestion (help)
 - **go-finding FindingError** — All detector errors use structured `finding.NewIOError`/`NewParseError` for `errors.Is()` support
 - **Pipeline config** — Analyze command wires Metrics, Retry (2 retries, 100ms base), OnFinding/OnIteration callbacks; oxlint version in ToolInfo
 - **Analyze formats** — `summary`, `json` (flat FindingView array), `report` (full go-finding Report JSON), `sarif`, `table`
 - **WithRegistry option** — `oxlint.WithRegistry(reg)` enables FixStrategy lookup per-finding
-- **Nix build** — `vendor/` committed; `vendorHash = null` in flake; `GOWORK=off` for vendor
+- **Nix build** — `vendor/` gitignored (auto-generated); `GOWORK=off go mod vendor` to populate; `GOWORK=off` for all go commands
 - **Severity filter** — Analyze `-s/--severity` flag uses `finding.Filter(BySeverityAtLeast)` for json/table; `ToSARIFFiltered` for SARIF
 - **Profile name dedup** — `profile.AllProfileNames()` is single source; no more `cliProfileNames`/`config.profileNames`
 - **Detect logging** — `pkg/detect` logs warnings on malformed package.json (but not missing — that's normal for Go projects)
