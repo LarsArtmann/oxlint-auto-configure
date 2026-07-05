@@ -155,10 +155,18 @@ func logDiffIfExisting(targetPath string, cfg *config.OxlintConfig) {
 	}
 }
 
-func writeConfig(cfg *config.OxlintConfig, targetPath string) error {
+func marshalConfigJSON(cfg *config.OxlintConfig) ([]byte, error) {
 	data, err := cfg.ToJSON()
 	if err != nil {
-		return fmt.Errorf("generate config JSON: %w", err)
+		return nil, fmt.Errorf("generate config JSON: %w", err)
+	}
+	return data, nil
+}
+
+func writeConfig(cfg *config.OxlintConfig, targetPath string) error {
+	data, err := marshalConfigJSON(cfg)
+	if err != nil {
+		return err
 	}
 
 	if err := os.WriteFile(targetPath, append(data, '\n'), 0o600); err != nil {
@@ -167,6 +175,21 @@ func writeConfig(cfg *config.OxlintConfig, targetPath string) error {
 
 	slog.Info("configuration written", "path", targetPath)
 
+	return nil
+}
+
+// writeDryRun prints cfg to stdout instead of writing a file. The shared
+// marshal+check preamble with writeConfig is intentional idiomatic Go
+// error propagation rather than duplicated logic — the actual output
+// operations differ (file vs stdout).
+func writeDryRun(cfg *config.OxlintConfig, targetPath string) error {
+	data, err := marshalConfigJSON(cfg)
+	if err != nil {
+		return err
+	}
+
+	slog.Info("dry run", "path", targetPath)
+	fmt.Println(string(data))
 	return nil
 }
 
@@ -202,15 +225,4 @@ func showDiffIfExisting(targetPath string, cfg *config.OxlintConfig) string {
 	d := diff.NewDiffer(existing, cfg)
 
 	return d.Summary() + "\n" + d.FormatDiff()
-}
-
-func writeDryRun(cfg *config.OxlintConfig, targetPath string) error {
-	data, err := cfg.ToJSON()
-	if err != nil {
-		return fmt.Errorf("generate config JSON: %w", err)
-	}
-
-	slog.Info("dry run", "path", targetPath)
-	fmt.Println(string(data))
-	return nil
 }

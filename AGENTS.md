@@ -143,6 +143,9 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Iteration logging** — OnIteration callback uses `slog.Debug` (only visible with `-v`); no more raw slog spam
 - **ProjectTypeTest** — `vitest`/`jest` now detected as `ProjectTypeTest` (not `ProjectTypeNode`); enables both `PluginNode` AND the correct test plugin via `depPluginRules`
 - **GOWORK=off** — Parent workspace at `/home/lars/projects/go.work` interferes; always use `GOWORK=off` for `go run`/`go test`
+- **Test boilerplate is intentional** — `t.Parallel()` followed by `reg := loadTestRegistry(t)` in every test is idiomatic Go and **not** a duplication violation; `paralleltest` linter requires `t.Parallel()` directly in the test function. Do not fold it into the helper.
+- **marshalConfigJSON helper** — `internal/cli/cmd_configure.go` extracts the shared `cfg.ToJSON()` + error wrap into `marshalConfigJSON`. The remaining 4-line preamble (`data, err := marshalConfigJSON(cfg); if err != nil { return err }`) in `writeConfig`/`writeDryRun` is idiomatic Go error propagation and intentionally not abstracted further.
+- **`slices.Sorted(maps.Keys(m))`** — Prefer over manual `make+loop+sort.Strings` for sorted map-key enumeration in Go 1.23+.
 
 ---
 
