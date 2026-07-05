@@ -33,6 +33,7 @@
           ./cmd
           ./internal
           ./pkg
+          ./vendor
         ];
       };
     in

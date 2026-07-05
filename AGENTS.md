@@ -56,8 +56,8 @@ nix run . -- configure .      # Run with oxlint in PATH
 nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint
 ```
 
-- **Vendored deps** — `vendor/` is gitignored (auto-generated via `go mod vendor`); nix uses `vendorHash = null` for on-the-fly vendoring
-- **`GOWORK=off go mod vendor`** — Re-vendor after `go.mod` changes (private go-finding dep requires GOPRIVATE=github.com/LarsArtmann/\* for module fetch)
+- **Vendored deps** — `vendor/` committed for nix sandbox compatibility (private go-finding dep can't be fetched with `GOPROXY=off`)
+- **`GOWORK=off go mod vendor`** — Re-vendor after `go.mod` changes, then commit (required for nix sandbox build)
 - **Runtime dep** — `oxlint` is a runtime dependency; wrapped in `nix run` via `makeWrapper`
 - **Git-derived version** — `self.rev or self.dirtyRev or "dev"` injected via ldflags
 - **`lib.fileset`** — Precise source filtering (go.mod, go.sum, cmd/, internal/, pkg/, vendor/)
@@ -134,7 +134,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Pipeline config** — Analyze command wires Metrics, Retry (2 retries, 100ms base), OnFinding/OnIteration callbacks; oxlint version in ToolInfo
 - **Analyze formats** — `summary`, `json` (flat FindingView array), `report` (full go-finding Report JSON), `sarif`, `table`
 - **WithRegistry option** — `oxlint.WithRegistry(reg)` enables FixStrategy lookup per-finding
-- **Nix build** — `vendor/` gitignored (auto-generated); `GOWORK=off go mod vendor` to populate; `GOWORK=off` for all go commands
+- **Nix build** — `vendor/` committed (required for nix sandbox); `vendorHash = null` in flake; `GOWORK=off` for all go commands
 - **Severity filter** — Analyze `-s/--severity` flag uses `finding.Filter(BySeverityAtLeast)` for json/table; `ToSARIFFiltered` for SARIF
 - **Profile name dedup** — `profile.AllProfileNames()` is single source; no more `cliProfileNames`/`config.profileNames`
 - **Detect logging** — `pkg/detect` logs warnings on malformed package.json (but not missing — that's normal for Go projects)

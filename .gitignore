@@ -75,6 +75,7 @@ reports/
 *.test
 *.out
 vendor/
+!vendor/
 go.work
 go.work.sum
 
