@@ -264,9 +264,11 @@ func TestMapCategory(t *testing.T) {
 
 func TestPositionFromLabelsEmpty(t *testing.T) {
 	t.Parallel()
-	line, col := positionFromLabels(nil)
-	assert.Equal(t, 0, line)
-	assert.Equal(t, 0, col)
+	pos := positionFromLabels("test.ts", nil)
+	assert.Equal(t, "test.ts", pos.File)
+	assert.Equal(t, 0, pos.Line)
+	assert.Equal(t, 0, pos.Column)
+	assert.Equal(t, -1, pos.Offset) // unset sentinel per go-finding v1.0.0
 }
 
 func TestRangeFromLabels(t *testing.T) {

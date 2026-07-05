@@ -149,7 +149,6 @@ func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
 
 	findings := make([]finding.Finding, 0, len(output.Diagnostics))
 	for _, diag := range output.Diagnostics {
-		line, col := positionFromLabels(diag.Labels)
 		ruleName, pluginName := parseCode(diag.Code)
 
 		f := finding.NewFinding(
@@ -157,7 +156,7 @@ func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
 			finding.ToolName("oxlint"),
 			diag.Message,
 			mapSeverity(diag.Severity),
-			finding.Position{File: diag.Filename, Line: line, Column: col},
+			positionFromLabels(diag.Filename, diag.Labels),
 			1.0,
 		)
 
@@ -185,12 +184,19 @@ func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
 	return findings, nil
 }
 
-// positionFromLabels extracts line/column from the first label's span.
-func positionFromLabels(labels []oxlintLabel) (line, col int) {
-	if len(labels) > 0 {
-		return labels[0].Span.Line, labels[0].Span.Column
+// positionFromLabels builds a Position from the first label's span.
+// When no labels are present, returns a position with Offset=-1 (unset sentinel)
+// per go-finding v1.0.0 zero-value semantics.
+func positionFromLabels(filename string, labels []oxlintLabel) finding.Position {
+	if len(labels) == 0 {
+		return finding.Position{File: filename, Offset: -1}
 	}
-	return 0, 0
+	return finding.Position{
+		File:   filename,
+		Line:   labels[0].Span.Line,
+		Column: labels[0].Span.Column,
+		Offset: labels[0].Span.Offset,
+	}
 }
 
 // rangeFromLabels constructs a Range from the first label's span.
