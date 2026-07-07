@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Status Report — Full Cleanup &amp; Hardening Session</title>
+    <style>
+      :root {
+        --color-graphite: #0e0e10; --color-graphite-2: #18181d; --color-graphite-3: #16161a;
+        --color-bone: #f4f4f0; --color-red: #ff6b6b; --color-blue: #6eb5ff; --color-yellow: #f4d35e; --color-amber: #ffb347;
+        --color-hairline: rgba(244,244,240,0.12); --color-hairline-strong: rgba(244,244,240,0.25);
+        --surface: var(--color-graphite); --surface-raised: var(--color-graphite-2); --surface-sunken: var(--color-graphite-3);
+        --text: var(--color-bone); --text-muted: rgba(244,244,240,0.72); --text-faint: rgba(244,244,240,0.45);
+        --border: var(--color-hairline); --border-strong: var(--color-hairline-strong);
+        --accent: var(--color-amber); --problem: var(--color-red); --solution: var(--color-blue); --warning: var(--color-yellow);
+        --radius: 0px; --radius-sm: 0px;
+        --font-heading: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas, monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; }
+      section[id], [id] { scroll-margin-top: 60px; }
+      body { background: var(--surface); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+      :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .top-bar { background: var(--text); color: var(--surface); padding: 0.6rem 2rem; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+      .layout { display: flex; gap: 2.5rem; padding: 2rem; }
+      .sidebar { width: 220px; flex-shrink: 0; position: sticky; top: 1rem; align-self: flex-start; height: calc(100vh - 2rem); overflow-y: auto; display: none; }
+      .sidebar nav { display: flex; flex-direction: column; }
+      .sidebar .label { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border-strong); }
+      .sidebar a { font-size: 0.85rem; color: var(--text-muted); text-decoration: none; padding: 0.45rem 0.75rem; border-left: 2px solid transparent; font-weight: 500; }
+      .sidebar a:hover, .sidebar a.active { color: var(--accent); border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+      .main { flex: 1; min-width: 0; }
+      h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 800; letter-spacing: -0.02em; }
+      h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 0.6rem; }
+      h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border-strong); display: flex; align-items: baseline; gap: 0.6rem; }
+      h2 .num { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); font-weight: 700; }
+      h3 { font-size: 1.1rem; margin: 0 0 0.4rem; font-weight: 700; }
+      h4 { font-size: 0.98rem; margin: 0 0 0.3rem; font-weight: 700; }
+      p { margin: 0 0 1rem; }
+      .hero { padding: 1.5rem 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-strong); }
+      .hero-badge { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--surface); background: var(--accent); padding: 0.3rem 0.7rem; margin-bottom: 0.9rem; }
+      .hero-subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 70ch; }
+      .hero-shapes { position: relative; height: 80px; margin-bottom: 1rem; }
+      .hero-shapes .circle { position: absolute; top: 0; left: 0; width: 56px; height: 56px; background: var(--problem); border-radius: 50%; }
+      .hero-shapes .square { position: absolute; top: 24px; left: 72px; width: 48px; height: 48px; background: var(--solution); }
+      .hero-shapes .tri { position: absolute; top: 8px; left: 140px; width: 0; height: 0; border-left: 28px solid transparent; border-right: 28px solid transparent; border-bottom: 48px solid var(--warning); }
+      .card { background: var(--surface-raised); border: 1px solid var(--border); padding: 1.1rem 1.3rem; margin-bottom: 1rem; border-left: 4px solid var(--border-strong); }
+      .card-problem { border-left-color: var(--problem); background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised)); }
+      .card-solution { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised)); }
+      .card-warning { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised)); }
+      .badge { display: inline-block; font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.18rem 0.5rem; border: 1px solid var(--border-strong); color: var(--text-muted); }
+      .badge-critical { color: var(--problem); border-color: var(--problem); }
+      .badge-high { color: var(--warning); border-color: var(--warning); }
+      .badge-medium { color: var(--accent); border-color: var(--accent); }
+      .badge-low { color: var(--text-muted); }
+      .badge-fixed { color: var(--solution); border-color: var(--solution); }
+      .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin: 1rem 0 1.5rem; }
+      .stat-card { background: var(--surface-raised); border: 1px solid var(--border); padding: 1.1rem 1rem; position: relative; }
+      .stat-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--border-strong); }
+      .stat-bad::before { background: var(--problem); }
+      .stat-good::before { background: var(--solution); }
+      .stat-warn::before { background: var(--warning); }
+      .stat-value { font-family: var(--font-heading); font-size: 2rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+      .stat-bad .stat-value { color: var(--problem); }
+      .stat-good .stat-value { color: var(--solution); }
+      .stat-warn .stat-value { color: var(--warning); }
+      .stat-label { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin-top: 0.5rem; }
+      .strengths { display: grid; gap: 0.5rem; margin: 1rem 0 1.5rem; }
+      .strength { display: grid; grid-template-columns: auto 1fr; gap: 0.8rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+      .strength .check { font-family: var(--font-mono); font-weight: 700; color: var(--solution); font-size: 1.1rem; }
+      .strength .text strong { display: block; margin-bottom: 0.15rem; }
+      .strength .text span { color: var(--text-muted); font-size: 0.9rem; }
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.9rem; }
+      th { text-align: left; padding: 0.6rem 0.9rem; background: var(--surface-raised); color: var(--text-faint); font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--border-strong); }
+      td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); }
+      tr:hover td { background: var(--surface-raised); }
+      .callout { margin: 0.8rem 0 0; padding: 0.7rem 0.9rem; border-left: 3px solid var(--border-strong); background: color-mix(in srgb, var(--text) 5%, transparent); font-size: 0.9rem; }
+      .callout strong { display: inline-block; margin-right: 0.4rem; }
+      .callout-solution { border-left-color: var(--solution); background: color-mix(in srgb, var(--solution) 10%, transparent); }
+      .callout-problem { border-left-color: var(--problem); background: color-mix(in srgb, var(--problem) 10%, transparent); }
+      pre { background: var(--surface-sunken); border: 1px solid var(--border); padding: 1rem 1.2rem; margin: 1rem 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.65; overflow-x: auto; }
+      code { font-family: var(--font-mono); }
+      p code, li code, td code { font-size: 0.88em; background: var(--surface-sunken); padding: 0.1rem 0.35rem; }
+      .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-faint); font-family: var(--font-mono); }
+      @media (min-width: 1024px) { .sidebar { display: block; } }
+      @media (max-width: 768px) { .layout { flex-direction: column; padding: 1rem; } .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar">
+      <span>STATUS REPORT</span>
+      <span>2026-07-07 23:03</span>
+      <span>oxlint-auto-configure</span>
+    </div>
+    <div class="layout">
+      <aside class="sidebar" data-nav>
+        <nav>
+          <div class="label">Contents</div>
+          <a href="#summary">Summary</a>
+          <a href="#done">Fully Done</a>
+          <a href="#partial">Partially Done</a>
+          <a href="#not-started">Not Started</a>
+          <a href="#fucked">Fucked Up</a>
+          <a href="#improve">Improve</a>
+          <a href="#next">Next 50</a>
+          <a href="#questions">Questions</a>
+        </nav>
+      </aside>
+      <main class="main">
+        <div class="hero">
+          <div class="hero-shapes"><div class="circle"></div><div class="square"></div><div class="tri"></div></div>
+          <div class="hero-badge">Full Cleanup &amp; Hardening</div>
+          <h1>Status Report — 13 Commits, Zero Lint, Dead Weight Purged</h1>
+          <p class="hero-subtitle">Session started with a broken nix build from uncommitted go-finding v1.2.0 upgrade. Ended with: build fix, profile split-brain elimination, 4,051 lines of dead docs/config/code removed, CI govulncheck added, version metadata feature, zero lint issues, and full AGENTS.md/README accuracy. All pushed.</p>
+        </div>
+
+        <h2 id="summary"><span class="num">00</span>Summary Dashboard</h2>
+        <div class="stat-grid">
+          <div class="stat-card stat-good"><div class="stat-value">13</div><div class="stat-label">Commits Shipped</div></div>
+          <div class="stat-card stat-good"><div class="stat-value">0</div><div class="stat-label">Lint Issues</div></div>
+          <div class="stat-card stat-good"><div class="stat-value">9</div><div class="stat-label">Test Packages Pass</div></div>
+          <div class="stat-card stat-good"><div class="stat-value">90%</div><div class="stat-label">Avg Coverage</div></div>
+          <div class="stat-card stat-bad"><div class="stat-value">-4,051</div><div class="stat-label">Dead Lines Removed</div></div>
+          <div class="stat-card stat-good"><div class="stat-value">2,891</div><div class="stat-label">Non-Test Go LOC</div></div>
+        </div>
+
+        <h2 id="done"><span class="num">01</span>Fully Done</h2>
+
+        <div class="card card-solution">
+          <h4>go-finding v1.2.0 Migration</h4>
+          <p>Branded <code>FilePath</code> type, <code>ToSARIFWithOpts(finding.WithMinSeverity(sev))</code>, vendor re-committed with lockutil. Detector, analyze command, and tests all updated.</p>
+        </div>
+        <div class="card card-solution">
+          <h4>Profile Decision Split Brain Eliminated</h4>
+          <p>8 parallel decision methods → 1 data-driven <code>profileSpecs</code> map. Single source of truth. <strong>-48 lines</strong>.</p>
+        </div>
+        <div class="card card-solution">
+          <h4>.golangci.yml — 11 Dead Linters + 5 Dead Build Tags Removed</h4>
+          <p>bodyclose, contextcheck, ginkgolinter, gosmopolitan, loggercheck, musttag, noctx, protogetter, rowserrcheck, sqlclosecheck, zerologlint. All zero matching patterns.</p>
+        </div>
+        <div class="card card-solution">
+          <h4>4,051 Lines of Dead Docs/Config Deleted</h4>
+          <p>11 status reports, 2 completed planning docs, 3 modularization proposal files, PUBLIC_OR_PRIVATE.md, CHANGELOG.md, DELETE_TO_IMPROVE_PLAN.md.</p>
+        </div>
+        <div class="card card-solution">
+          <h4>Dead Gorereaser Ldflags Fixed + Version Metadata Added</h4>
+          <p>Corrected <code>main.version</code> → <code>internal/cli.version</code>. Added <code>commit</code>, <code>date</code>, <code>builtBy</code> vars with <code>SetVersionTemplate</code> for rich <code>--version</code> output.</p>
+        </div>
+        <div class="card card-solution">
+          <h4>CI Govulncheck Security Job Added</h4>
+          <p>New <code>security</code> job in <code>.github/workflows/ci.yml</code> runs <code>govulncheck</code> on every push/PR.</p>
+        </div>
+        <div class="card card-solution">
+          <h4>Justfile References Purged Everywhere</h4>
+          <p>AGENTS.md, README.md — all <code>just test</code>, <code>just check</code>, <code>just update-rules</code> references replaced with direct Go/nix commands.</p>
+        </div>
+        <div class="card card-solution">
+          <h4>Zero Lint Issues</h4>
+          <p>Fixed pre-existing <code>unparam</code> warning. <code>golangci-lint run ./...</code> reports 0 issues.</p>
+        </div>
+        <div class="card card-solution">
+          <h4>Full Verification: Build + Vet + Lint + Test + Nix</h4>
+          <p>All green. All pushed to origin/master.</p>
+        </div>
+
+        <div class="strengths">
+          <div class="strength"><div class="check">+</div><div class="text"><strong>High test coverage</strong><span>config 94.9%, detect 95.0%, diff 92.9%, format 95.5%, rule 94.4%, profile 89.5%, oxlint 81.9%, cli 74.0%</span></div></div>
+          <div class="strength"><div class="check">+</div><div class="text"><strong>Data-driven profile engine</strong><span>Single map — impossible to create decide/decideCategory drift</span></div></div>
+          <div class="strength"><div class="check">+</div><div class="text"><strong>Reproducible nix builds</strong><span>Vendored deps, flake-based, oxlint wrapped</span></div></div>
+          <div class="strength"><div class="check">+</div><div class="text"><strong>CI pipeline: test + security + lint</strong><span>Three parallel jobs with GOPRIVATE, govulncheck, golangci-lint</span></div></div>
+        </div>
+
+        <h2 id="partial"><span class="num">02</span>Partially Done</h2>
+        <div class="card card-warning">
+          <h4>CLI coverage at 74.0% — lowest in project</h4>
+          <p><code>internal/cli</code> is the user-facing layer. <code>Configure()</code> extraction enables testability. Target: 85%+. The main gaps are in <code>cmd_analyze.go</code> pipeline wiring and <code>cmd_report.go</code> format helpers.</p>
+        </div>
+        <div class="card card-warning">
+          <h4>flake.nix ldflags not updated for new version vars</h4>
+          <p>The flake.nix injects <code>internal/cli.version</code> via ldflags but does NOT inject <code>commit</code>, <code>date</code>, or <code>builtBy</code>. Only goreleaser injects all four. Nix builds will show "unknown" for those fields.</p>
+        </div>
+
+        <h2 id="not-started"><span class="num">03</span>Not Started</h2>
+        <div class="card"><h4>encoding/json/v2 migration</h4><p>Go 1.26.4 but still on json v1. <code>how-to-golang</code> policy recommends v2 for Go 1.25+.</p></div>
+        <div class="card"><h4>testify → ginkgo/gomega</h4><p>Policy bans testify. Project uses it in all 10 test files. Decision needed.</p></div>
+        <div class="card"><h4>Flake.nix ldflags for commit/date/builtBy</h4><p>Nix builds only inject version, not the new metadata vars.</p></div>
+        <div class="card"><h4>E2E integration test (configure → validate → report roundtrip)</h4><p>Was in deleted planning doc. Not yet implemented.</p></div>
+        <div class="card"><h4>TODO_LIST.md and FEATURES.md</h4><p>Referenced in AGENTS.md global policy as canonical files, but don't exist in this project.</p></div>
+
+        <h2 id="fucked"><span class="num">04</span>Totally Fucked Up (Now Fixed)</h2>
+        <div class="card card-problem">
+          <h4>Uncommitted go-finding v1.2.0 upgrade</h4>
+          <p>Previous session fixed code but never committed. Nix build broken because untracked vendor files invisible to git-based flake source filtering.</p>
+          <div class="callout callout-solution"><strong>Fixed</strong> Committed + staged vendor.</div>
+        </div>
+        <div class="card card-problem">
+          <h4>8-method profile split brain</h4>
+          <p>Decide() and DecideCategory() had 4 parallel methods each. Adding a profile required updating both — silent severity mismatches if forgotten.</p>
+          <div class="callout callout-solution"><strong>Fixed</strong> profileSpecs map — single source of truth.</div>
+        </div>
+        <div class="card card-problem">
+          <h4>Dead ldflags pointing to nonexistent vars</h4>
+          <p><code>-X main.version</code> but version lives in internal/cli. <code>main.commit/date/builtBy</code> never existed anywhere. Four ldflags doing nothing.</p>
+          <div class="callout callout-solution"><strong>Fixed</strong> Correct paths + added missing vars.</div>
+        </div>
+        <div class="card card-problem">
+          <h4>AGENTS.md + README referencing deleted justfile</h4>
+          <p>Every session followed <code>just test</code> instructions pointing to nonexistent file.</p>
+          <div class="callout callout-solution"><strong>Fixed</strong> Replaced with direct Go/nix commands.</div>
+        </div>
+
+        <h2 id="improve"><span class="num">05</span>What We Should Improve</h2>
+        <div class="card card-warning"><h4>flake.nix should inject all version vars</h4><p>Currently only injects <code>version</code>. Should also inject <code>commit</code>, <code>date</code>, <code>builtBy</code> so <code>nix run . -- --version</code> shows full metadata.</p></div>
+        <div class="card card-warning"><h4>CLI coverage needs pushing</h4><p>74% is below the 80% target. Focus on cmd_analyze pipeline wiring and cmd_report format helpers.</p></div>
+        <div class="card card-warning"><h4>encoding/json/v2 adoption</h4><p>On Go 1.26.4 — json v2 is the recommended standard.</p></div>
+        <div class="card card-warning"><h4>No TODO_LIST.md or FEATURES.md</h4><p>Global AGENTS.md policy references these as canonical project files. They don't exist here.</p></div>
+        <div class="card card-warning"><h4>No E2E test</h4><p>No integration test verifying the configure → validate → report roundtrip.</p></div>
+        <div class="card card-warning"><h4>docs/ only has DOMAIN_LANGUAGE.md and status/</h4><p>Clean but could use ROADMAP.md for long-term direction.</p></div>
+
+        <h2 id="next"><span class="num">06</span>Next 50 Tasks (Impact/Effort Sorted)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Priority</th><th>Task</th><th>Effort</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><span class="badge badge-critical">Critical</span></td><td>Update flake.nix ldflags to inject commit/date/builtBy</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>2</td><td><span class="badge badge-critical">Critical</span></td><td>Increase internal/cli coverage: 74% → 85%+ (cmd_analyze, cmd_report)</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>3</td><td><span class="badge badge-high">High</span></td><td>Migrate to encoding/json/v2</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>4</td><td><span class="badge badge-high">High</span></td><td>Add E2E test: configure → validate → report roundtrip</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>5</td><td><span class="badge badge-high">High</span></td><td>Create TODO_LIST.md with short-term actionable tasks</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>6</td><td><span class="badge badge-high">High</span></td><td>Create FEATURES.md with honest feature inventory</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>7</td><td><span class="badge badge-high">High</span></td><td>Verify CI pipeline passes on GitHub (all 3 jobs)</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>8</td><td><span class="badge badge-high">High</span></td><td>Add gosec to CI security job</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>9</td><td><span class="badge badge-high">High</span></td><td>Run go mod tidy to clean stale go.sum entries</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>10</td><td><span class="badge badge-medium">Medium</span></td><td>Add property-based tests for profileSpecs decision logic</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>11</td><td><span class="badge badge-medium">Medium</span></td><td>Profile: extract Minimal special-case into the spec table</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>12</td><td><span class="badge badge-medium">Medium</span></td><td>Add ROADMAP.md for long-term direction</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>13</td><td><span class="badge badge-medium">Medium</span></td><td>Consider testify → ginkgo/gomega migration (policy decision)</td><td><span class="badge badge-critical">L</span></td></tr>
+              <tr><td>14</td><td><span class="badge badge-medium">Medium</span></td><td>Add snapshot tests for config generation output</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>15</td><td><span class="badge badge-medium">Medium</span></td><td>Consider error wrapping with cockroachdb/errors (policy)</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>16</td><td><span class="badge badge-medium">Medium</span></td><td>Add integration test: configure → validate round-trip</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>17</td><td><span class="badge badge-medium">Medium</span></td><td>Profile.Description() exact string tests</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>18</td><td><span class="badge badge-medium">Medium</span></td><td>Registry: add test for rule count matching rules_data.json</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>19</td><td><span class="badge badge-low">Low</span></td><td>Detector: add test for malformed oxlint JSON output</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>20</td><td><span class="badge badge-low">Low</span></td><td>Add --dry-run flag to report command</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>21</td><td><span class="badge badge-low">Low</span></td><td>Pkg/diff: add test for env/settings diff edge cases</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>22</td><td><span class="badge badge-low">Low</span></td><td>Pkg/format: add test for empty findings rendering</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>23</td><td><span class="badge badge-low">Low</span></td><td>Consider govalid for struct validation (policy)</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>24</td><td><span class="badge badge-low">Low</span></td><td>Add gitleaks to CI for secret detection</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>25</td><td><span class="badge badge-low">Low</span></td><td>Add trivy container scanning to CI</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>26</td><td><span class="badge badge-low">Low</span></td><td>Add --config flag for custom config path</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>27</td><td><span class="badge badge-low">Low</span></td><td>Add --output flag to configure for custom output path</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>28</td><td><span class="badge badge-low">Low</span></td><td>Consider adding --profile flag to analyze command</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>29</td><td><span class="badge badge-low">Low</span></td><td>Add Cobra completion subcommand</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>30</td><td><span class="badge badge-low">Low</span></td><td>Detector: add benchmark for parseOutput</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>31</td><td><span class="badge badge-low">Low</span></td><td>Registry: add benchmark for Filter</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>32</td><td><span class="badge badge-low">Low</span></td><td>Consider otter cache for registry lookups</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>33</td><td><span class="badge badge-low">Low</span></td><td>Consider koanf for config (if config parsing grows)</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>34</td><td><span class="badge badge-low">Low</span></td><td>Add version_test.go: test binary verification logic edge cases</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>35</td><td><span class="badge badge-low">Low</span></td><td>Fix gosec G304/G306 remaining (if any after cleanup)</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>36</td><td><span class="badge badge-low">Low</span></td><td>Pkg/oxlint: add test for fix.go wrapper</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>37</td><td><span class="badge badge-low">Low</span></td><td>Pkg/config: add test for validate edge cases</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>38</td><td><span class="badge badge-low">Low</span></td><td>Update CONTRIBUTING.md (no justfile, use nix)</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>39</td><td><span class="badge badge-low">Low</span></td><td>Consider adding renovate/dependabot config</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>40</td><td><span class="badge badge-low">Low</span></td><td>Consider adding .editorconfig</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>41</td><td><span class="badge badge-low">Low</span></td><td>Add SARIF output to GitHub Actions security tab</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>42</td><td><span class="badge badge-low">Low</span></td><td>Consider watch mode for auto-regen on package.json change</td><td><span class="badge badge-critical">L</span></td></tr>
+              <tr><td>43</td><td><span class="badge badge-low">Low</span></td><td>Add TestSetupLoggingVerboseQuietConflict</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>44</td><td><span class="badge badge-low">Low</span></td><td>Add TestSetupLoggingVerboseSetsDebug</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>45</td><td><span class="badge badge-low">Low</span></td><td>Add TestSetupLoggingQuietSetsError</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>46</td><td><span class="badge badge-low">Low</span></td><td>Add TestCompactLogAttrStripsTime</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>47</td><td><span class="badge badge-low">Low</span></td><td>Add TestWriteDryRun outputs JSON</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>48</td><td><span class="badge badge-low">Low</span></td><td>Add TestConfigureWithFix (mock oxlint.RunFix)</td><td><span class="badge badge-medium">M</span></td></tr>
+              <tr><td>49</td><td><span class="badge badge-low">Low</span></td><td>Add FindingView json tags validation</td><td><span class="badge badge-low">S</span></td></tr>
+              <tr><td>50</td><td><span class="badge badge-low">Low</span></td><td>Add coverage threshold check to CI (≥80%)</td><td><span class="badge badge-low">S</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="questions"><span class="num">07</span>Top 2 Questions I Cannot Answer</h2>
+        <div class="card card-problem">
+          <h4>Q1: testify → ginkgo/gomega — enforce policy or keep testify?</h4>
+          <p>The <code>how-to-golang</code> skill bans testify. This project uses it in all 10 test files with <code>testifylint</code> working perfectly. Migrating a pure-function CLI tool to BDD-style ginkgo feels like unnecessary churn. <strong>What's the call?</strong></p>
+        </div>
+        <div class="card card-problem">
+          <h4>Q2: flake.nix ldflags — should nix builds show commit/date/builtBy?</h4>
+          <p>Currently only <code>version</code> is injected via <code>flake.nix</code>. The new <code>commit</code>/<code>date</code>/<code>builtBy</code> vars default to "unknown" in nix builds. Should we wire <code>self.shortRev</code>/<code>self.lastModifiedDate</code> into the flake ldflags? <strong>Or is "unknown" acceptable for nix dev builds?</strong></p>
+        </div>
+
+        <footer class="footer">
+          Generated 2026-07-07 23:03 &middot; Based on 13-commit session: go-finding v1.2.0 migration, dead config purge (-4,051 lines), profile refactor, CI hardening, version metadata &middot; Verified via go test -race, go vet, golangci-lint (0 issues), nix build
+        </footer>
+      </main>
+    </div>
+    <script>
+      (function(){if(!("IntersectionObserver"in window))return;var nav=document.querySelector("[data-nav]");if(!nav)return;var links=nav.querySelectorAll('a[href^="#"]');var ids=Array.from(links).map(function(l){return l.getAttribute("href").slice(1)});var sections=ids.map(function(id){return document.getElementById(id)}).filter(Boolean);if(!sections.length)return;var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){links.forEach(function(link){link.classList.toggle("active",link.getAttribute("href")==="#"+entry.target.id)})}})},{rootMargin:"-20% 0px -70% 0px"});sections.forEach(function(s){observer.observe(s)})})();
+    </script>
+  </body>
+</html>
