@@ -23,8 +23,6 @@ builds:
       - amd64
       - arm64
     ignore:
-      - goos: darwin
-        goarch: 386
       - goos: windows
         goarch: arm64
     tags:
@@ -32,10 +30,7 @@ builds:
       - osusergo
     ldflags:
       - -s -w
-      - -X main.version={{.Version}}
-      - -X main.commit={{.Commit}}
-      - -X main.date={{.Date}}
-      - -X main.builtBy=goreleaser
+      - -X github.com/larsartmann/oxlint-auto-configure/internal/cli.version={{.Version}}
 
 archives:
   - id: default
@@ -49,7 +44,6 @@ archives:
     files:
       - LICENSE*
       - README*
-      - CHANGELOG*
 
 checksum:
   name_template: "checksums.txt"
