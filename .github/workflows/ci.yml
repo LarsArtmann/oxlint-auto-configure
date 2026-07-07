@@ -52,6 +52,34 @@ jobs:
       - name: Vet
         run: go vet ./...
 
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Configure GOPRIVATE
+        run: git config --global url."ssh://git@github.com/LarsArtmann/".insteadOf "https://github.com/LarsArtmann/"
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Tidy
+        env:
+          GOPRIVATE: github.com/LarsArtmann/*
+        run: go mod tidy
+
+      - name: Govulncheck
+        uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: "1.26"
+          go-package: ./...
+
   lint:
     runs-on: ubuntu-latest
     steps:
