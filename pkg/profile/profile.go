@@ -5,7 +5,6 @@ package profile
 import (
 	"fmt"
 	"slices"
-	"sort"
 	"strings"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
@@ -56,8 +55,59 @@ func (p Profile) IsValid() bool {
 // String returns the string representation.
 func (p Profile) String() string { return string(p) }
 
+// categoryPolicy defines the severity and config inclusion for a category.
+type categoryPolicy struct {
+	severity rule.SeverityDecision
+	include  bool // false = omit from config (oxlint uses its defaults)
+}
+
+// profileSpec is the data-driven policy for a profile.
+// explicit maps known categories to their policy.
+// fallback is the policy for categories not in the map (e.g., unknown categories).
+type profileSpec struct {
+	explicit map[rule.Category]categoryPolicy
+	fallback categoryPolicy
+}
+
+// profileSpecs is the single source of truth for all severity decisions.
+// Adding a profile or category = adding one entry here.
+var profileSpecs = map[Profile]profileSpec{ //nolint:gochecknoglobals // immutable policy table
+	ProfileMaximalTypesafe: {
+		explicit: map[rule.Category]categoryPolicy{
+			rule.CategoryNursery: {rule.SeverityWarn, true},
+		},
+		fallback: categoryPolicy{rule.SeverityError, true},
+	},
+	ProfileRecommended: {
+		explicit: map[rule.Category]categoryPolicy{
+			rule.CategoryCorrectness: {rule.SeverityError, true},
+			rule.CategorySuspicious:  {rule.SeverityError, true},
+			rule.CategoryPerf:        {rule.SeverityWarn, true},
+			rule.CategoryStyle:       {rule.SeverityWarn, true},
+			rule.CategoryPedantic:    {rule.SeverityWarn, true},
+			rule.CategoryRestriction: {rule.SeverityWarn, true},
+			rule.CategoryNursery:     {rule.SeverityOff, true},
+		},
+		fallback: categoryPolicy{rule.SeverityOff, true},
+	},
+	ProfileStrict: {
+		explicit: map[rule.Category]categoryPolicy{
+			rule.CategoryCorrectness: {rule.SeverityError, true},
+			rule.CategorySuspicious:  {rule.SeverityError, true},
+			rule.CategoryNursery:     {rule.SeverityOff, true},
+		},
+		fallback: categoryPolicy{rule.SeverityWarn, true},
+	},
+	ProfileMinimal: {
+		explicit: map[rule.Category]categoryPolicy{
+			rule.CategoryCorrectness: {rule.SeverityError, true},
+		},
+		fallback: categoryPolicy{rule.SeverityOff, false},
+	},
+}
+
 // Description returns a human-readable description derived from the profile's
-// category severity decisions. One source of truth — cannot drift from decide* logic.
+// category severity decisions. One source of truth — cannot drift from decide logic.
 func (p Profile) Description() string {
 	if !p.IsValid() {
 		return "unknown profile"
@@ -81,7 +131,7 @@ func (p Profile) Description() string {
 		if !ok {
 			continue
 		}
-		sort.Strings(cats)
+		slices.Sort(cats)
 		parts = append(parts, fmt.Sprintf("%s at %s", strings.Join(cats, "+"), sev))
 	}
 
@@ -102,20 +152,36 @@ func NewCategorizer(p Profile, pc PluginConfig) *Categorizer {
 	return &Categorizer{profile: p, pluginConfig: pc}
 }
 
-// Decide returns the severity decision for a given rule.
-func (c *Categorizer) Decide(r rule.Rule) rule.SeverityDecision {
-	switch c.profile {
-	case ProfileMaximalTypesafe:
-		return c.decideMaximal(r)
-	case ProfileRecommended:
-		return c.decideRecommended(r)
-	case ProfileStrict:
-		return c.decideStrict(r)
-	case ProfileMinimal:
-		return c.decideMinimal(r)
-	default:
-		return rule.SeverityOff
+// DecideCategory returns the category-level severity for the given category.
+// The bool indicates whether the category should be included in the config;
+// false means omit it (oxlint will use its defaults).
+func (c *Categorizer) DecideCategory(cat rule.Category) (rule.SeverityDecision, bool) {
+	spec, ok := profileSpecs[c.profile]
+	if !ok {
+		return rule.SeverityOff, false
 	}
+	p, ok := spec.explicit[cat]
+	if !ok {
+		p = spec.fallback
+	}
+	return p.severity, p.include
+}
+
+// Decide returns the severity decision for a given rule.
+// For the minimal profile, disabled rules are always off and enabled
+// non-correctness rules get warn (left at oxlint default).
+func (c *Categorizer) Decide(r rule.Rule) rule.SeverityDecision {
+	if c.profile == ProfileMinimal {
+		if !r.Enabled {
+			return rule.SeverityOff
+		}
+		if r.Category == rule.CategoryCorrectness {
+			return rule.SeverityError
+		}
+		return rule.SeverityWarn
+	}
+	sev, _ := c.DecideCategory(r.Category)
+	return sev
 }
 
 // EnabledPlugins returns the list of detected plugins that are enabled.
@@ -126,122 +192,8 @@ func (c *Categorizer) EnabledPlugins() []rule.Plugin {
 			plugins = append(plugins, p)
 		}
 	}
-	sort.Slice(plugins, func(i, j int) bool {
-		return string(plugins[i]) < string(plugins[j])
-	})
+	slices.Sort(plugins)
 	return plugins
-}
-
-// decideMaximal: ALL rules at error. Maximum type safety.
-func (c *Categorizer) decideMaximal(r rule.Rule) rule.SeverityDecision {
-	if r.Category == rule.CategoryNursery {
-		return rule.SeverityWarn
-	}
-	return rule.SeverityError
-}
-
-// decideRecommended: correctness+suspicious+TS at error, perf/style/pedantic at warn,
-// restriction at warn, nursery at off.
-func (c *Categorizer) decideRecommended(r rule.Rule) rule.SeverityDecision {
-	switch r.Category {
-	case rule.CategoryCorrectness, rule.CategorySuspicious:
-		return rule.SeverityError
-	case rule.CategoryPerf, rule.CategoryStyle, rule.CategoryPedantic:
-		return rule.SeverityWarn
-	case rule.CategoryRestriction:
-		return rule.SeverityWarn
-	case rule.CategoryNursery:
-		return rule.SeverityOff
-	default:
-		return rule.SeverityOff
-	}
-}
-
-// decideStrict: correctness+suspicious at error, everything else at warn except nursery.
-func (c *Categorizer) decideStrict(r rule.Rule) rule.SeverityDecision {
-	if r.Category == rule.CategoryNursery {
-		return rule.SeverityOff
-	}
-
-	switch r.Category {
-	case rule.CategoryCorrectness, rule.CategorySuspicious:
-		return rule.SeverityError
-	case rule.CategoryPedantic, rule.CategoryPerf, rule.CategoryStyle,
-		rule.CategoryRestriction, rule.CategoryNursery:
-		return rule.SeverityWarn
-	default:
-		return rule.SeverityWarn
-	}
-}
-
-// decideMinimal: only correctness at error, everything else uses oxlint defaults.
-func (c *Categorizer) decideMinimal(r rule.Rule) rule.SeverityDecision {
-	if r.Category == rule.CategoryCorrectness && r.Enabled {
-		return rule.SeverityError
-	}
-	if r.Enabled {
-		return rule.SeverityWarn
-	}
-	return rule.SeverityOff
-}
-
-// DecideCategory returns the category-level severity for the given category.
-// The bool indicates whether the category should be included in the config;
-// false means omit it (oxlint will use its defaults).
-func (c *Categorizer) DecideCategory(cat rule.Category) (rule.SeverityDecision, bool) {
-	switch c.profile {
-	case ProfileMaximalTypesafe:
-		return c.decideCategoryMaximal(cat)
-	case ProfileRecommended:
-		return c.decideCategoryRecommended(cat)
-	case ProfileStrict:
-		return c.decideCategoryStrict(cat)
-	case ProfileMinimal:
-		return c.decideCategoryMinimal(cat)
-	default:
-		return rule.SeverityOff, false
-	}
-}
-
-func (c *Categorizer) decideCategoryMaximal(cat rule.Category) (rule.SeverityDecision, bool) {
-	if cat == rule.CategoryNursery {
-		return rule.SeverityWarn, true
-	}
-	return rule.SeverityError, true
-}
-
-func (c *Categorizer) decideCategoryRecommended(cat rule.Category) (rule.SeverityDecision, bool) {
-	switch cat {
-	case rule.CategoryCorrectness, rule.CategorySuspicious:
-		return rule.SeverityError, true
-	case rule.CategoryPerf, rule.CategoryStyle, rule.CategoryPedantic, rule.CategoryRestriction:
-		return rule.SeverityWarn, true
-	case rule.CategoryNursery:
-		return rule.SeverityOff, true
-	default:
-		return rule.SeverityOff, true
-	}
-}
-
-func (c *Categorizer) decideCategoryStrict(cat rule.Category) (rule.SeverityDecision, bool) {
-	switch cat {
-	case rule.CategoryCorrectness, rule.CategorySuspicious:
-		return rule.SeverityError, true
-	case rule.CategoryNursery:
-		return rule.SeverityOff, true
-	case rule.CategoryPedantic, rule.CategoryPerf, rule.CategoryStyle,
-		rule.CategoryRestriction:
-		return rule.SeverityWarn, true
-	default:
-		return rule.SeverityWarn, true
-	}
-}
-
-func (c *Categorizer) decideCategoryMinimal(cat rule.Category) (rule.SeverityDecision, bool) {
-	if cat == rule.CategoryCorrectness {
-		return rule.SeverityError, true
-	}
-	return rule.SeverityOff, false
 }
 
 // IsPluginRelevant returns true if a rule's plugin is relevant given the project config.
