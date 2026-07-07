@@ -26,7 +26,7 @@ nix run github:larsartmann/oxlint-auto-configure -- configure
 # Or install to your nix profile
 nix profile install github:larsartmann/oxlint-auto-configure
 
-# Dev shell with go, oxlint, gopls, golangci-lint, just
+# Dev shell with go, oxlint, gopls, golangci-lint
 nix develop github:larsartmann/oxlint-auto-configure
 ```
 
@@ -170,15 +170,13 @@ oxlint-auto-configure report [-p recommended] [-f table|json|summary]
 ## Development
 
 ```bash
-just build        # Build CLI binary
-just test         # Run tests with -race
-just lint         # Run golangci-lint
-just cover        # Coverage report
-just check        # All checks
-just update-rules # Refresh rules from oxlint
-just vendor       # Re-vendor deps (needed after go.mod changes)
-nix build .       # Build via nix (runs tests)
-nix run . -- configure  # Run via nix (oxlint included)
+GOWORK=off go test -race ./...          # Run tests with -race
+GOWORK=off go vet ./...                 # Run go vet
+GOWORK=off golangci-lint run ./...      # Run linter
+nix build .                             # Build via nix (runs tests)
+nix run . -- configure                  # Run via nix (oxlint included)
+oxlint -f json --rules > pkg/rule/rules_data.json  # Refresh rules from oxlint
+GOWORK=off go mod vendor                # Re-vendor deps (needed after go.mod changes)
 ```
 
 ## Architecture
