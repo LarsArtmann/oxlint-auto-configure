@@ -115,7 +115,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.2.0 from GitHub (no local replace)
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
-- **Version injected at build** — `internal/cli.version` via ldflags (default: "dev")
+- **Version injected at build** — `internal/cli.version/commit/date/builtBy` via ldflags (default: "dev"/"unknown"). `SetVersionTemplate` shows full metadata in `--version`.
 - **Per-command files** — Commands are in `internal/cli/cmd_*.go`, not a monolithic file
 - **SARIF output** — analyze command defaults to summary format; SARIF is opt-in via `-f sarif`
 - **Structured logging** — CLI uses `log/slog` for all diagnostic output with --verbose/--quiet flags
@@ -146,6 +146,9 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Test boilerplate is intentional** — `t.Parallel()` followed by `reg := loadTestRegistry(t)` in every test is idiomatic Go and **not** a duplication violation; `paralleltest` linter requires `t.Parallel()` directly in the test function. Do not fold it into the helper.
 - **marshalConfigJSON helper** — `internal/cli/cmd_configure.go` extracts the shared `cfg.ToJSON()` + error wrap into `marshalConfigJSON`. The remaining 4-line preamble (`data, err := marshalConfigJSON(cfg); if err != nil { return err }`) in `writeConfig`/`writeDryRun` is idiomatic Go error propagation and intentionally not abstracted further.
 - **`slices.Sorted(maps.Keys(m))`** — Prefer over manual `make+loop+sort.Strings` for sorted map-key enumeration in Go 1.23+.
+- **profileSpecs table** — `pkg/profile/profile.go` uses a data-driven `profileSpecs` map as single source of truth for all severity decisions. Adding a profile = adding one map entry. No more parallel decide/decideCategory methods.
+- **CI security** — GitHub Actions runs govulncheck on every push/PR. Three jobs: test, security, lint.
+- **No justfile** — Justfile was deleted. All build/test/lint commands use direct Go/nix commands. See AGENTS.md Testing section.
 
 ---
 
