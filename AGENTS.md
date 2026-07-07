@@ -68,10 +68,10 @@ nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint
 ### Testing
 
 ```bash
-just test        # Run tests with -race (pkg + internal)
-just cover       # Coverage report
-just vet         # Run go vet
-just check       # All checks (fmt + vet + lint + test)
+GOWORK=off go test -race ./...          # Run tests with -race
+GOWORK=off go test -cover ./...         # Coverage report
+GOWORK=off go vet ./...                 # Run go vet
+nix flake check .                       # All checks via nix
 ```
 
 ### Dependencies
@@ -105,14 +105,14 @@ just check       # All checks (fmt + vet + lint + test)
 When oxlint adds new rules:
 
 ```bash
-just update-rules  # Runs: oxlint -f json --rules > pkg/rule/rules_data.json
+oxlint -f json --rules > pkg/rule/rules_data.json
 ```
 
 Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new count.
 
 ### Important Gotchas
 
-- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.0.0 from GitHub (no local replace)
+- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.2.0 from GitHub (no local replace)
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
 - **Version injected at build** — `internal/cli.version` via ldflags (default: "dev")
