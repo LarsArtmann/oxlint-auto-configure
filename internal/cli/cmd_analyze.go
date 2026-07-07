@@ -247,7 +247,7 @@ func findingsToViews(findings []finding.Finding) []format.FindingView {
 			Message:     f.Message,
 			Severity:    string(f.Severity),
 			Category:    string(f.Category),
-			File:        f.Position.File,
+			File:        string(f.Position.File),
 			Line:        f.Position.Line,
 			Column:      f.Position.Column,
 			DocsURL:     f.Metadata["url"],
@@ -295,7 +295,7 @@ func printSARIF(w io.Writer, report *finding.Report, minSev finding.Severity) er
 	var err error
 
 	if minSev != "" {
-		sarif, err = report.ToSARIFFiltered(minSev)
+		sarif, err = report.ToSARIFWithOpts(finding.WithMinSeverity(minSev))
 	} else {
 		sarif, err = report.ToSARIF()
 	}

@@ -123,15 +123,15 @@ func TestParseFindsCorrectPositions(t *testing.T) {
 
 	findings := parseTestFindings(t, realOxlintOutput)
 
-	assert.Equal(t, "test.ts", findings[0].Position.File)
+	assert.Equal(t, finding.FilePath("test.ts"), findings[0].Position.File)
 	assert.Equal(t, 2, findings[0].Position.Line)
 	assert.Equal(t, 1, findings[0].Position.Column)
 
-	assert.Equal(t, "src/main.ts", findings[1].Position.File)
+	assert.Equal(t, finding.FilePath("src/main.ts"), findings[1].Position.File)
 	assert.Equal(t, 1, findings[1].Position.Line)
 	assert.Equal(t, 7, findings[1].Position.Column)
 
-	assert.Equal(t, "src/types.ts", findings[2].Position.File)
+	assert.Equal(t, finding.FilePath("src/types.ts"), findings[2].Position.File)
 	assert.Equal(t, 10, findings[2].Position.Line)
 	assert.Equal(t, 5, findings[2].Position.Column)
 }
@@ -265,7 +265,7 @@ func TestMapCategory(t *testing.T) {
 func TestPositionFromLabelsEmpty(t *testing.T) {
 	t.Parallel()
 	pos := positionFromLabels("test.ts", nil)
-	assert.Equal(t, "test.ts", pos.File)
+	assert.Equal(t, finding.FilePath("test.ts"), pos.File)
 	assert.Equal(t, 0, pos.Line)
 	assert.Equal(t, 0, pos.Column)
 	assert.Equal(t, -1, pos.Offset) // unset sentinel per go-finding v1.0.0
@@ -300,7 +300,7 @@ func TestRangeFromLabels(t *testing.T) {
 		assert.Equal(t, 2, r.End.Line)
 		assert.Equal(t, 10, r.End.Column) // 1 + 9
 		assert.Equal(t, 27, r.End.Offset) // 18 + 9
-		assert.Equal(t, "test.ts", r.Start.File)
+		assert.Equal(t, finding.FilePath("test.ts"), r.Start.File)
 	})
 }
 

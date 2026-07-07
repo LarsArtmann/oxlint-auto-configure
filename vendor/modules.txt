@@ -20,9 +20,12 @@ github.com/go-faster/yaml
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
-# github.com/larsartmann/go-finding v1.0.0
-## explicit; go 1.26.3
+# github.com/larsartmann/go-finding v1.2.0
+## explicit; go 1.26.4
 github.com/larsartmann/go-finding
+github.com/larsartmann/go-finding/lockutil
+# github.com/larsartmann/go-finding/pipeline v0.0.0-20260706102557-968270bde65c
+## explicit; go 1.26.4
 github.com/larsartmann/go-finding/pipeline
 # github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
 ## explicit

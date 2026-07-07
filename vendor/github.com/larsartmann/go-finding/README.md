@@ -24,30 +24,58 @@ Each tool invents its own types for findings. There is no standardized way to ap
 
 ## Installation
 
+**Core types only** (zero external dependencies):
+
 ```bash
 go get github.com/larsartmann/go-finding
 ```
 
-Requires Go 1.26 or later.
+**With pipeline** (adds `x/sync`, `gogenfilter`):
+
+```bash
+go get github.com/larsartmann/go-finding/pipeline
+```
+
+**CLI tool**:
+
+```bash
+go install github.com/larsartmann/go-finding/cmd/go-finding@latest
+```
+
+Requires Go 1.26 or later. Each module is independently versioned via shared `v*` git tags.
 
 ## Quick Start
+
+**Recommended:** Use the `Builder` API for validated findings with fix strategies,
+categories, and metadata. The Builder validates at construction time, preventing
+invalid findings from entering your pipeline.
 
 ```go
 package main
 
 import (
     "fmt"
+    "log"
+
     "github.com/larsartmann/go-finding"
 )
 
 func main() {
-    f := finding.NewFinding(
-        "unused-var", "my-tool",
+    // Builder API — validated, fluent, recommended for all new code.
+    f, err := finding.NewBuilder(
+        finding.RuleName("unused-var"), finding.ToolName("my-tool"),
         "variable x is unused",
         finding.SeverityWarning,
-        finding.Position{File: "main.go", Line: 42, Column: 5},
-        finding.ConfidenceHigh,
-    )
+        finding.Pos("main.go", 42, 5),
+    ).
+        WithCategory(finding.CategoryCorrectness).
+        WithConfidence(finding.ConfidenceHigh).
+        WithFixStrategy(finding.FixStrategySuggest).
+        WithSuggestion("remove the unused variable").
+        Build()
+    if err != nil {
+        log.Fatal(err)
+    }
 
     report := finding.NewReport(finding.ToolInfo{Name: "my-tool", Version: "1.0.0"})
     report.AddFinding(f)
@@ -58,37 +86,41 @@ func main() {
 }
 ```
 
-## Builder API
+> **Lower-level:** `finding.NewFinding(...)` skips validation and is intended for
+> cases where you construct findings from trusted sources. Prefer `NewBuilder`
+> unless you have a specific reason to skip validation.
 
-Construct findings fluently with the `Builder`:
+### One-shot detection (no fix loop)
+
+For tools that only need detection without the fix pipeline:
 
 ```go
-f, err := finding.NewBuilder(finding.RuleName("nilcheck"), finding.ToolName("govet"), "possible nil deref",
-    finding.SeverityError, finding.Pos("main.go", 42, 5)).
-    WithFixStrategy(finding.FixStrategyDirect).
-    WithBeforeCode("x.foo").
-    WithAfterCode("x.foo()").
-    WithConfidence(finding.ConfidenceHigh).
-    Build()
-if err != nil {
-    log.Fatal(err)
-}
+detectors := []pipeline.Detector{myDetector1, myDetector2}
+findings, err := pipeline.Detect(ctx, detectors...)
+// → []finding.Finding, ready for Report/SARIF output
+```
+
+### Applying fixes to in-memory content
+
+```go
+result, applied := pipeline.ApplyToContent(fileContent, findings)
+// result = modified []byte, applied = count of successful fixes
 ```
 
 ## Core Types
 
-| Type          | Purpose                                                     |
-| ------------- | ----------------------------------------------------------- |
-| `Finding`     | A single issue: ID, rule, severity, position, fix strategy  |
-| `Report`      | Thread-safe container for findings with summary statistics  |
-| `Severity`    | `info` / `warning` / `error` / `critical`                   |
-| `FixStrategy` | `none` / `suggest` / `direct` / `ai`                        |
-| `Position`    | File, line, column location                                 |
-| `Range`       | Start and end positions with geometric operations           |
-| `Category`    | `security`, `style`, `performance`, `correctness`, etc.     |
-| `Tag`         | Multi-label classification (`security`, `performance`, ...) |
-| `Confidence`  | Named `float64` with `IsValid()`, `Clamp()`, `String()`     |
-| `Suppression` | Expiring suppression with `IsActive(now)`                   |
+| Type                                  | Purpose                                                      |
+| ------------------------------------- | ------------------------------------------------------------ |
+| `Finding`                             | A single issue: ID, rule, severity, position, fix strategy   |
+| `Report`                              | Thread-safe container for findings with summary statistics   |
+| `Severity`                            | `info` / `warning` / `error` / `critical`                    |
+| `FixStrategy`                         | `none` / `suggest` / `direct` / `ai`                         |
+| `Position`                            | File, line, column location                                  |
+| `Range`                               | Start and end positions with geometric operations            |
+| `Category`                            | `security`, `style`, `performance`, `correctness`, etc.      |
+| `Tag`                                 | Multi-label classification (`security`, `performance`, ...)  |
+| `Confidence`                          | Named `float64` with `IsValid()`, `Clamp()`, `String()`      |
+| `Suppression`                         | Expiring suppression with `IsActive(now)`                    |
 | `ID`/`RuleName`/`ToolName`/`FilePath` | Branded string types preventing field mixups at compile time |
 
 ## API Overview
@@ -366,11 +398,11 @@ go install github.com/larsartmann/go-finding/cmd/go-finding@latest
 go-finding -format sarif -output results.sarif
 go-finding -format json -config config.yaml
 go-finding -format csv -output findings.csv
-go-finding -format markdown -severity warning
+go-finding -format markdown -min-severity warning
 go-finding -filter-generated -fix-provider go-ast
 ```
 
-Key flags: `-format` (text/markdown/csv/tsv/json/sarif), `-severity`, `-config`, `-filter-generated`, `-fix-provider`, `-byte-level-conflict`. Use `-help` for the full list.
+Key flags: `-format` (text/markdown/csv/tsv/json/sarif), `-min-severity`, `-config`, `-filter-generated`, `-fix-provider`, `-byte-level-conflict`. Use `-help` for the full list.
 
 ## Development
 

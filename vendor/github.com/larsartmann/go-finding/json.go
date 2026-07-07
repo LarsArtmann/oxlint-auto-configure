@@ -25,13 +25,12 @@ type reportJSON struct {
 
 // MarshalJSON implements json.Marshaler.
 func (r *Report) MarshalJSON() ([]byte, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	data, err := json.Marshal(reportJSON{
-		Tool:     r.Tool,
-		Findings: r.findings,
-		Summary:  r.Summary,
+	data, err := withReadLockErr(r, func() ([]byte, error) {
+		return json.Marshal(reportJSON{
+			Tool:     r.Tool,
+			Findings: r.findings,
+			Summary:  r.Summary,
+		})
 	})
 	if err != nil {
 		return nil, fmt.Errorf("marshal report: %w", err)
@@ -56,9 +55,19 @@ func (r *Report) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// FilterInvalid returns true if the finding is invalid (has missing required fields).
-func FilterInvalid(f Finding) bool {
+// IsInvalid returns true if the finding is invalid (has missing required fields).
+// Intended for use with [slices.DeleteFunc].
+func IsInvalid(f Finding) bool {
 	return !f.IsValid()
+}
+
+// FilterInvalid is a deprecated alias for [IsInvalid]. The name was misleading:
+// it returns true when the finding IS invalid (should be filtered out), not
+// when it should be kept.
+//
+// Deprecated: Use [IsInvalid] instead.
+func FilterInvalid(f Finding) bool {
+	return IsInvalid(f)
 }
 
 // PrettyJSON returns a formatted JSON representation of the report.
@@ -76,20 +85,20 @@ func (r *Report) PrettyJSON() (string, error) {
 // active (non-suppressed) findings. Unlike PrettyJSON, this excludes
 // suppressed findings from the output.
 func (r *Report) PrettyJSONFiltered() (string, error) {
-	r.mu.RLock()
-
-	filtered := &Report{ //nolint:exhaustruct
-		Tool:     r.Tool,
-		findings: make([]Finding, 0, len(r.findingsLocked())),
-		Summary:  Summary{}, //nolint:exhaustruct
-	}
-	for _, f := range r.findingsLocked() {
-		if !f.IsSuppressed() {
-			filtered.findings = append(filtered.findings, f)
+	filtered := withReadLock(r, func() *Report {
+		result := &Report{ //nolint:exhaustruct
+			Tool:     r.Tool,
+			findings: make([]Finding, 0, len(r.findings)),
+			Summary:  Summary{}, //nolint:exhaustruct
 		}
-	}
+		for _, f := range r.findings {
+			if !f.IsSuppressed() {
+				result.findings = append(result.findings, f)
+			}
+		}
 
-	r.mu.RUnlock()
+		return result
+	})
 
 	filtered.ComputeSummary()
 

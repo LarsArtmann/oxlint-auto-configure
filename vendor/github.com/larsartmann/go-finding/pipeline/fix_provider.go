@@ -121,14 +121,14 @@ func (LineProvider) EditsWithLineIndex(content []byte, idx []int, f finding.Find
 }
 
 func lineProviderRangeEdits(content []byte, f finding.Finding, idx []int) ([]FixEdit, error) {
-	start, err := indexLineColToOffset(idx, len(content), f.Range.Start.Line, f.Range.Start.Column)
+	start, err := resolveLineCol(idx, len(content), f.Range.Start.Line, f.Range.Start.Column)
 	if err != nil {
-		return nil, ErrPositionUnresolvable
+		return nil, err
 	}
 
-	end, err := indexLineColToOffset(idx, len(content), f.Range.End.Line, f.Range.End.Column)
+	end, err := resolveLineCol(idx, len(content), f.Range.End.Line, f.Range.End.Column)
 	if err != nil {
-		return nil, ErrPositionUnresolvable
+		return nil, err
 	}
 
 	if end < start || end > len(content) {
@@ -150,10 +150,17 @@ func lineProviderRangeEdits(content []byte, f finding.Finding, idx []int) ([]Fix
 	return []FixEdit{newReplacementEdit(start, end-start, f)}, nil
 }
 
+// lineProviderOffset resolves the byte offset for a finding's Position
+// using the pre-built line offset index. Shared by insertion and
+// replacement edit helpers below.
+func lineProviderOffset(content []byte, idx []int, f finding.Finding) (int, error) {
+	return resolveLineCol(idx, len(content), f.Position.Line, f.Position.Column)
+}
+
 func lineProviderInsertionEdit(content []byte, f finding.Finding, idx []int) ([]FixEdit, error) {
-	offset, err := indexLineColToOffset(idx, len(content), f.Position.Line, f.Position.Column)
+	offset, err := lineProviderOffset(content, idx, f)
 	if err != nil {
-		return nil, ErrPositionUnresolvable
+		return nil, err
 	}
 
 	replacement := append([]byte(f.AfterCode), '\n')
@@ -162,9 +169,9 @@ func lineProviderInsertionEdit(content []byte, f finding.Finding, idx []int) ([]
 }
 
 func lineProviderReplacementEdit(content []byte, f finding.Finding, idx []int) ([]FixEdit, error) {
-	offset, err := indexLineColToOffset(idx, len(content), f.Position.Line, f.Position.Column)
+	offset, err := lineProviderOffset(content, idx, f)
 	if err != nil {
-		return nil, ErrPositionUnresolvable
+		return nil, err
 	}
 
 	before := []byte(f.BeforeCode)

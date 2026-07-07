@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+// OffsetUnknown is the sentinel value for "no byte offset set."
+// Use this instead of raw -1 literals to centralize the convention.
+const OffsetUnknown = -1
+
 // Position represents a location in source code.
 //
 // Sentinel values:
@@ -22,15 +26,25 @@ import (
 // Use IsZero() to check for the completely-uninitialized state (all fields at their
 // "unset" sentinels: empty File, Line=0, Column=0, Offset=-1).
 type Position struct {
-	File   string `json:"file"`             // Required: file path
-	Line   int    `json:"line,omitempty"`   // 1-based line number; 0 = not set
-	Column int    `json:"column,omitempty"` // 1-based column number; 0 = not set
-	Offset int    `json:"offset,omitempty"` // 0-based byte offset; -1 = not set
+	File   FilePath `json:"file"`             // Required: file path
+	Line   int      `json:"line,omitempty"`   // 1-based line number; 0 = not set
+	Column int      `json:"column,omitempty"` // 1-based column number; 0 = not set
+	Offset int      `json:"offset,omitempty"` // 0-based byte offset; -1 = not set
 }
 
-// IsValid returns true if the position has a file set and non-negative line/column.
+// IsValid returns true if the position has a file set and a non-zero line number.
+// Line 0 means "not set" per the sentinel convention, so IsValid returns false
+// for positions that lack a line number.
+//
+// For checking only whether a file path is present, use [Position.HasFile].
 func (p Position) IsValid() bool {
-	return p.File != "" && p.Line >= 0 && p.Column >= 0
+	return p.File != "" && p.Line > 0
+}
+
+// HasFile reports whether the position has a file path set, regardless of
+// line/column completeness.
+func (p Position) HasFile() bool {
+	return p.File != ""
 }
 
 // IsZero reports whether the position is completely uninitialized (all fields
@@ -79,7 +93,7 @@ func (p Position) Compare(other Position) int {
 // String returns a human-readable representation.
 func (p Position) String() string {
 	if p.Line == 0 {
-		return p.File
+		return string(p.File)
 	}
 
 	if p.Column == 0 {

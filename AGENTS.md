@@ -76,7 +76,7 @@ just check       # All checks (fmt + vet + lint + test)
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` v1.0.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID` in `NewFinding`)
+- `github.com/larsartmann/go-finding` v1.2.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
 - `github.com/spf13/cobra` — CLI framework
 - `github.com/stretchr/testify` — Test assertions
 
@@ -85,7 +85,7 @@ just check       # All checks (fmt + vet + lint + test)
 1. **Embedded rules data** — Rules are embedded via `go:embed` for zero-dependency startup
 2. **Profile-driven** — All severity decisions flow from `DecideCategory()`; `Description()` derived from same source
 3. **Project-aware** — Auto-detects frameworks to enable relevant plugins
-4. **go-finding integration** — Detection and reporting only (DryRun=true, no auto-fix); Detector interface; FixStrategy from registry (for reporting, not for fixing); Range from oxlint labels; structured FindingError; Metrics/Retry/Callbacks; Report.PrettyJSON/ToSARIF/ToSARIFFiltered; SortByPosition/ActiveFindings; finding.Filter for --severity
+4. **go-finding integration** — Detection and reporting only (DryRun=true, no auto-fix); Detector interface; FixStrategy from registry (for reporting, not for fixing); Range from oxlint labels; structured FindingError; Metrics/Retry/Callbacks; Report.PrettyJSON/ToSARIF/ToSARIFWithOpts; SortByPosition/ActiveFindings; finding.Filter for --severity
 5. **Config round-trip** — Generated configs can be parsed back and compared
 6. **Self-describing types** — Plugin has `CLIFlag()`/`NeedsFlag()`; Registry has generic `Filter()`
 7. **Decoupled rendering** — `pkg/format` accepts plain view structs, not go-finding types
@@ -127,7 +127,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Differ completeness** — Compares all fields: Plugins, Categories, Rules, Env, Settings
 - **Runner seam** — `pkg/oxlint.Runner` interface; `realRunner` (production), `mockRunner` (tests)
 - **Configure extraction** — `Configure(ctx, absRoot, opts)` callable without cobra; malformed existing configs now log warnings
-- **go-finding branded types** — `Finding.Rule` is `finding.RuleName`, `Finding.ToolName` is `finding.ToolName`. `NewFinding` requires branded conversions: `finding.RuleName(s)`, `finding.ToolName(s)`. Use `string(f.Rule)` when assigning to plain-string fields (e.g., `FindingView.Rule`).
+- **go-finding branded types** — `Finding.Rule` is `finding.RuleName`, `Finding.ToolName` is `finding.ToolName`, `Position.File` is `finding.FilePath` (since v1.2.0). `NewFinding` requires branded conversions: `finding.RuleName(s)`, `finding.ToolName(s)`. Use `string(f.Rule)` / `string(f.Position.File)` when assigning to plain-string fields (e.g., `FindingView.Rule`, `FindingView.File`).
 - **go-finding PipelineResult.Stable** — `Stable()` is a method, not a field. Use `Reason: pipeline.ReasonStable` in struct literals.
 - **go-finding Finding enrichment** — Detector populates Range (from oxlint label spans), FixStrategy (from registry FixCapability), Tag (plugin name), Snippet (label text), Metadata (url), Suggestion (help)
 - **go-finding FindingError** — All detector errors use structured `finding.NewIOError`/`NewParseError` for `errors.Is()` support
@@ -135,7 +135,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Analyze formats** — `summary`, `json` (flat FindingView array), `report` (full go-finding Report JSON), `sarif`, `table`
 - **WithRegistry option** — `oxlint.WithRegistry(reg)` enables FixStrategy lookup per-finding
 - **Nix build** — `vendor/` committed (required for nix sandbox); `vendorHash = null` in flake; `GOWORK=off` for all go commands
-- **Severity filter** — Analyze `-s/--severity` flag uses `finding.Filter(BySeverityAtLeast)` for json/table; `ToSARIFFiltered` for SARIF
+- **Severity filter** — Analyze `-s/--severity` flag uses `finding.Filter(BySeverityAtLeast)` for json/table; `report.ToSARIFWithOpts(finding.WithMinSeverity(sev))` for SARIF (v1.2.0 replaced `ToSARIFFiltered`)
 - **Profile name dedup** — `profile.AllProfileNames()` is single source; no more `cliProfileNames`/`config.profileNames`
 - **Detect logging** — `pkg/detect` logs warnings on malformed package.json (but not missing — that's normal for Go projects)
 - **Summary enrichment** — `SummaryView.ByFixStrategy` populated from `Report.Summary.ByFixStrategy`

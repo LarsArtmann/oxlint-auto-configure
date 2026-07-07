@@ -11,6 +11,14 @@ const (
 	sarifSchema  = "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json"
 )
 
+// SARIF suppression kind/status string constants (SARIF 2.1.0 §3.27.6-3.27.7).
+const (
+	sarifSuppressionKindSource     = "inSource"
+	sarifSuppressionKindExternal   = "inExternalConfiguration"
+	sarifSuppressionStatusAccepted = "accepted"
+	sarifSuppressionStatusReview   = "underReview"
+)
+
 const (
 	sarifPropID          = "go-finding/id"
 	sarifPropSeverity    = "go-finding/severity"
@@ -27,6 +35,9 @@ const (
 	sarifPropEditPrefix = "go-finding/edit/"
 	sarifPropPrefix     = "go-finding/"
 	sarifPropMetaPrefix = "go-finding/meta/"
+
+	sarifPropSuppressionKind   = "go-finding/suppression-kind"
+	sarifPropSuppressionExpiry = "go-finding/suppression-expiry"
 )
 
 // sarifLog represents a SARIF log file containing run results.
@@ -62,14 +73,23 @@ type sarifDriver struct {
 // The coercion between these two representations is centralized in
 // sarifProperties() (export) and applySarifProperties() (import).
 type sarifResult struct {
-	RuleID     string            `json:"ruleId"`
-	Level      string            `json:"level"`
-	Message    sarifMessage      `json:"message"`
-	Locations  []sarifLocation   `json:"locations"`
-	Fixes      []sarifFix        `json:"fixes,omitempty"`
-	Related    []sarifRelatedLoc `json:"relatedLocations,omitempty"`
-	Rank       float64           `json:"rank,omitempty"`
-	Properties map[string]any    `json:"properties,omitempty"`
+	RuleID       string             `json:"ruleId"`
+	Level        string             `json:"level"`
+	Message      sarifMessage       `json:"message"`
+	Locations    []sarifLocation    `json:"locations"`
+	Fixes        []sarifFix         `json:"fixes,omitempty"`
+	Related      []sarifRelatedLoc  `json:"relatedLocations,omitempty"`
+	Suppressions []sarifSuppression `json:"suppressions,omitempty"`
+	Rank         float64            `json:"rank,omitempty"`
+	Properties   map[string]any     `json:"properties,omitempty"`
+}
+
+// sarifSuppression represents a suppression entry on a SARIF result.
+// SARIF 2.1.0 §3.27.
+type sarifSuppression struct {
+	Kind          string `json:"kind"`                    // "inSource" or "inExternalConfiguration"
+	Status        string `json:"status,omitempty"`        // "accepted" or "underReview"
+	Justification string `json:"justification,omitempty"` // Why it's suppressed
 }
 
 // sarifMessage represents a message in SARIF format.

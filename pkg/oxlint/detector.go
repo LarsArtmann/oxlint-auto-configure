@@ -188,11 +188,12 @@ func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
 // When no labels are present, returns a position with Offset=-1 (unset sentinel)
 // per go-finding v1.0.0 zero-value semantics.
 func positionFromLabels(filename string, labels []oxlintLabel) finding.Position {
+	file := finding.FilePath(filename)
 	if len(labels) == 0 {
-		return finding.Position{File: filename, Offset: -1}
+		return finding.Position{File: file, Offset: -1}
 	}
 	return finding.Position{
-		File:   filename,
+		File:   file,
 		Line:   labels[0].Span.Line,
 		Column: labels[0].Span.Column,
 		Offset: labels[0].Span.Offset,
@@ -204,13 +205,14 @@ func positionFromLabels(filename string, labels []oxlintLabel) finding.Position 
 // (the common case), end column is start column + length.
 // Returns nil if no labels are present.
 func rangeFromLabels(filename string, labels []oxlintLabel) *finding.Range {
+	file := finding.FilePath(filename)
 	if len(labels) == 0 {
 		return nil
 	}
 
 	span := labels[0].Span
 	start := finding.Position{
-		File:   filename,
+		File:   file,
 		Line:   span.Line,
 		Column: span.Column,
 		Offset: span.Offset,
@@ -221,7 +223,7 @@ func rangeFromLabels(filename string, labels []oxlintLabel) *finding.Range {
 	}
 
 	end := finding.Position{
-		File:   filename,
+		File:   file,
 		Line:   span.Line,
 		Column: span.Column + span.Length,
 		Offset: span.Offset + span.Length,

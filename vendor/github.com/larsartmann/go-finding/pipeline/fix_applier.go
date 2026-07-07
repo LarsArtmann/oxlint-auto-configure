@@ -67,7 +67,7 @@ func (a *FixApplier) Close() error {
 
 // ioErrorAt creates an IO error with position info.
 func ioErrorAt(msg string, err error, path string) error {
-	pos := finding.Position{File: path, Offset: -1} //nolint:exhaustruct
+	pos := finding.Position{File: finding.FilePath(path), Offset: -1} //nolint:exhaustruct
 
 	return finding.NewIOError(msg, err).WithPosition(pos)
 }
@@ -87,9 +87,9 @@ func (a *FixApplier) ApplyWithDetails(
 	ctx context.Context,
 	fixes []finding.Finding,
 ) (int, []finding.Finding, error) {
-	applied, _, _, err := a.ApplyWithShiftMap(ctx, fixes)
+	applied, appliedFixes, _, err := a.ApplyWithShiftMap(ctx, fixes)
 
-	return applied, fixes, err
+	return applied, appliedFixes, err
 }
 
 // ApplyWithShiftMap applies fixes and returns the count, applied findings,
@@ -153,25 +153,25 @@ func (a *FixApplier) ApplyWithShiftMap(
 func (a *FixApplier) groupFindingsBySafePath(fixes []finding.Finding) map[string][]finding.Finding {
 	byFile := make(map[string][]finding.Finding)
 
+	// Resolve root once instead of per-finding (was O(N) syscalls).
+	cleanRoot := filepath.Clean(a.rootDir)
+
+	if resolved, err := filepath.EvalSymlinks(cleanRoot); err == nil {
+		cleanRoot = resolved
+	}
+
 	for _, f := range fixes {
 		if f.Position.File == "" {
 			continue
 		}
 
-		path := filepath.Join(a.rootDir, f.Position.File)
+		path := filepath.Join(a.rootDir, string(f.Position.File))
 
 		cleanPath := filepath.Clean(path)
-
-		cleanRoot := filepath.Clean(a.rootDir)
 
 		resolved, err := filepath.EvalSymlinks(cleanPath)
 		if err == nil {
 			cleanPath = resolved
-		}
-
-		resolvedRoot, err := filepath.EvalSymlinks(cleanRoot)
-		if err == nil {
-			cleanRoot = resolvedRoot
 		}
 
 		if cleanPath != cleanRoot &&
@@ -199,7 +199,7 @@ func (*FixApplier) recordShiftMap(
 
 	for _, f := range fileFixes {
 		if f.Position.File != "" {
-			relPath = f.Position.File
+			relPath = string(f.Position.File)
 
 			break
 		}
