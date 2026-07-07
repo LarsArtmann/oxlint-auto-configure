@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
@@ -35,7 +36,12 @@ const (
 	FormatSARIF   = "sarif"
 )
 
-var version = "dev"
+var (
+	version = "dev"
+	commit  = "unknown" //nolint:gochecknoglobals // ldflags injection target
+	date    = "unknown" //nolint:gochecknoglobals // ldflags injection target
+	builtBy = "unknown" //nolint:gochecknoglobals // ldflags injection target
+)
 
 // AddProfileFlag adds the shared profile flag to the given command.
 // The p parameter receives the flag value; each command should pass its own
@@ -69,6 +75,10 @@ rule to the best severity based on your chosen profile.`,
 
 	root.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 	root.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-error output")
+
+	root.SetVersionTemplate(
+		fmt.Sprintf("oxlint-auto-configure %s (commit: %s, built: %s, by: %s)\n", version, commit, date, builtBy),
+	)
 
 	root.AddCommand(newConfigureCommand())
 	root.AddCommand(newAnalyzeCommand())
