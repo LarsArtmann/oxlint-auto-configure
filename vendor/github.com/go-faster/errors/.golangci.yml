@@ -88,12 +88,12 @@ issues:
       linters: [gocritic]
 
     # Ignore shadowing of err.
-    - linters: [ govet ]
+    - linters: [govet]
       text: 'declaration of "(err|ctx|log|c)"'
 
     # Ignore linters in main packages.
     - path: main\.go
-      linters: [ goconst, funlen, gocognit, gocyclo ]
+      linters: [goconst, funlen, gocognit, gocyclo]
 
     - path: _test\.go
       text: "suspicious identical"

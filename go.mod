@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	github.com/larsartmann/go-finding v1.2.0
-	github.com/larsartmann/go-finding/pipeline v0.0.0-20260706102557-968270bde65c
+	github.com/larsartmann/go-finding/pipeline v0.0.0-20260708144747-398d8c81e53d
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 )
@@ -21,7 +21,7 @@ require (
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

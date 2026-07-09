@@ -71,6 +71,7 @@
               "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.version=${version}"
             ];
             nativeCheckInputs = [ pkgs.oxlint ];
+            env.GOEXPERIMENT = "jsonv2";
             meta = with pkgs.lib; {
               description = "Auto-generate optimal .oxlintrc.json configurations";
               homepage = "https://github.com/larsartmann/oxlint-auto-configure";
@@ -107,6 +108,7 @@
 
               GOPRIVATE = "github.com/LarsArtmann/*";
               GOWORK = "off";
+              GOEXPERIMENT = "jsonv2";
             };
 
             ci = pkgs.mkShellNoCC {
@@ -117,6 +119,7 @@
 
               GOWORK = "off";
               GOPRIVATE = "github.com/LarsArtmann/*";
+              GOEXPERIMENT = "jsonv2";
             };
           };
 

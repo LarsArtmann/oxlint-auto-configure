@@ -2,7 +2,8 @@
 package format
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io"
 	"maps"
@@ -128,7 +129,7 @@ func sortedKeys(m map[string]int) []string {
 
 // PrintFindingsJSON writes findings as a JSON array to w.
 func PrintFindingsJSON(w io.Writer, findings []FindingView) error {
-	data, err := json.MarshalIndent(findings, "", "  ")
+	data, err := json.Marshal(findings, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
 	if err != nil {
 		return fmt.Errorf("marshal findings: %w", err)
 	}

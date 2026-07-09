@@ -62,17 +62,20 @@ nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint
 - **Git-derived version** — `self.rev or self.dirtyRev or "dev"` injected via ldflags
 - **`lib.fileset`** — Precise source filtering (go.mod, go.sum, cmd/, internal/, pkg/, vendor/)
 - **`nix-systems/default`** — System list via flake input instead of hardcoded
+- **`env.GOEXPERIMENT = "jsonv2"`** — Set in `packages.default` and both devShells so builds, tests, and `nix flake check` all enable `encoding/json/v2`
 - **Checks** — `build` and `test` (reuses goModules from package)
 - **Formatter** — `nixfmt` via `formatter` output
 
 ### Testing
 
 ```bash
-GOWORK=off go test -race ./...          # Run tests with -race
-GOWORK=off go test -cover ./...         # Coverage report
-GOWORK=off go vet ./...                 # Run go vet
-nix flake check .                       # All checks via nix
+GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./...   # Run tests with -race
+GOWORK=off GOEXPERIMENT=jsonv2 go test -cover ./...  # Coverage report
+GOWORK=off GOEXPERIMENT=jsonv2 go vet ./...          # Run go vet
+nix flake check .                                    # All checks via nix
 ```
+
+- **`GOEXPERIMENT=jsonv2` required** — codebase uses `encoding/json/v2` (Go 1.25+ recommended). The experiment is still gated in Go 1.26, so every direct `go` invocation must set it. Nix flakes set it via `env.GOEXPERIMENT` so `nix build`/`nix flake check` work without manual flags.
 
 ### Dependencies
 
@@ -143,6 +146,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Iteration logging** — OnIteration callback uses `slog.Debug` (only visible with `-v`); no more raw slog spam
 - **ProjectTypeTest** — `vitest`/`jest` now detected as `ProjectTypeTest` (not `ProjectTypeNode`); enables both `PluginNode` AND the correct test plugin via `depPluginRules`
 - **GOWORK=off** — Parent workspace at `/home/lars/projects/go.work` interferes; always use `GOWORK=off` for `go run`/`go test`
+- **GOEXPERIMENT=jsonv2** — Codebase uses `encoding/json/v2` (Go 1.25+ policy). Still behind `goexperiment.jsonv2` build tag in Go 1.26, so `go test`/`go vet`/`go run` need `GOEXPERIMENT=jsonv2`. Nix flakes set it via `env.GOEXPERIMENT`.
 - **Test boilerplate is intentional** — `t.Parallel()` followed by `reg := loadTestRegistry(t)` in every test is idiomatic Go and **not** a duplication violation; `paralleltest` linter requires `t.Parallel()` directly in the test function. Do not fold it into the helper.
 - **marshalConfigJSON helper** — `internal/cli/cmd_configure.go` extracts the shared `cfg.ToJSON()` + error wrap into `marshalConfigJSON`. The remaining 4-line preamble (`data, err := marshalConfigJSON(cfg); if err != nil { return err }`) in `writeConfig`/`writeDryRun` is idiomatic Go error propagation and intentionally not abstracted further.
 - **`slices.Sorted(maps.Keys(m))`** — Prefer over manual `make+loop+sort.Strings` for sorted map-key enumeration in Go 1.23+.

@@ -1,7 +1,8 @@
 package cli
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io"
 	"log/slog"
@@ -98,7 +99,7 @@ func reportJSON(w io.Writer, decisions []profile.RuleDecision) error {
 		})
 	}
 
-	data, err := json.MarshalIndent(entries, "", "  ")
+	data, err := json.Marshal(entries, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
 	if err != nil {
 		return fmt.Errorf("marshal report: %w", err)
 	}

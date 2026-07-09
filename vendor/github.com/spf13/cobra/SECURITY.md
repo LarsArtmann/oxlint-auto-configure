@@ -102,4 +102,4 @@ community members who help keep cobra, its users, and the entire Go ecosystem se
 
 ---
 
-*This security policy is inspired by the [Open Web Application Security Project (OWASP)](https://owasp.org/) guidelines and security best practices.*
+_This security policy is inspired by the [Open Web Application Security Project (OWASP)](https://owasp.org/) guidelines and security best practices._

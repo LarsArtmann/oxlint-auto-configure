@@ -2,7 +2,8 @@
 package config
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"sort"
 
@@ -65,7 +66,7 @@ func (g *Generator) GenerateMaximal() *OxlintConfig {
 
 // ToJSON serializes the config to pretty-printed JSON.
 func (c *OxlintConfig) ToJSON() ([]byte, error) {
-	data, err := json.MarshalIndent(c, "", "  ")
+	data, err := json.Marshal(c, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
 	if err != nil {
 		return nil, fmt.Errorf("marshal config: %w", err)
 	}

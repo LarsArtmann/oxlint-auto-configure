@@ -24,7 +24,7 @@ github.com/inconshreveable/mousetrap
 ## explicit; go 1.26.4
 github.com/larsartmann/go-finding
 github.com/larsartmann/go-finding/lockutil
-# github.com/larsartmann/go-finding/pipeline v0.0.0-20260706102557-968270bde65c
+# github.com/larsartmann/go-finding/pipeline v0.0.0-20260708144747-398d8c81e53d
 ## explicit; go 1.26.4
 github.com/larsartmann/go-finding/pipeline
 # github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
@@ -53,10 +53,10 @@ github.com/stretchr/testify/require
 # go.uber.org/multierr v1.11.0
 ## explicit; go 1.19
 go.uber.org/multierr
-# golang.org/x/sync v0.21.0
+# golang.org/x/sync v0.22.0
 ## explicit; go 1.25.0
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.46.0
+# golang.org/x/sys v0.47.0
 ## explicit; go 1.25.0
 golang.org/x/sys/cpu
 # gopkg.in/yaml.v3 v3.0.1
