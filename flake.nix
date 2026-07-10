@@ -25,9 +25,9 @@
     let
       version = self.rev or self.dirtyRev or "dev";
 
-      src = nixlib.fileset.toSource {
+      src = nixpkgs.lib.fileset.toSource {
         root = ./.;
-        fileset = nixlib.fileset.unions [
+        fileset = nixpkgs.lib.fileset.unions [
           ./go.mod
           ./go.sum
           ./cmd
@@ -48,6 +48,7 @@
         {
           config,
           pkgs,
+          lib,
           ...
         }:
         {
