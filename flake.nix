@@ -25,9 +25,9 @@
     let
       version = self.rev or self.dirtyRev or "dev";
 
-      src = nixpkgs.lib.fileset.toSource {
+      src = nixlib.fileset.toSource {
         root = ./.;
-        fileset = nixpkgs.lib.fileset.unions [
+        fileset = nixlib.fileset.unions [
           ./go.mod
           ./go.sum
           ./cmd
@@ -72,7 +72,7 @@
             ];
             nativeCheckInputs = [ pkgs.oxlint ];
             env.GOEXPERIMENT = "jsonv2";
-            meta = with pkgs.lib; {
+            meta = with lib; {
               description = "Auto-generate optimal .oxlintrc.json configurations";
               homepage = "https://github.com/larsartmann/oxlint-auto-configure";
               license = licenses.mit;
@@ -90,8 +90,8 @@
                 }
                 ''
                   mkdir -p $out/bin
-                  makeWrapper ${pkgs.lib.getExe config.packages.default} $out/bin/oxlint-auto-configure \
-                    --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.oxlint ]}
+                  makeWrapper ${lib.getExe config.packages.default} $out/bin/oxlint-auto-configure \
+                    --prefix PATH : ${lib.makeBinPath [ pkgs.oxlint ]}
                 ''
             }/bin/oxlint-auto-configure";
           };
