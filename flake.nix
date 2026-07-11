@@ -77,7 +77,12 @@
               description = "Auto-generate optimal .oxlintrc.json configurations";
               homepage = "https://github.com/larsartmann/oxlint-auto-configure";
               license = licenses.mit;
-              maintainers = [ maintainers.larsartmann ];
+              maintainers = [
+                {
+                  name = "Lars Artmann";
+                  github = "LarsArtmann";
+                }
+              ];
               mainProgram = "oxlint-auto-configure";
             };
           };
