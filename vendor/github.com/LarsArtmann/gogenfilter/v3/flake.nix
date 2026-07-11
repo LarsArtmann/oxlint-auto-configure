@@ -79,7 +79,7 @@
             meta = with pkgs.lib; {
               description = "Go struct field filter code generator";
               license = licenses.mit;
-              maintainers = [ maintainers.larsartmann ];
+              maintainers = [ { name = "Lars Artmann"; github = "LarsArtmann"; } ];
               mainProgram = "gogenfilter";
             };
           };

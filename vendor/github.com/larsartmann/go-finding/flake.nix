@@ -53,7 +53,7 @@
             description = "Code quality finding framework for Go";
             homepage = "https://github.com/LarsArtmann/go-finding";
             license = lib.licenses.mit;
-            maintainers = [ lib.maintainers.larsartmann ];
+            maintainers = [ { name = "Lars Artmann"; github = "LarsArtmann"; } ];
             mainProgram = "go-finding";
           };
         };
@@ -93,7 +93,7 @@
               homepage = "https://github.com/larsartmann/go-finding";
               license = pkgs.lib.licenses.mit;
               platforms = pkgs.lib.platforms.unix;
-              maintainers = [ pkgs.lib.maintainers.larsartmann ];
+              maintainers = [ { name = "Lars Artmann"; github = "LarsArtmann"; } ];
             };
           };
         in
