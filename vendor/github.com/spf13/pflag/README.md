@@ -46,7 +46,7 @@ unaffected.
 
 Define flags using flag.String(), Bool(), Int(), etc.
 
-This declares an integer flag, -flagname, stored in the pointer ip, with type \*int.
+This declares an integer flag, -flagname, stored in the pointer ip, with type *int.
 
 ```go
 var ip *int = flag.Int("flagname", 1234, "help message for flagname")
@@ -188,7 +188,7 @@ Duration flags accept any input valid for time.ParseDuration.
 
 It is possible to set a custom flag name 'normalization function.' It allows flag names to be mutated both when created in the code and when used on the command line to some 'normalized' form. The 'normalized' form is used for comparison. Two examples of using the custom normalization func follow.
 
-**Example #1**: You want -, \_, and . in flags to compare the same. aka --my-flag == --my_flag == --my.flag
+**Example #1**: You want -, _, and . in flags to compare the same. aka --my-flag == --my_flag == --my.flag
 
 ```go
 func wordSepNormalizeFunc(f *pflag.FlagSet, name string) pflag.NormalizedName {

@@ -16,7 +16,6 @@ name a few. [This list](site/content/projects_using_cobra.md) contains a more ex
 [![Go Reference](https://pkg.go.dev/badge/github.com/spf13/cobra.svg)](https://pkg.go.dev/github.com/spf13/cobra)
 [![Go Report Card](https://goreportcard.com/badge/github.com/spf13/cobra)](https://goreportcard.com/report/github.com/spf13/cobra)
 [![Slack](https://img.shields.io/badge/Slack-cobra-brightgreen)](https://gophers.slack.com/archives/CD3LP1199)
-
 <hr>
 <div align="center" markdown="1">
    <sup>Supported by:</sup>

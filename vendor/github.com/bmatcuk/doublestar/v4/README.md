@@ -255,7 +255,7 @@ GlobWalk calls the callback function `fn` for every file matching pattern. The
 syntax of pattern is the same as in Match() and the behavior is the same as
 Glob(), with regard to limitations (such as patterns containing `/./`, `/../`,
 or starting with `/`). The pattern may describe hierarchical names such as
-usr/\*/bin/ed.
+usr/*/bin/ed.
 
 GlobWalk may have a small performance benefit over Glob if you do not need a
 slice of matches because it can avoid allocating memory for the matches.
@@ -292,7 +292,7 @@ func FilepathGlob(pattern string, opts ...GlobOption) (matches []string, err err
 
 FilepathGlob returns the names of all files matching pattern or nil if there is
 no matching file. The syntax of pattern is the same as in Match(). The pattern
-may describe hierarchical names such as usr/\*/bin/ed.
+may describe hierarchical names such as usr/*/bin/ed.
 
 FilepathGlob ignores file system errors such as I/O errors reading directories
 by default. The only possible returned error is `ErrBadPattern`, reporting that
@@ -332,7 +332,7 @@ string is everything after that slash. For example, given the pattern:
              ^----------- split here
 ```
 
-SplitPattern returns "../../path/to" and "meta\*/\*\*". This is useful for
+SplitPattern returns "../../path/to" and "meta*/**". This is useful for
 initializing os.DirFS() to call Glob() because Glob() will silently fail if
 your pattern includes `/./` or `/../`. For example:
 

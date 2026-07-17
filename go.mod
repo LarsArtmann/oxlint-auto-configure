@@ -4,13 +4,13 @@ go 1.26.4
 
 require (
 	github.com/larsartmann/go-finding v1.2.0
-	github.com/larsartmann/go-finding/pipeline v0.0.0-20260708144747-398d8c81e53d
+	github.com/larsartmann/go-finding/pipeline v0.1.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 )
 
 require (
-	github.com/LarsArtmann/gogenfilter/v3 v3.2.0 // indirect
+	github.com/LarsArtmann/gogenfilter/v3 v3.3.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-faster/errors v0.7.1 // indirect

@@ -1,5 +1,5 @@
-# github.com/LarsArtmann/gogenfilter/v3 v3.2.0
-## explicit; go 1.26.3
+# github.com/LarsArtmann/gogenfilter/v3 v3.3.0
+## explicit; go 1.26.4
 github.com/LarsArtmann/gogenfilter/v3
 # github.com/bmatcuk/doublestar/v4 v4.10.0
 ## explicit; go 1.16
@@ -24,7 +24,7 @@ github.com/inconshreveable/mousetrap
 ## explicit; go 1.26.4
 github.com/larsartmann/go-finding
 github.com/larsartmann/go-finding/lockutil
-# github.com/larsartmann/go-finding/pipeline v0.0.0-20260708144747-398d8c81e53d
+# github.com/larsartmann/go-finding/pipeline v0.1.0
 ## explicit; go 1.26.4
 github.com/larsartmann/go-finding/pipeline
 # github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2

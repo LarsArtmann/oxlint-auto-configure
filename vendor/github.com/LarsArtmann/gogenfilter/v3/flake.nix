@@ -42,7 +42,7 @@
           ...
         }:
         let
-          lib = pkgs.lib;
+          inherit (pkgs) lib;
           goPkg = pkgs.go_1_26;
 
           goFiles = lib.fileset.fileFilter (file: file.hasExt "go") ./.;
@@ -79,7 +79,7 @@
             meta = with pkgs.lib; {
               description = "Go struct field filter code generator";
               license = licenses.mit;
-              maintainers = [ { name = "Lars Artmann"; github = "LarsArtmann"; } ];
+              maintainers = [ maintainers.larsartmann ];
               mainProgram = "gogenfilter";
             };
           };
@@ -155,6 +155,10 @@
 
             lint = mkApp "lint" [ pkgs.golangci-lint ] ''
               golangci-lint run ./...
+            '';
+
+            gendocs = mkApp "gendocs" [ goPkg ] ''
+              go run ./cmd/gendocs "$@"
             '';
 
             coverage = mkApp "coverage" [ goPkg ] ''
