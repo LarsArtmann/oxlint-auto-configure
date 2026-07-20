@@ -3,6 +3,7 @@ package detect
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
@@ -23,117 +24,48 @@ func TestDetectUnknownProject(t *testing.T) {
 
 func TestDetectReactProject(t *testing.T) {
 	t.Parallel()
-	dir := t.TempDir()
-	pkgJSON := `{"dependencies": {"react": "^18.0.0", "react-dom": "^18.0.0"}}`
-	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
-	require.NoError(t, err)
-
-	det := NewDetector(dir)
-	pc, types, err := det.Detect()
-	require.NoError(t, err)
+	pc, types := detectWithPackageJSON(t, `{"dependencies": {"react": "^18.0.0", "react-dom": "^18.0.0"}}`)
 
 	assert.True(t, pc[rule.PluginReact])
 	assert.True(t, pc[rule.PluginJSXA11y])
 	assert.True(t, pc[rule.PluginReactPerf])
 
-	var hasReact bool
-	for _, t := range types {
-		if t == ProjectTypeReact {
-			hasReact = true
-		}
-	}
-	assert.True(t, hasReact)
+	assert.True(t, containsType(types, ProjectTypeReact))
 }
 
 func TestDetectNextJSProject(t *testing.T) {
 	t.Parallel()
-	dir := t.TempDir()
-	pkgJSON := `{"dependencies": {"next": "^14.0.0", "react": "^18.0.0"}}`
-	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
-	require.NoError(t, err)
-
-	det := NewDetector(dir)
-	pc, types, err := det.Detect()
-	require.NoError(t, err)
+	pc, types := detectWithPackageJSON(t, `{"dependencies": {"next": "^14.0.0", "react": "^18.0.0"}}`)
 
 	assert.True(t, pc[rule.PluginNextJS])
 	assert.True(t, pc[rule.PluginReact])
-
-	var hasNextJS bool
-	for _, t := range types {
-		if t == ProjectTypeNextJS {
-			hasNextJS = true
-		}
-	}
-	assert.True(t, hasNextJS)
+	assert.True(t, containsType(types, ProjectTypeNextJS))
 }
 
 func TestDetectVueProject(t *testing.T) {
 	t.Parallel()
-	dir := t.TempDir()
-	pkgJSON := `{"dependencies": {"vue": "^3.0.0"}}`
-	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
-	require.NoError(t, err)
-
-	det := NewDetector(dir)
-	pc, types, err := det.Detect()
-	require.NoError(t, err)
+	pc, types := detectWithPackageJSON(t, `{"dependencies": {"vue": "^3.0.0"}}`)
 
 	assert.True(t, pc[rule.PluginVue])
-
-	var hasVue bool
-	for _, t := range types {
-		if t == ProjectTypeVue {
-			hasVue = true
-		}
-	}
-	assert.True(t, hasVue)
+	assert.True(t, containsType(types, ProjectTypeVue))
 }
 
 func TestDetectJestProject(t *testing.T) {
 	t.Parallel()
-	dir := t.TempDir()
-	pkgJSON := `{"devDependencies": {"jest": "^29.0.0"}}`
-	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
-	require.NoError(t, err)
-
-	det := NewDetector(dir)
-	pc, types, err := det.Detect()
-	require.NoError(t, err)
+	pc, types := detectWithPackageJSON(t, `{"devDependencies": {"jest": "^29.0.0"}}`)
 
 	assert.True(t, pc[rule.PluginJest])
 	assert.True(t, pc[rule.PluginNode])
-
-	var hasTest bool
-	for _, typ := range types {
-		if typ == ProjectTypeTest {
-			hasTest = true
-		}
-	}
-	assert.True(t, hasTest, "expected ProjectTypeTest in detected types")
+	assert.True(t, containsType(types, ProjectTypeTest), "expected ProjectTypeTest in detected types")
 }
 
 func TestDetectVitestProject(t *testing.T) {
 	t.Parallel()
-	dir := t.TempDir()
-	pkgJSON := `{"devDependencies": {"vitest": "^1.0.0"}}`
-	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
-	require.NoError(t, err)
-
-	det := NewDetector(dir)
-	pc, types, err := det.Detect()
-	require.NoError(t, err)
+	pc, types := detectWithPackageJSON(t, `{"devDependencies": {"vitest": "^1.0.0"}}`)
 
 	assert.True(t, pc[rule.PluginVitest])
 	assert.True(t, pc[rule.PluginNode])
-
-	var hasTest bool
-	for _, typ := range types {
-		if typ == ProjectTypeTest {
-			hasTest = true
-		}
-	}
-	assert.True(t, hasTest, "expected ProjectTypeTest in detected types")
+	assert.True(t, containsType(types, ProjectTypeTest), "expected ProjectTypeTest in detected types")
 }
 
 func TestDetectTSProject(t *testing.T) {
@@ -183,13 +115,7 @@ func TestDetectPromiseProject(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			dir := t.TempDir()
-			err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(tt.pkgJSON), 0o644)
-			require.NoError(t, err)
-
-			det := NewDetector(dir)
-			pc, _, err := det.Detect()
-			require.NoError(t, err)
+			pc, _ := detectWithPackageJSON(t, tt.pkgJSON)
 			assert.True(t, pc[rule.PluginPromise], "expected promise plugin for %s", tt.name)
 		})
 	}
@@ -197,14 +123,7 @@ func TestDetectPromiseProject(t *testing.T) {
 
 func TestDetectNoFalsePromise(t *testing.T) {
 	t.Parallel()
-	dir := t.TempDir()
-	pkgJSON := `{"dependencies": {"lodash": "^4.0.0"}}`
-	err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644)
-	require.NoError(t, err)
-
-	det := NewDetector(dir)
-	pc, _, err := det.Detect()
-	require.NoError(t, err)
+	pc, _ := detectWithPackageJSON(t, `{"dependencies": {"lodash": "^4.0.0"}}`)
 	assert.False(t, pc[rule.PluginPromise], "should not detect promise plugin from lodash")
 }
 
@@ -213,4 +132,21 @@ func TestProjectTypeString(t *testing.T) {
 	assert.Equal(t, "react", string(ProjectTypeReact))
 	assert.Equal(t, "nextjs", string(ProjectTypeNextJS))
 	assert.Equal(t, "vue", string(ProjectTypeVue))
+}
+
+// detectWithPackageJSON writes pkgJSON to a fresh temp dir's package.json and
+// returns the Detector's results. Fails the test on I/O or Detect errors.
+func detectWithPackageJSON(t *testing.T, pkgJSON string) (profile.PluginConfig, []ProjectType) {
+	t.Helper()
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644))
+
+	pc, types, err := NewDetector(dir).Detect()
+	require.NoError(t, err)
+	return pc, types
+}
+
+// containsType reports whether want appears in types.
+func containsType(types []ProjectType, want ProjectType) bool {
+	return slices.Contains(types, want)
 }
