@@ -314,8 +314,7 @@ func (d *Detector) mapFixStrategy(ruleName, pluginName string) finding.FixStrate
 // if the exit code is just oxlint reporting findings (exit code 1).
 // Returns a non-nil error for unexpected failures.
 func handleExitError(err error, cmd string) error {
-	exitErr := &exec.ExitError{}
-	if errors.As(err, &exitErr) {
+	if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
 		if len(exitErr.Stderr) > 0 {
 			return finding.NewIOError(cmd, fmt.Errorf("%s", string(exitErr.Stderr)))
 		}
