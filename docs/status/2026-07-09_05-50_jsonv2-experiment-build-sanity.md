@@ -11,7 +11,7 @@
 
 - **Root cause found and fixed:** `encoding/json/v2` is still behind `goexperiment.jsonv2` build tag in Go 1.26.4. The codebase imports v2 but no tool ever set the experiment.
 - **All local checks pass** with `GOEXPERIMENT=jsonv2`: vet, build, test -race, golangci-lint, govulncheck.
-- **Not committed** (per safety rules): 4 source files modified, 1 gitignore negation restored, vendor/ left in buildflow's pre-existing dirty state.
+- ~~**Not committed** (per safety rules): 4 source files modified, 1 gitignore negation restored, vendor/ left in buildflow's pre-existing dirty state.~~ **Committed** in subsequent merges (8913345, 4216a2c, dc7d858): GOEXPERIMENT=jsonv2 plumbing, vendor/ sync, and CI hardening are now in `master`.
 
 ---
 
@@ -112,3 +112,22 @@ Context: The user's intent ("fix") clearly implies making the whole build work, 
 **Q2: Should the `GOEXPERIMENT=jsonv2` requirement stay forever, or should the project migrate to drop it when Go 1.27 ships?**
 
 Context: I documented it as "required because the experiment is still gated in Go 1.26". The Go 1.27 release notes (which I cannot verify) may flip jsonv2 to default. If yes, all the GOEXPERIMENT plumbing becomes dead weight. If no, the project will carry the env permanently. The honest answer is "check when Go 1.27 lands" — but I can't predict that. **Need the user's policy: maintain-env-permanently vs plan-removal-in-1.27.**
+
+---
+
+## Resolution (2026-07-22)
+
+This session produced the `GOEXPERIMENT=jsonv2` fix but left it uncommitted. The work was merged into `master` shortly afterward.
+
+| Item                                     | Claim in report                | Resolution                                                            | Commit            |
+| ---------------------------------------- | ------------------------------ | --------------------------------------------------------------------- | ----------------- |
+| flake.nix `env.GOEXPERIMENT`             | Added locally                  | **SHIPPED** in `packages.default` and both devShells                  | 8913345           |
+| `.github/workflows/ci.yml` job-level env | Edited locally                 | **SHIPPED** with `GOEXPERIMENT=jsonv2` at job level                   | 8913345 / 4216a2c |
+| `AGENTS.md` GOEXPERIMENT note            | Updated locally                | **SHIPPED**; later expanded with full gotcha section                  | 8913345           |
+| `.gitignore` `!vendor/` negation         | Restored locally               | **SHIPPED** and still present                                         | 8913345           |
+| `vendor/` + go.mod/go.sum changes        | Left dirty                     | **COMMITTED** through re-vendor in dc7d858 and hardening in 87505b0   | dc7d858 / 87505b0 |
+| BuildFlow `GOEXPERIMENT` support         | Suggested for `.buildflow.yml` | **OPEN** — not yet addressed in `.buildflow.yml`                      | —                 |
+| `go.mod` Go 1.27 bump                    | Not started                    | **OPEN** — `go.mod` still declares `go 1.26.4`; gopls warnings remain | —                 |
+| `TODO_LIST.md` / `FEATURES.md`           | Not started                    | **OPEN** — still missing as of 2026-07-22                             | —                 |
+
+Current `master` is `0867c95` (CHANGELOG v0.2.1 update). The gopls warning and the missing project docs are still tracked in TODO_LIST.md.

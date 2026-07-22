@@ -523,6 +523,17 @@
           </p>
         </div>
 
+        <div class="card card-warning">
+          <h4>Update 2026-07-22</h4>
+          <p>
+            Since this report, <code>GOEXPERIMENT=jsonv2</code> was enabled across the codebase
+            (8913345, 4216a2c), a restriction denylist was added to prevent auto-enabling rules that
+            ban modern JS/TS syntax (804d117), and the lint stack was hardened (87505b0). Full
+            item-by-item status is in the <a href="#resolution">Resolution</a> section at the
+            bottom of this report.
+          </p>
+        </div>
+
         <h2 id="summary"><span class="num">00</span>Summary Dashboard</h2>
         <div class="stat-grid">
           <div class="stat-card stat-good">
@@ -714,12 +725,14 @@
           </p>
         </div>
 
-        <div class="card">
+        <div class="card card-solution">
           <h4>encoding/json/v2 adoption</h4>
           <p>
-            Go 1.25+ ships <code>encoding/json/v2</code>. This project is on
-            <code>go 1.26.4</code> but still uses <code>encoding/json</code> v1. Migration is
-            straightforward but not started.
+            <strong>Done in 8913345 / 4216a2c.</strong> The project now uses
+            <code>encoding/json/v2</code> via <code>GOEXPERIMENT=jsonv2</code>, set in
+            <code>flake.nix</code>, CI workflows, and the documented local commands. The
+            <code>go 1.26.4</code> declaration remains, so gopls still warns that
+            <code>json.Unmarshal</code> needs Go 1.27.
           </p>
         </div>
 
@@ -1185,6 +1198,36 @@
             modules. The project is ~2,900 lines of non-test code in a single module. Is
             modularization worth the overhead for a tool this size, or should we archive the
             proposal? <strong>What's the decision?</strong>
+          </p>
+        </div>
+
+        <h2 id="resolution"><span class="num">08</span>Resolution (2026-07-22)</h2>
+
+        <div class="card card-solution">
+          <h4>GOEXPERIMENT=jsonv2 — now enabled</h4>
+          <p>
+            The "encoding/json/v2 adoption" item under <strong>Not Started</strong> was completed in
+            commits 8913345 and 4216a2c. The experiment is now set in
+            <code>flake.nix</code>, CI workflows, and documented local commands.
+          </p>
+        </div>
+
+        <div class="card card-solution">
+          <h4>Restriction denylist shipped</h4>
+          <p>
+            Rules that ban fundamental modern JS/TS syntax
+            (<code>oxc/no-async-await</code>, <code>oxc/no-optional-chaining</code>,
+            <code>oxc/no-rest-spread-properties</code>) are forced to <code>"off"</code> in all
+            profiles, even <code>maximal-typesafe</code>. Shipped in 804d117.
+          </p>
+        </div>
+
+        <div class="card card-warning">
+          <h4>Still open as of 2026-07-22</h4>
+          <p>
+            <code>TODO_LIST.md</code> and <code>FEATURES.md</code> were still missing. The
+            testify/ginkgo question and the modularization proposal remain unresolved. See the
+            2026-07-22 docs-health pass for the living-doc fixes.
           </p>
         </div>
 
