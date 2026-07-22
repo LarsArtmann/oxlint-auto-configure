@@ -459,6 +459,7 @@
           <a href="#improve">Improve</a>
           <a href="#next">Next 50</a>
           <a href="#questions">Questions</a>
+          <a href="#resolution">Resolution</a>
         </nav>
       </aside>
       <main class="main">
@@ -1088,28 +1089,28 @@
           <h4>GOEXPERIMENT=jsonv2 — now enabled</h4>
           <p>
             The "encoding/json/v2 migration" item under <strong>Not Started</strong> was completed
-            in commits 8913345 and 4216a2c. The experiment is now set in
-            <code>flake.nix</code>, CI workflows, and documented local commands.
+            in commits 8913345 and 4216a2c. The experiment is now set in <code>flake.nix</code>, CI
+            workflows, and documented local commands.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>Restriction denylist shipped</h4>
           <p>
-            Rules that ban fundamental modern JS/TS syntax
-            (<code>oxc/no-async-await</code>, <code>oxc/no-optional-chaining</code>,
-            <code>oxc/no-rest-spread-properties</code>) are forced to <code>"off"</code> in all
-            profiles, even <code>maximal-typesafe</code>. Shipped in 804d117.
+            Rules that ban fundamental modern JS/TS syntax (<code>oxc/no-async-await</code>,
+            <code>oxc/no-optional-chaining</code>, <code>oxc/no-rest-spread-properties</code>) are
+            forced to <code>"off"</code> in all profiles, even <code>maximal-typesafe</code>.
+            Shipped in 804d117.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Still open as of 2026-07-22</h4>
           <p>
-            <code>TODO_LIST.md</code> and <code>FEATURES.md</code> were still missing. The
-            flake.nix ldflags question (commit/date/builtBy) is still open — nix builds still
-            show "unknown" for those fields. The testify/ginkgo policy question remains unresolved.
-            See the 2026-07-22 docs-health pass for the living-doc fixes.
+            <code>TODO_LIST.md</code> and <code>FEATURES.md</code> were still missing. The flake.nix
+            ldflags question (commit/date/builtBy) is still open — nix builds still show "unknown"
+            for those fields. The testify/ginkgo policy question remains unresolved. See the
+            2026-07-22 docs-health pass for the living-doc fixes.
           </p>
         </div>
 

@@ -504,6 +504,7 @@
           <a href="#improve">What to Improve</a>
           <a href="#next">Next 50 Tasks</a>
           <a href="#questions">Questions</a>
+          <a href="#resolution">Resolution</a>
         </nav>
       </aside>
 
@@ -529,8 +530,8 @@
             Since this report, <code>GOEXPERIMENT=jsonv2</code> was enabled across the codebase
             (8913345, 4216a2c), a restriction denylist was added to prevent auto-enabling rules that
             ban modern JS/TS syntax (804d117), and the lint stack was hardened (87505b0). Full
-            item-by-item status is in the <a href="#resolution">Resolution</a> section at the
-            bottom of this report.
+            item-by-item status is in the <a href="#resolution">Resolution</a> section at the bottom
+            of this report.
           </p>
         </div>
 
@@ -1207,18 +1208,18 @@
           <h4>GOEXPERIMENT=jsonv2 — now enabled</h4>
           <p>
             The "encoding/json/v2 adoption" item under <strong>Not Started</strong> was completed in
-            commits 8913345 and 4216a2c. The experiment is now set in
-            <code>flake.nix</code>, CI workflows, and documented local commands.
+            commits 8913345 and 4216a2c. The experiment is now set in <code>flake.nix</code>, CI
+            workflows, and documented local commands.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>Restriction denylist shipped</h4>
           <p>
-            Rules that ban fundamental modern JS/TS syntax
-            (<code>oxc/no-async-await</code>, <code>oxc/no-optional-chaining</code>,
-            <code>oxc/no-rest-spread-properties</code>) are forced to <code>"off"</code> in all
-            profiles, even <code>maximal-typesafe</code>. Shipped in 804d117.
+            Rules that ban fundamental modern JS/TS syntax (<code>oxc/no-async-await</code>,
+            <code>oxc/no-optional-chaining</code>, <code>oxc/no-rest-spread-properties</code>) are
+            forced to <code>"off"</code> in all profiles, even <code>maximal-typesafe</code>.
+            Shipped in 804d117.
           </p>
         </div>
 
