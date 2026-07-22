@@ -6,17 +6,17 @@
 
 - **Idiomatic**:
   multierr follows best practices in Go, and keeps your code idiomatic.
-  - It keeps the underlying error type hidden,
-    allowing you to deal in `error` values exclusively.
-  - It provides APIs to safely append into an error from a `defer` statement.
+    - It keeps the underlying error type hidden,
+      allowing you to deal in `error` values exclusively.
+    - It provides APIs to safely append into an error from a `defer` statement.
 - **Performant**:
   multierr is optimized for performance:
-  - It avoids allocations where possible.
-  - It utilizes slice resizing semantics to optimize common cases
-    like appending into the same error object from a loop.
+    - It avoids allocations where possible.
+    - It utilizes slice resizing semantics to optimize common cases
+      like appending into the same error object from a loop.
 - **Interoperable**:
   multierr interoperates with the Go standard library's error APIs seamlessly:
-  - The `errors.Is` and `errors.As` functions _just work_.
+    - The `errors.Is` and `errors.As` functions *just work*.
 - **Lightweight**:
   multierr comes with virtually no dependencies.
 
@@ -30,7 +30,7 @@ go get -u go.uber.org/multierr@latest
 
 Stable: No breaking changes will be made before 2.0.
 
----
+-------------------------------------------------------------------------------
 
 Released under the [MIT License].
 

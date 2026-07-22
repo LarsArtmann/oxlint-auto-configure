@@ -71,6 +71,19 @@ type profileSpec struct {
 	fallback categoryPolicy
 }
 
+// restrictionDenylist contains rules that must never be auto-enabled, regardless
+// of profile. These rules ban fundamental, modern language features that are the
+// standard in contemporary JavaScript/TypeScript development. They exist for
+// niche legacy or specialized environments only.
+//
+// Adding a rule here means: even when the restriction category is set to "error"
+// or "warn", this rule stays "off" in the generated config.
+var restrictionDenylist = map[string]bool{ //nolint:gochecknoglobals // immutable policy table
+	"oxc/no-async-await":            true, // bans async/await — oxc docs say "should not be used"
+	"oxc/no-optional-chaining":      true, // bans ?. optional chaining (ES2020)
+	"oxc/no-rest-spread-properties": true, // bans ...rest/spread properties (ES2018)
+}
+
 // profileSpecs is the single source of truth for all severity decisions.
 // Adding a profile or category = adding one entry here.
 var profileSpecs = map[Profile]profileSpec{ //nolint:gochecknoglobals // immutable policy table
@@ -176,9 +189,14 @@ func (c *Categorizer) DecideCategory(cat rule.Category) (rule.SeverityDecision, 
 }
 
 // Decide returns the severity decision for a given rule.
+// Rules on the restriction denylist are always off, regardless of profile.
 // For the minimal profile, disabled rules are always off and enabled
 // non-correctness rules get warn (left at oxlint default).
 func (c *Categorizer) Decide(r rule.Rule) rule.SeverityDecision {
+	if restrictionDenylist[r.FullName()] {
+		return rule.SeverityOff
+	}
+
 	if c.profile == ProfileMinimal {
 		if !r.Enabled {
 			return rule.SeverityOff

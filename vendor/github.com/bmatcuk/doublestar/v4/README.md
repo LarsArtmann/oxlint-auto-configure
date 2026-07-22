@@ -88,6 +88,7 @@ then use this function.
 Note: users should _not_ count on the returned error,
 `doublestar.ErrBadPattern`, being equal to `path.ErrBadPattern`.
 
+
 ### MatchUnvalidated
 
 ```go
@@ -99,6 +100,7 @@ about whether or not the pattern is valid (perhaps because you already ran
 `ValidatePattern`). Note that there's really only one case where this
 performance improvement is realized: when pattern matching reaches the end of
 `name` before reaching the end of `pattern`, such as `Match("a/b/c", "a")`.
+
 
 ### PathMatch
 
@@ -116,6 +118,7 @@ that both `pattern` and `name` are using the system's path separator. If you
 can't be sure of that, use `filepath.ToSlash()` on both `pattern` and `name`,
 and then use the `Match()` function instead.
 
+
 ### PathMatchUnvalidated
 
 ```go
@@ -127,6 +130,7 @@ care about whether or not the pattern is valid (perhaps because you already ran
 `ValidatePattern`). Note that there's really only one case where this
 performance improvement is realized: when pattern matching reaches the end of
 `name` before reaching the end of `pattern`, such as `Match("a/b/c", "a")`.
+
 
 ### GlobOption
 
@@ -202,10 +206,9 @@ For example, `.*` will match hidden files, and `.config/**` will match files
 inside the .config directory.
 
 The rule is:
-
-- For `**`: do not descend into hidden directories
-- For `*` or a pattern starting with `?`: do not match dotfiles or
-  directories
+  - For `**`: do not descend into hidden directories
+  - For `*` or a pattern starting with `?`: do not match dotfiles or
+    directories
 
 On Windows, doublestar will check the file attributes and avoid hidden files
 and directories this way, instead of matching the filename. Therefore, any
@@ -251,7 +254,7 @@ type GlobWalkFunc func(path string, d fs.DirEntry) error
 func GlobWalk(fsys fs.FS, pattern string, fn GlobWalkFunc, opts ...GlobOption) error
 ```
 
-GlobWalk calls the callback function `fn` for every file matching pattern. The
+GlobWalk calls the callback function `fn` for every file matching pattern.  The
 syntax of pattern is the same as in Match() and the behavior is the same as
 Glob(), with regard to limitations (such as patterns containing `/./`, `/../`,
 or starting with `/`). The pattern may describe hierarchical names such as
@@ -305,10 +308,10 @@ Note: FilepathGlob is a convenience function that is meant as a drop-in
 replacement for `path/filepath.Glob()` for users who don't need the
 complication of io/fs. Basically, it:
 
-- Runs `filepath.Clean()` and `ToSlash()` on the pattern
-- Runs `SplitPattern()` to get a base path and a pattern to Glob
-- Creates an FS object from the base path and `Glob()s` on the pattern
-- Joins the base path with all of the matches from `Glob()`
+* Runs `filepath.Clean()` and `ToSlash()` on the pattern
+* Runs `SplitPattern()` to get a base path and a pattern to Glob
+* Creates an FS object from the base path and `Glob()s` on the pattern
+* Joins the base path with all of the matches from `Glob()`
 
 Returned paths will use the system's path separator, just like
 `filepath.Glob()`.
@@ -324,7 +327,7 @@ func SplitPattern(p string) (base, pattern string)
 
 SplitPattern is a utility function. Given a pattern, SplitPattern will return
 two strings: the first string is everything up to the last slash (`/`) that
-appears _before_ any unescaped "meta" characters (ie, `*?[{`). The second
+appears _before_ any unescaped "meta" characters (ie, `*?[{`).  The second
 string is everything after that slash. For example, given the pattern:
 
 ```
@@ -360,7 +363,7 @@ func ValidatePattern(s string) bool
 ```
 
 Validate a pattern. Patterns are validated while they run in Match(),
-PathMatch(), and Glob(), so, you normally wouldn't need to call this. However,
+PathMatch(), and Glob(), so, you normally wouldn't need to call this.  However,
 there are cases where this might be useful: for example, if your program allows
 a user to enter a pattern that you'll run at a later time, you might want to
 validate it.
@@ -382,13 +385,13 @@ requires '/' separators, even if your OS uses something else.
 
 **doublestar** supports the following special terms in the patterns:
 
-| Special Terms | Meaning                                                                                                   |
-| ------------- | --------------------------------------------------------------------------------------------------------- |
-| `*`           | matches any sequence of non-path-separators                                                               |
-| `/**/`        | matches zero or more directories                                                                          |
-| `?`           | matches any single non-path-separator character                                                           |
-| `[class]`     | matches any single non-path-separator character against a class of characters ([see "character classes"]) |
-| `{alt1,...}`  | matches a sequence of characters if one of the comma-separated alternatives matches                       |
+Special Terms | Meaning
+------------- | -------
+`*`           | matches any sequence of non-path-separators
+`/**/`        | matches zero or more directories
+`?`           | matches any single non-path-separator character
+`[class]`     | matches any single non-path-separator character against a class of characters ([see "character classes"])
+`{alt1,...}`  | matches a sequence of characters if one of the comma-separated alternatives matches
 
 Any character with a special meaning can be escaped with a backslash (`\`).
 
@@ -401,13 +404,13 @@ pattern you're looking for is `path/to/**/*.txt`.
 
 Character classes support the following:
 
-| Class      | Meaning                                                           |
-| ---------- | ----------------------------------------------------------------- |
-| `[abc123]` | matches any single character within the set                       |
-| `[a-z0-9]` | matches any single character in the range a-z or 0-9              |
-| `[125-79]` | matches any single character within the set 129, or the range 5-7 |
-| `[^class]` | matches any single character which does _not_ match the class     |
-| `[!class]` | same as `^`: negates the class                                    |
+Class      | Meaning
+---------- | -------
+`[abc123]` | matches any single character within the set
+`[a-z0-9]` | matches any single character in the range a-z or 0-9
+`[125-79]` | matches any single character within the set 129, or the range 5-7
+`[^class]` | matches any single character which does *not* match the class
+`[!class]` | same as `^`: negates the class
 
 #### Globs Are Not Regular Expressions
 
@@ -472,7 +475,6 @@ can cause a large number of reads when globbing as it will need to recursively
 traverse your filesystem.
 
 ## Sponsors
-
 I started this project in 2014 in my spare time and have been maintaining it
 ever since. In that time, it has grown into one of the most popular globbing
 libraries in the Go ecosystem. So, if **doublestar** is a useful library in

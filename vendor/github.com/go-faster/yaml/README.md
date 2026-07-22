@@ -15,7 +15,7 @@ Specifically, as of v3 of the yaml package:
   in YAML 1.2 are _true/false_ only.
 - Octals encode and decode as _0777_ per YAML 1.1, rather than _0o777_
   as specified in YAML 1.2, because most parsers still use the old format.
-  Octals in the _0o777_ format are supported though, so new files work.
+  Octals in the  _0o777_ format are supported though, so new files work.
 - Does not support base-60 floats. These are gone from YAML 1.2, and were
   actually never supported by this package as it's clearly a poor choice.
 
@@ -37,6 +37,7 @@ To install it, run:
 ## API stability
 
 Unlike the original library, this module is not guaranteed to be stable.
+
 
 ## Example
 
@@ -122,3 +123,4 @@ b:
   - 3
   - 4
 ```
+

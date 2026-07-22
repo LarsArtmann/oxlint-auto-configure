@@ -151,6 +151,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **marshalConfigJSON helper** — `internal/cli/cmd_configure.go` extracts the shared `cfg.ToJSON()` + error wrap into `marshalConfigJSON`. The remaining 4-line preamble (`data, err := marshalConfigJSON(cfg); if err != nil { return err }`) in `writeConfig`/`writeDryRun` is idiomatic Go error propagation and intentionally not abstracted further.
 - **`slices.Sorted(maps.Keys(m))`** — Prefer over manual `make+loop+sort.Strings` for sorted map-key enumeration in Go 1.23+.
 - **profileSpecs table** — `pkg/profile/profile.go` uses a data-driven `profileSpecs` map as single source of truth for all severity decisions. Adding a profile = adding one map entry. No more parallel decide/decideCategory methods.
+- **Restriction denylist** — `restrictionDenylist` in `pkg/profile/profile.go` prevents auto-enabling rules that ban fundamental modern JS/TS syntax (`oxc/no-async-await`, `oxc/no-optional-chaining`, `oxc/no-rest-spread-properties`). These rules' own docs say they shouldn't be used in modern codebases. The denylist is checked first in `Decide()`, so denied rules are always `"off"` — emitted as explicit per-rule overrides even when the restriction category is set to error/warn.
 - **CI security** — GitHub Actions runs govulncheck on every push/PR. Three jobs: test, security, lint.
 - **No justfile** — Justfile was deleted. All build/test/lint commands use direct Go/nix commands. See AGENTS.md Testing section.
 

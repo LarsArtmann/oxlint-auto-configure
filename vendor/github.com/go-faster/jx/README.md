@@ -7,18 +7,17 @@ Lightweight fork of [jsoniter](https://github.com/json-iterator/go).
 go get github.com/go-faster/jx
 ```
 
-- [Usage and examples](#usage)
-- [Roadmap](#roadmap)
-- [Non-goals](#non-goals)
+* [Usage and examples](#usage)
+* [Roadmap](#roadmap)
+* [Non-goals](#non-goals)
 
 ## Features
-
-- Mostly zero-allocation and highly optimized
-- Directly encode and decode json values
-- No reflect or `interface{}`
-- Pools and direct buffer access for less (or none) allocations
-- Multi-pass decoding
-- Validation
+* Mostly zero-allocation and highly optimized
+* Directly encode and decode json values
+* No reflect or `interface{}`
+* Pools and direct buffer access for less (or none) allocations
+* Multi-pass decoding
+* Validation
 
 See [usage](#Usage) for examples. Mostly suitable for fast low-level json manipulation
 with high control, for dynamic parsing and encoding of unstructured data. Used in [ogen](https://github.com/ogen-go/ogen) project for
@@ -51,7 +50,7 @@ Flexibility of `jx` enables highly efficient semantic-aware encoding and decodin
 e.g. using `[16]byte` for `TraceId` with zero-allocation `hex` encoding in json:
 
 | Name     | Speed     | Allocations |
-| -------- | --------- | ----------- |
+|----------|-----------|-------------|
 | Decode   | 1279 MB/s | 0 allocs/op |
 | Validate | 1914 MB/s | 0 allocs/op |
 | Encode   | 1202 MB/s | 0 allocs/op |
@@ -67,42 +66,41 @@ Most of [jsoniter](https://github.com/json-iterator/go) issues are caused by nec
 to be drop-in replacement for standard `encoding/json`. Removing such constrains greatly
 simplified implementation and reduced scope, allowing to focus on json stream processing.
 
-- Commas are handled automatically while encoding
-- Raw json, Number and Base64 support
-- Reduced scope
-  - No reflection
-  - No `encoding/json` adapter
-  - 3.5x less code (8.5K to 2.4K SLOC)
-- Fuzzing, improved test coverage
-- Drastically refactored and simplified
-  - Explicit error returns
-  - No `Config` or `API`
+* Commas are handled automatically while encoding
+* Raw json, Number and Base64 support
+* Reduced scope
+  * No reflection
+  * No `encoding/json` adapter
+  * 3.5x less code (8.5K to 2.4K SLOC)
+* Fuzzing, improved test coverage
+* Drastically refactored and simplified
+  * Explicit error returns
+  * No `Config` or `API`
+
 
 ## Usage
 
-- [Decoding](#decode)
-- [Encoding](#encode)
-- [Writer](#writer)
-- [Raw message](#raw)
-- [Number](#number)
-- [Base64](#base64)
-- [Validation](#validate)
-- [Multi pass decoding](#capture)
+* [Decoding](#decode)
+* [Encoding](#encode)
+* [Writer](#writer)
+* [Raw message](#raw)
+* [Number](#number)
+* [Base64](#base64)
+* [Validation](#validate)
+* [Multi pass decoding](#capture)
 
 ### Decode
 
 Use [jx.Decoder](https://pkg.go.dev/github.com/go-faster/jx#Decoder). Zero value is valid,
 but constructors are available for convenience:
-
-- [jx.Decode(reader io.Reader, bufSize int)](https://pkg.go.dev/github.com/go-faster/jx#Decode) for `io.Reader`
-- [jx.DecodeBytes([]byte)](https://pkg.go.dev/github.com/go-faster/jx#Decode) for byte slices
-- [jx.DecodeStr(string)](https://pkg.go.dev/github.com/go-faster/jx#Decode) for strings
+  * [jx.Decode(reader io.Reader, bufSize int)](https://pkg.go.dev/github.com/go-faster/jx#Decode) for `io.Reader`
+  * [jx.DecodeBytes([]byte)](https://pkg.go.dev/github.com/go-faster/jx#Decode)  for byte slices
+  * [jx.DecodeStr(string)](https://pkg.go.dev/github.com/go-faster/jx#Decode) for strings
 
 To reuse decoders and their buffers, use [jx.GetDecoder](https://pkg.go.dev/github.com/go-faster/jx#GetDecoder)
 and [jx.PutDecoder](https://pkg.go.dev/github.com/go-faster/jx#PutDecoder) alongside with reset functions:
-
-- [jx.Decoder.Reset(io.Reader)](https://pkg.go.dev/github.com/go-faster/jx#Decoder.Reset) to reset to new `io.Reader`
-- [jx.Decoder.ResetBytes([]byte)](https://pkg.go.dev/github.com/go-faster/jx#Decoder.ResetBytes) to decode another byte slice
+* [jx.Decoder.Reset(io.Reader)](https://pkg.go.dev/github.com/go-faster/jx#Decoder.Reset) to reset to new `io.Reader`
+* [jx.Decoder.ResetBytes([]byte)](https://pkg.go.dev/github.com/go-faster/jx#Decoder.ResetBytes) to decode another byte slice
 
 Decoder is reset on `PutDecoder`.
 
@@ -138,12 +136,10 @@ fmt.Println(values)
 ```
 
 ### Encode
-
 Use [jx.Encoder](https://pkg.go.dev/github.com/go-faster/jx#Encoder). Zero value is valid, reuse with
 [jx.GetEncoder](https://pkg.go.dev/github.com/go-faster/jx#GetEncoder),
 [jx.PutEncoder](https://pkg.go.dev/github.com/go-faster/jx#PutEncoder) and
 [jx.Encoder.Reset()](https://pkg.go.dev/github.com/go-faster/jx#Encoder.Reset). Encoder is reset on `PutEncoder`.
-
 ```go
 var e jx.Encoder
 e.ObjStart()           // {
@@ -167,9 +163,7 @@ Use [jx.Writer](https://pkg.go.dev/github.com/go-faster/jx#Writer) for low level
 No automatic commas or indentation for lowest possible overhead, useful for code generated json encoding.
 
 ### Raw
-
 Use [jx.Decoder.Raw](https://pkg.go.dev/github.com/go-faster/jx#Decoder.Raw) to read raw json values, similar to `json.RawMessage`.
-
 ```go
 d := jx.DecodeStr(`{"foo": [1, 2, 3]}`)
 
@@ -226,13 +220,11 @@ fmt.Println("int64:", v)
 ```
 
 ### Base64
-
 Use [jx.Encoder.Base64](https://pkg.go.dev/github.com/go-faster/jx#Encoder.Base64) and
 [jx.Decoder.Base64](https://pkg.go.dev/github.com/go-faster/jx#Decoder.Base64) or
 [jx.Decoder.Base64Append](https://pkg.go.dev/github.com/go-faster/jx#Decoder.Base64Append).
 
 Same as encoding/json, base64.StdEncoding or [[RFC 4648](https://www.rfc-editor.org/rfc/rfc4648.html)].
-
 ```go
 var e jx.Encoder
 e.Base64([]byte("Hello"))
@@ -256,10 +248,8 @@ fmt.Println(jx.Valid([]byte(`["foo"}`)))            // false
 ```
 
 ### Capture
-
 The [jx.Decoder.Capture](https://pkg.go.dev/github.com/go-faster/jx#Decoder.Capture) method allows to unread everything is read in callback.
 Useful for multi-pass parsing:
-
 ```go
 d := jx.DecodeStr(`["foo", "bar", "baz"]`)
 var elems int
@@ -285,7 +275,6 @@ fmt.Println("Next element is", d.Next(), "again")
 ### ObjBytes
 
 The `Decoder.ObjBytes` method tries not to allocate memory for keys, reusing existing buffer.
-
 ```go
 d := DecodeStr(`{"id":1,"randomNumber":10}`)
 d.ObjBytes(func(d *Decoder, key []byte) error {
@@ -298,7 +287,6 @@ d.ObjBytes(func(d *Decoder, key []byte) error {
 ```
 
 ## Roadmap
-
 - [ ] Rework and export `Any`
 - [x] Support `Raw` for io.Reader
 - [x] Support `Capture` for io.Reader
@@ -309,15 +297,13 @@ d.ObjBytes(func(d *Decoder, key []byte) error {
 - [ ] Add non-callback decoding of objects
 
 ## Non-goals
-
-- Code generation for decoding or encoding
-- Replacement for `encoding/json`
-- Reflection or `interface{}` based encoding or decoding
-- Support for json path or similar
+* Code generation for decoding or encoding
+* Replacement for `encoding/json`
+* Reflection or `interface{}` based encoding or decoding
+* Support for json path or similar
 
 This package should be kept as simple as possible and be used as
 low-level foundation for high-level projects like code generator.
 
 ## License
-
 MIT, same as jsoniter

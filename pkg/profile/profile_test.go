@@ -187,6 +187,45 @@ func TestEnabledPlugins(t *testing.T) {
 	assert.Contains(t, plugins, rule.PluginJSXA11y)
 }
 
+func TestRestrictionDenylist(t *testing.T) {
+	t.Parallel()
+
+	deniedRules := []rule.Rule{
+		{Name: "no-async-await", Plugin: rule.PluginOXC, Category: rule.CategoryRestriction},
+		{Name: "no-optional-chaining", Plugin: rule.PluginOXC, Category: rule.CategoryRestriction},
+		{Name: "no-rest-spread-properties", Plugin: rule.PluginOXC, Category: rule.CategoryRestriction},
+	}
+
+	// Denied rules must be off in every profile that enables restriction.
+	for _, profile := range AllProfiles() {
+		cat := NewCategorizer(profile, PluginConfig{})
+		for _, r := range deniedRules {
+			assert.Equal(t, rule.SeverityOff, cat.Decide(r),
+				"%s should be off in %s profile", r.FullName(), profile)
+		}
+	}
+}
+
+func TestNonDeniedRestrictionRuleRespectsProfile(t *testing.T) {
+	t.Parallel()
+
+	// A restriction rule NOT on the denylist should still get the profile severity.
+	cat := NewCategorizer(ProfileMaximalTypesafe, PluginConfig{})
+	r := rule.Rule{Name: "no-console", Plugin: rule.PluginESLint, Category: rule.CategoryRestriction}
+	assert.Equal(t, rule.SeverityError, cat.Decide(r),
+		"non-denied restriction rule should get profile severity")
+}
+
+func TestRestrictionDenylistEntriesExistInRegistry(t *testing.T) {
+	t.Parallel()
+	reg := loadTestRegistry(t)
+
+	for name := range restrictionDenylist {
+		_, ok := reg.ByName(name)
+		assert.True(t, ok, "denylist entry %q does not exist in registry (typo?)", name)
+	}
+}
+
 func TestDecideAll(t *testing.T) {
 	t.Parallel()
 	reg := loadTestRegistry(t)

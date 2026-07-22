@@ -7,13 +7,13 @@ access. As a result, it is only supported by [golang] v1.16+.
 `Match()` and `PathMatch()` mostly did not change, besides big performance
 improvements. Their API is the same. However, note the following corner cases:
 
-- In previous versions of [doublestar], `PathMatch()` could accept patterns
+* In previous versions of [doublestar], `PathMatch()` could accept patterns
   that used either platform-specific path separators, or `/`. This was
   undocumented and didn't match `filepath.Match()`. In v4, both `pattern` and
   `name` must be using appropriate path separators for the platform. You can
   use `filepath.FromSlash()` to change `/` to platform-specific separators if
   you aren't sure.
-- In previous versions of [doublestar], a pattern such as `path/to/a/**` would
+* In previous versions of [doublestar], a pattern such as `path/to/a/**` would
   _not_ match `path/to/a`. In v4, this pattern _will_ match because if `a` was
   a directory, `Glob()` would return it. In other words, the following returns
   true: `Match("path/to/a/**", "path/to/a")`
@@ -22,10 +22,10 @@ improvements. Their API is the same. However, note the following corner cases:
 `OS` interface) to the [io/fs] package. As a result, it now takes a `fs.FS` as
 its first argument. This change has a couple ramifications:
 
-- Like `io/fs.Glob`, `pattern` must use a `/` as path separator, even on
+* Like `io/fs.Glob`, `pattern` must use a `/` as path separator, even on
   platforms that use something else. You can use `filepath.ToSlash()` on your
   patterns if you aren't sure.
-- Patterns that contain `/./` or `/../` are invalid. The [io/fs] package
+* Patterns that contain `/./` or `/../` are invalid. The [io/fs] package
   rejects them, returning an IO error. Since `Glob()` ignores IO errors, it'll
   end up being silently rejected. You can run `path.Clean()` to ensure they are
   removed from the pattern.

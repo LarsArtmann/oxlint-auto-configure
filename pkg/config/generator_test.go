@@ -190,6 +190,27 @@ func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
 	}
 }
 
+func TestRestrictionDenylistRulesAreOff(t *testing.T) {
+	t.Parallel()
+	reg := loadTestRegistry(t)
+
+	denied := []string{
+		"oxc/no-async-await",
+		"oxc/no-optional-chaining",
+		"oxc/no-rest-spread-properties",
+	}
+
+	// Even in maximal-typesafe (restriction=error), denied rules must be off.
+	cat := profile.NewCategorizer(profile.ProfileMaximalTypesafe, profile.PluginConfig{})
+	gen := NewGenerator(cat, reg, nil)
+	cfg := gen.GenerateMaximal()
+
+	for _, name := range denied {
+		assert.Equal(t, SeverityOff, cfg.Rules[name],
+			"%s must be explicitly off even in maximal-typesafe", name)
+	}
+}
+
 func TestFromJSONInvalid(t *testing.T) {
 	t.Parallel()
 
