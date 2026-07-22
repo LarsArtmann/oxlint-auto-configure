@@ -42,6 +42,10 @@ Requires Go 1.26+ and [oxlint](https://oxc.rs/docs/guide/usage/linter.html) in P
 > **Note:** The Go install method requires access to the private
 > [go-finding](https://github.com/larsartmann/go-finding) dependency.
 > The nix method works without any Go setup or Git authentication.
+>
+> **Note:** When building or running from source, set `GOEXPERIMENT=jsonv2`.
+> The project uses `encoding/json/v2`, which is still behind the jsonv2 experiment
+> in Go 1.26. Nix builds and dev shells set this automatically.
 
 ## Quick Start
 
@@ -67,18 +71,18 @@ oxlint-auto-configure report
 
 ## Profiles
 
-| Profile              | Correctness | Suspicious | TypeScript | Style   | Perf    | Pedantic | Restriction | Nursery |
-| -------------------- | ----------- | ---------- | ---------- | ------- | ------- | -------- | ----------- | ------- |
-| **maximal-typesafe** | error       | error      | error      | error   | error   | error    | error       | warn    |
-| **strict**           | error       | error      | error      | warn    | warn    | warn     | warn        | off     |
-| **recommended**      | error       | error      | error      | warn    | warn    | warn     | warn        | off     |
-| **minimal**          | error       | default    | default    | default | default | default  | default     | default |
+| Profile              | Correctness | Suspicious | Style   | Perf    | Pedantic | Restriction | Nursery |
+| -------------------- | ----------- | ---------- | ------- | ------- | -------- | ----------- | ------- |
+| **maximal-typesafe** | error       | error      | error   | error   | error    | error       | warn    |
+| **strict**           | error       | error      | warn    | warn    | warn     | warn        | off     |
+| **recommended**      | error       | error      | warn    | warn    | warn     | warn        | off     |
+| **minimal**          | error       | default    | default | default | default  | default     | default |
 
 ### Profile Details
 
 - **maximal-typesafe**: Every single rule at `error`. Maximum type safety and correctness enforcement. Even nursery rules at `warn`.
 - **strict**: Core correctness at `error`, everything else at `warn` except nursery.
-- **recommended** (default): Correctness + suspicious + TypeScript rules at `error`. Style, perf, pedantic at `warn`. Restriction at `warn`. Nursery off.
+- **recommended** (default): Correctness + suspicious at `error`. Style, perf, pedantic, and restriction at `warn`. Nursery off.
 - **minimal**: Only correctness at `error`. Everything else uses oxlint defaults.
 
 ## Project Detection
@@ -91,7 +95,7 @@ The tool auto-detects your project type and enables relevant plugins:
 | Next.js    | `nextjs`, `react`, `jsx-a11y`     |
 | Vue        | `vue`                             |
 | Jest       | `jest`, `node`                    |
-| Vitest     | `vitest`                          |
+| Vitest     | `vitest`, `node`                  |
 | TypeScript | `typescript` (always on)          |
 
 ## Commands
@@ -170,13 +174,13 @@ oxlint-auto-configure report [-p recommended] [-f table|json|summary]
 ## Development
 
 ```bash
-GOWORK=off go test -race ./...          # Run tests with -race
-GOWORK=off go vet ./...                 # Run go vet
-GOWORK=off golangci-lint run ./...      # Run linter
-nix build .                             # Build via nix (runs tests)
-nix run . -- configure                  # Run via nix (oxlint included)
+GOWORK=off GOEXPERIMENT=jsonv2 go test -race ./...  # Run tests with -race
+GOWORK=off GOEXPERIMENT=jsonv2 go vet ./...         # Run go vet
+GOWORK=off GOEXPERIMENT=jsonv2 golangci-lint run ./...  # Run linter
+nix build .                                          # Build via nix (runs tests)
+nix run . -- configure                               # Run via nix (oxlint included)
 oxlint -f json --rules > pkg/rule/rules_data.json  # Refresh rules from oxlint
-GOWORK=off go mod vendor                # Re-vendor deps (needed after go.mod changes)
+GOWORK=off go mod vendor                             # Re-vendor deps (needed after go.mod changes)
 ```
 
 ## Architecture

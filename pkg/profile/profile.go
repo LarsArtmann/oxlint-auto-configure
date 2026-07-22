@@ -19,11 +19,10 @@ const (
 	ProfileMaximalTypesafe Profile = "maximal-typesafe"
 
 	// ProfileRecommended enables correctness+suspicious at error,
-	// typescript+oxc at error, perf+style+pedantic at warn,
-	// restriction at warn, nursery at off.
+	// perf+style+pedantic+restriction at warn, nursery at off.
 	ProfileRecommended Profile = "recommended"
 
-	// ProfileStrict enables correctness+suspicious+typescript at error,
+	// ProfileStrict enables correctness+suspicious at error,
 	// everything else at warn except nursery (off).
 	ProfileStrict Profile = "strict"
 

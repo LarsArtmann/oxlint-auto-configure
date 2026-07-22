@@ -13,8 +13,13 @@ Thanks for your interest in contributing!
 
 Run the following commands to set up your development environment:
 
-    go test ./... -race
-    golangci-lint run ./...
+    GOWORK=off GOEXPERIMENT=jsonv2 go test ./... -race
+    GOWORK=off GOEXPERIMENT=jsonv2 golangci-lint run ./...
+
+Or use Nix, which handles the experiment automatically:
+
+    nix build .       # build and test
+    nix flake check . # all checks
 
 ## Reporting Issues
 

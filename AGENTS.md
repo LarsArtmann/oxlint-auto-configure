@@ -79,7 +79,7 @@ nix flake check .                                    # All checks via nix
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` v1.2.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
+- `github.com/larsartmann/go-finding` v1.2.1 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
 - `github.com/spf13/cobra` — CLI framework
 - `github.com/stretchr/testify` — Test assertions
 
@@ -96,12 +96,12 @@ nix flake check .                                    # All checks via nix
 
 ### Profiles
 
-| Profile            | Description                                                   |
-| ------------------ | ------------------------------------------------------------- |
-| `maximal-typesafe` | ALL rules at error (nursery at warn)                          |
-| `recommended`      | Correctness+suspicious+TS at error, rest at warn, nursery off |
-| `strict`           | Correctness+suspicious at error, rest at warn, nursery off    |
-| `minimal`          | Only correctness at error, rest uses defaults                 |
+| Profile            | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `maximal-typesafe` | ALL rules at error (nursery at warn)                       |
+| `recommended`      | Correctness+suspicious at error, rest at warn, nursery off |
+| `strict`           | Correctness+suspicious at error, rest at warn, nursery off |
+| `minimal`          | Only correctness at error, rest uses defaults              |
 
 ### Updating Rules
 
@@ -115,7 +115,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 
 ### Important Gotchas
 
-- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.2.0 from GitHub (no local replace)
+- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.2.1 from GitHub (no local replace)
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
 - **Version injected at build** — `internal/cli.version/commit/date/builtBy` via ldflags (default: "dev"/"unknown"). `SetVersionTemplate` shows full metadata in `--version`.

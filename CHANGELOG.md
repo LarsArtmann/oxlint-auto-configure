@@ -8,15 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `FEATURES.md` and `TODO_LIST.md` for project tracking and honest feature inventory.
+- Filled `docs/DOMAIN_LANGUAGE.md` with actual project domain terms.
+
 ### Changed
 
-### Deprecated
-
-### Removed
+- `CONTRIBUTING.md` now documents the required `GOEXPERIMENT=jsonv2` and `GOWORK=off` flags for local commands and adds Nix alternatives.
 
 ### Fixed
 
-### Security
+- `README.md` profile table now reflects actual oxlint categories (removed non-existent `TypeScript` category column; `strict` and `recommended` are now aligned with the code).
+- `README.md` project detection table now lists `node` for Vitest alongside `vitest`.
+- `README.md` Development commands include `GOEXPERIMENT=jsonv2`.
+- `AGENTS.md` dependency version updated to `go-finding` v1.2.1 and profile description corrected.
+- `internal/cli/cmd_configure.go` help text no longer claims `TypeScript` is a severity category.
+- `pkg/profile/profile.go` comments now match the actual `profileSpecs` table.
 
 ## [0.2.1] - 2026-07-22
 

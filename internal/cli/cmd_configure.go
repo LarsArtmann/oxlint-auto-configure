@@ -33,7 +33,7 @@ func newConfigureCommand() *cobra.Command {
 
 Profiles:
   maximal-typesafe  Enable ALL rules at 'error' — maximum type safety
-  recommended       Correctness+suspicious+TS at error, rest at warn (default)
+  recommended       Correctness+suspicious at error, rest at warn (default)
   strict            Correctness+suspicious at error, everything else at warn
   minimal           Only correctness at error, rest uses oxlint defaults`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
