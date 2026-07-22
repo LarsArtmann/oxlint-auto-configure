@@ -2,7 +2,7 @@ package oxlint
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -86,8 +86,10 @@ const realOxlintOutput = `{
 
 func parseTestFindings(t *testing.T) []finding.Finding {
 	t.Helper()
+
 	findings, err := new(Detector).parseOutput([]byte(realOxlintOutput))
 	require.NoError(t, err)
+
 	return findings
 }
 
@@ -176,6 +178,7 @@ func TestParseEmptyDiagnostics(t *testing.T) {
 
 func TestParseCodeFormat(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		code         string
 		expectedRule string
@@ -192,6 +195,7 @@ func TestParseCodeFormat(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.code, func(t *testing.T) {
 			t.Parallel()
+
 			rule, plugin := parseCode(tt.code)
 			assert.Equal(t, tt.expectedRule, rule)
 			assert.Equal(t, tt.expectedPlug, plugin)
@@ -216,6 +220,7 @@ func TestDetectEmptyJSON(t *testing.T) {
 
 func TestDetectOnRealProject(t *testing.T) {
 	t.Parallel()
+
 	if os.Getenv("OXLINT_E2E") == "" {
 		t.Skip("Set OXLINT_E2E=1 to run e2e test with real oxlint")
 	}
@@ -236,6 +241,7 @@ func TestDetectOnRealProject(t *testing.T) {
 
 func TestMapCategory(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		plugin   string
 		expected finding.Category
@@ -264,6 +270,7 @@ func TestMapCategory(t *testing.T) {
 
 func TestPositionFromLabelsEmpty(t *testing.T) {
 	t.Parallel()
+
 	pos := positionFromLabels("test.ts", nil)
 	assert.Equal(t, finding.FilePath("test.ts"), pos.File)
 	assert.Equal(t, 0, pos.Line)
@@ -285,12 +292,14 @@ func TestRangeFromLabels(t *testing.T) {
 
 	t.Run("zero_length", func(t *testing.T) {
 		t.Parallel()
+
 		labels := []oxlintLabel{{Span: oxlintSpan{Line: 5, Column: 3, Offset: 42, Length: 0}}}
 		assert.Nil(t, rangeFromLabels("test.ts", labels))
 	})
 
 	t.Run("single_line_span", func(t *testing.T) {
 		t.Parallel()
+
 		labels := []oxlintLabel{{Span: oxlintSpan{Line: 2, Column: 1, Offset: 18, Length: 9}}}
 		r := rangeFromLabels("test.ts", labels)
 		require.NotNil(t, r)
@@ -356,6 +365,7 @@ func (m mockRunner) Run(_ context.Context, _ string, _ []string, _ string) ([]by
 
 func TestDetectWithMockRunner(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector(".", WithRunner(mockRunner{output: []byte(realOxlintOutput)}))
 	findings, err := d.Detect(context.Background())
 	require.NoError(t, err)
@@ -365,6 +375,7 @@ func TestDetectWithMockRunner(t *testing.T) {
 
 func TestDetectWithMockRunnerEmptyOutput(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector(".", WithRunner(mockRunner{output: []byte("{}")}))
 	findings, err := d.Detect(context.Background())
 	require.NoError(t, err)
@@ -373,24 +384,28 @@ func TestDetectWithMockRunnerEmptyOutput(t *testing.T) {
 
 func TestDetectorName(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector(".")
 	assert.Equal(t, "oxlint", d.Name())
 }
 
 func TestWithConfig(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector(".", WithConfig("/path/to/config"))
 	assert.Equal(t, "/path/to/config", d.config)
 }
 
 func TestWithArgs(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector(".", WithArgs("--verbose"))
 	assert.Contains(t, d.args, "--verbose")
 }
 
 func TestMapSeverityAllBranches(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		input    string
 		expected finding.Severity
@@ -413,6 +428,7 @@ func TestMapSeverityAllBranches(t *testing.T) {
 
 func TestDetectNonExitError(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector(".", WithRunner(mockRunner{err: assert.AnError}))
 	findings, err := d.Detect(context.Background())
 	require.Error(t, err)
@@ -422,6 +438,7 @@ func TestDetectNonExitError(t *testing.T) {
 
 func TestDetectExitErrorWithStderr(t *testing.T) {
 	t.Parallel()
+
 	exitErr := &exec.ExitError{Stderr: []byte("something broke")}
 	d := NewDetector(".", WithRunner(mockRunner{err: exitErr}))
 	findings, err := d.Detect(context.Background())
@@ -432,6 +449,7 @@ func TestDetectExitErrorWithStderr(t *testing.T) {
 
 func TestBuildArgsNoConfig(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector("/project")
 	args := d.buildArgs()
 	assert.Equal(t, []string{"-f", FormatJSON, "."}, args)
@@ -439,6 +457,7 @@ func TestBuildArgsNoConfig(t *testing.T) {
 
 func TestBuildArgsWithConfig(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector("/project", WithConfig("/project/.oxlintrc.json"))
 	args := d.buildArgs()
 	assert.Equal(t, []string{"-f", FormatJSON, "-c", "/project/.oxlintrc.json", "."}, args)
@@ -446,6 +465,7 @@ func TestBuildArgsWithConfig(t *testing.T) {
 
 func TestBuildArgsWithExtraArgs(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector("/project", WithArgs("--verbose", "--silent"))
 	args := d.buildArgs()
 	assert.Equal(t, []string{"-f", FormatJSON, "--verbose", "--silent", "."}, args)
@@ -453,6 +473,7 @@ func TestBuildArgsWithExtraArgs(t *testing.T) {
 
 func TestBuildArgsWithConfigAndExtraArgs(t *testing.T) {
 	t.Parallel()
+
 	d := NewDetector("/project", WithConfig("/project/.oxlintrc.json"), WithArgs("--verbose"))
 	args := d.buildArgs()
 	assert.Equal(

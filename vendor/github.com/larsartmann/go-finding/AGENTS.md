@@ -52,6 +52,11 @@ golangci-lint run ./...                     # Lint
 bash scripts/bench-check.sh benchmarks/baseline.txt current.txt 25  # Benchmark regression check
 ```
 
+> **GOEXPERIMENT=jsonv2 required.** The project imports `encoding/json/v2` (9 files across all
+> modules). All `nix run .#*` apps and devShells set this env var automatically. Direct `go`
+> commands (outside `nix develop`) require `export GOEXPERIMENT=jsonv2` first — otherwise you get
+> "build constraints exclude all Go files" errors.
+
 ## Module Dependencies (per go.mod)
 
 | Module                      | Production Deps              | Test Deps         |
@@ -82,6 +87,7 @@ bash scripts/bench-check.sh benchmarks/baseline.txt current.txt 25  # Benchmark 
 
 ## Important Behaviors (Gotchas)
 
+- **GOEXPERIMENT=jsonv2 required** — The project uses `encoding/json/v2` (Go 1.26 experimental feature). All `nix run .#*` apps and devShells export `GOEXPERIMENT=jsonv2`. Direct `go build`/`go test` outside `nix develop` will fail with "build constraints exclude all Go files" unless you `export GOEXPERIMENT=jsonv2` first. The `GOWORK=off` per-module path needs BOTH `GOWORK=off` and `GOEXPERIMENT=jsonv2`.
 - **Report{} zero-value safe** — Uses value `sync.Mutex`, safe for concurrent use without initialization
 - **Report.findings is unexported** — Use `FindingsSnapshot()` for a deep copy, `All()` for iteration, or `FindByID()` for single lookups
 - **Pipeline.Run() is single-use** — Returns `errAlreadyRan` on second call
@@ -99,7 +105,8 @@ bash scripts/bench-check.sh benchmarks/baseline.txt current.txt 25  # Benchmark 
 - **LineShiftMap shifts Position + Range** — `ShiftedPosition` shifts line + column (single-line edits); `ShiftedRange` shifts both endpoints
 - **SubstringProvider column-aware** — Disambiguates multiple occurrences by line + column distance
 - **context.Context on I/O** — `WriteSARIF`, `FindingsFromSARIF`, etc. accept context as first arg
-- **StageHooks replace OnStage** — Use `Config.StageHooks` with `StageHook`/`StageHookFunc` for before/after events with abort capability
+- **StageHooks replace OnStage** — Use `Config.StageHooks` with `StageHook`/`StageHookFunc` for before/after events with abort capability. Both StageBefore and StageAfter errors abort the pipeline.
+- **IsSuppressedAt validates Suppression** — Uses `Suppression.IsActive(now)` which checks `IsValid()` (valid Kind + non-empty Rule) AND not expired. Invalid suppressions are treated as inactive.
 - **Branded types prevent mixups** — `ID`, `RuleName`, `ToolName`, `FilePath` are distinct string types. Use `finding.ID("x")` not raw `"x"` for fields. JSON marshals identically to string.
 - **Validate() decomposed** — `finding_validate.go` delegates to 6 per-field validators (`validateIdentity`, `validateClassification`, `validateFix`, `validateReferences`, `validateSpatial`, `validateSuppression`). Complexity per validator < 10.
 - **SeverityAliases removed** — Use `RegisterSeverityAlias()` / `LookupSeverityAlias()`. Global map guarded by `sync.RWMutex`.
@@ -107,10 +114,13 @@ bash scripts/bench-check.sh benchmarks/baseline.txt current.txt 25  # Benchmark 
 - **testify in go.mod is transitive** — `stretchr/testify` appears as `// indirect` in core go.mod because ginkgo/slim-sprig depends on it. It is NOT used directly. Banned per how-to-golang but unavoidable as a transitive dep of ginkgo.
 - **Position.File is FilePath** — Changed from `string` to `FilePath` branded type. Use `finding.FilePath("path")` for string vars; string literals auto-convert. Constructors `Pos`, `NewRange`, `NewRangePtr` accept `FilePath`.
 - **SARIFOption pattern** — Use `ToSARIFWithOpts(WithIncludeSuppressed(), WithMinSeverity(sev))` instead of deprecated `ToSARIFFiltered`. Suppressed findings can now be emitted with SARIF suppression arrays.
-- **LSPDiagnosticData** — `ToLSP()` populates `diag.Data` with ID, FixStrategy, Confidence, Category, Tags, code data. `FromLSP` restores them. Round-trip is now lossless.
+- **LSPDiagnosticData** — `ToLSP()` populates `diag.Data` with ID, Severity, FixStrategy, Confidence, Category, Tags, code data, Snippet, Suppression, Metadata, and RelatedFindingIDs. `FromLSP` restores them. Round-trip is lossless including SeverityCritical (which LSP collapses to Error) and RelatedRef.FindingID (which is preserved instead of regenerated).
 - **Analysis BeforeCode** — `analysis.FromDiagnostic` now extracts `BeforeCode` from TextEdits by reading source file from disk.
 - **GroupByFile returns map[FilePath][]Finding** — Updated to use branded type as map key.
 - **lockutil.Locked/RLocked for mutex boilerplate** — Generic helpers `lockutil.Locked(sync.Locker, fn)` and `lockutil.RLocked(*sync.RWMutex, fn)` consolidate the m.mu.Lock()/defer m.mu.Unlock() pattern. Returns generic T; use `struct{}` for side-effect-only sections. Report/metrics/file_backup/registry/category_linter/etc. all use these.
+- **makezero is `always: false` (intentional)** — `.golangci.yml` sets makezero `always: false`. The `always: true` mode flags the idiomatic `make([]T, len) + copy()` pattern as wrong (23 false positives). The `false` mode still catches the real bug: `make([]T, n) + append` (over-allocation). Idiomatic Go wins. One-line revert in `.golangci.yml` if append-only style is ever desired.
+- **StageTiming closure must be called exactly once** — `Metrics.RecordStage` uses `+=` (`metrics.go:50`), so calling the closure returned by `stageTiming(stage)` more than once double-records the duration. When wrapping a stage that has success AND error/hook-abort paths, invoke the done-closure on exactly one path. Previous bug: `pipeline_iteration.go` called `applyDone()` on both the success path and the hook-error path.
+- **RetryConfig validation uses named sentinels** — `pipeline/retry.go:20-25` defines 6 named sentinel errors (`errMaxRetriesNegative`, `errBaseDelayPositive`, etc.). Consumers can `errors.Is(err, errBaseDelayPositive)`. NEVER inline `errors.New("...")` in validation returns — it breaks `errors.Is()` matching. Any new validation rule must add a named sentinel var.
 
 ## CLI Features
 
@@ -130,11 +140,11 @@ bash scripts/bench-check.sh benchmarks/baseline.txt current.txt 25  # Benchmark 
 - **FixProvider chain** — OffsetProvider → LineProvider → SubstringProvider (fallback); custom providers prepended
 - **lineIndexAware lazy caching** — Line offset index built once per file, only when a LineProvider/SubstringProvider handles a finding
 - **GoASTProvider** — AST-aware provider in `pipeline/goast/` (opt-in `go/parser` dependency)
-- **IntervalIndex[T]** — Generic O(log n + k) overlap queries; used by Correlate
+- **IntervalIndex[T]** — Generic O(n + k) overlap queries (sorted-slice impl); used by Correlate
 - **DetectorRegistry** — Thread-safe plugin architecture with `Register`/`Build`/`BuildAll`
 - **MergeIter** — Streaming `iter.Seq[Finding]` merge with dedup
 - **ConfigFile** — JSON config loading with `ResolveDetectors`/`ResolveProviders`
-- **go-output CLI adapter** — `cmd/go-finding/output_adapter.go` adapts `[]Finding` → `output.TableData` for markdown/CSV/TSV. Root `finding` package stays dependency-free. See `docs/PRO_CONTRA_go-output-integration.md`.
+- **go-output CLI adapter** — `cmd/go-finding/output_adapter.go` adapts `[]Finding` → `output.Table` for markdown/CSV/TSV. Root `finding` package stays dependency-free. See `docs/PRO_CONTRA_go-output-integration.md`.
 - **Branded primitive types** — `type ID/RuleName/ToolName/FilePath string` in `branded_types.go`. Compile-time type safety preventing ID/Rule/Tool/File mixups. JSON marshals as string. Named `ID` not `FindingID` to avoid revive stutter (`finding.FindingID`).
 - **Validate decomposition** — Monolithic `Validate()` split into 6 per-field validators. Each returns `[]error`, aggregated by `Validate()`.
 - **SeverityAliases thread-safe** — `sync.RWMutex` guarded global map; `RegisterSeverityAlias()` / `LookupSeverityAlias()` API.
@@ -147,6 +157,8 @@ bash scripts/bench-check.sh benchmarks/baseline.txt current.txt 25  # Benchmark 
 - **Pipeline convenience functions** — `pipeline.Detect(ctx, detectors...)` for one-shot detection; `pipeline.ApplyToContent(content, fixes)` for content-level fix application without filesystem.
 - **FixEngine guide** — `docs/guides/fix-engine.md` covers all FixEngine usage patterns.
 - **lockutil package** — Generic `lockutil.Locked(sync.Locker, fn) T` and `lockutil.RLocked(*sync.RWMutex, fn) T` helpers eliminate m.mu.Lock()/defer m.mu.Unlock() boilerplate across Report, Metrics, FileBackup, registries, and AST provider. Stdlib only, follows `gotoken` precedent.
+- **Multi-module release tagging** — Each sub-module needs a **directory-prefixed** git tag to resolve on the Go proxy: `pipeline/v*`, `analysis/v*`, `cmd/go-finding/v*`. Core uses unprefixed `v*`. Sub-modules have no `version.go`; the tag is the version source. See `docs/release-procedure.md`.
+- **Repo is private** — Until made public, consumers MUST set `GOPRIVATE=github.com/larsartmann/go-finding` or module resolution 404s on the public proxy.
 
 ## Test Organization
 

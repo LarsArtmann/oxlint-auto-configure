@@ -47,6 +47,7 @@ func newReportCommand() *cobra.Command {
 			}
 
 			det := detect.NewDetector(absRoot)
+
 			pluginConfig, _, err := det.Detect()
 			if err != nil {
 				return fmt.Errorf("detect project type: %w", err)
@@ -103,6 +104,7 @@ func reportJSON(w io.Writer, decisions []profile.RuleDecision) error {
 	if err != nil {
 		return fmt.Errorf("marshal report: %w", err)
 	}
+
 	_, _ = fmt.Fprintln(w, string(data))
 
 	return nil
@@ -138,6 +140,7 @@ func reportTable(decisions []profile.RuleDecision) error {
 		if d.Rule.Enabled {
 			def = "on"
 		}
+
 		fmt.Printf("| %s | %s | %s | %s | %s |\n",
 			d.Rule.FullName(), d.Rule.Plugin, d.Rule.Category, def, d.Severity)
 	}

@@ -12,6 +12,7 @@ import (
 
 func TestRunFixRemovesDebugger(t *testing.T) {
 	t.Parallel()
+
 	if os.Getenv("OXLINT_E2E") == "" {
 		t.Skip("Set OXLINT_E2E=1 to run e2e test with real oxlint")
 	}
@@ -33,6 +34,7 @@ func TestRunFixRemovesDebugger(t *testing.T) {
 
 func TestRunFixNoIssues(t *testing.T) {
 	t.Parallel()
+
 	if os.Getenv("OXLINT_E2E") == "" {
 		t.Skip("Set OXLINT_E2E=1 to run e2e test with real oxlint")
 	}
@@ -54,6 +56,7 @@ func TestRunFixNoIssues(t *testing.T) {
 
 func TestRunFixWithConfig(t *testing.T) {
 	t.Parallel()
+
 	if os.Getenv("OXLINT_E2E") == "" {
 		t.Skip("Set OXLINT_E2E=1 to run e2e test with real oxlint")
 	}

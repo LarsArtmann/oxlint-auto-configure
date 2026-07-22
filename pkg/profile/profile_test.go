@@ -10,8 +10,10 @@ import (
 
 func loadTestRegistry(t *testing.T) *rule.Registry {
 	t.Helper()
+
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
+
 	return reg
 }
 
@@ -43,6 +45,7 @@ func TestProfileDescription(t *testing.T) {
 
 func TestCategorizerMaximalTypesafe(t *testing.T) {
 	t.Parallel()
+
 	cat := NewCategorizer(ProfileMaximalTypesafe, PluginConfig{})
 
 	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryCorrectness}))
@@ -54,6 +57,7 @@ func TestCategorizerMaximalTypesafe(t *testing.T) {
 
 func TestCategorizerRecommended(t *testing.T) {
 	t.Parallel()
+
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{})
 
 	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryCorrectness}))
@@ -67,6 +71,7 @@ func TestCategorizerRecommended(t *testing.T) {
 
 func TestCategorizerStrict(t *testing.T) {
 	t.Parallel()
+
 	cat := NewCategorizer(ProfileStrict, PluginConfig{})
 
 	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryCorrectness}))
@@ -114,6 +119,7 @@ func TestDecideCategory(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			cat := NewCategorizer(tt.profile, PluginConfig{})
 			got, include := cat.DecideCategory(tt.category)
 			assert.Equal(t, tt.want, got)
@@ -124,6 +130,7 @@ func TestDecideCategory(t *testing.T) {
 
 func TestCategorizerMinimal(t *testing.T) {
 	t.Parallel()
+
 	cat := NewCategorizer(ProfileMinimal, PluginConfig{})
 
 	assert.Equal(
@@ -145,6 +152,7 @@ func TestCategorizerMinimal(t *testing.T) {
 
 func TestPluginRelevance(t *testing.T) {
 	t.Parallel()
+
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{
 		rule.PluginReact:  true,
 		rule.PluginNextJS: true,
@@ -166,6 +174,7 @@ func TestPluginRelevance(t *testing.T) {
 
 func TestEnabledPlugins(t *testing.T) {
 	t.Parallel()
+
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{
 		rule.PluginReact:   true,
 		rule.PluginJest:    true,
@@ -191,16 +200,19 @@ func TestDecideAll(t *testing.T) {
 
 func TestAllProfiles(t *testing.T) {
 	t.Parallel()
+
 	profiles := AllProfiles()
 	assert.Len(t, profiles, 4)
 }
 
 func TestDecideCategoryUnknown(t *testing.T) {
 	t.Parallel()
+
 	unknownCat := rule.Category("unknown_category")
 
 	t.Run("minimal", func(t *testing.T) {
 		t.Parallel()
+
 		c := NewCategorizer(ProfileMinimal, nil)
 		_, hasCat := c.DecideCategory(unknownCat)
 		assert.False(t, hasCat, "unknown category should be omitted for minimal")
@@ -208,6 +220,7 @@ func TestDecideCategoryUnknown(t *testing.T) {
 
 	t.Run("maximal-typesafe", func(t *testing.T) {
 		t.Parallel()
+
 		c := NewCategorizer(ProfileMaximalTypesafe, nil)
 		_, hasCat := c.DecideCategory(unknownCat)
 		assert.True(
@@ -219,6 +232,7 @@ func TestDecideCategoryUnknown(t *testing.T) {
 
 	t.Run("recommended", func(t *testing.T) {
 		t.Parallel()
+
 		c := NewCategorizer(ProfileRecommended, nil)
 		_, hasCat := c.DecideCategory(unknownCat)
 		assert.True(t, hasCat, "unknown category gets default severity for recommended")
@@ -226,6 +240,7 @@ func TestDecideCategoryUnknown(t *testing.T) {
 
 	t.Run("strict", func(t *testing.T) {
 		t.Parallel()
+
 		c := NewCategorizer(ProfileStrict, nil)
 		_, hasCat := c.DecideCategory(unknownCat)
 		assert.True(t, hasCat, "unknown category gets default severity for strict")

@@ -9,8 +9,10 @@ import (
 
 func loadTestRegistry(t *testing.T) *Registry {
 	t.Helper()
+
 	reg, err := LoadRegistry()
 	require.NoError(t, err)
+
 	return reg
 }
 
@@ -62,6 +64,7 @@ func TestRegistryByCategory(t *testing.T) {
 
 	correctness := reg.ByCategory(CategoryCorrectness)
 	assert.NotEmpty(t, correctness)
+
 	for _, r := range correctness {
 		assert.Equal(t, CategoryCorrectness, r.Category)
 	}
@@ -73,6 +76,7 @@ func TestRegistryByPlugin(t *testing.T) {
 
 	ts := reg.ByPlugin(PluginTypeScript)
 	assert.NotEmpty(t, ts)
+
 	for _, r := range ts {
 		assert.Equal(t, PluginTypeScript, r.Plugin)
 	}
@@ -84,6 +88,7 @@ func TestRegistryEnabledByDefault(t *testing.T) {
 
 	enabled := reg.EnabledByDefault()
 	assert.NotEmpty(t, enabled)
+
 	for _, r := range enabled {
 		assert.True(t, r.Enabled)
 	}
@@ -95,6 +100,7 @@ func TestRegistryDisabledByDefault(t *testing.T) {
 
 	disabled := reg.DisabledByDefault()
 	assert.NotEmpty(t, disabled)
+
 	for _, r := range disabled {
 		assert.False(t, r.Enabled)
 	}
@@ -106,6 +112,7 @@ func TestRegistryFixable(t *testing.T) {
 
 	fixable := reg.Fixable()
 	assert.NotEmpty(t, fixable)
+
 	for _, r := range fixable {
 		assert.True(t, r.IsFixable())
 	}
@@ -117,6 +124,7 @@ func TestRegistryTypeAware(t *testing.T) {
 
 	ta := reg.TypeAwareRules()
 	assert.NotEmpty(t, ta)
+
 	for _, r := range ta {
 		assert.True(t, r.TypeAware)
 	}
@@ -124,6 +132,7 @@ func TestRegistryTypeAware(t *testing.T) {
 
 func TestRuleFullName(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		rule     Rule
 		expected string
@@ -169,6 +178,7 @@ func TestPluginIsValid(t *testing.T) {
 
 func TestMapFix(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		input    string
 		expected FixCapability
@@ -192,18 +202,21 @@ func TestMapFix(t *testing.T) {
 
 func TestAllCategories(t *testing.T) {
 	t.Parallel()
+
 	cats := AllCategories()
 	assert.Len(t, cats, 7)
 }
 
 func TestAllPlugins(t *testing.T) {
 	t.Parallel()
+
 	plugins := AllPlugins()
 	assert.Len(t, plugins, 15)
 }
 
 func TestEmbeddedVersion(t *testing.T) {
 	t.Parallel()
+
 	ver := EmbeddedVersion()
 	assert.NotEmpty(t, ver)
 	assert.Equal(t, "1.59.0", ver)
@@ -211,6 +224,7 @@ func TestEmbeddedVersion(t *testing.T) {
 
 func TestPluginCLIFlag(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		plugin   Plugin
 		expected string
@@ -253,6 +267,7 @@ func TestRegistryFilter(t *testing.T) {
 
 	fixed := reg.Filter(func(r Rule) bool { return r.Fix == FixSafe })
 	assert.NotEmpty(t, fixed)
+
 	for _, r := range fixed {
 		assert.True(t, r.IsSafeFixable())
 	}
@@ -288,6 +303,7 @@ func TestSeverityDecisionStringMethod(t *testing.T) {
 
 func TestAlwaysOnPluginsConsistentWithAllPlugins(t *testing.T) {
 	t.Parallel()
+
 	for _, p := range AllPlugins() {
 		if alwaysOnPlugins[p] {
 			assert.False(t, p.NeedsFlag(), "always-on plugin %q should not need flag", p)
@@ -299,6 +315,7 @@ func TestAlwaysOnPluginsConsistentWithAllPlugins(t *testing.T) {
 
 func TestCLIFlagMapConsistentWithAllPlugins(t *testing.T) {
 	t.Parallel()
+
 	for _, p := range AllPlugins() {
 		if p.NeedsFlag() {
 			assert.NotEmpty(t, p.CLIFlag(), "plugin %q needs flag but CLIFlag() is empty", p)
@@ -308,13 +325,16 @@ func TestCLIFlagMapConsistentWithAllPlugins(t *testing.T) {
 
 func TestAlwaysOnPluginsSubsetOfAllPlugins(t *testing.T) {
 	t.Parallel()
+
 	allPluginsSet := make(map[Plugin]bool, len(AllPlugins()))
 	for _, p := range AllPlugins() {
 		allPluginsSet[p] = true
 	}
+
 	for p := range alwaysOnPlugins {
 		assert.True(t, allPluginsSet[p], "alwaysOnPlugins contains %q not in AllPlugins()", p)
 	}
+
 	for p := range cliFlagMap {
 		assert.True(t, allPluginsSet[p], "cliFlagMap contains %q not in AllPlugins()", p)
 	}

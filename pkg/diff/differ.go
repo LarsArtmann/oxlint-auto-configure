@@ -93,6 +93,7 @@ func (d *Differ) Summary() string {
 	changes := d.Diff()
 
 	added, removed, changed := 0, 0, 0
+
 	for _, c := range changes {
 		switch c.Kind {
 		case KindAdded:
@@ -121,6 +122,7 @@ func (d *Differ) FormatDiff() string {
 	})
 
 	var b strings.Builder
+
 	for _, c := range changes {
 		switch c.Kind {
 		case KindAdded:
@@ -143,18 +145,21 @@ func (d *Differ) compareSlices(before, after []string, prefix string) []Change {
 	for _, s := range before {
 		beforeSet[s] = true
 	}
+
 	afterSet := make(map[string]bool, len(after))
 	for _, s := range after {
 		afterSet[s] = true
 	}
 
 	var changes []Change
+
 	seen := make(map[string]bool)
 
 	for _, s := range before {
 		if seen[s] {
 			continue
 		}
+
 		seen[s] = true
 		if !afterSet[s] {
 			changes = append(
@@ -163,10 +168,12 @@ func (d *Differ) compareSlices(before, after []string, prefix string) []Change {
 			)
 		}
 	}
+
 	for _, s := range after {
 		if seen[s] {
 			continue
 		}
+
 		seen[s] = true
 		if !beforeSet[s] {
 			changes = append(
@@ -175,6 +182,7 @@ func (d *Differ) compareSlices(before, after []string, prefix string) []Change {
 			)
 		}
 	}
+
 	return changes
 }
 
@@ -184,10 +192,12 @@ func (d *Differ) compareBoolMaps(before, after map[string]bool, prefix string) [
 	for k, v := range before {
 		bStr[k] = strconv.FormatBool(v)
 	}
+
 	aStr := make(map[string]string, len(after))
 	for k, v := range after {
 		aStr[k] = strconv.FormatBool(v)
 	}
+
 	return d.compareMaps(bStr, aStr, prefix)
 }
 
@@ -199,17 +209,22 @@ func (d *Differ) compareAnyMaps(before, after map[string]any, prefix string) []C
 			data, err := json.Marshal(v)
 			if err != nil {
 				result[k] = fmt.Sprintf("%v", v)
+
 				continue
 			}
+
 			result[k] = string(data)
 		}
+
 		return result
 	}
+
 	return d.compareMaps(stringify(before), stringify(after), prefix)
 }
 
 func (d *Differ) collectAllKeys(before, after map[string]string) []string {
 	seen := make(map[string]struct{})
+
 	var keys []string
 
 	addUnseenKeys(seen, &keys, before)

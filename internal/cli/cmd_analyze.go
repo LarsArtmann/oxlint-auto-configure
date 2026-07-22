@@ -92,6 +92,7 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 	detector := newDetector(setup.absRoot, setup.reg)
 
 	pipelineCfg := newAnalyzePipelineConfig()
+
 	p, err := pipeline.New(pipelineCfg, setup.absRoot, detector)
 	if err != nil {
 		return fmt.Errorf("formatFlag=%s sevFlag=%s: create pipeline: %w", formatFlag, sevFlag, err)
@@ -120,6 +121,7 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 	for _, iter := range result.Iterations {
 		report.AddFindings(iter.Findings())
 	}
+
 	report.ComputeSummary()
 
 	minSev, err := parseOptionalSeverity(sevFlag)
@@ -132,10 +134,12 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 
 func newDetector(absRoot string, reg *rule.Registry) *oxlint.Detector {
 	configPath := filepath.Join(absRoot, defaultConfigPath)
+
 	var opts []oxlint.Option
 	if _, err := os.Stat(configPath); err == nil {
 		opts = append(opts, oxlint.WithConfig(configPath))
 	}
+
 	opts = append(opts, oxlint.WithRegistry(reg))
 
 	return oxlint.NewDetector(absRoot, opts...)
@@ -196,6 +200,7 @@ func renderFindings(
 
 	if len(filtered) == 0 && minSev != "" {
 		slog.Info("no findings match severity filter", "min_severity", string(minSev))
+
 		return nil
 	}
 
@@ -206,12 +211,14 @@ func renderFindings(
 		return printFormatError(format.PrintSummary(os.Stderr, sv), FormatSummary, minSev)
 	case FormatJSON:
 		views := findingsToViews(filtered)
+
 		return printFormatError(format.PrintFindingsJSON(os.Stdout, views), FormatJSON, minSev)
 	case FormatReport:
 		return printReportJSON(os.Stdout, report)
 	case FormatTable:
 		sorted := sortedByPosition(filtered)
 		views := findingsToViews(sorted)
+
 		return printFormatError(format.PrintFindingsTable(os.Stdout, views), FormatTable, minSev)
 	case FormatSARIF:
 		return printSARIF(os.Stdout, report, minSev)
@@ -228,6 +235,7 @@ func sortedByPosition(findings []finding.Finding) []finding.Finding {
 	sorted := make([]finding.Finding, len(findings))
 	copy(sorted, findings)
 	finding.SortByPosition(sorted)
+
 	return sorted
 }
 
@@ -235,6 +243,7 @@ func printFormatError(err error, label string, minSev finding.Severity) error {
 	if err != nil {
 		return fmt.Errorf("print %s (minSev=%s): %w", label, minSev, err)
 	}
+
 	return nil
 }
 
@@ -255,6 +264,7 @@ func findingsToViews(findings []finding.Finding) []format.FindingView {
 			Snippet:     f.Snippet,
 		})
 	}
+
 	return views
 }
 
@@ -267,10 +277,12 @@ func summaryFromReport(
 	for k, v := range report.Summary.BySeverity {
 		bySev[string(k)] = v
 	}
+
 	byCat := make(map[string]int, len(report.Summary.ByCategory))
 	for k, v := range report.Summary.ByCategory {
 		byCat[string(k)] = v
 	}
+
 	byFix := make(map[string]int, len(report.Summary.ByFixStrategy))
 	for k, v := range report.Summary.ByFixStrategy {
 		byFix[string(k)] = v
@@ -291,8 +303,10 @@ func summaryFromReport(
 // printSARIF renders SARIF directly from go-finding Report.
 // Uses ToSARIFFiltered when a minimum severity is specified.
 func printSARIF(w io.Writer, report *finding.Report, minSev finding.Severity) error {
-	var sarif []byte
-	var err error
+	var (
+		sarif []byte
+		err   error
+	)
 
 	if minSev != "" {
 		sarif, err = report.ToSARIFWithOpts(finding.WithMinSeverity(minSev))
@@ -303,6 +317,7 @@ func printSARIF(w io.Writer, report *finding.Report, minSev finding.Severity) er
 	if err != nil {
 		return fmt.Errorf("generate SARIF (minSev=%s): %w", minSev, err)
 	}
+
 	_, _ = fmt.Fprintln(w, string(sarif))
 
 	return nil
@@ -315,6 +330,7 @@ func printReportJSON(w io.Writer, report *finding.Report) error {
 	if err != nil {
 		return fmt.Errorf("serialize report: %w", err)
 	}
+
 	_, _ = fmt.Fprintln(w, json)
 
 	return nil

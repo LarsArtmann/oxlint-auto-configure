@@ -2,7 +2,8 @@ package finding
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io"
 )
@@ -75,7 +76,7 @@ func (r *Report) ToSARIFWithOpts(opts ...SARIFOption) ([]byte, error) {
 
 	log := r.buildsarifLog(sarifResultsFromFindings(r.readFindings(), cfg))
 
-	data, err := json.MarshalIndent(log, "", "  ")
+	data, err := json.Marshal(log, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
 	if err != nil {
 		return nil, fmt.Errorf("marshaling SARIF: %w", err)
 	}
@@ -106,10 +107,12 @@ func (r *Report) WriteSARIFWithOpts(ctx context.Context, w io.Writer, opts ...SA
 		opt(&cfg)
 	}
 
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-
-	err = enc.Encode(r.buildsarifLog(sarifResultsFromFindings(r.readFindings(), cfg)))
+	err = json.MarshalWrite(
+		w,
+		r.buildsarifLog(sarifResultsFromFindings(r.readFindings(), cfg)),
+		jsontext.WithIndentPrefix(""),
+		jsontext.WithIndent("  "),
+	)
 	if err != nil {
 		return fmt.Errorf("encoding SARIF: %w", err)
 	}
@@ -235,7 +238,7 @@ func findingRegion(f Finding) *sarifRegion {
 	}
 
 	if f.Snippet != "" {
-		region.Snippet = f.Snippet
+		region.Snippet = &sarifArtifactContent{Text: f.Snippet}
 	}
 
 	return region
@@ -335,7 +338,7 @@ func sarifProperties(f Finding) map[string]any {
 	}
 
 	if f.Confidence > 0 {
-		props[sarifPropConfidence] = float64(f.Confidence)
+		props[sarifPropConfidence] = float64(f.NormalizedConfidence())
 	}
 
 	if f.Suggestion != "" {
@@ -354,8 +357,25 @@ func sarifProperties(f Finding) map[string]any {
 		props[sarifPropAfterCode] = f.AfterCode
 	}
 
+	if f.Position.HasOffset() {
+		props[sarifPropStartOffset] = f.Position.Offset
+	}
+
+	if f.Range != nil && f.Range.End.HasOffset() {
+		props[sarifPropEndOffset] = f.Range.End.Offset
+	}
+
 	if f.Suppression != nil {
 		props[sarifPropSuppressionKind] = string(f.Suppression.Kind)
+
+		if f.Suppression.Rule != "" {
+			props[sarifPropSuppressionRule] = string(f.Suppression.Rule)
+		}
+
+		if f.Suppression.Reason != "" {
+			props[sarifPropSuppressionReason] = f.Suppression.Reason
+		}
+
 		if f.Suppression.ExpiresAt != nil {
 			props[sarifPropSuppressionExpiry] = f.Suppression.ExpiresAt.Format("2006-01-02T15:04:05Z07:00")
 		}

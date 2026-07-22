@@ -19,6 +19,7 @@ func RunFix(ctx context.Context, rootDir, configPath string) (*FixResult, error)
 	if configPath != "" {
 		args = append(args, "-c", configPath)
 	}
+
 	args = append(args, ".")
 
 	cmd := exec.CommandContext(ctx, "oxlint", args...)

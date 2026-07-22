@@ -20,7 +20,7 @@ github.com/go-faster/yaml
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
-# github.com/larsartmann/go-finding v1.2.0
+# github.com/larsartmann/go-finding v1.2.1
 ## explicit; go 1.26.4
 github.com/larsartmann/go-finding
 github.com/larsartmann/go-finding/lockutil

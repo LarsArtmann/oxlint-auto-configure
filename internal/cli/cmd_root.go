@@ -100,6 +100,7 @@ func setupLogging(verbose, quiet bool, w io.Writer) error {
 	if verbose {
 		level = slog.LevelDebug
 	}
+
 	if quiet {
 		level = slog.LevelError
 	}
@@ -110,6 +111,7 @@ func setupLogging(verbose, quiet bool, w io.Writer) error {
 	}
 
 	slog.SetDefault(slog.New(slog.NewTextHandler(w, opts)))
+
 	return nil
 }
 
@@ -118,5 +120,6 @@ func compactLogAttr(_ []string, a slog.Attr) slog.Attr {
 	if a.Key == slog.TimeKey {
 		return slog.Attr{}
 	}
+
 	return a
 }

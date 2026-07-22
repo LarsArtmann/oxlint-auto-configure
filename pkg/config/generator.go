@@ -53,6 +53,7 @@ func (g *Generator) Generate() *OxlintConfig {
 		Settings:   g.buildSettings(),
 		Env:        g.buildEnv(),
 	}
+
 	return cfg
 }
 
@@ -61,6 +62,7 @@ func (g *Generator) Generate() *OxlintConfig {
 func (g *Generator) GenerateMaximal() *OxlintConfig {
 	cfg := g.Generate()
 	cfg.Plugins = g.allPlugins()
+
 	return cfg
 }
 
@@ -70,6 +72,7 @@ func (c *OxlintConfig) ToJSON() ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("marshal config: %w", err)
 	}
+
 	return data, nil
 }
 
@@ -79,6 +82,7 @@ func FromJSON(data []byte) (*OxlintConfig, error) {
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
+
 	return &cfg, nil
 }
 
@@ -86,17 +90,20 @@ func FromJSON(data []byte) (*OxlintConfig, error) {
 // Always includes "builtin"; adds "node" when a Node.js project is detected.
 func (g *Generator) buildEnv() map[string]bool {
 	env := map[string]bool{"builtin": true}
+
 	for _, pt := range g.projectTypes {
 		if pt == detect.ProjectTypeNode || pt == detect.ProjectTypeTest {
 			env["node"] = true
 		}
 	}
+
 	return env
 }
 
 // enabledPlugins returns the list of plugins that should be enabled.
 func (g *Generator) enabledPlugins() []string {
 	seen := make(map[string]bool)
+
 	var plugins []string
 
 	for _, p := range []rule.Plugin{rule.PluginOXC, rule.PluginTypeScript, rule.PluginUnicorn} {
@@ -116,6 +123,7 @@ func (g *Generator) enabledPlugins() []string {
 	}
 
 	sort.Strings(plugins)
+
 	return plugins
 }
 
@@ -125,7 +133,9 @@ func (g *Generator) allPlugins() []string {
 	for _, p := range rule.AllPlugins() {
 		plugins = append(plugins, string(p))
 	}
+
 	sort.Strings(plugins)
+
 	return plugins
 }
 
@@ -138,12 +148,14 @@ func (g *Generator) categorySeverityMap() map[string]string {
 	}
 
 	result := make(map[string]string)
+
 	for _, cat := range rule.AllCategories() {
 		severity, include := g.categorizer.DecideCategory(cat)
 		if include {
 			result[string(cat)] = string(severity)
 		}
 	}
+
 	return result
 }
 
@@ -227,5 +239,6 @@ func (g *Generator) buildSettings() map[string]any {
 			settings[ps.key] = ps.value
 		}
 	}
+
 	return settings
 }

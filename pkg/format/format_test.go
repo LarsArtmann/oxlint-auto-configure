@@ -2,7 +2,7 @@ package format
 
 import (
 	"bytes"
-	"encoding/json"
+	"encoding/json/v2"
 	"strings"
 	"testing"
 
@@ -18,7 +18,9 @@ const (
 
 func TestPrintSummary(t *testing.T) {
 	t.Parallel()
+
 	var buf bytes.Buffer
+
 	sv := &SummaryView{
 		Total:         5,
 		BySeverity:    map[string]int{config.SeverityError: 3, "warning": 2},
@@ -38,6 +40,7 @@ func TestPrintSummary(t *testing.T) {
 
 	err := PrintSummary(&buf, sv)
 	require.NoError(t, err)
+
 	output := buf.String()
 	assert.Contains(t, output, "5 finding(s) across 3 file(s)")
 	assert.Contains(t, output, "error")
@@ -52,6 +55,7 @@ func TestPrintSummary(t *testing.T) {
 
 func TestPrintFindingsJSON(t *testing.T) {
 	t.Parallel()
+
 	findings := []FindingView{
 		{
 			Rule:     testRuleNoDebugger,
@@ -65,10 +69,12 @@ func TestPrintFindingsJSON(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
+
 	err := PrintFindingsJSON(&buf, findings)
 	require.NoError(t, err)
 
 	var parsed []FindingView
+
 	err = json.Unmarshal(buf.Bytes(), &parsed)
 	require.NoError(t, err)
 	assert.Len(t, parsed, 1)
@@ -77,6 +83,7 @@ func TestPrintFindingsJSON(t *testing.T) {
 
 func TestPrintFindingsTable(t *testing.T) {
 	t.Parallel()
+
 	findings := []FindingView{
 		{
 			Rule:     testRuleNoDebugger,
@@ -99,6 +106,7 @@ func TestPrintFindingsTable(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
+
 	err := PrintFindingsTable(&buf, findings)
 	require.NoError(t, err)
 
@@ -110,31 +118,37 @@ func TestPrintFindingsTable(t *testing.T) {
 
 func TestPrintFindingsTableSortsByFile(t *testing.T) {
 	t.Parallel()
+
 	findings := []FindingView{
 		{Rule: "a-rule", File: "a.js", Line: 1},
 		{Rule: "z-rule", File: "z.js", Line: 1},
 	}
 
 	var buf bytes.Buffer
+
 	err := PrintFindingsTable(&buf, findings)
 	require.NoError(t, err)
 
 	lines := strings.Split(buf.String(), "\n")
 	aIdx := 0
 	zIdx := 0
+
 	for i, line := range lines {
 		if strings.Contains(line, "a-rule") {
 			aIdx = i
 		}
+
 		if strings.Contains(line, "z-rule") {
 			zIdx = i
 		}
 	}
+
 	assert.Less(t, aIdx, zIdx, "a.js should appear before z.js (caller must pre-sort)")
 }
 
 func TestPrintFindingsTableTruncatesLongMessages(t *testing.T) {
 	t.Parallel()
+
 	longMsg := strings.Repeat("x", 100)
 	findings := []FindingView{
 		{
@@ -148,6 +162,7 @@ func TestPrintFindingsTableTruncatesLongMessages(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
+
 	err := PrintFindingsTable(&buf, findings)
 	require.NoError(t, err)
 
@@ -156,6 +171,7 @@ func TestPrintFindingsTableTruncatesLongMessages(t *testing.T) {
 
 func TestFormatMap(t *testing.T) {
 	t.Parallel()
+
 	m := map[string]int{"warn": 5, "error": 3}
 	result := Map(m)
 	assert.Contains(t, result, "error=3")

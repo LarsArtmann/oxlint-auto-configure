@@ -40,6 +40,7 @@ Profiles:
 			if rootDir == "" {
 				rootDir = "."
 			}
+
 			absRoot, err := filepath.Abs(rootDir)
 			if err != nil {
 				return fmt.Errorf("profileFlag=%s: resolve root dir: %w", profileFlag, err)
@@ -51,6 +52,7 @@ Profiles:
 				DryRun:     dryRun,
 				Fix:        runFix,
 			}
+
 			return Configure(cmd.Context(), absRoot, opts)
 		},
 	}
@@ -94,6 +96,7 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 	}
 
 	det := detect.NewDetector(absRoot)
+
 	pluginConfig, projectTypes, err := det.Detect()
 	if err != nil {
 		return fmt.Errorf("absRoot=%s: detect project type: %w", absRoot, err)
@@ -128,6 +131,7 @@ func checkOxlintVersion(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("oxlint: %w", err)
 	}
+
 	slog.Info("oxlint version", "version", oxlintVer)
 
 	embeddedVer := rule.EmbeddedVersion()
@@ -146,6 +150,7 @@ func resolveConfigPath(configPath, absRoot string) string {
 	if configPath == "" {
 		return filepath.Join(absRoot, defaultConfigPath)
 	}
+
 	return configPath
 }
 
@@ -160,6 +165,7 @@ func marshalConfigJSON(cfg *config.OxlintConfig) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("generate config JSON: %w", err)
 	}
+
 	return data, nil
 }
 
@@ -190,6 +196,7 @@ func writeDryRun(cfg *config.OxlintConfig, targetPath string) error {
 
 	slog.Info("dry run", "path", targetPath)
 	fmt.Println(string(data))
+
 	return nil
 }
 
@@ -199,13 +206,16 @@ func runFixIfNeeded(ctx context.Context, absRoot, targetPath string, runFix bool
 	}
 
 	slog.Info("running oxlint fix")
+
 	fixResult, err := oxlint.RunFix(ctx, absRoot, targetPath)
 	if err != nil {
 		return fmt.Errorf("absRoot=%s: fix: %w", absRoot, err)
 	}
+
 	if fixResult.Output != "" {
 		slog.Info("fix output", "detail", fixResult.Output)
 	}
+
 	slog.Info("fix complete")
 
 	return nil
@@ -216,12 +226,14 @@ func showDiffIfExisting(targetPath string, cfg *config.OxlintConfig) string {
 	if err != nil {
 		return ""
 	}
+
 	existing, err := config.FromJSON(existingData)
 	if err != nil {
 		slog.Warn("existing config is malformed, skipping diff", "error", err)
 
 		return ""
 	}
+
 	d := diff.NewDiffer(existing, cfg)
 
 	return d.Summary() + "\n" + d.FormatDiff()

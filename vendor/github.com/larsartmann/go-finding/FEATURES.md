@@ -75,12 +75,12 @@ f, err := NewBuilder(RuleName("nilcheck"), ToolName("govet"), "possible nil dere
 
 ### 2.1 Position
 
-| Field  | Type     | Notes                             |
-| ------ | -------- | --------------------------------- |
-| File   | `string` | Required                          |
-| Line   | `int`    | 1-based; 0 = not set              |
-| Column | `int`    | 1-based; 0 = not set              |
-| Offset | `int`    | 0-based byte offset; -1 = not set |
+| Field  | Type       | Notes                                                  |
+| ------ | ---------- | ------------------------------------------------------ |
+| File   | `FilePath` | Required (branded type — string literals auto-convert) |
+| Line   | `int`      | 1-based; 0 = not set                                   |
+| Column | `int`      | 1-based; 0 = not set                                   |
+| Offset | `int`      | 0-based byte offset; -1 = not set                      |
 
 Methods: `IsValid()`, `Equal()`, `Compare()`, `String()`, `HasOffset()`, `IsZero()`, `HasLocation()`
 Constructor: `Pos(file, line, column)`
@@ -164,7 +164,7 @@ Mark findings as suppressed with reason and optional expiry.
 | Field     | Type              | Purpose                               |
 | --------- | ----------------- | ------------------------------------- |
 | Kind      | `SuppressionKind` | `in-source`, `in-config`, `in-review` |
-| Rule      | `string`          | Which rule is suppressed              |
+| Rule      | `RuleName`        | Which rule is suppressed              |
 | Reason    | `string`          | Why                                   |
 | ExpiresAt | `*time.Time`      | Optional TTL                          |
 
@@ -317,12 +317,12 @@ Handles Windows paths with colons correctly.
 
 ### Export
 
-| Method                                 | Description                                    |
-| -------------------------------------- | ---------------------------------------------- |
-| `report.ToSARIF()`                     | Full report → SARIF JSON (excludes suppressed) |
-| `report.ToSARIFFiltered(minSev)`       | Severity-filtered SARIF JSON                   |
-| `report.WriteSARIF(w)`                 | Streaming SARIF output                         |
-| `report.WriteSARIFFiltered(w, minSev)` | Streaming filtered output                      |
+| Method                                  | Description                                                           |
+| --------------------------------------- | --------------------------------------------------------------------- |
+| `report.ToSARIF()`                      | Full report → SARIF JSON (excludes suppressed by default)             |
+| `report.ToSARIFWithOpts(opts...)`       | Functional options: `WithIncludeSuppressed()`, `WithMinSeverity(sev)` |
+| `report.WriteSARIF(w)`                  | Streaming SARIF output                                                |
+| `report.WriteSARIFWithOpts(w, opts...)` | Streaming output with functional options                              |
 
 ### Import
 
@@ -333,7 +333,7 @@ Handles Windows paths with colons correctly.
 - All non-standard fields preserved in `properties` bag (`go-finding/*` prefix)
 - `Finding.Snippet` round-trips via SARIF `region.snippet`
 - `RelatedRef.Range` end positions round-trip via related location regions
-- Suppressed findings excluded from export (lossy)
+- Suppressed findings round-trip when `WithIncludeSuppressed()` is used (emits SARIF `suppressions` arrays)
 - `SeverityCritical` maps to SARIF `"error"` (no `"critical"` level in SARIF 2.1.0); original preserved in Properties
 
 ---
@@ -356,7 +356,7 @@ Handles: severity mapping, 0-based conversion, Range, related information, diagn
 
 Preserves: end position as Range, related information, related range end positions, diagnostic tags in Metadata, raw LSP severity in Metadata
 
-> **Known limitation:** Partially lossy conversion — `FixStrategy`, `Confidence`, `BeforeCode`, `AfterCode`, `Suppression`, `Category` are lost in LSP format. Position, severity, rule, message, related info (including ranges), and diagnostic tags survive via metadata.
+**Full round-trip fidelity via `LSPDiagnosticData`:** When `ToLSP()` populates `diag.Data`, `FromLSP()` restores: ID, Severity (including SeverityCritical), FixStrategy, Confidence, Category, Tags, BeforeCode, AfterCode, Suggestion, Snippet, Suppression, Metadata, and RelatedRef.FindingID (preserved, not regenerated).
 
 ---
 
@@ -470,14 +470,14 @@ Composable transforms that run on findings between detection and triage.
 
 ```go
 type FindingTransformer interface {
-    Process(ctx context.Context, findings []finding.Finding) ([]finding.Finding, error)
     Name() string
+    Transform(ctx context.Context, findings []finding.Finding) ([]finding.Finding, error)
 }
 ```
 
 Adapters:
 
-- `TransformerFunc(fn)` — wraps a function as a `FindingTransformer` (name: `"anonymous"`)
+- `TransformerFunc(fn)` — wraps a function as a `FindingTransformer` (name: `""`)
 - `NamedTransformerFunc(name, fn)` — wraps with a custom name
 
 Processors are executed in order from `Config.Processors`. Use cases: filtering, enrichment, normalization, severity adjustment, deduplication.
@@ -674,7 +674,7 @@ Binary: `go-finding`
 | ------------------------- | ------- | ------------------------------------------------------------------- |
 | `-dir`                    | `.`     | Root directory to analyze                                           |
 | `-format`                 | `text`  | Output format: `text`, `markdown`, `csv`, `tsv`, `json`, `sarif`    |
-| `-severity`               | `info`  | Minimum severity filter                                             |
+| `-min-severity`           | `info`  | Minimum severity filter (deprecated alias: `-severity`)             |
 | `-max-iterations`         | `1`     | Pipeline iterations                                                 |
 | `-parallel`               | `true`  | Run detectors in parallel                                           |
 | `-verify`                 | `false` | Re-run detectors after fixes                                        |
@@ -745,7 +745,7 @@ Test categories:
 - Fuzz tests (`fuzz_test.go`, `id_fuzz_test.go`, `merge_fuzz_test.go`, `sarif_fuzz_test.go`)
 - Property-based tests (`property_test.go`)
 - Benchmarks (`bench_test.go`)
-- Bug-specific regression tests (`*_bugfix_test.go`)
+- Regression tests alongside the behavior they protect (one `<subject>_test.go` per production file)
 
 ---
 
@@ -786,7 +786,7 @@ Methods: `Register`, `MustRegister`, `Build`, `BuildAll`, `Names`, `Has`. Thread
 
 **Status:** FULLY_FUNCTIONAL
 
-Generic interval index for O(log n + k) overlap queries:
+Generic interval index for O(n + k) overlap queries (sorted-slice implementation):
 
 ```go
 idx := finding.NewIntervalIndex(intervals)
@@ -914,7 +914,7 @@ sev, err := finding.ParseSeverity("warn") // SeverityWarning
 
 | Feature                           | Status               | Notes                                                                                 |
 | --------------------------------- | -------------------- | ------------------------------------------------------------------------------------- |
-| Finding type                      | FULLY_FUNCTIONAL     | Core data model with branded types (ID, RuleName, ToolName, FilePath), 97.1% coverage |
+| Finding type                      | FULLY_FUNCTIONAL     | Core data model with branded types (ID, RuleName, ToolName, FilePath), 93.4% coverage |
 | Builder API                       | FULLY_FUNCTIONAL     | Fluent construction with validation                                                   |
 | Position & Range                  | FULLY_FUNCTIONAL     | Full spatial algebra (Contains, Overlaps, Intersection, Adjacent)                     |
 | Severity (4 levels)               | FULLY_FUNCTIONAL     | With comparison operators                                                             |
@@ -961,7 +961,7 @@ sev, err := finding.ParseSeverity("warn") // SeverityWarning
 | SARIF `region.snippet`            | FULLY_FUNCTIONAL     | Native SARIF snippet round-trip support                                               |
 | Comprehensive `doc.go`            | FULLY_FUNCTIONAL     | Full package documentation with examples and architecture notes                       |
 | DetectorRegistry                  | FULLY_FUNCTIONAL     | Thread-safe plugin-style detector constructor registry                                |
-| IntervalIndex[T]                  | FULLY_FUNCTIONAL     | Generic O(log n + k) overlap queries; used by Correlate                               |
+| IntervalIndex[T]                  | FULLY_FUNCTIONAL     | Generic O(n + k) overlap queries; used by Correlate                                   |
 | LineShiftMap                      | FULLY_FUNCTIONAL     | Byte-offset-aware line+column shift tracking after edits                              |
 | MergeIter                         | FULLY_FUNCTIONAL     | Streaming iter.Seq merge with deduplication                                           |
 | ConfigFile (pipeline)             | FULLY_FUNCTIONAL     | JSON config loading + ResolveDetectors/ResolveProviders                               |

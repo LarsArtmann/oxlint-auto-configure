@@ -40,10 +40,12 @@ func AllProfiles() []Profile {
 // AllProfileNames returns all profile names as strings.
 func AllProfileNames() []string {
 	ps := AllProfiles()
+
 	names := make([]string, len(ps))
 	for i, p := range ps {
 		names[i] = string(p)
 	}
+
 	return names
 }
 
@@ -115,12 +117,15 @@ func (p Profile) Description() string {
 
 	cat := NewCategorizer(p, nil)
 	groups := make(map[string][]string) // severity → [category names]
+
 	for _, c := range rule.AllCategories() {
 		sev, include := cat.DecideCategory(c)
 		if !include {
 			groups["default"] = append(groups["default"], string(c))
+
 			continue
 		}
+
 		key := string(sev)
 		groups[key] = append(groups[key], string(c))
 	}
@@ -131,6 +136,7 @@ func (p Profile) Description() string {
 		if !ok {
 			continue
 		}
+
 		slices.Sort(cats)
 		parts = append(parts, fmt.Sprintf("%s at %s", strings.Join(cats, "+"), sev))
 	}
@@ -160,10 +166,12 @@ func (c *Categorizer) DecideCategory(cat rule.Category) (rule.SeverityDecision, 
 	if !ok {
 		return rule.SeverityOff, false
 	}
+
 	p, ok := spec.explicit[cat]
 	if !ok {
 		p = spec.fallback
 	}
+
 	return p.severity, p.include
 }
 
@@ -175,12 +183,16 @@ func (c *Categorizer) Decide(r rule.Rule) rule.SeverityDecision {
 		if !r.Enabled {
 			return rule.SeverityOff
 		}
+
 		if r.Category == rule.CategoryCorrectness {
 			return rule.SeverityError
 		}
+
 		return rule.SeverityWarn
 	}
+
 	sev, _ := c.DecideCategory(r.Category)
+
 	return sev
 }
 
@@ -192,7 +204,9 @@ func (c *Categorizer) EnabledPlugins() []rule.Plugin {
 			plugins = append(plugins, p)
 		}
 	}
+
 	slices.Sort(plugins)
+
 	return plugins
 }
 
@@ -201,6 +215,7 @@ func (c *Categorizer) IsPluginRelevant(r rule.Rule) bool {
 	if !r.Plugin.NeedsFlag() {
 		return true
 	}
+
 	return c.pluginConfig[r.Plugin]
 }
 
@@ -213,6 +228,7 @@ type RuleDecision struct {
 // DecideAll returns severity decisions for all rules in the registry.
 func (c *Categorizer) DecideAll(reg *rule.Registry) []RuleDecision {
 	rules := reg.All()
+
 	decisions := make([]RuleDecision, 0, len(rules))
 	for _, r := range rules {
 		decisions = append(decisions, RuleDecision{
@@ -220,5 +236,6 @@ func (c *Categorizer) DecideAll(reg *rule.Registry) []RuleDecision {
 			Severity: c.Decide(r),
 		})
 	}
+
 	return decisions
 }

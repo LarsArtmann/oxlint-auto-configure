@@ -19,6 +19,7 @@ const (
 
 func TestDiffNoChanges(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{
 		Rules: map[string]string{testRuleNoUnusedVars: testSeverityError},
 	}
@@ -31,6 +32,7 @@ func TestDiffNoChanges(t *testing.T) {
 
 func TestDiffAdded(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{Rules: map[string]string{}}
 	after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityError}}
 
@@ -43,6 +45,7 @@ func TestDiffAdded(t *testing.T) {
 
 func TestDiffRemoved(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{
 		Rules: map[string]string{testRuleNoUnusedVars: testSeverityError},
 	}
@@ -56,6 +59,7 @@ func TestDiffRemoved(t *testing.T) {
 
 func TestDiffChanged(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityWarn}}
 	after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityError}}
 
@@ -69,6 +73,7 @@ func TestDiffChanged(t *testing.T) {
 
 func TestDiffSummary(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{Rules: map[string]string{"a": testSeverityWarn}}
 	after := &config.OxlintConfig{
 		Rules: map[string]string{"a": testSeverityError, "b": testSeverityError},
@@ -82,6 +87,7 @@ func TestDiffSummary(t *testing.T) {
 
 func TestDiffPluginsAdded(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{Plugins: []string{testPluginTS}}
 	after := &config.OxlintConfig{Plugins: []string{testPluginTS, testPluginReact, testPluginVue}}
 
@@ -89,6 +95,7 @@ func TestDiffPluginsAdded(t *testing.T) {
 	changes := d.Diff()
 	addedPlugins := filterChanges(changes, "plugin:")
 	assert.Len(t, addedPlugins, 2)
+
 	for _, c := range addedPlugins {
 		assert.Equal(t, KindAdded, c.Kind)
 	}
@@ -96,6 +103,7 @@ func TestDiffPluginsAdded(t *testing.T) {
 
 func TestDiffPluginsRemoved(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{Plugins: []string{testPluginTS, testPluginReact, testPluginVue}}
 	after := &config.OxlintConfig{Plugins: []string{testPluginTS}}
 
@@ -103,6 +111,7 @@ func TestDiffPluginsRemoved(t *testing.T) {
 	changes := d.Diff()
 	removedPlugins := filterChanges(changes, "plugin:")
 	assert.Len(t, removedPlugins, 2)
+
 	for _, c := range removedPlugins {
 		assert.Equal(t, KindRemoved, c.Kind)
 	}
@@ -110,6 +119,7 @@ func TestDiffPluginsRemoved(t *testing.T) {
 
 func TestDiffEnvChanged(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{Env: map[string]bool{"builtin": true, "browser": false}}
 	after := &config.OxlintConfig{Env: map[string]bool{"builtin": true, "node": true}}
 
@@ -121,6 +131,7 @@ func TestDiffEnvChanged(t *testing.T) {
 
 func TestDiffSettingsChanged(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{Settings: map[string]any{
 		"react": map[string]any{"version": "detect"},
 	}}
@@ -137,16 +148,19 @@ func TestDiffSettingsChanged(t *testing.T) {
 
 func filterChanges(changes []Change, prefix string) []Change {
 	var filtered []Change
+
 	for _, c := range changes {
 		if len(c.Rule) >= len(prefix) && c.Rule[:len(prefix)] == prefix {
 			filtered = append(filtered, c)
 		}
 	}
+
 	return filtered
 }
 
 func TestDiffFormatDiff(t *testing.T) {
 	t.Parallel()
+
 	before := &config.OxlintConfig{Rules: map[string]string{"a": testSeverityWarn}}
 	after := &config.OxlintConfig{
 		Rules: map[string]string{"a": testSeverityError, "b": testSeverityError},

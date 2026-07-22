@@ -53,6 +53,7 @@ func validateRules(cfg *OxlintConfig, reg *rule.Registry, result *ValidateResult
 
 	if len(result.UnknownRules) > 0 {
 		slices.Sort(result.UnknownRules)
+
 		return fmt.Errorf("%w: %d unknown rules (%s)",
 			ErrInvalidConfig, len(result.UnknownRules),
 			strings.Join(result.UnknownRules, ", "))
@@ -71,6 +72,7 @@ func validateSeverities(cfg *OxlintConfig, result *ValidateResult) error {
 
 	if len(result.InvalidSeverities) > 0 {
 		slices.Sort(result.InvalidSeverities)
+
 		return fmt.Errorf("%w: %d invalid severities (%s)",
 			ErrInvalidConfig, len(result.InvalidSeverities),
 			strings.Join(result.InvalidSeverities, ", "))
@@ -81,6 +83,7 @@ func validateSeverities(cfg *OxlintConfig, result *ValidateResult) error {
 			result.EnabledCount++
 		}
 	}
+
 	result.DisabledCount = len(cfg.Rules) - result.EnabledCount
 
 	return nil

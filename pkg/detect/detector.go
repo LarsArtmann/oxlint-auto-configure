@@ -65,14 +65,17 @@ var depTypeRules = []struct { //nolint:gochecknoglobals // immutable lookup tabl
 // detectProjectTypes determines project types from dependencies.
 func (d *Detector) detectProjectTypes(deps map[string]bool) []ProjectType {
 	var types []ProjectType
+
 	for _, rule := range depTypeRules {
 		if anyDep(deps, rule.deps) {
 			types = append(types, rule.typ)
 		}
 	}
+
 	if len(types) == 0 {
 		types = d.inferFallbackTypes()
 	}
+
 	return types
 }
 
@@ -82,6 +85,7 @@ func anyDep(deps map[string]bool, names []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -90,12 +94,15 @@ func (d *Detector) inferFallbackTypes() []ProjectType {
 	if d.hasTSConfig() {
 		types = append(types, ProjectTypePlainTS)
 	}
+
 	if d.hasNodeModules() || d.hasPackageJSON() {
 		types = append(types, ProjectTypeNode)
 	}
+
 	if len(types) == 0 {
 		types = append(types, ProjectTypeUnknown)
 	}
+
 	return types
 }
 
@@ -104,6 +111,7 @@ func (d *Detector) toPluginConfig(types []ProjectType, deps map[string]bool) pro
 	pc := make(profile.PluginConfig)
 	d.applyTypePlugins(types, pc)
 	d.applyDepPlugins(deps, pc)
+
 	return pc
 }
 
@@ -148,9 +156,11 @@ func (d *Detector) applyDepPlugins(deps map[string]bool, pc profile.PluginConfig
 			pc[r.plugin] = true
 		}
 	}
+
 	if d.hasPromiseSubstringDep(deps) {
 		pc[rule.PluginPromise] = true
 	}
+
 	if d.hasImportUsage() {
 		pc[rule.PluginImport] = true
 	}
@@ -165,11 +175,13 @@ type packageJSON struct {
 // readPackageJSON reads and parses the project's package.json.
 func (d *Detector) readPackageJSON() *packageJSON {
 	path := filepath.Join(d.rootDir, "package.json")
+
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			slog.Warn("cannot read package.json", "path", path, "error", err)
 		}
+
 		return nil
 	}
 
@@ -182,8 +194,10 @@ func (d *Detector) readPackageJSON() *packageJSON {
 			"error",
 			err,
 		)
+
 		return nil
 	}
+
 	return &pkg
 }
 
@@ -195,6 +209,7 @@ func (d *Detector) collectDependencies(pkg *packageJSON) map[string]bool {
 		for name := range pkg.Dependencies {
 			deps[name] = true
 		}
+
 		for name := range pkg.DevDependencies {
 			deps[name] = true
 		}
@@ -205,6 +220,7 @@ func (d *Detector) collectDependencies(pkg *packageJSON) map[string]bool {
 
 func (d *Detector) hasFile(filename string) bool {
 	_, err := os.Stat(filepath.Join(d.rootDir, filename))
+
 	return err == nil
 }
 
@@ -226,6 +242,7 @@ func (d *Detector) hasImportUsage() bool {
 
 func (d *Detector) hasGlob(pattern string) bool {
 	matches, _ := filepath.Glob(filepath.Join(d.rootDir, pattern))
+
 	return len(matches) > 0
 }
 
@@ -235,6 +252,7 @@ func (d *Detector) hasPromiseSubstringDep(deps map[string]bool) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -244,8 +262,10 @@ func FormatTypes(types []ProjectType) string {
 	for _, t := range types {
 		names = append(names, string(t))
 	}
+
 	if len(names) == 0 {
 		return "unknown"
 	}
+
 	return strings.Join(names, ", ")
 }

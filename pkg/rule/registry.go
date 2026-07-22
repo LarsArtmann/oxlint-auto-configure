@@ -82,6 +82,7 @@ func LoadRegistry() (*Registry, error) {
 		if reg.rules[i].Category != reg.rules[j].Category {
 			return reg.rules[i].Category < reg.rules[j].Category
 		}
+
 		return reg.rules[i].FullName() < reg.rules[j].FullName()
 	})
 
@@ -92,12 +93,14 @@ func LoadRegistry() (*Registry, error) {
 func (r *Registry) All() []Rule {
 	result := make([]Rule, len(r.rules))
 	copy(result, r.rules)
+
 	return result
 }
 
 // ByName looks up a rule by its fully qualified name.
 func (r *Registry) ByName(name string) (Rule, bool) {
 	rule, ok := r.byName[name]
+
 	return rule, ok
 }
 
@@ -114,11 +117,13 @@ func (r *Registry) ByCategory(c Category) []Rule {
 // Filter returns all rules matching the given predicate.
 func (r *Registry) Filter(pred func(Rule) bool) []Rule {
 	var result []Rule
+
 	for _, rule := range r.rules {
 		if pred(rule) {
 			result = append(result, rule)
 		}
 	}
+
 	return result
 }
 

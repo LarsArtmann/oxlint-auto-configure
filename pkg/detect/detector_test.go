@@ -79,11 +79,13 @@ func TestDetectTSProject(t *testing.T) {
 	require.NoError(t, err)
 
 	var hasTS bool
+
 	for _, t := range types {
 		if t == ProjectTypePlainTS {
 			hasTS = true
 		}
 	}
+
 	assert.True(t, hasTS)
 }
 
@@ -143,6 +145,7 @@ func detectWithPackageJSON(t *testing.T, pkgJSON string) (profile.PluginConfig, 
 
 	pc, types, err := NewDetector(dir).Detect()
 	require.NoError(t, err)
+
 	return pc, types
 }
 

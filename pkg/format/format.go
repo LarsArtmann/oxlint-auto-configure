@@ -41,10 +41,12 @@ type SummaryView struct {
 // PrintSummary writes a human-readable summary to w.
 func PrintSummary(w io.Writer, sv *SummaryView) error {
 	_, _ = fmt.Fprintf(w, "\n=== Analysis Results ===\n")
+
 	_, _ = fmt.Fprintf(w, "\n%d finding(s) across %d file(s)", sv.Total, sv.FilesAffected)
 	if sv.Iterations > 1 {
 		_, _ = fmt.Fprintf(w, " (%d iterations, stable=%t)", sv.Iterations, sv.Stable)
 	}
+
 	_, _ = fmt.Fprintln(w)
 
 	_, _ = fmt.Fprintln(w, "\nBy severity:")
@@ -75,6 +77,7 @@ func PrintSummary(w io.Writer, sv *SummaryView) error {
 	}
 
 	_, _ = fmt.Fprintln(w)
+
 	return nil
 }
 
@@ -95,6 +98,7 @@ func topByRule(findings []FindingView, n int) []namedCount {
 	for _, f := range findings {
 		counts[f.Rule]++
 	}
+
 	return topN(counts, n)
 }
 
@@ -103,6 +107,7 @@ func topByFile(findings []FindingView, n int) []namedCount {
 	for _, f := range findings {
 		counts[f.File]++
 	}
+
 	return topN(counts, n)
 }
 
@@ -111,15 +116,19 @@ func topN(counts map[string]int, n int) []namedCount {
 	for k, v := range counts {
 		entries = append(entries, namedCount{k, v})
 	}
+
 	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].count != entries[j].count {
 			return entries[i].count > entries[j].count
 		}
+
 		return entries[i].name < entries[j].name
 	})
+
 	if len(entries) > n {
 		entries = entries[:n]
 	}
+
 	return entries
 }
 
@@ -133,7 +142,9 @@ func PrintFindingsJSON(w io.Writer, findings []FindingView) error {
 	if err != nil {
 		return fmt.Errorf("marshal findings: %w", err)
 	}
+
 	_, _ = fmt.Fprintln(w, string(data))
+
 	return nil
 }
 
@@ -145,14 +156,17 @@ func PrintFindingsTable(w io.Writer, findings []FindingView) error {
 
 	for _, f := range findings {
 		loc := fmt.Sprintf("%s:%d", f.File, f.Line)
+
 		msg := f.Message
 		if len(msg) > 60 {
 			msg = msg[:57] + "..."
 		}
+
 		msg = strings.ReplaceAll(msg, "|", "\\|")
 		_, _ = fmt.Fprintf(w, "| %s | %s | %s | %s | %s |\n",
 			f.Rule, f.Severity, f.Category, loc, msg)
 	}
+
 	return nil
 }
 
@@ -166,6 +180,8 @@ func formatMap(m map[string]int) string {
 	for k, v := range m {
 		parts = append(parts, fmt.Sprintf("%s=%d", k, v))
 	}
+
 	sort.Strings(parts)
+
 	return strings.Join(parts, ", ")
 }

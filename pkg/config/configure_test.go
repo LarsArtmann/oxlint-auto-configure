@@ -12,8 +12,10 @@ import (
 
 func loadTestRegistry(t *testing.T) *rule.Registry {
 	t.Helper()
+
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
+
 	return reg
 }
 

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"testing"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
@@ -91,6 +91,7 @@ func TestGeneratorWithAllPlugins(t *testing.T) {
 
 func TestConfigToJSON(t *testing.T) {
 	t.Parallel()
+
 	cfg := &OxlintConfig{
 		Plugins:    []string{"typescript", "unicorn"},
 		Categories: map[string]string{"correctness": SeverityError},
@@ -103,6 +104,7 @@ func TestConfigToJSON(t *testing.T) {
 	assert.NotEmpty(t, data)
 
 	var parsed map[string]any
+
 	err = json.Unmarshal(data, &parsed)
 	require.NoError(t, err)
 }
@@ -126,6 +128,7 @@ func TestConfigRoundTrip(t *testing.T) {
 
 func TestFromJSON(t *testing.T) {
 	t.Parallel()
+
 	input := `{
 		"plugins": ["typescript"],
 		"categories": {"correctness": "error"},
@@ -178,6 +181,7 @@ func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
 		if !ok {
 			continue
 		}
+
 		catSev, hasCat := cfg.Categories[string(r.Category)]
 		if hasCat {
 			assert.NotEqual(t, catSev, ruleSev,
@@ -188,12 +192,14 @@ func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
 
 func TestFromJSONInvalid(t *testing.T) {
 	t.Parallel()
+
 	_, err := FromJSON([]byte("not json"))
 	require.Error(t, err)
 }
 
 func TestFromJSONEmptyObject(t *testing.T) {
 	t.Parallel()
+
 	cfg, err := FromJSON([]byte("{}"))
 	require.NoError(t, err)
 	assert.Empty(t, cfg.Categories)

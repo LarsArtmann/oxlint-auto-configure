@@ -1,7 +1,8 @@
 package finding
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
@@ -40,6 +41,7 @@ func (r *Report) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
+// Safe for concurrent use — acquires a write lock.
 func (r *Report) UnmarshalJSON(data []byte) error {
 	var dto reportJSON
 
@@ -48,9 +50,13 @@ func (r *Report) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("unmarshal report: %w", err)
 	}
 
-	r.Tool = dto.Tool
-	r.findings = dto.Findings
-	r.Summary = dto.Summary
+	withLock(r, func() struct{} {
+		r.Tool = dto.Tool
+		r.findings = dto.Findings
+		r.Summary = dto.Summary
+
+		return struct{}{}
+	})
 
 	return nil
 }
@@ -70,10 +76,21 @@ func FilterInvalid(f Finding) bool {
 	return IsInvalid(f)
 }
 
+// JSON returns a compact JSON representation of the report.
+// Shorthand for MarshalJSON that returns a string.
+func (r *Report) JSON() (string, error) {
+	data, err := r.MarshalJSON()
+	if err != nil {
+		return "", fmt.Errorf("marshaling JSON: %w", err)
+	}
+
+	return string(data), nil
+}
+
 // PrettyJSON returns a formatted JSON representation of the report.
 // Includes all findings, including suppressed ones.
 func (r *Report) PrettyJSON() (string, error) {
-	bytes, err := json.MarshalIndent(r, "", "  ")
+	bytes, err := json.Marshal(r, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
 	if err != nil {
 		return "", fmt.Errorf("marshaling JSON: %w", err)
 	}
@@ -102,7 +119,7 @@ func (r *Report) PrettyJSONFiltered() (string, error) {
 
 	filtered.ComputeSummary()
 
-	bytes, err := json.MarshalIndent(filtered, "", "  ")
+	bytes, err := json.Marshal(filtered, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
 	if err != nil {
 		return "", fmt.Errorf("marshaling filtered JSON: %w", err)
 	}
@@ -176,9 +193,13 @@ func (f Finding) LineJSON() (string, error) {
 // WriteJSON writes compact JSON directly to w.
 // Avoids the intermediate string allocation of LineJSON.
 func (f Finding) WriteJSON(w io.Writer) error {
-	err := json.NewEncoder(w).Encode(f)
+	err := json.MarshalWrite(w, f)
 	if err != nil {
 		return fmt.Errorf("encoding finding JSON: %w", err)
+	}
+
+	if _, err := w.Write([]byte("\n")); err != nil {
+		return fmt.Errorf("writing trailing newline: %w", err)
 	}
 
 	return nil
@@ -188,10 +209,7 @@ func (f Finding) WriteJSON(w io.Writer) error {
 // Avoids the intermediate string allocation of PrettyJSON.
 // Safe for concurrent use.
 func (r *Report) WriteJSON(w io.Writer) error {
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-
-	err := enc.Encode(r)
+	err := json.MarshalWrite(w, r, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
 	if err != nil {
 		return fmt.Errorf("encoding report JSON: %w", err)
 	}

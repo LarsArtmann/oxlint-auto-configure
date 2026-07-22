@@ -37,6 +37,7 @@ func (c Category) IsValid() bool {
 		CategoryPerf, CategoryStyle, CategoryRestriction, CategoryNursery:
 		return true
 	}
+
 	return false
 }
 
@@ -117,9 +118,11 @@ func (p Plugin) CLIFlag() string {
 	if flag, ok := cliFlagMap[p]; ok {
 		return flag
 	}
+
 	if !p.NeedsFlag() {
 		return ""
 	}
+
 	return "--" + string(p) + "-plugin"
 }
 
@@ -146,11 +149,12 @@ type Rule struct {
 }
 
 // FullName returns the fully qualified rule name with plugin prefix.
-// Matches oxlint's config key format: "typescript/no-floating-promises"
+// Matches oxlint's config key format: "typescript/no-floating-promises".
 func (r Rule) FullName() string {
 	if r.Plugin == PluginESLint {
 		return r.Name
 	}
+
 	return string(r.Plugin) + "/" + r.Name
 }
 
@@ -183,5 +187,6 @@ func (s SeverityDecision) IsValid() bool {
 	case SeverityError, SeverityWarn, SeverityOff:
 		return true
 	}
+
 	return false
 }

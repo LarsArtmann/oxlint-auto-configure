@@ -33,6 +33,7 @@ func (realRunner) Run(ctx context.Context, name string, args []string, dir strin
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Dir = dir
 	out, err := cmd.Output()
+
 	return out, finding.NewIOError("run oxlint", err)
 }
 
@@ -74,6 +75,7 @@ func NewDetector(rootDir string, opts ...Option) *Detector {
 	for _, opt := range opts {
 		opt(d)
 	}
+
 	return d
 }
 
@@ -99,6 +101,7 @@ func (d *Detector) Detect(ctx context.Context) ([]finding.Finding, error) {
 
 func (d *Detector) buildArgs() []string {
 	var args []string
+
 	args = append(args, "-f", "json")
 
 	if d.config != "" {
@@ -107,6 +110,7 @@ func (d *Detector) buildArgs() []string {
 
 	args = append(args, d.args...)
 	args = append(args, ".")
+
 	return args
 }
 
@@ -169,11 +173,14 @@ func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
 			if f.Metadata == nil {
 				f.Metadata = make(map[string]string)
 			}
+
 			f.Metadata["url"] = diag.URL
 		}
+
 		if diag.Help != "" {
 			f.Suggestion = diag.Help
 		}
+
 		if len(diag.Labels) > 0 && diag.Labels[0].Label != "" {
 			f.Snippet = diag.Labels[0].Label
 		}
@@ -192,6 +199,7 @@ func positionFromLabels(filename string, labels []oxlintLabel) finding.Position 
 	if len(labels) == 0 {
 		return finding.Position{File: file, Offset: -1}
 	}
+
 	return finding.Position{
 		File:   file,
 		Line:   labels[0].Span.Line,
@@ -206,6 +214,7 @@ func positionFromLabels(filename string, labels []oxlintLabel) finding.Position 
 // Returns nil if no labels are present.
 func rangeFromLabels(filename string, labels []oxlintLabel) *finding.Range {
 	file := finding.FilePath(filename)
+
 	if len(labels) == 0 {
 		return nil
 	}
@@ -239,10 +248,12 @@ func parseCode(code string) (ruleName, plugin string) {
 	if found {
 		return strings.TrimSuffix(ruleName, ")"), plugin
 	}
+
 	plugin, ruleName, found = strings.Cut(code, "/")
 	if found {
 		return ruleName, plugin
 	}
+
 	return code, PluginESLint
 }
 
@@ -278,6 +289,7 @@ func mapCategory(pluginName string) finding.Category {
 	if cat, ok := pluginToCategory[rule.Plugin(pluginName)]; ok {
 		return cat
 	}
+
 	return finding.CategoryCorrectness
 }
 
@@ -318,8 +330,10 @@ func handleExitError(err error, cmd string) error {
 		if len(exitErr.Stderr) > 0 {
 			return finding.NewIOError(cmd, fmt.Errorf("%s", string(exitErr.Stderr)))
 		}
+
 		return nil
 	}
+
 	return finding.NewIOError("run "+cmd, err)
 }
 
@@ -330,5 +344,6 @@ func checkExitError(err error, cmd string) error {
 			return exitErr
 		}
 	}
+
 	return nil
 }

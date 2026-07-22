@@ -2,7 +2,7 @@ package cli
 
 import (
 	"bytes"
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"io"
 	"log/slog"
@@ -26,6 +26,7 @@ const (
 
 func TestConfigureDryRunRecommended(t *testing.T) {
 	t.Parallel()
+
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{CmdConfigure, "--dry-run", testFlagRoot, t.TempDir()})
 
@@ -35,6 +36,7 @@ func TestConfigureDryRunRecommended(t *testing.T) {
 
 func TestConfigureDryRunMaximalTypesafe(t *testing.T) {
 	t.Parallel()
+
 	cmd := NewRootCommand()
 	cmd.SetArgs(
 		[]string{CmdConfigure, "--dry-run", "-p", "maximal-typesafe", testFlagRoot, t.TempDir()},
@@ -46,6 +48,7 @@ func TestConfigureDryRunMaximalTypesafe(t *testing.T) {
 
 func TestConfigureInvalidProfile(t *testing.T) {
 	t.Parallel()
+
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{CmdConfigure, "-p", "invalid", testFlagRoot, t.TempDir()})
 
@@ -70,6 +73,7 @@ func TestConfigureWritesFile(t *testing.T) {
 	assert.NotEmpty(t, data)
 
 	var cfg config.OxlintConfig
+
 	err = json.Unmarshal(data, &cfg)
 	require.NoError(t, err)
 	assert.Equal(t, "error", cfg.Categories["correctness"])
@@ -117,6 +121,7 @@ func TestValidateUnknownRules(t *testing.T) {
 
 func TestReportTable(t *testing.T) {
 	t.Parallel()
+
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{CmdReport, "-f", "table", testFlagRoot, t.TempDir()})
 
@@ -136,6 +141,7 @@ func TestAnalyzeCleanProject(t *testing.T) {
 
 func TestVersionFlag(t *testing.T) {
 	t.Parallel()
+
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{"--version"})
 
@@ -145,6 +151,7 @@ func TestVersionFlag(t *testing.T) {
 
 func TestReportSummary(t *testing.T) {
 	t.Parallel()
+
 	cmd := NewRootCommand()
 	cmd.SetArgs([]string{CmdReport, "-f", FormatSummary, testFlagRoot, t.TempDir()})
 
@@ -154,6 +161,7 @@ func TestReportSummary(t *testing.T) {
 
 func TestReportJSON(t *testing.T) {
 	t.Parallel()
+
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
@@ -171,6 +179,7 @@ func TestReportJSON(t *testing.T) {
 			"severity": string(d.Severity),
 		})
 	}
+
 	data, err := json.Marshal(entries)
 	require.NoError(t, err)
 	assert.Greater(t, len(data), 1000)
@@ -178,6 +187,7 @@ func TestReportJSON(t *testing.T) {
 
 func TestReportJSONDirect(t *testing.T) {
 	t.Parallel()
+
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
@@ -185,11 +195,13 @@ func TestReportJSONDirect(t *testing.T) {
 	decisions := cat.DecideAll(reg)
 
 	var buf bytes.Buffer
+
 	err = reportJSON(&buf, decisions)
 	require.NoError(t, err)
 	assert.NotEmpty(t, buf.String())
 
 	var entries []map[string]any
+
 	err = json.Unmarshal(buf.Bytes(), &entries)
 	require.NoError(t, err)
 	assert.Len(t, entries, 716)
@@ -202,6 +214,7 @@ func TestShowDiffExisting(t *testing.T) {
 
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
+
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
 	gen := config.NewGenerator(cat, reg, nil)
 	cfg := gen.Generate()
@@ -227,6 +240,7 @@ func TestShowDiffMalformed(t *testing.T) {
 
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
+
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
 	gen := config.NewGenerator(cat, reg, nil)
 	cfg := gen.Generate()
@@ -242,6 +256,7 @@ func TestShowDiffMissing(t *testing.T) {
 
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
+
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
 	gen := config.NewGenerator(cat, reg, nil)
 	cfg := gen.Generate()
@@ -266,6 +281,7 @@ func TestValidateInvalidSeverity(t *testing.T) {
 
 func TestSetupLoggingVerboseQuietConflict(t *testing.T) {
 	t.Parallel()
+
 	err := setupLogging(true, true, io.Discard)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "cannot use both")
@@ -273,24 +289,28 @@ func TestSetupLoggingVerboseQuietConflict(t *testing.T) {
 
 func TestSetupLoggingVerbose(t *testing.T) {
 	t.Parallel()
+
 	err := setupLogging(true, false, io.Discard)
 	require.NoError(t, err)
 }
 
 func TestSetupLoggingQuiet(t *testing.T) {
 	t.Parallel()
+
 	err := setupLogging(false, true, io.Discard)
 	require.NoError(t, err)
 }
 
 func TestCompactLogAttrStripsTime(t *testing.T) {
 	t.Parallel()
+
 	attr := compactLogAttr(nil, slog.Attr{Key: slog.TimeKey})
 	assert.Equal(t, slog.Attr{}, attr)
 }
 
 func TestCompactLogAttrPreservesOther(t *testing.T) {
 	t.Parallel()
+
 	original := slog.Attr{Key: slog.MessageKey, Value: slog.StringValue("test")}
 	attr := compactLogAttr(nil, original)
 	assert.Equal(t, original, attr)
@@ -298,6 +318,7 @@ func TestCompactLogAttrPreservesOther(t *testing.T) {
 
 func TestProfileNames(t *testing.T) {
 	t.Parallel()
+
 	names := profile.AllProfileNames()
 	assert.Len(t, names, 4)
 	assert.Contains(t, names, "recommended")
@@ -305,12 +326,14 @@ func TestProfileNames(t *testing.T) {
 
 func TestPrintFormatErrorNil(t *testing.T) {
 	t.Parallel()
+
 	err := printFormatError(nil, "json", "")
 	assert.NoError(t, err)
 }
 
 func TestPrintFormatErrorWithErr(t *testing.T) {
 	t.Parallel()
+
 	err := printFormatError(errors.New("write failed"), "table", "")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "print table")
@@ -318,6 +341,7 @@ func TestPrintFormatErrorWithErr(t *testing.T) {
 
 func TestSummaryFromReport(t *testing.T) {
 	t.Parallel()
+
 	report := finding.NewReport(finding.ToolInfo{Name: "test", Version: "0.0.0"})
 	f := finding.NewFinding(finding.RuleName("rule1"), finding.ToolName("test"), "msg", finding.SeverityError,
 		finding.Position{File: testFileATS, Line: 1}, 1.0)
@@ -336,6 +360,7 @@ func TestSummaryFromReport(t *testing.T) {
 
 func TestFindingsToViews(t *testing.T) {
 	t.Parallel()
+
 	findings := []finding.Finding{
 		finding.NewFinding(finding.RuleName("no-debugger"), finding.ToolName("oxlint"), "msg",
 			finding.SeverityWarning,
@@ -350,6 +375,7 @@ func TestFindingsToViews(t *testing.T) {
 
 func TestPrintReportJSON(t *testing.T) {
 	t.Parallel()
+
 	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: "1.0.0"})
 	f := finding.NewFinding(finding.RuleName("no-unused-vars"), finding.ToolName("oxlint"), "unused variable",
 		finding.SeverityError,
@@ -360,10 +386,12 @@ func TestPrintReportJSON(t *testing.T) {
 	report.ComputeSummary()
 
 	var buf bytes.Buffer
+
 	err := printReportJSON(&buf, report)
 	require.NoError(t, err)
 
 	var parsed map[string]any
+
 	err = json.Unmarshal(buf.Bytes(), &parsed)
 	require.NoError(t, err)
 
