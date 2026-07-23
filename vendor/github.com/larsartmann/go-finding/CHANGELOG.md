@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_No unreleased changes yet._
+
+## [1.3.0] - 2026-07-22
+
+Consumer-driven API improvements. 11 additive APIs eliminating the boilerplate every consumer independently reinvents, without breaking changes to existing types or signatures. Driven by a full audit of all 22 consumer projects.
+
+### Added
+
+- **`NewReportFromFindings(tool, findings)`** — One-step report creation (NewReport + AddFindings + ComputeSummary). Eliminates the 4-line boilerplate in 5+ consumers.
+- **`Builder.BuildOrDefault() Finding`** — Returns zero-value Finding on validation error instead of panicking. Eliminates the SafeBuildFinding / buildFinding error-swallowing pattern.
+- **`Template` type** — Pre-configured builder factory: stamp tool name, category, fix strategy, and tags once, then build many findings with `Build(rule, msg, sev, pos)`. Eliminates `newMigrationFinding` / `buildFixableFinding` patterns.
+- **`FilePos(file FilePath) Position`** — Constructor for file-level positions (Line=0, Offset=-1). For findings that apply to an entire file (config issues, project checks).
+- **`SeverityFromLevel(level, fallback) Severity`** — Maps severity strings (canonical + aliases) to Severity, returns fallback for unknown. Eliminates consumer-side `mapSeverity()` switches.
+- **`Severity.PriorityString() string`** — Reverse mapping: Critical→"critical", Error→"high", Warning→"medium", Info→"low".
+- **`FormatTable(w, findings)`** — Severity-badged table output (SEVERITY, LOCATION, RULE, MESSAGE columns).
+- **`FormatTextRich(w, findings)`** — Rich text output with emoji severity badges, category display, and 💡 suggestion prefix. `FormatText` retains the original `[SEVERITY]` format for backward compatibility.
+- **`ApplySimpleFixes(findings) map[FilePath][]SimpleFixResult`** — BeforeCode→AfterCode string replacement in core package. 80% case for consumers that don't need the full pipeline FixEngine.
+- **`CheckBinary(name) (string, error)`** — Wraps `exec.LookPath` with finding error. Standardizes the "run CLI tool → parse JSON" pattern.
+- **`RunCmd(ctx, name, args) ([]byte, error)`** — Wraps `exec.CommandContext` with finding error. For external tool integration.
+
+### Changed
+
+- **Builder default Confidence is now `ConfidenceFull`** — `NewBuilder` now passes `ConfidenceFull` (1.0) instead of `0` (ConfidenceNone). More semantically correct for deterministic static analysis. Override with `.WithConfidence()`.
+- **`validateIdentity()` uses `HasFile()` instead of `IsValid()`** — File-level positions (File set, Line=0) now pass validation. `Position.IsValid()` still requires Line>0 for backward compatibility. Use `HasFile()` for file-only checks.
+- **Severity aliases expanded** — Added "optional"→Info and "crit"→Critical to the pre-registered alias map.
+- **DefaultLinterRegistry expanded** — Added 20+ new golangci-lint linters (gofumpt, nolintlint, depguard, nakedret, bidichk, tagliatelle, mirror, etc.).
+
+## [1.2.1] - 2026-07-19
+
+Post-v1.2.0 correctness, security, and dependency modernization release. 40 commits covering 15+ bug fixes (range geometry, thread safety, SARIF/LSP round-trip fidelity, path traversal), `encoding/json/v2` migration, go-output v0.30.4, dependabot PR merges, and comprehensive skills audit sweep (8 review reports + 2 architecture diagrams).
+
 ### Fixed
 
 - **`Range.containsByOffset` respected Offset=0 sentinel** — Previously used `> 0` instead of `>= 0` for the end offset upper bound, causing single-point ranges at offset 0 and ranges with `End.Offset = -1` (unset sentinel) to incorrectly contain all higher offsets. Now uses `EndOffsetOrStart()` for consistency with overlap/intersection logic.
@@ -638,3 +669,28 @@ All APIs deprecated since v0.6.0–v0.9.0 have been removed. See `docs/MIGRATION
 - `gopkg.in/yaml.v3` — YAML config support in CLI
 - `golang.org/x/sync` — errgroup for parallel detection
 - `golang.org/x/tools` — go/analysis framework integration
+
+---
+
+[Unreleased]: https://github.com/larsartmann/go-finding/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/larsartmann/go-finding/compare/v1.2.1...v1.3.0
+[1.2.1]: https://github.com/larsartmann/go-finding/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/larsartmann/go-finding/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/larsartmann/go-finding/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/larsartmann/go-finding/compare/v0.9.1...v1.0.0
+[0.9.1]: https://github.com/larsartmann/go-finding/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/larsartmann/go-finding/compare/v0.8.0...v0.9.0
+[0.8.0]: https://github.com/larsartmann/go-finding/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/larsartmann/go-finding/compare/v0.6.1...v0.7.0
+[0.6.1]: https://github.com/larsartmann/go-finding/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/larsartmann/go-finding/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/larsartmann/go-finding/compare/v0.4.3...v0.5.0
+[0.4.3]: https://github.com/larsartmann/go-finding/compare/v0.4.2...v0.4.3
+[0.4.2]: https://github.com/larsartmann/go-finding/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/larsartmann/go-finding/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/larsartmann/go-finding/compare/v0.2.1...v0.4.0
+[0.2.1]: https://github.com/larsartmann/go-finding/compare/v0.1.3...v0.2.1
+[0.1.3]: https://github.com/larsartmann/go-finding/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/larsartmann/go-finding/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/larsartmann/go-finding/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/larsartmann/go-finding/releases/tag/v0.1.0

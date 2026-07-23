@@ -32,7 +32,6 @@
   outputs =
     inputs@{
       self,
-      nixpkgs,
       flake-parts,
       systems,
       treefmt-nix,
