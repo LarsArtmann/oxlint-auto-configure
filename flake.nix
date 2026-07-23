@@ -12,6 +12,21 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    go-nix-helpers = {
+      url = "git+ssh://git@github.com/LarsArtmann/go-nix-helpers?ref=master";
+      flake = false;
+    };
+
+    go-finding = {
+      url = "git+ssh://git@github.com/LarsArtmann/go-finding?ref=master";
+      flake = false;
+    };
+
+    gogenfilter = {
+      url = "git+ssh://git@github.com/LarsArtmann/gogenfilter?ref=master";
+      flake = false;
+    };
   };
 
   outputs =
@@ -21,21 +36,10 @@
       flake-parts,
       systems,
       treefmt-nix,
+      ...
     }:
     let
       version = self.rev or self.dirtyRev or "dev";
-
-      src = nixpkgs.lib.fileset.toSource {
-        root = ./.;
-        fileset = nixpkgs.lib.fileset.unions [
-          ./go.mod
-          ./go.sum
-          ./cmd
-          ./internal
-          ./pkg
-          ./vendor
-        ];
-      };
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = import systems;
@@ -51,6 +55,37 @@
           lib,
           ...
         }:
+        let
+          mkPreparedSource = import (inputs.go-nix-helpers + "/mkPreparedSource.nix") {
+            inherit pkgs lib;
+            goPkg = pkgs.go_1_26;
+          };
+
+          preparedSrc = mkPreparedSource {
+            name = "oxlint-auto-configure";
+            inherit version;
+            src = lib.fileset.toSource {
+              root = ./.;
+              fileset = lib.fileset.unions [
+                ./go.mod
+                ./go.sum
+                ./cmd
+                ./internal
+                ./pkg
+              ];
+            };
+            deps = {
+              "github.com/larsartmann/go-finding" = inputs.go-finding;
+              "github.com/LarsArtmann/gogenfilter/v3" = inputs.gogenfilter;
+            };
+          };
+
+          src = preparedSrc;
+
+          # To update after a dependency change: `nix build .#default`, then
+          # copy the `got:` sha256 from the hash-mismatch error below.
+          vendorHash = "sha256-Df8bY/y+NCQgX57xAr9wyIP4kAXfd4xZyPksjk1xpHg=";
+        in
         {
           treefmt = {
             projectRootFile = "go.mod";
@@ -63,9 +98,8 @@
 
           packages.default = pkgs.buildGoModule {
             pname = "oxlint-auto-configure";
-            inherit version src;
-            vendorHash = null;
-            proxyVendor = true;
+            inherit version src vendorHash;
+            proxyVendor = false;
             ldflags = [
               "-s"
               "-w"
@@ -113,7 +147,7 @@
                 oxlint
               ];
 
-              GOPRIVATE = "github.com/LarsArtmann/*";
+              GOPRIVATE = "github.com/larsartmann/*,github.com/LarsArtmann/*";
               GOWORK = "off";
               GOEXPERIMENT = "jsonv2";
             };
@@ -125,7 +159,7 @@
               ];
 
               GOWORK = "off";
-              GOPRIVATE = "github.com/LarsArtmann/*";
+              GOPRIVATE = "github.com/larsartmann/*,github.com/LarsArtmann/*";
               GOEXPERIMENT = "jsonv2";
             };
           };

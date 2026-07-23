@@ -20,6 +20,57 @@
         "type": "github"
       }
     },
+    "go-finding": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784782151,
+        "narHash": "sha256-X6JgtS46elnlMDF8WaVSD/gMjDr0RMJ3ARFNEQeNLL8=",
+        "ref": "master",
+        "rev": "d90a74e2cbeccbf1ae8c519ff475a15870a61be2",
+        "revCount": 989,
+        "type": "git",
+        "url": "ssh://git@github.com/LarsArtmann/go-finding"
+      },
+      "original": {
+        "ref": "master",
+        "type": "git",
+        "url": "ssh://git@github.com/LarsArtmann/go-finding"
+      }
+    },
+    "go-nix-helpers": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784792756,
+        "narHash": "sha256-BVfdBN2fk+RjtG8jMHrnMBNYhtxIqExw9zBKKB+RdlM=",
+        "ref": "master",
+        "rev": "91fa823a82983fc309504cae427b848a59867f78",
+        "revCount": 36,
+        "type": "git",
+        "url": "ssh://git@github.com/LarsArtmann/go-nix-helpers"
+      },
+      "original": {
+        "ref": "master",
+        "type": "git",
+        "url": "ssh://git@github.com/LarsArtmann/go-nix-helpers"
+      }
+    },
+    "gogenfilter": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784641377,
+        "narHash": "sha256-5Ye4Iuadn+f05gJ2jy8xiEBDnHQw+6djuRwVrKSRZgE=",
+        "ref": "master",
+        "rev": "39397d211fd7e7a5c98f0e98e7c10839580bb336",
+        "revCount": 747,
+        "type": "git",
+        "url": "ssh://git@github.com/LarsArtmann/gogenfilter"
+      },
+      "original": {
+        "ref": "master",
+        "type": "git",
+        "url": "ssh://git@github.com/LarsArtmann/gogenfilter"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1784497964,
@@ -39,6 +90,9 @@
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
+        "go-finding": "go-finding",
+        "go-nix-helpers": "go-nix-helpers",
+        "gogenfilter": "gogenfilter",
         "nixpkgs": "nixpkgs",
         "systems": "systems",
         "treefmt-nix": "treefmt-nix"
