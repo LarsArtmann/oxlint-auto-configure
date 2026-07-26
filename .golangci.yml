@@ -182,23 +182,23 @@ linters:
       ignore-names:
         # Go stdlib conventions
         - err # error return value
-        - ok  # map/type assertion ok value
-        - fn  # function/callback parameter
-        - w   # io.Writer parameter (fmt.Fprintf, io.Copy, etc.)
-        - r   # io.Reader/rule/registry variable
-        - s   # string parameter
+        - ok # map/type assertion ok value
+        - fn # function/callback parameter
+        - w # io.Writer parameter (fmt.Fprintf, io.Copy, etc.)
+        - r # io.Reader/rule/registry variable
+        - s # string parameter
         # Loop and test conventions
-        - i   # loop index
-        - t   # *testing.T parameter
-        - tt  # table test case
+        - i # loop index
+        - t # *testing.T parameter
+        - tt # table test case
         # Domain-specific short names (consistent across codebase)
-        - p   # profile/plugin/path
-        - f   # finding/flag
-        - d   # decision/data
-        - c   # category/command/config
-        - n   # number/count
-        - b   # bool/buffer
-        - k   # map key in range loops
+        - p # profile/plugin/path
+        - f # finding/flag
+        - d # decision/data
+        - c # category/command/config
+        - n # number/count
+        - b # bool/buffer
+        - k # map key in range loops
   exclusions:
     generated: lax
     rules:
@@ -261,7 +261,7 @@ linters:
       - path: _test\.go
         linters:
           - err113 # Test errors are ad-hoc, not programmatic contracts
-          - mnd    # Test magic numbers are idiomatic (slice lengths, positions, etc.)
+          - mnd # Test magic numbers are idiomatic (slice lengths, positions, etc.)
       - text: devDependencies
         linters:
           - tagliatelle # camelCase field in package.json, not our config output
