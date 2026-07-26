@@ -21,13 +21,15 @@ func buildTestReport(t *testing.T) *finding.Report {
 	f1 := finding.NewFinding(
 		finding.RuleName("no-debugger"), finding.ToolName("oxlint"),
 		"Unexpected debugger statement", finding.SeverityError,
-		finding.Position{File: "test.ts", Line: 10, Column: 1}, 1.0)
+		finding.Position{File: "test.ts", Line: 10, Column: 1}, 1.0,
+	)
 	f1.Category = finding.CategoryCorrectness
 
 	f2 := finding.NewFinding(
 		finding.RuleName("no-explicit-any"), finding.ToolName("oxlint"),
 		"Unexpected any", finding.SeverityWarning,
-		finding.Position{File: "types.ts", Line: 5, Column: 3}, 1.0)
+		finding.Position{File: "types.ts", Line: 5, Column: 3}, 1.0,
+	)
 	f2.Category = "suspicious"
 
 	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: "1.73.0"})
@@ -71,7 +73,9 @@ func TestRenderFindingsSARIF(t *testing.T) {
 func TestRenderFindingsSARIFWithSeverity(t *testing.T) {
 	t.Parallel()
 
-	require.NoError(t, renderFindings(FormatSARIF, buildTestReport(t), buildTestPipelineResult(), finding.SeverityError))
+	require.NoError(t, renderFindings(
+		FormatSARIF, buildTestReport(t), buildTestPipelineResult(), finding.SeverityError,
+	))
 }
 
 func TestRenderFindingsReport(t *testing.T) {
