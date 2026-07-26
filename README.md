@@ -6,7 +6,7 @@ This tool's one job: inspect your project and write the best possible [oxlint](h
 
 ## Why
 
-Oxlint has **716 rules** across **7 categories** and **15 plugins**. Only 108 are enabled by default. Manually configuring each rule for maximum type safety is tedious and error-prone. This tool automates the entire process:
+Oxlint has **841 rules** across **7 categories** and **15 plugins**. Only 113 are enabled by default. Manually configuring each rule for maximum type safety is tedious and error-prone. This tool automates the entire process:
 
 - Discovers your project type (React, Next.js, Vue, etc.)
 - Enables relevant plugins automatically
@@ -65,7 +65,7 @@ oxlint-auto-configure validate
 # Analyze project and show findings (SARIF output)
 oxlint-auto-configure analyze
 
-# Report of all 716 rules and their recommended severity
+# Report of all 841 rules and their recommended severity
 oxlint-auto-configure report
 ```
 
@@ -144,31 +144,31 @@ oxlint-auto-configure report [-p recommended] [-f table|json|summary]
 
 | Category    | Count   | Default         |
 | ----------- | ------- | --------------- |
-| Correctness | 216     | 108 enabled     |
-| Style       | 211     | mostly disabled |
-| Pedantic    | 115     | disabled        |
-| Restriction | 91      | disabled        |
-| Suspicious  | 52      | disabled        |
-| Perf        | 13      | disabled        |
-| Nursery     | 18      | disabled        |
-| **Total**   | **716** | **108 enabled** |
+| Correctness | 259     | 111 enabled     |
+| Style       | 275     | mostly disabled |
+| Pedantic    | 125     | disabled        |
+| Restriction | 97      | disabled        |
+| Suspicious  | 59      | disabled        |
+| Perf        | 14      | disabled        |
+| Nursery     | 12      | disabled        |
+| **Total**   | **841** | **113 enabled** |
 
 | Plugin     | Rules |
 | ---------- | ----- |
-| eslint     | 173   |
-| unicorn    | 128   |
-| typescript | 108   |
-| react      | 57    |
-| jest       | 56    |
-| import     | 32    |
-| jsx_a11y   | 31    |
-| vitest     | 23    |
-| nextjs     | 21    |
-| jsdoc      | 18    |
-| vue        | 17    |
-| promise    | 16    |
+| eslint     | 185   |
+| unicorn    | 138   |
+| vitest     | 72    |
+| react      | 63    |
+| jest       | 60    |
+| vue        | 46    |
+| jsx_a11y   | 36    |
+| import     | 33    |
 | oxc        | 26    |
-| node       | 6     |
+| jsdoc      | 22    |
+| nextjs     | 21    |
+| promise    | 16    |
+| typescript | 110   |
+| node       | 9     |
 | react_perf | 4     |
 
 ## Development
@@ -189,7 +189,7 @@ GOWORK=off go mod vendor                             # Re-vendor deps (needed af
 oxlint-auto-configure/
 ├── cmd/oxlint-auto-configure/   # CLI entry point
 ├── pkg/
-│   ├── rule/                   # Rule types, registry (716 embedded rules)
+│   ├── rule/                   # Rule types, registry (841 embedded rules)
 │   ├── profile/                # Profiles, categorization engine
 │   ├── config/                 # .oxlintrc.json generator
 │   ├── detect/                 # Project type detection

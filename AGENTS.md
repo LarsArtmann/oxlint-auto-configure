@@ -17,7 +17,7 @@
 
 ### Core Purpose
 
-Oxlint has 716 rules across 7 categories and 15 plugins. Only 108 are enabled by default. This tool:
+Oxlint has 841 rules across 7 categories and 15 plugins. Only 113 are enabled by default. This tool:
 
 1. Discovers project type (React, Next.js, Vue, etc.)
 2. Enables relevant plugins automatically
@@ -29,7 +29,7 @@ Oxlint has 716 rules across 7 categories and 15 plugins. Only 108 are enabled by
 | File                                | Purpose                                                                                |
 | ----------------------------------- | -------------------------------------------------------------------------------------- |
 | `pkg/rule/rule.go`                  | Core types: Rule, Category, Plugin, FixCapability, SeverityDecision                    |
-| `pkg/rule/registry.go`              | Rule registry loaded from embedded JSON (716 rules)                                    |
+| `pkg/rule/registry.go`              | Rule registry loaded from embedded JSON (841 rules)                                    |
 | `pkg/rule/rules_data.json`          | Embedded oxlint rules data (from `oxlint -f json --rules`)                             |
 | `pkg/profile/profile.go`            | Profile presets, Categorizer engine, `DecideCategory()`, PluginConfig                  |
 | `pkg/config/generator.go`           | .oxlintrc.json generator                                                               |

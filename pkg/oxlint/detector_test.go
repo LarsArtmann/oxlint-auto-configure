@@ -524,8 +524,8 @@ func TestParseOutputFixStrategyWithRegistry(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, findings, 3)
 
-	assert.Equal(t, finding.FixStrategyDirect, findings[0].FixStrategy,
-		"no-debugger is safe-fixable")
+	assert.Equal(t, finding.FixStrategySuggest, findings[0].FixStrategy,
+		"no-debugger is suggestion-fixable")
 	assert.Equal(t, finding.FixStrategySuggest, findings[2].FixStrategy,
 		"no-explicit-any is suggestion-fixable")
 }
@@ -544,7 +544,7 @@ func TestMapFixStrategy(t *testing.T) {
 		plugin   string
 		expected finding.FixStrategy
 	}{
-		{"no-debugger is safe", "no-debugger", PluginESLint, finding.FixStrategyDirect},
+		{"no-debugger is suggestion", "no-debugger", PluginESLint, finding.FixStrategySuggest},
 		{
 			"no-explicit-any is suggestion",
 			"no-explicit-any",

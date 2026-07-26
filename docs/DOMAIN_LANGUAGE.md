@@ -29,7 +29,7 @@ Objects with identity and lifecycle.
 
 | Term              | Definition                                                             | Context                   |
 | ----------------- | ---------------------------------------------------------------------- | ------------------------- |
-| **Rule Registry** | The embedded collection of 716 oxlint rules loaded at startup.         | `pkg/rule/registry.go`    |
+| **Rule Registry** | The embedded collection of 841 oxlint rules loaded at startup.         | `pkg/rule/registry.go`    |
 | **Categorizer**   | The engine that maps categories and rules to severities for a profile. | `pkg/profile/profile.go`  |
 | **Generator**     | Creates the `.oxlintrc.json` structure from profile decisions.         | `pkg/config/generator.go` |
 | **Detector**      | Discovers project type from `package.json` and filesystem.             | `pkg/detect/detector.go`  |
