@@ -301,15 +301,15 @@ GOWORK=off GOEXPERIMENT=jsonv2 golangci-lint run ./...  # 117 issues
 
 ## Resolution (2026-07-26)
 
-| Item | Claim in report                          | Resolution                    | Commit    |
-| ---- | ---------------------------------------- | ----------------------------- | --------- |
-| §b.3 | `ROADMAP.md` remain uncreated            | Created                       | `4c9ea2f` |
-| §c.1 | Push docs-health changes to origin       | Pushed; `4a64b0d` on origin   | `4a64b0d` |
-| §c.12| Create `ROADMAP.md`                      | Created                       | `4c9ea2f` |
-| §f.1 | Push docs-health changes                 | Pushed; `4a64b0d` on origin   | `4a64b0d` |
-| §f.47| Create `ROADMAP.md`                      | Created                       | `4c9ea2f` |
-| §g.1 | Should I push?                           | Resolved: pushed              | `4a64b0d` |
-| §g.3 | Should I create `ROADMAP.md`?            | Resolved: created             | `4c9ea2f` |
+| Item  | Claim in report                    | Resolution                  | Commit    |
+| ----- | ---------------------------------- | --------------------------- | --------- |
+| §b.3  | `ROADMAP.md` remain uncreated      | Created                     | `4c9ea2f` |
+| §c.1  | Push docs-health changes to origin | Pushed; `4a64b0d` on origin | `4a64b0d` |
+| §c.12 | Create `ROADMAP.md`                | Created                     | `4c9ea2f` |
+| §f.1  | Push docs-health changes           | Pushed; `4a64b0d` on origin | `4a64b0d` |
+| §f.47 | Create `ROADMAP.md`                | Created                     | `4c9ea2f` |
+| §g.1  | Should I push?                     | Resolved: pushed            | `4a64b0d` |
+| §g.3  | Should I create `ROADMAP.md`?      | Resolved: created           | `4c9ea2f` |
 
 **Subsequent work not anticipated by this report:** A later session (2026-07-26) migrated config writes to `go-atomic-write` v0.3.0 (crash-durable: temp + fsync + atomic rename). Upgraded `go-finding` from v1.2.1 to v1.3.0. Removed `vendor/` from git tracking. See the 2026-07-26 status report for details.
 

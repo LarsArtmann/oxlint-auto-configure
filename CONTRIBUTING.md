@@ -27,11 +27,11 @@ Requires Go 1.26+ and [oxlint](https://oxc.rs/) in PATH.
 
 Three environment variables are **required** for all `go` commands:
 
-| Variable | Value | Why |
-| --- | --- | --- |
-| `GOEXPERIMENT` | `jsonv2` | The codebase uses `encoding/json/v2`, still behind an experiment gate in Go 1.26. |
-| `GOWORK` | `off` | A parent `go.work` at `/home/lars/projects/go.work` interferes; disable it. |
-| `GOPRIVATE` | `github.com/larsartmann/*,github.com/LarsArtmann/*` | Private dependencies (`go-finding`, `go-atomic-write`, `gogenfilter`) require Git access. |
+| Variable       | Value                                               | Why                                                                                       |
+| -------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `GOEXPERIMENT` | `jsonv2`                                            | The codebase uses `encoding/json/v2`, still behind an experiment gate in Go 1.26.         |
+| `GOWORK`       | `off`                                               | A parent `go.work` at `/home/lars/projects/go.work` interferes; disable it.               |
+| `GOPRIVATE`    | `github.com/larsartmann/*,github.com/LarsArtmann/*` | Private dependencies (`go-finding`, `go-atomic-write`, `gogenfilter`) require Git access. |
 
 ```bash
 export GOEXPERIMENT=jsonv2
@@ -43,11 +43,11 @@ export GOPRIVATE="github.com/larsartmann/*,github.com/LarsArtmann/*"
 
 This project depends on three private `github.com/LarsArtmann/*` repositories:
 
-| Dependency | Purpose |
-| --- | --- |
-| `go-finding` v1.3.0 | Unified static analysis model used by the `analyze` command |
+| Dependency               | Purpose                                                         |
+| ------------------------ | --------------------------------------------------------------- |
+| `go-finding` v1.3.0      | Unified static analysis model used by the `analyze` command     |
 | `go-atomic-write` v0.3.0 | Crash-durable atomic file writes (temp + fsync + atomic rename) |
-| `gogenfilter` | Code generation filter |
+| `gogenfilter`            | Code generation filter                                          |
 
 Git authentication (SSH key or token) for `github.com/LarsArtmann` is required to fetch them. The nix dev shell and build handle this via `GOPRIVATE`; the nix build sandbox injects them as local `replace` directives via `mkPreparedSource`.
 
