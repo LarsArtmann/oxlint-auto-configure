@@ -40,9 +40,9 @@ func AllProfiles() []Profile {
 func AllProfileNames() []string {
 	ps := AllProfiles()
 
-	names := make([]string, len(ps))
-	for i, p := range ps {
-		names[i] = string(p)
+	names := make([]string, 0, len(ps))
+	for _, p := range ps {
+		names = append(names, string(p))
 	}
 
 	return names

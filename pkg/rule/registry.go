@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json/v2"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -91,8 +92,7 @@ func LoadRegistry() (*Registry, error) {
 
 // All returns all rules sorted by category then name.
 func (r *Registry) All() []Rule {
-	result := make([]Rule, len(r.rules))
-	copy(result, r.rules)
+	result := slices.Clone(r.rules)
 
 	return result
 }

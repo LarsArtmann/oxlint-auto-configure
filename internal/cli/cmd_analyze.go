@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	finding "github.com/larsartmann/go-finding"
@@ -16,6 +17,13 @@ import (
 	"github.com/larsartmann/oxlint-auto-configure/pkg/oxlint"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/spf13/cobra"
+)
+
+// Pipeline retry configuration.
+const (
+	pipelineMaxRetries = 2
+	pipelineBaseDelay  = 100 * time.Millisecond
+	pipelineMaxDelay   = 2 * time.Second
 )
 
 func newAnalyzeCommand() *cobra.Command {
@@ -152,9 +160,9 @@ func newAnalyzePipelineConfig() pipeline.Config {
 	cfg.GracefulDegradation = true
 	cfg.Metrics = pipeline.NewMetrics()
 	cfg.Retry = &pipeline.RetryConfig{
-		MaxRetries: 2,
-		BaseDelay:  100 * time.Millisecond,
-		MaxDelay:   2 * time.Second,
+		MaxRetries: pipelineMaxRetries,
+		BaseDelay:  pipelineBaseDelay,
+		MaxDelay:   pipelineMaxDelay,
 	}
 	cfg.OnFinding = func(f finding.Finding) {
 		slog.Debug("finding", "rule", f.Rule, "file", f.Position.File, "line", f.Position.Line)
@@ -173,7 +181,7 @@ func parseOptionalSeverity(s string) (finding.Severity, error) {
 
 	sev := finding.Severity(s)
 	if !sev.IsValid() {
-		return "", fmt.Errorf("invalid severity %q: choose from error, warning, info", s)
+		return "", fmt.Errorf("%w: %q (choose from error, warning, info)", errInvalidSeverity, s)
 	}
 
 	return sev, nil
@@ -223,17 +231,13 @@ func renderFindings(
 	case FormatSARIF:
 		return printSARIF(os.Stdout, report, minSev)
 	default:
-		return fmt.Errorf(
-			"unknown format %q: choose from summary, json, report, sarif, table (minSev=%s)",
-			fmtFlag,
-			minSev,
-		)
+		return fmt.Errorf("%w: %q (choose from summary, json, report, sarif, table; minSev=%s)",
+			errUnknownFormat, fmtFlag, minSev)
 	}
 }
 
 func sortedByPosition(findings []finding.Finding) []finding.Finding {
-	sorted := make([]finding.Finding, len(findings))
-	copy(sorted, findings)
+	sorted := slices.Clone(findings)
 	finding.SortByPosition(sorted)
 
 	return sorted

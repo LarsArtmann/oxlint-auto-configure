@@ -43,6 +43,13 @@ var (
 	builtBy = "unknown" //nolint:gochecknoglobals // ldflags injection target
 )
 
+// Sentinel errors for CLI argument validation.
+var (
+	errVerboseQuietConflict = errors.New("cannot use both --verbose and --quiet")
+	errInvalidSeverity      = errors.New("invalid severity")
+	errUnknownFormat        = errors.New("unknown format")
+)
+
 // AddProfileFlag adds the shared profile flag to the given command.
 // The p parameter receives the flag value; each command should pass its own
 // local variable to avoid shared mutable state between commands.
@@ -93,7 +100,7 @@ func setupLogging(verbose, quiet bool, w io.Writer) error {
 	defer logSetupMu.Unlock()
 
 	if verbose && quiet {
-		return errors.New("cannot use both --verbose and --quiet")
+		return errVerboseQuietConflict
 	}
 
 	level := slog.LevelInfo

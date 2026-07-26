@@ -328,7 +328,7 @@ func (d *Detector) mapFixStrategy(ruleName, pluginName string) finding.FixStrate
 func handleExitError(err error, cmd string) error {
 	if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
 		if len(exitErr.Stderr) > 0 {
-			return finding.NewIOError(cmd, fmt.Errorf("%s", string(exitErr.Stderr)))
+			return finding.NewIOError(cmd, fmt.Errorf("%w: %s", ErrOxlintStderr, string(exitErr.Stderr)))
 		}
 
 		return nil

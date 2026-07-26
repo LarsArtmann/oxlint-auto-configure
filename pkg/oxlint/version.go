@@ -23,7 +23,7 @@ func CheckVersion(ctx context.Context) (string, error) {
 
 	match := versionRegex.FindString(version)
 	if match == "" {
-		return "", fmt.Errorf("unexpected oxlint version output: %s", version)
+		return "", fmt.Errorf("%w: %s", ErrUnexpectedVersionOutput, version)
 	}
 
 	return match, nil
