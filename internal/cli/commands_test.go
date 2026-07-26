@@ -169,7 +169,7 @@ func TestReportJSON(t *testing.T) {
 	decisions := cat.DecideAll(reg)
 
 	// Verify we can generate the report data
-	assert.Len(t, decisions, 716)
+	assert.Len(t, decisions, 841)
 
 	// Verify JSON serialization
 	entries := make([]map[string]string, 0, len(decisions))
@@ -204,7 +204,7 @@ func TestReportJSONDirect(t *testing.T) {
 
 	err = json.Unmarshal(buf.Bytes(), &entries)
 	require.NoError(t, err)
-	assert.Len(t, entries, 716)
+	assert.Len(t, entries, 841)
 }
 
 func TestShowDiffExisting(t *testing.T) {
