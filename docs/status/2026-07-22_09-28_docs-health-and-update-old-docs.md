@@ -70,7 +70,7 @@
    - It reports 117 issues (depguard, err113, varnamelen, mnd, etc.), many of which appear suppressed or configured differently in CI.
    - A clean, reproducible baseline has not been established.
 2. **docs-health "fitness" score.**
-   - All identified drift was fixed, but some docs (e.g., `ROADMAP.md`) remain uncreated, and `TODO_LIST.md` is new.
+   - All identified drift was fixed. ~~Some docs (e.g., `ROADMAP.md`) remain uncreated~~ `ROADMAP.md` created in `4c9ea2f` (2026-07-26). `TODO_LIST.md` was new at this time.
 3. **Profile differentiation.**
    - `strict` and `recommended` are functionally identical in the current code.
    - The docs now reflect this reality; a product decision on whether to differentiate them is still open.
@@ -82,7 +82,7 @@
 
 ## c) NOT STARTED
 
-1. Push the current working-tree changes to `origin/master`.
+1. ~~Push the current working-tree changes to `origin/master`.~~ DONE: `4a64b0d` is on `origin/master`;
 2. Resolve the `go.mod` Go version mismatch with `encoding/json/v2` (gopls warnings).
 3. Add a CI check that `go mod vendor` produces no diff.
 4. Add BuildFlow to CI.
@@ -93,7 +93,7 @@
 9. Add an E2E integration test: configure → validate → report round-trip.
 10. Wire `flake.nix` ldflags for `commit`, `date`, and `builtBy` so nix builds show full version metadata.
 11. Increase `internal/cli` test coverage toward 85%+.
-12. Create `ROADMAP.md` for long-term direction.
+12. ~~Create `ROADMAP.md` for long-term direction.~~ DONE: `4c9ea2f`;
 13. Decide whether to add `gosec` to the CI security job.
 14. Decide testify → ginkgo/gomega migration policy for this project.
 15. Decide whether to execute or archive the modularization proposal (docs already deleted; decision remains).
@@ -168,7 +168,7 @@
 
 ### P0 — Block current work from shipping
 
-1. Push the current docs-health changes to `origin/master` (or confirm review before pushing).
+1. ~~Push the current docs-health changes to `origin/master` (or confirm review before pushing).~~ DONE: `4a64b0d` is on `origin/master`;
 2. Resolve `go.mod` Go version / `encoding/json/v2` mismatch.
 3. Add CI check that `go mod vendor` produces no diff.
 4. Establish a reproducible local `golangci-lint` baseline.
@@ -229,7 +229,7 @@
 
 ### P5 — Docs & process
 
-47. Create `ROADMAP.md` for long-term direction.
+47. ~~Create `ROADMAP.md` for long-term direction.~~ DONE: `4c9ea2f`;
 48. Update `AGENTS.md` with the profile identity gotcha and linter baseline mismatch.
 49. Add `docs/INTERNALS.md` explaining the private go-finding + nix sandbox + vendor dance.
 50. Consider a public documentation website via the `website-launch` skill.
@@ -241,11 +241,15 @@
 1. **Should I push the current working-tree changes to `origin/master` now, or do you want to review the docs-health diff first?**
    Context: The working tree has 7 modified files and 2 new files (`FEATURES.md`, `TODO_LIST.md`). All quality gates pass. I did not commit because the rule is "never commit unless asked".
 
+   **Resolved:** Changes committed as `4a64b0d` and pushed to `origin/master`.
+
 2. **Should `strict` and `recommended` profiles remain functionally identical, or should we differentiate them?**
    Context: `pkg/profile/profile.go` currently gives both profiles the exact same `profileSpecs` map. The docs now reflect this reality. If they should differ, the code should change; if not, we could remove one profile or document the equivalence explicitly.
 
 3. **Should I create `ROADMAP.md` now, or wait until more long-term direction is defined?**
    Context: The docs-health model flags `ROADMAP.md` as optional for a library/package, but previous status reports called it out as missing. The current `TODO_LIST.md` captures short-term work; a `ROADMAP.md` would be helpful for long-term vision (e.g., monorepo support, public docs).
+
+   **Resolved:** `ROADMAP.md` created in `4c9ea2f` (2026-07-26) with themes, open questions, and non-goals.
 
 ---
 
@@ -292,6 +296,22 @@ nix flake check .  # all checks passed
 ```
 GOWORK=off GOEXPERIMENT=jsonv2 golangci-lint run ./...  # 117 issues
 ```
+
+---
+
+## Resolution (2026-07-26)
+
+| Item | Claim in report                          | Resolution                    | Commit    |
+| ---- | ---------------------------------------- | ----------------------------- | --------- |
+| §b.3 | `ROADMAP.md` remain uncreated            | Created                       | `4c9ea2f` |
+| §c.1 | Push docs-health changes to origin       | Pushed; `4a64b0d` on origin   | `4a64b0d` |
+| §c.12| Create `ROADMAP.md`                      | Created                       | `4c9ea2f` |
+| §f.1 | Push docs-health changes                 | Pushed; `4a64b0d` on origin   | `4a64b0d` |
+| §f.47| Create `ROADMAP.md`                      | Created                       | `4c9ea2f` |
+| §g.1 | Should I push?                           | Resolved: pushed              | `4a64b0d` |
+| §g.3 | Should I create `ROADMAP.md`?            | Resolved: created             | `4c9ea2f` |
+
+**Subsequent work not anticipated by this report:** A later session (2026-07-26) migrated config writes to `go-atomic-write` v0.3.0 (crash-durable: temp + fsync + atomic rename). Upgraded `go-finding` from v1.2.1 to v1.3.0. Removed `vendor/` from git tracking. See the 2026-07-26 status report for details.
 
 ---
 

@@ -1,36 +1,38 @@
 # TODO List
 
-Short-term actionable work for oxlint-auto-configure.
+> Short-term, actionable, bounded work items, verified against the actual code.
+> For long-term vision and unrefined ideas, see `ROADMAP.md`.
+> For shipped work, see `CHANGELOG.md`.
+> Items here are verified, not assumed.
 
-Done items live in `CHANGELOG.md`, not here.
+## Build and Tooling
 
-## Build & Tooling
+| Task                                                                                       | Impact | Effort | Evidence                                                                      | Source              |
+| ------------------------------------------------------------------------------------------ | ------ | ------ | ----------------------------------------------------------------------------- | ------------------- |
+| Update embedded rules from oxlint `1.59.0` to current (`1.73.0`): regenerate `rules_data.json`, bump `rules_version.txt`, update `TestRegistryTotal` count | High   | 30min  | `pkg/rule/rules_version.txt` says `1.59.0`; produces `WARN` on every run      | 2026-07-26 f.11-13  |
+| Resolve `go.mod` Go version mismatch: `go 1.26.5` triggers 16 gopls `stdversion` warnings (`json.Marshal` requires go1.27). Bump to `go 1.27` or add `toolchain` directive | High   | 15min  | `go.mod:3`; 16 active LSP `stdversion` warnings                               | 2026-07-22 c.2, 2026-07-26 f.15 |
+| Add CI check that `go mod vendor` produces no diff (root cause of 2026-07-17 BuildFlow failure) | High   | 1h     | No such check in `.github/workflows/ci.yml`                                   | 2026-07-22 c.3, e.1 |
+| Establish reproducible `golangci-lint` baseline: local reports ~117 issues (depguard, forbidigo, stdversion) while CI passes | Med    | 2h     | `FEATURES.md` gap; `.golangci.yml` exists but local/CI mismatch               | 2026-07-22 d.2      |
+| Add BuildFlow to CI so the full local workflow runs on every PR                            | Med    | 1h     | Not in CI                                                                     | 2026-07-22 c.4, f.5 |
+| Decide whether to add `gosec` to the CI security job                                       | Low    | 15min  | `.github/workflows/ci.yml` has govulncheck but not gosec                      | 2026-07-22 c.13     |
 
-- [ ] Resolve `go.mod` Go version mismatch with `encoding/json/v2` (gopls warnings). Options: bump to `go 1.27` or add a `toolchain` directive.
-- [ ] Add CI check that `go mod vendor` produces no diff.
-- [ ] Add BuildFlow to CI so the full local workflow runs on every PR.
-- [ ] Run `golangci-lint run ./...` directly and record a baseline of findings.
-- [ ] Run `hierarchical-errors` directly and record a baseline of findings.
-- [ ] Investigate BuildFlow step-count discrepancy (42 vs 35) from the 2026-07-17 session.
+## Testing
 
-## Code Quality
+| Task                                                                                       | Impact | Effort | Evidence                                                                      | Source              |
+| ------------------------------------------------------------------------------------------ | ------ | ------ | ----------------------------------------------------------------------------- | ------------------- |
+| Add entry-point tests for `cmd/oxlint-auto-configure/main.go` (currently 0% coverage)      | High   | 1h     | `go test -cover ./...` shows 0.0% for `cmd/oxlint-auto-configure`             | 2026-07-22 c.8, f.10 |
+| Add E2E integration test: `configure` -> parse output -> verify round-trip via `config.FromJSON` | Med    | 2h     | No such test exists                                                           | 2026-07-22 c.9, 2026-07-26 f.18 |
+| Add dedicated test for atomic-write contract: verify `writeConfig` leaves no `.tmp` files and always produces valid JSON | Med    | 1h     | No `atomicwrite`/`.tmp` test found in `*_test.go`                            | 2026-07-26 c.2, f.2-3 |
+| Wire `flake.nix` ldflags for `commit`, `date`, and `builtBy` so nix builds show full version metadata | Low    | 30min  | `flake.nix` only injects `version`; rest default to `unknown`                 | 2026-07-22 c.10     |
+| Increase `internal/cli` test coverage from 74.3% toward 85%+                               | Low    | 3h     | `go test -cover ./...` shows 74.3%                                            | 2026-07-22 c.11     |
 
-- [ ] Add tests for `cmd/oxlint-auto-configure/main.go` (entry point currently at 0% coverage).
-- [ ] Add E2E integration test: configure → validate → report round-trip.
-- [ ] Wire `flake.nix` ldflags for `commit`, `date`, and `builtBy` so nix builds show full version metadata.
-- [ ] Increase `internal/cli` test coverage from ~74% toward 85%+.
+## Maintenance
 
-## Documentation
-
-- [ ] Create `ROADMAP.md` for long-term direction.
-- [ ] Keep `README.md` and `AGENTS.md` in sync after every dependency or feature change.
-
-## Decisions Needed
-
-- [ ] Decide testify → ginkgo/gomega migration policy for this project.
-- [ ] Decide whether to execute or archive the modularization proposal (docs already deleted; decision remains).
-- [ ] Decide whether to add `gosec` to the CI security job.
+| Task                                                                                       | Impact | Effort | Evidence                                                                      | Source              |
+| ------------------------------------------------------------------------------------------ | ------ | ------ | ----------------------------------------------------------------------------- | ------------------- |
+| Clean up `result/` symlink left by `nix build` in repo root (gitignored but local clutter) | Low    | 1min   | `ls result` exists; points to nix store path                                  | 2026-07-26 c.3      |
+| Run `hierarchical-errors` skill and baseline findings                                      | Low    | 1h     | Not yet run as a dedicated pass                                               | 2026-07-22 c.6      |
 
 ---
 
-Last reviewed: 2026-07-22
+_Last reviewed: 2026-07-26_

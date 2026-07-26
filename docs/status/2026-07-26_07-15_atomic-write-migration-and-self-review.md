@@ -36,7 +36,7 @@
 
 | #   | Task                                         | Why it matters                                                                                                                                                                                                                                                     |
 | --- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | **Update `CHANGELOG.md`**                    | Added a new dependency and changed the write mechanism. The `[Unreleased]` section has no entry for this. Clear documentation miss.                                                                                                                                |
+| 1   | **Update `CHANGELOG.md`**                    | Added a new dependency and changed the write mechanism. ~~The `[Unreleased]` section has no entry for this. Clear documentation miss.~~ DONE: `4c9ea2f` — atomic-write entry added to `[Unreleased]`.                                                                                                                                |
 | 2   | **Dedicated test for atomic-write contract** | No test verifies that `writeConfig` leaves no `.tmp` files, or that a crash during write doesn't corrupt the config. The functional test I ran was manual, not automated.                                                                                          |
 | 3   | **Clean up `result/` symlink**               | `nix build` created `result/` symlink in repo root. Gitignored, but it's clutter.                                                                                                                                                                                  |
 | 4   | **TOCTOU enhancement (`WriteVerified`)**     | `showDiffIfExisting` reads the existing config at the start of `Configure()`. This is the natural fingerprint capture point for `WriteVerified` — would detect "user edited config while tool ran." Dismissed as out-of-scope but never documented as a follow-up. |
@@ -81,7 +81,7 @@
 
 ### Directly from this session's work
 
-1. **Update `CHANGELOG.md` `[Unreleased]`** with the atomic-write migration entry
+1. ~~**Update `CHANGELOG.md` `[Unreleased]`** with the atomic-write migration entry~~ DONE: `4c9ea2f`;
 2. **Add automated test for `writeConfig`** verifying no `.tmp` files remain after write
 3. **Add automated test for `writeConfig`** verifying valid JSON is always produced
 4. **Clean up `result/` symlink** left by `nix build`
