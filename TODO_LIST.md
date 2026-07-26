@@ -28,9 +28,11 @@
 
 ## Maintenance
 
-| Task                                                  | Impact | Effort | Evidence                        | Source         |
-| ----------------------------------------------------- | ------ | ------ | ------------------------------- | -------------- |
-| Run `hierarchical-errors` skill and baseline findings | Low    | 1h     | Not yet run as a dedicated pass | 2026-07-22 c.6 |
+| Task                                                                                                                       | Impact | Effort | Evidence                                                                              | Source                            |
+| -------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ------------------------------------------------------------------------------------- | --------------------------------- |
+| Run `hierarchical-errors` skill and baseline findings                                                                      | Low    | 1h     | Not yet run as a dedicated pass                                                       | 2026-07-22 c.6                    |
+| Run dedicated skill passes (`naming-review`, `code-quality-scan`, `deduplicate-code`) and baseline findings across codebase | Low    | 3h     | Listed in multiple reports; never executed                                             | 2026-07-22 f.15, 2026-07-26 f.18  |
+| Fix broken `#resolution` anchor links in `docs/status/` (07-17 `.md` + 2 `.html` files) — GitHub generates `#resolution-2026-07-22`, not `#resolution` | Low    | 20min  | `grep -rn '#resolution' docs/status/` shows 3 broken links; headings have date suffix | 2026-07-26 f.3, d.1              |
 
 ---
 

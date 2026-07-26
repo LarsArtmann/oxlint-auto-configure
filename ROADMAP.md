@@ -59,6 +59,8 @@ Decisions that need user input before they can become actionable tasks:
 3. **Should `strict` and `recommended` differ?** They are functionally identical in `pkg/profile/profile.go`. Either differentiate the code or consolidate and document the equivalence. _(Source: 2026-07-22 report, question g.2)_
 4. **testify to ginkgo/gomega migration?** Establish a testing framework policy for this project.
 5. **Modularization proposal: execute or archive?** The docs were deleted but the decision to pursue modularization remains open.
+6. **Markdown or HTML for status reports?** The `status-report` skill prescribes styled HTML dashboards; the user has requested `.md` twice. A split format exists in `docs/status/`. Pick one canonical format and document the decision.
+7. **Are `Fingerprint` and `TOCTOU` domain terms or implementation details?** They live in `docs/DOMAIN_LANGUAGE.md` but originate from `go-atomic-write` internals. Decide whether to keep them, move them to AGENTS.md, or restructure DOMAIN_LANGUAGE to separate domain terms from implementation entities.
 
 ## Non-goals
 
