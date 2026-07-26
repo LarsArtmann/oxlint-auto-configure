@@ -24,6 +24,8 @@ const (
 	pipelineMaxRetries = 2
 	pipelineBaseDelay  = 100 * time.Millisecond
 	pipelineMaxDelay   = 2 * time.Second
+
+	toolName = "oxlint"
 )
 
 func newAnalyzeCommand() *cobra.Command {
@@ -125,7 +127,7 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 		return nil
 	}
 
-	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: setup.oxlintVersion})
+	report := finding.NewReport(finding.ToolInfo{Name: toolName, Version: setup.oxlintVersion})
 	for _, iter := range result.Iterations {
 		report.AddFindings(iter.Findings())
 	}

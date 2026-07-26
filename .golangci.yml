@@ -144,6 +144,8 @@ linters:
     ginkgolinter:
       forbid-focus-container: true
       forbid-spec-pollution: true
+    goconst:
+      ignore-tests: true
     gocritic:
       disabled-checks:
         - ifElseChain

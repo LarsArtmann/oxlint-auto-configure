@@ -95,7 +95,9 @@ func TestRenderFindingsUnknownFormat(t *testing.T) {
 func TestRenderFindingsSeverityFilterNoMatch(t *testing.T) {
 	t.Parallel()
 
-	require.NoError(t, renderFindings(FormatJSON, buildTestReport(t), buildTestPipelineResult(), finding.Severity("critical")))
+	require.NoError(t, renderFindings(
+		FormatJSON, buildTestReport(t), buildTestPipelineResult(), finding.Severity("critical"),
+	))
 }
 
 func TestPrintSARIF(t *testing.T) {
