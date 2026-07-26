@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -130,7 +131,13 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 func checkOxlintVersion(ctx context.Context) error {
 	oxlintVer, err := oxlint.CheckVersion(ctx)
 	if err != nil {
-		return fmt.Errorf("oxlint: %w", err)
+		if errors.Is(err, oxlint.ErrNotFound) {
+			slog.Warn("oxlint not found in PATH; skipping version check")
+
+			return nil
+		}
+
+		return fmt.Errorf("oxlint version check: %w", err)
 	}
 
 	slog.Info("oxlint version", "version", oxlintVer)

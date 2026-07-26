@@ -3,6 +3,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -77,6 +78,13 @@ func initAnalyze(ctx context.Context, rootDir string) (*analyzeSetup, error) {
 	}
 
 	if err := oxlint.CheckBinary(ctx); err != nil {
+		if errors.Is(err, oxlint.ErrNotFound) {
+			return nil, fmt.Errorf(
+				"oxlint is required for analyze but was not found in PATH; %w",
+				err,
+			)
+		}
+
 		return nil, fmt.Errorf("check oxlint: %w", err)
 	}
 

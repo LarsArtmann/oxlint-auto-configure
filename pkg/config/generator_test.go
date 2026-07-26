@@ -72,13 +72,13 @@ func TestGeneratorWithAllPlugins(t *testing.T) {
 	t.Parallel()
 	reg := loadTestRegistry(t)
 
-	pc := profile.PluginConfig{
+	pluginConfig := profile.PluginConfig{
 		rule.PluginReact: true, rule.PluginNextJS: true, rule.PluginVue: true,
 		rule.PluginJest: true, rule.PluginVitest: true, rule.PluginJSDoc: true,
 		rule.PluginJSXA11y: true, rule.PluginNode: true, rule.PluginImport: true,
 		rule.PluginPromise: true, rule.PluginReactPerf: true,
 	}
-	cat := profile.NewCategorizer(profile.ProfileRecommended, pc)
+	cat := profile.NewCategorizer(profile.ProfileRecommended, pluginConfig)
 	gen := NewGenerator(cat, reg, []detect.ProjectType{detect.ProjectTypeNode})
 	cfg := gen.Generate()
 

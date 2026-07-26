@@ -115,19 +115,19 @@ func (d *Detector) toPluginConfig(types []ProjectType, deps map[string]bool) pro
 	return pc
 }
 
-func (d *Detector) applyTypePlugins(types []ProjectType, pc profile.PluginConfig) {
+func (d *Detector) applyTypePlugins(types []ProjectType, pluginConfig profile.PluginConfig) {
 	for _, t := range types {
 		switch t {
 		case ProjectTypeReact, ProjectTypeNextJS:
-			pc[rule.PluginReact] = true
-			pc[rule.PluginJSXA11y] = true
-			pc[rule.PluginReactPerf] = true
+			pluginConfig[rule.PluginReact] = true
+			pluginConfig[rule.PluginJSXA11y] = true
+			pluginConfig[rule.PluginReactPerf] = true
 		case ProjectTypeVue:
-			pc[rule.PluginVue] = true
+			pluginConfig[rule.PluginVue] = true
 		case ProjectTypeTest:
-			pc[rule.PluginNode] = true
+			pluginConfig[rule.PluginNode] = true
 		case ProjectTypeNode:
-			pc[rule.PluginNode] = true
+			pluginConfig[rule.PluginNode] = true
 		case ProjectTypeUnknown, ProjectTypePlainTS, ProjectTypeLibrary:
 			// no additional plugins
 		}
@@ -150,19 +150,19 @@ var depPluginRules = []struct { //nolint:gochecknoglobals // immutable lookup ta
 	},
 }
 
-func (d *Detector) applyDepPlugins(deps map[string]bool, pc profile.PluginConfig) {
+func (d *Detector) applyDepPlugins(deps map[string]bool, pluginConfig profile.PluginConfig) {
 	for _, r := range depPluginRules {
 		if anyDep(deps, r.deps) {
-			pc[r.plugin] = true
+			pluginConfig[r.plugin] = true
 		}
 	}
 
 	if d.hasPromiseSubstringDep(deps) {
-		pc[rule.PluginPromise] = true
+		pluginConfig[rule.PluginPromise] = true
 	}
 
 	if d.hasImportUsage() {
-		pc[rule.PluginImport] = true
+		pluginConfig[rule.PluginImport] = true
 	}
 }
 
