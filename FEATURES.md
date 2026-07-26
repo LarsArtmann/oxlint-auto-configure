@@ -25,7 +25,7 @@ Status legend:
 | Config before/after diffing                                  | FULLY_FUNCTIONAL | `pkg/diff/differ.go`, `pkg/diff/differ_test.go`                                          | Compares plugins, categories, rules, env, settings.                                                                 |
 | Restriction denylist                                         | FULLY_FUNCTIONAL | `pkg/profile/profile.go:81-85`, `pkg/profile/profile_test.go`                            | Forces `oxc/no-async-await`, `oxc/no-optional-chaining`, `oxc/no-rest-spread-properties` to `off` in every profile. |
 | CLI global flags (`--verbose`, `--quiet`, `--version`)       | FULLY_FUNCTIONAL | `internal/cli/cmd_root.go`, `internal/cli/commands_test.go`                              | Version metadata injected via ldflags.                                                                              |
-| Nix build and dev shell                                      | FULLY_FUNCTIONAL | `flake.nix`                                                                              | `nix build .` and `nix flake check .` pass. `GOEXPERIMENT=jsonv2` set automatically.                                |
+| Nix build and dev shell                                      | PARTIALLY_FUNCTIONAL | `flake.nix`                                                                              | `nix develop .` (dev shell) works. `nix build .` and `nix flake check .` currently FAIL: the `go 1.26.4` directive (changed in `ec08705`) breaks the `mkPreparedSource` go-modules tidy check. `GOEXPERIMENT=jsonv2` set automatically. |
 | CI pipeline (test, security, lint)                           | FULLY_FUNCTIONAL | `.github/workflows/ci.yml`                                                               | Three jobs: test, govulncheck security, golangci-lint.                                                              |
 
 ## Output Formats
@@ -73,3 +73,4 @@ Status legend:
 - Embedded rules pinned to oxlint `1.59.0` while runtime is `1.73.0` (produces a `WARN` on every run).
 - Local `golangci-lint run ./...` reports ~116 issues (depguard, varnamelen, mnd, tagliatelle, err113, forbidigo) while CI passes (version/config mismatch).
 - No dedicated test for the atomic-write contract (no `.tmp` leftovers, valid JSON always).
+- `nix build .` and `nix flake check .` fail after `ec08705` (go directive `1.26.5` -> `1.26.4`); the `mkPreparedSource` go-modules derivation reports "go: updates to go.mod needed." `go build`/`go test`/`go vet` all pass.

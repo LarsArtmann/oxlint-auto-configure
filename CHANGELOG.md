@@ -35,6 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `FEATURES.md` and `TODO_LIST.md` Go version references corrected from stale `1.26.5` to `1.26.4` (after `go.mod` directive change in `ec08705`).
 - `FEATURES.md` "Vendored dependencies" evidence column corrected — `vendor/` is gitignored, not a tracked path.
 - `CONTRIBUTING.md` `gogenfilter` dependency clarified as transitive (`// indirect` in `go.mod`, pulled in by `go-finding`).
+- `FEATURES.md` Nix row downgraded from FULLY_FUNCTIONAL to PARTIALLY_FUNCTIONAL — `nix flake check` currently fails after `ec08705` (go directive change); `go build`/`go test`/`go vet` all pass.
 
 ## [0.2.1] - 2026-07-22
 
