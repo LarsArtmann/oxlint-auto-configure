@@ -16,7 +16,7 @@ The commit `dc7d858` was produced (not by this session, but before the report wa
 
 ---
 
-> **Update 2026-07-22 (current `master` is `0867c95`):** The `dc7d858` re-vendor shipped and `master` has since advanced. Items 1 (push), 8 (AGENTS freshness), and 14 (vendor gotcha note) from the "NOT STARTED" list below are now done. Items 2–7, 9–13, and 15 remain open. Full item-by-item status is in [Resolution](#resolution) at the bottom of this report.
+> **Update 2026-07-22 (current `master` is `0867c95`):** The `dc7d858` re-vendor shipped and `master` has since advanced. Items 1 (push), 8 (AGENTS freshness), and 14 (vendor gotcha note) from the "NOT STARTED" list below are now done. Items 2–7, 9–13, and 15 remain open. Full item-by-item status is in [Resolution](#resolution-2026-07-22) at the bottom of this report.
 
 ## a) FULLY DONE
 

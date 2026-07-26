@@ -49,6 +49,8 @@
     }:
     let
       version = self.rev or self.dirtyRev or "dev";
+      commit = self.shortRev or self.dirtyShortRev or "unknown";
+      date = builtins.substring 0 8 (self.lastModifiedDate or "19700101");
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = import systems;
@@ -115,6 +117,9 @@
               "-s"
               "-w"
               "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.version=${version}"
+              "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.commit=${commit}"
+              "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.date=${date}"
+              "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.builtBy=nix"
             ];
             nativeCheckInputs = [ pkgs.oxlint ];
             env.GOEXPERIMENT = "jsonv2";
