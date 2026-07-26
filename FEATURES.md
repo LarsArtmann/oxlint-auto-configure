@@ -21,6 +21,7 @@ Status legend:
 | Project type detection                                       | FULLY_FUNCTIONAL | `pkg/detect/detector.go`, `pkg/detect/detector_test.go`                                  | Detects React, Next.js, Vue, Jest, Vitest, Node, TypeScript.                                                        |
 | Embedded 716-rule registry                                   | FULLY_FUNCTIONAL | `pkg/rule/registry.go`, `pkg/rule/rules_data.json`, `pkg/rule/registry_test.go`          | Loaded from embedded JSON; `TestRegistryTotal` verifies 716.                                                        |
 | `.oxlintrc.json` generation and round-trip                   | FULLY_FUNCTIONAL | `pkg/config/generator.go`, `pkg/config/configure.go`, `pkg/config/*_test.go`             | Uses `encoding/json/v2` with `jsontext` indentation.                                                                |
+| Crash-durable config writes (atomic write)                   | FULLY_FUNCTIONAL | `internal/cli/cmd_configure.go:179` (`atomicwrite.Write`)                               | Temp + fsync + atomic rename via `go-atomic-write` v0.3.0. A crash mid-write cannot truncate the config.            |
 | Config before/after diffing                                  | FULLY_FUNCTIONAL | `pkg/diff/differ.go`, `pkg/diff/differ_test.go`                                          | Compares plugins, categories, rules, env, settings.                                                                 |
 | Restriction denylist                                         | FULLY_FUNCTIONAL | `pkg/profile/profile.go:81-85`, `pkg/profile/profile_test.go`                            | Forces `oxc/no-async-await`, `oxc/no-optional-chaining`, `oxc/no-rest-spread-properties` to `off` in every profile. |
 | CLI global flags (`--verbose`, `--quiet`, `--version`)       | FULLY_FUNCTIONAL | `internal/cli/cmd_root.go`, `internal/cli/commands_test.go`                              | Version metadata injected via ldflags.                                                                              |
@@ -42,7 +43,7 @@ Status legend:
 | Feature                                                        | Status               | Evidence                                                     | Notes                                                                                                                                                    |
 | -------------------------------------------------------------- | -------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Race-safe tests                                                | FULLY_FUNCTIONAL     | `go test -race ./...` passes.                                | `GOEXPERIMENT=jsonv2` required.                                                                                                                          |
-| golangci-lint clean                                            | FULLY_FUNCTIONAL     | `.golangci.yml`, `golangci-lint run ./...` reports 0 issues. | Config uses v2 format.                                                                                                                                   |
+| golangci-lint clean (CI)                                      | PARTIALLY_FUNCTIONAL | `.golangci.yml`, `.github/workflows/ci.yml`                | CI passes (0 issues). Local `golangci-lint run ./...` reports ~117 issues due to version/config mismatch with CI (depguard, forbidigo, stdversion). |
 | govulncheck security scanning                                  | FULLY_FUNCTIONAL     | `.github/workflows/ci.yml` security job.                     | Runs on every push/PR.                                                                                                                                   |
 | Vendored dependencies                                          | FULLY_FUNCTIONAL     | `vendor/`, `go.mod`                                          | Required for nix sandbox.                                                                                                                                |
 | `GOEXPERIMENT=jsonv2` plumbing                                 | FULLY_FUNCTIONAL     | `flake.nix`, `.github/workflows/ci.yml`, `AGENTS.md`         | Set in nix package, dev shells, CI.                                                                                                                      |
@@ -61,12 +62,14 @@ Status legend:
 | `CONTRIBUTING.md`         | FULLY_FUNCTIONAL | `CONTRIBUTING.md`         | Contributor setup.                   |
 | `FEATURES.md` (this file) | FULLY_FUNCTIONAL | `FEATURES.md`             | Honest feature inventory.            |
 | `TODO_LIST.md`            | FULLY_FUNCTIONAL | `TODO_LIST.md`            | Short-term open work.                |
-| `ROADMAP.md`              | PLANNED          | —                         | Long-term direction not yet written. |
+| `ROADMAP.md`              | FULLY_FUNCTIONAL | `ROADMAP.md`              | Long-term direction and open questions.            |
 
 ## Known Gaps (captured in TODO_LIST.md)
 
-- `go.mod` Go version mismatch with `encoding/json/v2` (gopls warnings).
+- `go.mod` pins `go 1.26.5`; `encoding/json/v2` triggers gopls `stdversion` warnings (`json.Marshal` requires go1.27).
 - No `go mod vendor` consistency check in CI.
-- No entry-point tests for `cmd/oxlint-auto-configure`.
-- No E2E round-trip test.
-- No `ROADMAP.md`.
+- No entry-point tests for `cmd/oxlint-auto-configure` (0% coverage).
+- No E2E round-trip test (configure -> validate -> report).
+- Embedded rules pinned to oxlint `1.59.0` while runtime is `1.73.0` (produces a `WARN` on every run).
+- Local `golangci-lint run ./...` reports ~117 issues while CI passes (version/config mismatch).
+- No dedicated test for the atomic-write contract (no `.tmp` leftovers, valid JSON always).

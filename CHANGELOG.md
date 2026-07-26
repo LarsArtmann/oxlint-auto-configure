@@ -9,10 +9,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - `FEATURES.md` and `TODO_LIST.md` for project tracking and honest feature inventory.
+- `ROADMAP.md` for long-term project direction and open questions.
 - Filled `docs/DOMAIN_LANGUAGE.md` with actual project domain terms.
+- `go-atomic-write` v0.3.0 dependency — config writes are now crash-durable (temp + fsync + atomic rename).
 
 ### Changed
 
+- `writeConfig` (`internal/cli/cmd_configure.go:179`) now uses `atomicwrite.Write` instead of raw `os.WriteFile` — a crash mid-write can no longer truncate the user's `.oxlintrc.json`.
+- Upgraded `go-finding` from v1.2.1 to v1.3.0.
+- `vendor/` directory removed from git tracking; now gitignored and regenerated locally (via `go mod vendor` or automatically by `go build`).
 - `CONTRIBUTING.md` now documents the required `GOEXPERIMENT=jsonv2` and `GOWORK=off` flags for local commands and adds Nix alternatives.
 
 ### Fixed
