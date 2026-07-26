@@ -56,9 +56,9 @@ nix run . -- configure .      # Run with oxlint in PATH
 nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint
 ```
 
-- **Vendored deps** — `vendor/` committed for LOCAL development only (offline `go build`/`go test` with private deps). The nix build does NOT use `vendor/`; it re-vendors via `buildGoModule` from `mkPreparedSource` output
+- **Vendored deps** — `vendor/` is GITIGNORED and regenerated locally (`go mod vendor` or auto-fetched by `go build` with `GOPRIVATE`); never committed. The nix build does NOT use `vendor/`; it re-vendors via `buildGoModule` from `mkPreparedSource` output
 - **`mkPreparedSource`** (from `go-nix-helpers`) — Injects every `github.com/[Ll]ars[Aa]rtmann/*` dep as a local `replace` in the sandbox. Each such dep needs BOTH a flake input (`flake = false`) AND an entry in the `deps` map. Public repos under the org (e.g. `go-atomic-write`) use the `github:` HTTPS shorthand pinned to the go.mod tag; private repos use `git+ssh://`. `validatePrivateDeps` enforces that none are missing
-- **`GOWORK=off go mod vendor`** — Re-vendor after `go.mod` changes, then commit (keeps local `vendor/` in sync)
+- **`GOWORK=off go mod vendor`** — Regenerate local `vendor/` after `go.mod` changes (`vendor/` is gitignored, never committed)
 - **Runtime dep** — `oxlint` is a runtime dependency; wrapped in `nix run` via `makeWrapper`
 - **Git-derived version** — `self.rev or self.dirtyRev or "dev"` injected via ldflags
 - **`lib.fileset`** — Precise source filtering (go.mod, go.sum, cmd/, internal/, pkg/) — note: `vendor/` is NOT in the fileset
@@ -140,7 +140,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Pipeline config** — Analyze command wires Metrics, Retry (2 retries, 100ms base), OnFinding/OnIteration callbacks; oxlint version in ToolInfo
 - **Analyze formats** — `summary`, `json` (flat FindingView array), `report` (full go-finding Report JSON), `sarif`, `table`
 - **WithRegistry option** — `oxlint.WithRegistry(reg)` enables FixStrategy lookup per-finding
-- **Nix build** — `vendor/` committed for local dev only (nix re-vendors via `buildGoModule`); `vendorHash` is a REAL hash in flake (update via the documented hash-mismatch workflow: `nix build .#default`, copy the `got:` sha256); `GOWORK=off` for all go commands
+- **Nix build** — `vendor/` is gitignored (regenerated locally); nix re-vendors via `buildGoModule`; `vendorHash` is a REAL hash in flake (update via the documented hash-mismatch workflow: `nix build .#default`, copy the `got:` sha256); `GOWORK=off` for all go commands
 - **Severity filter** — Analyze `-s/--severity` flag uses `finding.Filter(BySeverityAtLeast)` for json/table; `report.ToSARIFWithOpts(finding.WithMinSeverity(sev))` for SARIF (v1.2.0 replaced `ToSARIFFiltered`)
 - **Profile name dedup** — `profile.AllProfileNames()` is single source; no more `cliProfileNames`/`config.profileNames`
 - **Detect logging** — `pkg/detect` logs warnings on malformed package.json (but not missing — that's normal for Go projects)
