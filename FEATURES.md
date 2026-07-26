@@ -45,7 +45,7 @@ Status legend:
 | Race-safe tests                                                | FULLY_FUNCTIONAL     | `go test -race ./...` passes.                        | `GOEXPERIMENT=jsonv2` required.                                                                                                                                               |
 | golangci-lint clean (CI)                                       | PARTIALLY_FUNCTIONAL | `.golangci.yml`, `.github/workflows/ci.yml`          | CI passes (0 issues). Local `golangci-lint run ./...` reports ~116 issues (depguard, varnamelen, mnd, tagliatelle, err113, forbidigo) due to version/config mismatch with CI. |
 | govulncheck security scanning                                  | FULLY_FUNCTIONAL     | `.github/workflows/ci.yml` security job.             | Runs on every push/PR.                                                                                                                                                        |
-| Vendored dependencies                                          | FULLY_FUNCTIONAL     | `vendor/`, `go.mod`                                  | Required for nix sandbox.                                                                                                                                                     |
+| Vendored dependencies                                          | FULLY_FUNCTIONAL     | `go.mod`                                             | `vendor/` is gitignored and regenerated locally (`go mod vendor`) or by `go build`; required for nix sandbox builds.                                                          |
 | `GOEXPERIMENT=jsonv2` plumbing                                 | FULLY_FUNCTIONAL     | `flake.nix`, `.github/workflows/ci.yml`, `AGENTS.md` | Set in nix package, dev shells, CI.                                                                                                                                           |
 | Version metadata at build time                                 | PARTIALLY_FUNCTIONAL | `internal/cli/cmd_root.go`, `.goreleaser.yaml`       | Goreleaser injects `version`, `commit`, `date`, `builtBy`. `flake.nix` only injects `version`; `commit`/`date`/`builtBy` remain `unknown` in nix builds.                      |
 | Entry-point test coverage                                      | PLANNED              | `cmd/oxlint-auto-configure/main.go`                  | No test files; coverage is 0%.                                                                                                                                                |
@@ -66,7 +66,7 @@ Status legend:
 
 ## Known Gaps (captured in TODO_LIST.md)
 
-- `go.mod` pins `go 1.26.5`; `encoding/json/v2` triggers gopls `stdversion` warnings (`json.Marshal` requires go1.27).
+- `go.mod` pins `go 1.26.4`; `encoding/json/v2` triggers gopls `stdversion` warnings (`json.Marshal` requires go1.27).
 - No `go mod vendor` consistency check in CI.
 - No entry-point tests for `cmd/oxlint-auto-configure` (0% coverage).
 - No E2E round-trip test (configure -> validate -> report).

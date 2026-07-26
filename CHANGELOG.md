@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Upgraded `go-finding` from v1.2.1 to v1.3.0.
 - `vendor/` directory removed from git tracking; now gitignored and regenerated locally (via `go mod vendor` or automatically by `go build`).
 - `CONTRIBUTING.md` expanded from a 27-line stub to a comprehensive guide: prerequisites, private dependencies, atomic-write policy, vendorHash workflow, rules update process, and CI overview.
+- `go.mod` Go directive adjusted from `go 1.26.5` to `go 1.26.4` to align with the active toolchain.
 
 ### Fixed
 
@@ -31,6 +32,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `pkg/profile/profile.go` comments now match the actual `profileSpecs` table.
 - `README.md` Next.js detection table now includes `react-perf` (was omitted; code enables it via shared React case).
 - `FEATURES.md` and `TODO_LIST.md` golangci-lint count corrected from stale ~117 to fresh ~116; linter list fixed (removed `stdversion` which is gopls, not golangci-lint; added `varnamelen`, `mnd`, `tagliatelle`, `err113`).
+- `FEATURES.md` and `TODO_LIST.md` Go version references corrected from stale `1.26.5` to `1.26.4` (after `go.mod` directive change in `ec08705`).
+- `FEATURES.md` "Vendored dependencies" evidence column corrected — `vendor/` is gitignored, not a tracked path.
+- `CONTRIBUTING.md` `gogenfilter` dependency clarified as transitive (`// indirect` in `go.mod`, pulled in by `go-finding`).
 
 ## [0.2.1] - 2026-07-22
 
