@@ -56,11 +56,12 @@ nix run . -- configure .      # Run with oxlint in PATH
 nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint
 ```
 
-- **Vendored deps** — `vendor/` committed for nix sandbox compatibility (private go-finding dep can't be fetched with `GOPROXY=off`)
-- **`GOWORK=off go mod vendor`** — Re-vendor after `go.mod` changes, then commit (required for nix sandbox build)
+- **Vendored deps** — `vendor/` committed for LOCAL development only (offline `go build`/`go test` with private deps). The nix build does NOT use `vendor/`; it re-vendors via `buildGoModule` from `mkPreparedSource` output
+- **`mkPreparedSource`** (from `go-nix-helpers`) — Injects every `github.com/[Ll]ars[Aa]rtmann/*` dep as a local `replace` in the sandbox. Each such dep needs BOTH a flake input (`flake = false`) AND an entry in the `deps` map. Public repos under the org (e.g. `go-atomic-write`) use the `github:` HTTPS shorthand pinned to the go.mod tag; private repos use `git+ssh://`. `validatePrivateDeps` enforces that none are missing
+- **`GOWORK=off go mod vendor`** — Re-vendor after `go.mod` changes, then commit (keeps local `vendor/` in sync)
 - **Runtime dep** — `oxlint` is a runtime dependency; wrapped in `nix run` via `makeWrapper`
 - **Git-derived version** — `self.rev or self.dirtyRev or "dev"` injected via ldflags
-- **`lib.fileset`** — Precise source filtering (go.mod, go.sum, cmd/, internal/, pkg/, vendor/)
+- **`lib.fileset`** — Precise source filtering (go.mod, go.sum, cmd/, internal/, pkg/) — note: `vendor/` is NOT in the fileset
 - **`nix-systems/default`** — System list via flake input instead of hardcoded
 - **`env.GOEXPERIMENT = "jsonv2"`** — Set in `packages.default` and both devShells so builds, tests, and `nix flake check` all enable `encoding/json/v2`
 - **Checks** — `build` and `test` (reuses goModules from package)
@@ -79,7 +80,8 @@ nix flake check .                                    # All checks via nix
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` v1.2.1 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
+- `github.com/larsartmann/go-finding` v1.3.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
+- `github.com/larsartmann/go-atomic-write` v0.3.0 — Crash-durable atomic file writes (temp + `fsync` + atomic rename). Used for `.oxlintrc.json` output in `writeConfig` so a crash mid-write cannot truncate the user's config
 - `github.com/spf13/cobra` — CLI framework
 - `github.com/stretchr/testify` — Test assertions
 
@@ -93,6 +95,7 @@ nix flake check .                                    # All checks via nix
 6. **Self-describing types** — Plugin has `CLIFlag()`/`NeedsFlag()`; Registry has generic `Filter()`
 7. **Decoupled rendering** — `pkg/format` accepts plain view structs, not go-finding types
 8. **Testable commands** — `Configure()` extracted from cobra closure; independently callable
+9. **Atomic config writes** — `.oxlintrc.json` is written via `atomicwrite.Write(path, data, Fingerprint{})`. A zero `Fingerprint` skips TOCTOU verification (the tool regenerates config, so overwriting is intended) while still guaranteeing crash durability (temp file + `fsync` + atomic rename). Never use raw `os.WriteFile` for user-facing config output — a crash can truncate it
 
 ### Profiles
 
@@ -115,7 +118,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 
 ### Important Gotchas
 
-- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.2.1 from GitHub (no local replace)
+- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.3.0 from GitHub (no local replace)
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
 - **Version injected at build** — `internal/cli.version/commit/date/builtBy` via ldflags (default: "dev"/"unknown"). `SetVersionTemplate` shows full metadata in `--version`.
@@ -137,7 +140,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Pipeline config** — Analyze command wires Metrics, Retry (2 retries, 100ms base), OnFinding/OnIteration callbacks; oxlint version in ToolInfo
 - **Analyze formats** — `summary`, `json` (flat FindingView array), `report` (full go-finding Report JSON), `sarif`, `table`
 - **WithRegistry option** — `oxlint.WithRegistry(reg)` enables FixStrategy lookup per-finding
-- **Nix build** — `vendor/` committed (required for nix sandbox); `vendorHash = null` in flake; `GOWORK=off` for all go commands
+- **Nix build** — `vendor/` committed for local dev only (nix re-vendors via `buildGoModule`); `vendorHash` is a REAL hash in flake (update via the documented hash-mismatch workflow: `nix build .#default`, copy the `got:` sha256); `GOWORK=off` for all go commands
 - **Severity filter** — Analyze `-s/--severity` flag uses `finding.Filter(BySeverityAtLeast)` for json/table; `report.ToSARIFWithOpts(finding.WithMinSeverity(sev))` for SARIF (v1.2.0 replaced `ToSARIFFiltered`)
 - **Profile name dedup** — `profile.AllProfileNames()` is single source; no more `cliProfileNames`/`config.profileNames`
 - **Detect logging** — `pkg/detect` logs warnings on malformed package.json (but not missing — that's normal for Go projects)
