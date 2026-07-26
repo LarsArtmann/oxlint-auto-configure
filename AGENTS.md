@@ -46,6 +46,16 @@ Oxlint has 841 rules across 7 categories and 15 plugins. Only 113 are enabled by
 | `internal/cli/cmd_report.go`        | report command + format helpers (JSON, table, summary)                                 |
 | `cmd/oxlint-auto-configure/main.go` | Entry point                                                                            |
 
+### Key Test Files
+
+| File                                   | Purpose                                                                         |
+| -------------------------------------- | ------------------------------------------------------------------------------- |
+| `cmd/oxlint-auto-configure/main_test.go` | Entry-point tests: `--version`, `--help`, binary build                        |
+| `internal/cli/e2e_test.go`             | E2E round-trip: `configure` → parse output → verify via `config.FromJSON`      |
+| `internal/cli/atomic_write_test.go`    | Atomic write contract: no `.tmp` files left, idempotent overwrite              |
+| `internal/cli/coverage_test.go`        | Coverage tests: `renderFindings`, `printSARIF`, `sortedByPosition`, etc.       |
+| `internal/cli/commands_test.go`        | Command integration tests with assertions on rule counts and config structure  |
+
 ### Nix
 
 The project has a `flake.nix` for reproducible builds and dev shells.

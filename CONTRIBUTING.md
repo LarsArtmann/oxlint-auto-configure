@@ -45,15 +45,15 @@ This project depends on three private `github.com/LarsArtmann/*` repositories:
 
 | Dependency               | Purpose                                                         |
 | ------------------------ | --------------------------------------------------------------- |
-| `go-finding` v1.3.0      | Unified static analysis model used by the `analyze` command     |
-| `go-atomic-write` v0.3.0 | Crash-durable atomic file writes (temp + fsync + atomic rename) |
+| `go-finding` v1.4.0      | Unified static analysis model used by the `analyze` command     |
+| `go-atomic-write` v0.4.0 | Crash-durable atomic file writes (temp + fsync + atomic rename) |
 | `gogenfilter` v3.3.1     | Code generation filter (transitive, pulled in by `go-finding`)  |
 
 Git authentication (SSH key or token) for `github.com/LarsArtmann` is required to fetch them. The nix dev shell and build handle this via `GOPRIVATE`; the nix build sandbox injects them as local `replace` directives via `mkPreparedSource`.
 
 ## Atomic Write
 
-Config output (`.oxlintrc.json`) is written via `atomicwrite.Write` from `go-atomic-write` v0.3.0 — temp file + fsync + atomic rename. A crash mid-write cannot truncate the user's existing config. Never use raw `os.WriteFile` for config output. See `internal/cli/cmd_configure.go` (`writeConfig`).
+Config output (`.oxlintrc.json`) is written via `atomicwrite.Write` from `go-atomic-write` v0.4.0 — temp file + fsync + atomic rename. A crash mid-write cannot truncate the user's existing config. Never use raw `os.WriteFile` for config output. See `internal/cli/cmd_configure.go` (`writeConfig`).
 
 ## Build, Test, and Lint
 
@@ -114,11 +114,12 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 
 ## CI
 
-CI runs three jobs on every push/PR (`.github/workflows/ci.yml`):
+CI runs four jobs on every push/PR (`.github/workflows/ci.yml`):
 
-- **test** — `go test -race ./...`
+- **test** — `go test -race ./...` + `go mod tidy` consistency check
 - **security** — `govulncheck`
-- **lint** — `golangci-lint run ./...`
+- **lint** — `golangci-lint run ./...` (pinned to `v2.12.2`)
+- **nix** — `nix flake check`
 
 CI is the source of truth. If local results differ from CI, the CI result wins.
 
