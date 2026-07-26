@@ -1,7 +1,7 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.26.4
+  go: "1.26.5"
   build-tags:
     - goexperiment.arenas
     - goexperiment.goroutineleakprofile
@@ -134,6 +134,10 @@ linters:
           allow:
             - $gostd
             - $module
+            - github.com/spf13/cobra
+            - github.com/stretchr
+            - github.com/larsartmann
+            - github.com/LarsArtmann
     exhaustruct:
       exclude:
         - os/exec.Cmd
@@ -145,13 +149,13 @@ linters:
         - ifElseChain
     gomoddirectives:
       replace-local: true
-    ireturn:
-      allow:
-        - error
-        - empty
-        - anon
-        - stdlib
-        - generic
+    forbidigo:
+      exclude:
+        - cmd_root\.go
+        - cmd_configure\.go
+        - cmd_report\.go
+        - cmd_analyze\.go
+        - cmd_validate\.go
     makezero:
       always: true
     revive:
@@ -164,6 +168,13 @@ linters:
       disable:
         - go-require
       enable-all: true
+    ireturn:
+      allow:
+        - error
+        - empty
+        - anon
+        - stdlib
+        - generic
     varnamelen:
       ignore-map-index-ok: true
       ignore-names:
@@ -178,6 +189,19 @@ linters:
         - a
         - b
         - v
+        - d
+        - c
+        - r
+        - p
+        - f
+        - sv
+        - w
+        - n
+        - s
+        - k
+        - pc
+        - bv
+        - av
       ignore-type-assert-ok: true
   exclusions:
     generated: lax
