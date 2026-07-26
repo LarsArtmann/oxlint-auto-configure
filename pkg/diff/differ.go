@@ -11,6 +11,10 @@ import (
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 )
 
+// estimatedChangeCount is the pre-allocation hint for the changes slice.
+// Diffs typically produce plugins + categories + rules + env + settings changes.
+const estimatedChangeCount = 8
+
 // Change represents a single difference between two configs.
 type Change struct {
 	Rule     string
@@ -43,7 +47,7 @@ func NewDiffer(before, after *config.OxlintConfig) *Differ {
 
 // Diff computes all changes between before and after configs.
 func (d *Differ) Diff() []Change {
-	changes := make([]Change, 0, 8)
+	changes := make([]Change, 0, estimatedChangeCount)
 
 	changes = append(changes, d.compareSlices(d.before.Plugins, d.after.Plugins, "plugin:")...)
 	changes = append(

@@ -12,6 +12,13 @@ import (
 	"strings"
 )
 
+// Summary rendering limits.
+const (
+	defaultTopRules  = 10
+	maxColumnWidth   = 45
+	maxMessageLength = 60
+)
+
 // FindingView is a projection of a lint finding for rendering.
 type FindingView struct {
 	Rule        string `json:"rule"`
@@ -66,14 +73,14 @@ func PrintSummary(w io.Writer, sv *SummaryView) error {
 		}
 	}
 
-	topRules := topByRule(sv.Findings, 10)
+	topRules := topByRule(sv.Findings, defaultTopRules)
 	if len(topRules) > 0 {
-		printTopEntries(w, "Top rules:", topRules, 45)
+		printTopEntries(w, "Top rules:", topRules, maxColumnWidth)
 	}
 
-	topFiles := topByFile(sv.Findings, 10)
+	topFiles := topByFile(sv.Findings, defaultTopRules)
 	if len(topFiles) > 0 {
-		printTopEntries(w, "Top files:", topFiles, 45)
+		printTopEntries(w, "Top files:", topFiles, maxColumnWidth)
 	}
 
 	_, _ = fmt.Fprintln(w)
@@ -158,8 +165,8 @@ func PrintFindingsTable(w io.Writer, findings []FindingView) error {
 		loc := fmt.Sprintf("%s:%d", f.File, f.Line)
 
 		msg := f.Message
-		if len(msg) > 60 {
-			msg = msg[:57] + "..."
+		if len(msg) > maxMessageLength {
+			msg = msg[:maxMessageLength-3] + "..."
 		}
 
 		msg = strings.ReplaceAll(msg, "|", "\\|")

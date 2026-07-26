@@ -54,6 +54,9 @@ jobs:
           GOPRIVATE: github.com/LarsArtmann/*
         run: go mod tidy
 
+      - name: Verify module consistency
+        run: git diff --exit-code go.mod go.sum
+
       - name: Build
         env:
           GOPRIVATE: github.com/LarsArtmann/*
@@ -126,7 +129,7 @@ jobs:
         env:
           GOPRIVATE: github.com/LarsArtmann/*
         with:
-          version: latest
+          version: v2.12.2
           args: --timeout=5m
     timeout-minutes: 15
 concurrency:
