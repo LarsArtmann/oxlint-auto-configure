@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/larsartmann/go-atomic-write"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/diff"
@@ -175,7 +176,7 @@ func writeConfig(cfg *config.OxlintConfig, targetPath string) error {
 		return err
 	}
 
-	if err := os.WriteFile(targetPath, append(data, '\n'), 0o600); err != nil {
+	if err := atomicwrite.Write(targetPath, append(data, '\n')); err != nil {
 		return fmt.Errorf("write config: %w", err)
 	}
 

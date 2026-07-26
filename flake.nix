@@ -83,7 +83,7 @@
 
           # To update after a dependency change: `nix build .#default`, then
           # copy the `got:` sha256 from the hash-mismatch error below.
-          vendorHash = "sha256-NS1ZYh33svBXa4MhD16xOThBamZe8eQ05rGJgnaepOQ=";
+          vendorHash = "sha256-NR7haP7HvznWIxb109IZLj2C5QY+FYWBAyTQW0g6L1Y=";
         in
         {
           treefmt = {
