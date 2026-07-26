@@ -176,7 +176,7 @@ func writeConfig(cfg *config.OxlintConfig, targetPath string) error {
 		return err
 	}
 
-	if err := atomicwrite.Write(targetPath, append(data, '\n'), atomicwrite.Fingerprint{}); err != nil {
+	if err := atomicwrite.Write(targetPath, append(data, '\n')); err != nil {
 		return fmt.Errorf("write config: %w", err)
 	}
 
