@@ -96,7 +96,7 @@ nix flake check .                                    # All checks via nix
 6. **Self-describing types** — Plugin has `CLIFlag()`/`NeedsFlag()`; Registry has generic `Filter()`
 7. **Decoupled rendering** — `pkg/format` accepts plain view structs, not go-finding types
 8. **Testable commands** — `Configure()` extracted from cobra closure; independently callable
-9. **Atomic config writes** — `.oxlintrc.json` is written via `atomicwrite.Write(path, data)` (v0.4.0 simplified the API; the old `Fingerprint` TOCTOU parameter was removed). The write guarantees crash durability (temp file + `fsync` + atomic rename). Never use raw `os.WriteFile` for user-facing config output — a crash can truncate it
+9. **Atomic config writes** — `.oxlintrc.json` is written via `atomicwrite.Write(path, data)` (v0.4.0 refactored the API: `Write` now takes only path+data for crash durability; the TOCTOU-aware `WriteVerified(path, data, Fingerprint)` is a separate function). The tool uses plain `Write` because overwriting is the intended behavior. Never use raw `os.WriteFile` for user-facing config output — a crash can truncate it
 
 ### Profiles
 

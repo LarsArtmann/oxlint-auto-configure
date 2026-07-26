@@ -37,7 +37,7 @@ Raw ideas:
 - **Shell completions.** Cobra completion subcommand for bash, zsh, fish.
 - **Structured JSON logs.** `--log-format json` flag for all commands, for CI and tooling integration.
 - **Custom output paths.** `--output` / `--config` flexibility for non-standard project layouts (partially covered by existing `--config` flag).
-- **TOCTOU protection.** Evaluate `WriteVerified` for `configure` — capture the existing config fingerprint when reading for diff, fail loudly if the user edited `.oxlintrc.json` during execution.
+- **TOCTOU protection.** Evaluate `WriteVerified` for `configure` — capture the existing config fingerprint via `FingerprintFile` when reading for diff, pass to `WriteVerified` to fail loudly if the user edited `.oxlintrc.json` during execution. (`go-atomic-write` v0.4.0 refactored: `Write` = crash-durability only, `WriteVerified` = crash-durability + TOCTOU.)
 
 ### 4. Architecture and Quality
 
@@ -55,12 +55,12 @@ Raw ideas:
 Decisions that need user input before they can become actionable tasks:
 
 1. **Adopt `linter-autoconfigure-sdk` for `validate`?** The SDK self-describes as "the weakest of the 5 SDKs" with "modest value over stdlib until a second auto-configurer lands." This is a product direction call: be the first consumer (absorbing early-adopter tax) or wait. _(Source: 2026-07-26 report, question g.1)_
-2. **Should `configure` use `WriteVerified` (TOCTOU protection)?** The tool's job is to regenerate config (overwriting is intended), but silently clobbering manual edits made during execution could be surprising. _(Source: 2026-07-26 report, question g.2)_
+2. **Should `configure` use `WriteVerified` (TOCTOU protection)?** The tool's job is to regenerate config (overwriting is intended), but silently clobbering manual edits made during execution could be surprising. `go-atomic-write` v0.4.0 provides both `Write(path, data)` and `WriteVerified(path, data, Fingerprint)` — the choice is still open. _(Source: 2026-07-26 report, question g.2)_
 3. **Should `strict` and `recommended` differ?** They are functionally identical in `pkg/profile/profile.go`. Either differentiate the code or consolidate and document the equivalence. _(Source: 2026-07-22 report, question g.2)_
 4. **testify to ginkgo/gomega migration?** Establish a testing framework policy for this project.
 5. **Modularization proposal: execute or archive?** The docs were deleted but the decision to pursue modularization remains open.
 6. **Markdown or HTML for status reports?** The `status-report` skill prescribes styled HTML dashboards; the user has requested `.md` twice. A split format exists in `docs/status/`. Pick one canonical format and document the decision.
-7. **~~Are `Fingerprint` and `TOCTOU` domain terms or implementation details?~~** RESOLVED: `go-atomic-write` v0.4.0 removed the `Fingerprint` API entirely, making this question moot. Both entries were removed from `docs/DOMAIN_LANGUAGE.md`.
+7. **Are `Fingerprint` and `TOCTOU` domain terms or implementation details?** They were removed from `docs/DOMAIN_LANGUAGE.md` as implementation details (they are `go-atomic-write` API concepts, not oxlint-auto-configure domain terms). Both still exist in `go-atomic-write` v0.4.0: `Fingerprint` is used by `WriteVerified`, `WriteIfChanged`, etc. Decision: keep them OUT of DOMAIN_LANGUAGE.md (implementation detail, not domain language).
 
 ## Non-goals
 
