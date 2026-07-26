@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `FEATURES.md` and `TODO_LIST.md` for project tracking and honest feature inventory.
 - `ROADMAP.md` for long-term project direction and open questions.
 - Filled `docs/DOMAIN_LANGUAGE.md` with actual project domain terms.
+- `docs/DOMAIN_LANGUAGE.md` now includes atomic-write vocabulary (Atomic Write, Crash Durability, Fingerprint, TOCTOU).
 - `go-atomic-write` v0.3.0 dependency — config writes are now crash-durable (temp + fsync + atomic rename).
 
 ### Changed
@@ -18,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `writeConfig` (`internal/cli/cmd_configure.go:179`) now uses `atomicwrite.Write` instead of raw `os.WriteFile` — a crash mid-write can no longer truncate the user's `.oxlintrc.json`.
 - Upgraded `go-finding` from v1.2.1 to v1.3.0.
 - `vendor/` directory removed from git tracking; now gitignored and regenerated locally (via `go mod vendor` or automatically by `go build`).
-- `CONTRIBUTING.md` now documents the required `GOEXPERIMENT=jsonv2` and `GOWORK=off` flags for local commands and adds Nix alternatives.
+- `CONTRIBUTING.md` expanded from a 27-line stub to a comprehensive guide: prerequisites, private dependencies, atomic-write policy, vendorHash workflow, rules update process, and CI overview.
 
 ### Fixed
 
@@ -28,6 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `AGENTS.md` dependency version updated to `go-finding` v1.2.1 and profile description corrected.
 - `internal/cli/cmd_configure.go` help text no longer claims `TypeScript` is a severity category.
 - `pkg/profile/profile.go` comments now match the actual `profileSpecs` table.
+- `README.md` Next.js detection table now includes `react-perf` (was omitted; code enables it via shared React case).
+- `FEATURES.md` and `TODO_LIST.md` golangci-lint count corrected from stale ~117 to fresh ~116; linter list fixed (removed `stdversion` which is gopls, not golangci-lint; added `varnamelen`, `mnd`, `tagliatelle`, `err113`).
 
 ## [0.2.1] - 2026-07-22
 
