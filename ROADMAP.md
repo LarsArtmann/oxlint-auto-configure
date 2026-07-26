@@ -60,7 +60,7 @@ Decisions that need user input before they can become actionable tasks:
 4. **testify to ginkgo/gomega migration?** Establish a testing framework policy for this project.
 5. **Modularization proposal: execute or archive?** The docs were deleted but the decision to pursue modularization remains open.
 6. **Markdown or HTML for status reports?** The `status-report` skill prescribes styled HTML dashboards; the user has requested `.md` twice. A split format exists in `docs/status/`. Pick one canonical format and document the decision.
-7. **Are `Fingerprint` and `TOCTOU` domain terms or implementation details?** They live in `docs/DOMAIN_LANGUAGE.md` but originate from `go-atomic-write` internals. Decide whether to keep them, move them to AGENTS.md, or restructure DOMAIN_LANGUAGE to separate domain terms from implementation entities.
+7. **~~Are `Fingerprint` and `TOCTOU` domain terms or implementation details?~~** RESOLVED: `go-atomic-write` v0.4.0 removed the `Fingerprint` API entirely, making this question moot. Both entries were removed from `docs/DOMAIN_LANGUAGE.md`.
 
 ## Non-goals
 

@@ -80,8 +80,9 @@ nix flake check .                                    # All checks via nix
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` v1.3.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
-- `github.com/larsartmann/go-atomic-write` v0.3.0 — Crash-durable atomic file writes (temp + `fsync` + atomic rename). Used for `.oxlintrc.json` output in `writeConfig` so a crash mid-write cannot truncate the user's config
+- `github.com/larsartmann/go-finding` v1.4.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
+- `github.com/larsartmann/go-atomic-write` v0.4.0 — Crash-durable atomic file writes (temp + `fsync` + atomic rename). Used for `.oxlintrc.json` output in `writeConfig` so a crash mid-write cannot truncate the user's config
+- `github.com/larsartmann/go-error-family` v0.10.0 — Structured error family helpers (transitive dep of `go-atomic-write` v0.4.0)
 - `github.com/spf13/cobra` — CLI framework
 - `github.com/stretchr/testify` — Test assertions
 
@@ -95,7 +96,7 @@ nix flake check .                                    # All checks via nix
 6. **Self-describing types** — Plugin has `CLIFlag()`/`NeedsFlag()`; Registry has generic `Filter()`
 7. **Decoupled rendering** — `pkg/format` accepts plain view structs, not go-finding types
 8. **Testable commands** — `Configure()` extracted from cobra closure; independently callable
-9. **Atomic config writes** — `.oxlintrc.json` is written via `atomicwrite.Write(path, data, Fingerprint{})`. A zero `Fingerprint` skips TOCTOU verification (the tool regenerates config, so overwriting is intended) while still guaranteeing crash durability (temp file + `fsync` + atomic rename). Never use raw `os.WriteFile` for user-facing config output — a crash can truncate it
+9. **Atomic config writes** — `.oxlintrc.json` is written via `atomicwrite.Write(path, data)` (v0.4.0 simplified the API; the old `Fingerprint` TOCTOU parameter was removed). The write guarantees crash durability (temp file + `fsync` + atomic rename). Never use raw `os.WriteFile` for user-facing config output — a crash can truncate it
 
 ### Profiles
 
@@ -118,7 +119,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 
 ### Important Gotchas
 
-- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.3.0 from GitHub (no local replace)
+- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.4.0 from GitHub (no local replace)
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
 - **Version injected at build** — `internal/cli.version/commit/date/builtBy` via ldflags (default: "dev"/"unknown"). `SetVersionTemplate` shows full metadata in `--version`.
