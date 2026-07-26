@@ -92,7 +92,7 @@ The tool auto-detects your project type and enables relevant plugins:
 | Detected   | Plugins Enabled                   |
 | ---------- | --------------------------------- |
 | React      | `react`, `jsx-a11y`, `react-perf` |
-| Next.js    | `nextjs`, `react`, `jsx-a11y`     |
+| Next.js    | `nextjs`, `react`, `jsx-a11y`, `react-perf` |
 | Vue        | `vue`                             |
 | Jest       | `jest`, `node`                    |
 | Vitest     | `vitest`, `node`                  |
