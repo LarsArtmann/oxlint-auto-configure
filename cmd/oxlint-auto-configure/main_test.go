@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 )
 
@@ -41,11 +42,8 @@ func TestMainHelp(t *testing.T) {
 func buildBinary(t *testing.T) string {
 	t.Helper()
 
-	binary, err := os.CreateTemp(t.TempDir(), "oxlint-auto-configure-test")
-	if err != nil {
-		t.Fatalf("create temp binary: %v", err)
-	}
-	binary.Close()
+	dir := t.TempDir()
+	binary := filepath.Join(dir, "oxlint-auto-configure-test")
 
 	cmd := exec.Command("go", "build", "-o", binary, ".")
 	cmd.Env = append(os.Environ(), "GOWORK=off", "GOEXPERIMENT=jsonv2")

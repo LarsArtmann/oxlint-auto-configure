@@ -21,7 +21,7 @@ func TestWriteConfigLeavesNoTempFiles(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cfg, err := config.GenerateProjectProfile(profile.ProfileRecommended, reg, nil, nil)
+	cfg, err := config.GenerateProjectConfig(profile.ProfileRecommended, reg, nil, nil)
 	require.NoError(t, err)
 
 	dir := t.TempDir()
@@ -56,7 +56,7 @@ func TestWriteConfigOverwriteIdempotent(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cfg, err := config.GenerateProjectProfile(profile.ProfileRecommended, reg, nil, nil)
+	cfg, err := config.GenerateProjectConfig(profile.ProfileRecommended, reg, nil, nil)
 	require.NoError(t, err)
 
 	dir := t.TempDir()
@@ -74,8 +74,15 @@ func TestWriteConfigOverwriteIdempotent(t *testing.T) {
 	secondData, err := os.ReadFile(targetPath)
 	require.NoError(t, err)
 
-	// Both writes should produce identical output
-	assert.Equal(t, firstData, secondData, "overwriting with same config should produce identical output")
+	// Both writes should produce equivalent configs (parse and compare,
+	// since Go map iteration order is randomized so raw bytes may differ)
+	firstCfg, err := config.FromJSON(firstData)
+	require.NoError(t, err)
+
+	secondCfg, err := config.FromJSON(secondData)
+	require.NoError(t, err)
+
+	assert.Equal(t, firstCfg, secondCfg, "overwriting with same config should produce equivalent output")
 
 	// Verify no temp files remain
 	entries, err := os.ReadDir(dir)

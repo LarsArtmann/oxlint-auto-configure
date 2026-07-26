@@ -53,7 +53,7 @@ func TestConfigureE2EAllProfiles(t *testing.T) {
 	t.Parallel()
 
 	for _, p := range profile.AllProfileNames() {
-		t.Run(string(p), func(t *testing.T) {
+		t.Run(p, func(t *testing.T) {
 			t.Parallel()
 
 			dir := t.TempDir()
@@ -63,7 +63,7 @@ func TestConfigureE2EAllProfiles(t *testing.T) {
 
 			configPath := filepath.Join(dir, ".oxlintrc.json")
 			opts := ConfigureOptions{
-				Profile:    p,
+				Profile:    profile.Profile(p),
 				ConfigPath: configPath,
 			}
 
