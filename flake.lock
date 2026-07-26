@@ -20,6 +20,23 @@
         "type": "github"
       }
     },
+    "go-atomic-write": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784825939,
+        "narHash": "sha256-fHyuY3D2ZjJ7BrOOt5Hu63J3i4X1PwYrYCiUDQL8HJ4=",
+        "owner": "LarsArtmann",
+        "repo": "go-atomic-write",
+        "rev": "edb2c1c1f2bd90335104876fa13662d7bef698d0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LarsArtmann",
+        "ref": "v0.3.0",
+        "repo": "go-atomic-write",
+        "type": "github"
+      }
+    },
     "go-finding": {
       "flake": false,
       "locked": {
@@ -90,6 +107,7 @@
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
+        "go-atomic-write": "go-atomic-write",
         "go-finding": "go-finding",
         "go-nix-helpers": "go-nix-helpers",
         "gogenfilter": "gogenfilter",

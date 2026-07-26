@@ -18,6 +18,11 @@
       flake = false;
     };
 
+    go-atomic-write = {
+      url = "github:LarsArtmann/go-atomic-write/v0.3.0";
+      flake = false;
+    };
+
     go-finding = {
       url = "git+ssh://git@github.com/LarsArtmann/go-finding?ref=master";
       flake = false;
@@ -74,6 +79,7 @@
               ];
             };
             deps = {
+              "github.com/larsartmann/go-atomic-write" = inputs.go-atomic-write;
               "github.com/larsartmann/go-finding" = inputs.go-finding;
               "github.com/LarsArtmann/gogenfilter/v3" = inputs.gogenfilter;
             };
@@ -83,7 +89,7 @@
 
           # To update after a dependency change: `nix build .#default`, then
           # copy the `got:` sha256 from the hash-mismatch error below.
-          vendorHash = "sha256-NR7haP7HvznWIxb109IZLj2C5QY+FYWBAyTQW0g6L1Y=";
+          vendorHash = "sha256-1U621KqT22CpznxIEC6iw9pJkkbKGeCNYcvaY2QXq2k=";
         in
         {
           treefmt = {
