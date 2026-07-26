@@ -179,19 +179,19 @@ FEATURES.md and TODO_LIST.md now say "local reports ~117 issues while CI passes.
 
 A follow-up session (the `2026-07-26_09-43` report) was created specifically to close the P0 gaps this self-review identified. All 11 "NOT STARTED" items in section c were resolved:
 
-| Item | Claim in report | Resolution | Commit |
-| ---- | --------------- | ---------- | ------ |
-| c.1  | Health report with Accuracy/Fitness scores omitted | Printed (commits `aeee5c1`, `8f52510`); scoring caveats self-flagged in that report's d.3 | `aeee5c1` |
-| c.2  | Full VERIFY checklist (only 3 of 9 run) | All 9 checks run and enumerated (09:43 report a.13) | `aeee5c1` |
-| c.3  | Skill references not loaded | `build-guide.md`, `verify-checklist.md`, `common-mistakes.md` all loaded (09:43 a.2) | — |
-| c.4  | `docs/DOMAIN_LANGUAGE.md` atomic-write vocabulary missing | Added 4 terms (Atomic Write, Crash Durability, Fingerprint, TOCTOU) (09:43 a.6) | `aeee5c1` |
-| c.5  | `CONTRIBUTING.md` still 27-line stub | Rebuilt to comprehensive guide (09:43 a.7) | `1860b64` |
-| c.6  | `README.md` freshness not checked | Verified; fixed Next.js detection table (09:43 a.8-9) | `b1df533` |
-| c.7  | `AGENTS.md` not actively re-verified | All 17 key paths verified (09:43 a.10) | — |
-| c.8  | `nix flake check .` not run | Ran; "all checks passed" (09:43 a.14) | — |
-| c.9  | Fresh `golangci-lint` count not computed | Re-ran; 116 issues (not 117); updated docs (09:43 a.4-5) | `aeee5c1` |
-| c.10 | Internal markdown link audit not run | Ran `grep -roE '\]\([^)]+\)'` across all `.md` (09:43 a.11) | — |
-| c.11 | `result/` symlink not cleaned | Removed on sight (09:43 a.3) | — |
+| Item | Claim in report                                           | Resolution                                                                                | Commit    |
+| ---- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------- |
+| c.1  | Health report with Accuracy/Fitness scores omitted        | Printed (commits `aeee5c1`, `8f52510`); scoring caveats self-flagged in that report's d.3 | `aeee5c1` |
+| c.2  | Full VERIFY checklist (only 3 of 9 run)                   | All 9 checks run and enumerated (09:43 report a.13)                                       | `aeee5c1` |
+| c.3  | Skill references not loaded                               | `build-guide.md`, `verify-checklist.md`, `common-mistakes.md` all loaded (09:43 a.2)      | —         |
+| c.4  | `docs/DOMAIN_LANGUAGE.md` atomic-write vocabulary missing | Added 4 terms (Atomic Write, Crash Durability, Fingerprint, TOCTOU) (09:43 a.6)           | `aeee5c1` |
+| c.5  | `CONTRIBUTING.md` still 27-line stub                      | Rebuilt to comprehensive guide (09:43 a.7)                                                | `1860b64` |
+| c.6  | `README.md` freshness not checked                         | Verified; fixed Next.js detection table (09:43 a.8-9)                                     | `b1df533` |
+| c.7  | `AGENTS.md` not actively re-verified                      | All 17 key paths verified (09:43 a.10)                                                    | —         |
+| c.8  | `nix flake check .` not run                               | Ran; "all checks passed" (09:43 a.14)                                                     | —         |
+| c.9  | Fresh `golangci-lint` count not computed                  | Re-ran; 116 issues (not 117); updated docs (09:43 a.4-5)                                  | `aeee5c1` |
+| c.10 | Internal markdown link audit not run                      | Ran `grep -roE '\]\([^)]+\)'` across all `.md` (09:43 a.11)                               | —         |
+| c.11 | `result/` symlink not cleaned                             | Removed on sight (09:43 a.3)                                                              | —         |
 
 **Question g.3** (stale golangci-lint count): resolved — fresh count is 116, documented with correct linter breakdown.
 

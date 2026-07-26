@@ -47,7 +47,7 @@ This project depends on three private `github.com/LarsArtmann/*` repositories:
 | ------------------------ | --------------------------------------------------------------- |
 | `go-finding` v1.3.0      | Unified static analysis model used by the `analyze` command     |
 | `go-atomic-write` v0.3.0 | Crash-durable atomic file writes (temp + fsync + atomic rename) |
-| `gogenfilter` v3.3.1     | Code generation filter (transitive, pulled in by `go-finding`) |
+| `gogenfilter` v3.3.1     | Code generation filter (transitive, pulled in by `go-finding`)  |
 
 Git authentication (SSH key or token) for `github.com/LarsArtmann` is required to fetch them. The nix dev shell and build handle this via `GOPRIVATE`; the nix build sandbox injects them as local `replace` directives via `mkPreparedSource`.
 
