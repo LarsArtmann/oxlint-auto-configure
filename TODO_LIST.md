@@ -12,7 +12,7 @@
 | Update embedded rules from oxlint `1.59.0` to current (`1.73.0`): regenerate `rules_data.json`, bump `rules_version.txt`, update `TestRegistryTotal` count | High   | 30min  | `pkg/rule/rules_version.txt` says `1.59.0`; produces `WARN` on every run      | 2026-07-26 f.11-13  |
 | Resolve `go.mod` Go version mismatch: `go 1.26.5` triggers 16 gopls `stdversion` warnings (`json.Marshal` requires go1.27). Bump to `go 1.27` or add `toolchain` directive | High   | 15min  | `go.mod:3`; 16 active LSP `stdversion` warnings                               | 2026-07-22 c.2, 2026-07-26 f.15 |
 | Add CI check that `go mod vendor` produces no diff (root cause of 2026-07-17 BuildFlow failure) | High   | 1h     | No such check in `.github/workflows/ci.yml`                                   | 2026-07-22 c.3, e.1 |
-| Establish reproducible `golangci-lint` baseline: local reports ~117 issues (depguard, forbidigo, stdversion) while CI passes | Med    | 2h     | `FEATURES.md` gap; `.golangci.yml` exists but local/CI mismatch               | 2026-07-22 d.2      |
+| Establish reproducible `golangci-lint` baseline: local reports ~116 issues (depguard, varnamelen, mnd, tagliatelle, err113, forbidigo) while CI passes | Med    | 2h     | `FEATURES.md` gap; `.golangci.yml` exists but local/CI mismatch               | 2026-07-22 d.2      |
 | Add BuildFlow to CI so the full local workflow runs on every PR                            | Med    | 1h     | Not in CI                                                                     | 2026-07-22 c.4, f.5 |
 | Decide whether to add `gosec` to the CI security job                                       | Low    | 15min  | `.github/workflows/ci.yml` has govulncheck but not gosec                      | 2026-07-22 c.13     |
 
@@ -30,7 +30,6 @@
 
 | Task                                                                                       | Impact | Effort | Evidence                                                                      | Source              |
 | ------------------------------------------------------------------------------------------ | ------ | ------ | ----------------------------------------------------------------------------- | ------------------- |
-| Clean up `result/` symlink left by `nix build` in repo root (gitignored but local clutter) | Low    | 1min   | `ls result` exists; points to nix store path                                  | 2026-07-26 c.3      |
 | Run `hierarchical-errors` skill and baseline findings                                      | Low    | 1h     | Not yet run as a dedicated pass                                               | 2026-07-22 c.6      |
 
 ---

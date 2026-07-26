@@ -43,7 +43,7 @@ Status legend:
 | Feature                                                        | Status               | Evidence                                                     | Notes                                                                                                                                                    |
 | -------------------------------------------------------------- | -------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Race-safe tests                                                | FULLY_FUNCTIONAL     | `go test -race ./...` passes.                                | `GOEXPERIMENT=jsonv2` required.                                                                                                                          |
-| golangci-lint clean (CI)                                      | PARTIALLY_FUNCTIONAL | `.golangci.yml`, `.github/workflows/ci.yml`                | CI passes (0 issues). Local `golangci-lint run ./...` reports ~117 issues due to version/config mismatch with CI (depguard, forbidigo, stdversion). |
+| golangci-lint clean (CI)                                      | PARTIALLY_FUNCTIONAL | `.golangci.yml`, `.github/workflows/ci.yml`                | CI passes (0 issues). Local `golangci-lint run ./...` reports ~116 issues (depguard, varnamelen, mnd, tagliatelle, err113, forbidigo) due to version/config mismatch with CI. |
 | govulncheck security scanning                                  | FULLY_FUNCTIONAL     | `.github/workflows/ci.yml` security job.                     | Runs on every push/PR.                                                                                                                                   |
 | Vendored dependencies                                          | FULLY_FUNCTIONAL     | `vendor/`, `go.mod`                                          | Required for nix sandbox.                                                                                                                                |
 | `GOEXPERIMENT=jsonv2` plumbing                                 | FULLY_FUNCTIONAL     | `flake.nix`, `.github/workflows/ci.yml`, `AGENTS.md`         | Set in nix package, dev shells, CI.                                                                                                                      |
@@ -71,5 +71,5 @@ Status legend:
 - No entry-point tests for `cmd/oxlint-auto-configure` (0% coverage).
 - No E2E round-trip test (configure -> validate -> report).
 - Embedded rules pinned to oxlint `1.59.0` while runtime is `1.73.0` (produces a `WARN` on every run).
-- Local `golangci-lint run ./...` reports ~117 issues while CI passes (version/config mismatch).
+- Local `golangci-lint run ./...` reports ~116 issues (depguard, varnamelen, mnd, tagliatelle, err113, forbidigo) while CI passes (version/config mismatch).
 - No dedicated test for the atomic-write contract (no `.tmp` leftovers, valid JSON always).

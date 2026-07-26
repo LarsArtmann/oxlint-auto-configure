@@ -20,6 +20,10 @@ If a word means something different to a developer than to a customer, define it
 | **PluginConfig**          | Map of plugins to enable for a detected project.                                   | Detection     |
 | **.oxlintrc.json**        | The generated oxlint configuration file.                                           | Output        |
 | **go-finding**            | The static-analysis pipeline library used by `analyze`.                            | Dependency    |
+| **Atomic Write**          | Crash-durable file write: temp file + fsync + atomic rename. Used for `.oxlintrc.json` output so a crash mid-write cannot truncate the config. | `internal/cli/cmd_configure.go`, `go-atomic-write` |
+| **Crash Durability**      | The guarantee that a config write either fully succeeds or leaves the existing file untouched, even if the process is killed mid-write. | Quality attribute |
+| **Fingerprint**           | An optional TOCTOU guard passed to `atomicwrite.Write`. A zero `Fingerprint` skips verification (the tool regenerates config, so overwriting is intended) while still guaranteeing crash durability. | `go-atomic-write` |
+| **TOCTOU**                | Time-of-check-to-time-of-use race. The tool currently uses a zero `Fingerprint`, accepting the overwrite; `WriteVerified` with a captured fingerprint is a future option (see `ROADMAP.md`). | Open question |
 
 ## Entities
 
