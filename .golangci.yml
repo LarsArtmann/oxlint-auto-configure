@@ -149,13 +149,6 @@ linters:
         - ifElseChain
     gomoddirectives:
       replace-local: true
-    forbidigo:
-      exclude:
-        - cmd_root\.go
-        - cmd_configure\.go
-        - cmd_report\.go
-        - cmd_analyze\.go
-        - cmd_validate\.go
     makezero:
       always: true
     revive:
@@ -164,6 +157,10 @@ linters:
           name: exported
         - disabled: true
           name: package-comments
+    tagliatelle:
+      case:
+        rules:
+          json: snake
     testifylint:
       disable:
         - go-require
@@ -259,6 +256,16 @@ linters:
         text: unused
         linters:
           - unused
+      - path: internal/cli/cmd_.*\.go$
+        linters:
+          - forbidigo
+      - path: _test\.go
+        linters:
+          - err113
+          - mnd
+      - text: devDependencies
+        linters:
+          - tagliatelle
     paths:
       - \.gen\.go$
       - _templ\.go$

@@ -243,7 +243,7 @@ func rangeFromLabels(filename string, labels []oxlintLabel) *finding.Range {
 
 // parseCode splits "eslint(no-debugger)" or "typescript/no-explicit-any"
 // into (rule-name, plugin).
-func parseCode(code string) (ruleName, plugin string) {
+func parseCode(code string) (string, string) {
 	plugin, ruleName, found := strings.Cut(code, "(")
 	if found {
 		return strings.TrimSuffix(ruleName, ")"), plugin
