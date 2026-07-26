@@ -18,22 +18,22 @@ import (
 func buildTestReport(t *testing.T) *finding.Report {
 	t.Helper()
 
-	f1 := finding.NewFinding(
+	debuggerFinding := finding.NewFinding(
 		finding.RuleName("no-debugger"), finding.ToolName("oxlint"),
 		"Unexpected debugger statement", finding.SeverityError,
 		finding.Position{File: "test.ts", Line: 10, Column: 1}, 1.0,
 	)
-	f1.Category = finding.CategoryCorrectness
+	debuggerFinding.Category = finding.CategoryCorrectness
 
-	f2 := finding.NewFinding(
+	anyFinding := finding.NewFinding(
 		finding.RuleName("no-explicit-any"), finding.ToolName("oxlint"),
 		"Unexpected any", finding.SeverityWarning,
 		finding.Position{File: "types.ts", Line: 5, Column: 3}, 1.0,
 	)
-	f2.Category = "suspicious"
+	anyFinding.Category = "suspicious"
 
 	report := finding.NewReport(finding.ToolInfo{Name: "oxlint", Version: "1.73.0"})
-	report.AddFindings([]finding.Finding{f1, f2})
+	report.AddFindings([]finding.Finding{debuggerFinding, anyFinding})
 	report.ComputeSummary()
 
 	return report

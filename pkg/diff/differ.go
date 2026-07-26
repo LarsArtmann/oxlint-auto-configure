@@ -66,25 +66,25 @@ func (d *Differ) compareMaps(before, after map[string]string, prefix string) []C
 	var changes []Change
 
 	for _, key := range d.collectAllKeys(before, after) {
-		bv, hadBefore := before[key]
-		av, hasAfter := after[key]
+		beforeVal, hadBefore := before[key]
+		afterVal, hasAfter := after[key]
 		name := prefix + key
 
 		switch {
 		case !hadBefore && hasAfter:
 			changes = append(
 				changes,
-				Change{Rule: name, OldValue: "", NewValue: av, Kind: KindAdded},
+				Change{Rule: name, OldValue: "", NewValue: afterVal, Kind: KindAdded},
 			)
 		case hadBefore && !hasAfter:
 			changes = append(
 				changes,
-				Change{Rule: name, OldValue: bv, NewValue: "", Kind: KindRemoved},
+				Change{Rule: name, OldValue: beforeVal, NewValue: "", Kind: KindRemoved},
 			)
-		case hadBefore && hasAfter && bv != av:
+		case hadBefore && hasAfter && beforeVal != afterVal:
 			changes = append(
 				changes,
-				Change{Rule: name, OldValue: bv, NewValue: av, Kind: KindChanged},
+				Change{Rule: name, OldValue: beforeVal, NewValue: afterVal, Kind: KindChanged},
 			)
 		}
 	}

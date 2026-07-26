@@ -214,11 +214,11 @@ func renderFindings(
 		return nil
 	}
 
-	sv := summaryFromReport(report, result)
+	summary := summaryFromReport(report, result)
 
 	switch fmtFlag {
 	case FormatSummary:
-		return printFormatError(format.PrintSummary(os.Stderr, sv), FormatSummary, minSev)
+		return printFormatError(format.PrintSummary(os.Stderr, summary), FormatSummary, minSev)
 	case FormatJSON:
 		views := findingsToViews(filtered)
 

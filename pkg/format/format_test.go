@@ -21,7 +21,7 @@ func TestPrintSummary(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	sv := &SummaryView{
+	summary := &SummaryView{
 		Total:         5,
 		BySeverity:    map[string]int{config.SeverityError: 3, "warning": 2},
 		ByCategory:    map[string]int{testCategoryCorrectness: 5},
@@ -38,7 +38,7 @@ func TestPrintSummary(t *testing.T) {
 		},
 	}
 
-	err := PrintSummary(&buf, sv)
+	err := PrintSummary(&buf, summary)
 	require.NoError(t, err)
 
 	output := buf.String()

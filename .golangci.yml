@@ -134,8 +134,10 @@ linters:
           allow:
             - $gostd
             - $module
+            # CLI framework and test assertions used throughout internal/cli and cmd/
             - github.com/spf13/cobra
             - github.com/stretchr
+            # Private dependencies: go-finding, go-atomic-write, go-error-family
             - github.com/larsartmann
             - github.com/LarsArtmann
     exhaustruct:
@@ -145,7 +147,7 @@ linters:
       forbid-focus-container: true
       forbid-spec-pollution: true
     goconst:
-      ignore-tests: true
+      ignore-tests: true # Test fixtures often repeat strings deliberately
     gocritic:
       disabled-checks:
         - ifElseChain
@@ -162,7 +164,7 @@ linters:
     tagliatelle:
       case:
         rules:
-          json: snake
+          json: snake # .oxlintrc.json uses snake_case field names
     testifylint:
       disable:
         - go-require
@@ -176,34 +178,27 @@ linters:
         - generic
     varnamelen:
       ignore-map-index-ok: true
-      ignore-names:
-        - err
-        - ok
-        - tt
-        - fn
-        - t
-        - i
-        - m
-        - g
-        - a
-        - b
-        - v
-        - d
-        - c
-        - r
-        - p
-        - f
-        - sv
-        - w
-        - n
-        - s
-        - k
-        - pc
-        - bv
-        - av
-        - f1
-        - f2
       ignore-type-assert-ok: true
+      ignore-names:
+        # Go stdlib conventions
+        - err # error return value
+        - ok  # map/type assertion ok value
+        - fn  # function/callback parameter
+        - w   # io.Writer parameter (fmt.Fprintf, io.Copy, etc.)
+        - r   # io.Reader/rule/registry variable
+        - s   # string parameter
+        # Loop and test conventions
+        - i   # loop index
+        - t   # *testing.T parameter
+        - tt  # table test case
+        # Domain-specific short names (consistent across codebase)
+        - p   # profile/plugin/path
+        - f   # finding/flag
+        - d   # decision/data
+        - c   # category/command/config
+        - n   # number/count
+        - b   # bool/buffer
+        - k   # map key in range loops
   exclusions:
     generated: lax
     rules:
@@ -262,14 +257,14 @@ linters:
           - unused
       - path: internal/cli/cmd_.*\.go$
         linters:
-          - forbidigo
+          - forbidigo # CLI commands use fmt.Println/Printf for stdout output by design
       - path: _test\.go
         linters:
-          - err113
-          - mnd
+          - err113 # Test errors are ad-hoc, not programmatic contracts
+          - mnd    # Test magic numbers are idiomatic (slice lengths, positions, etc.)
       - text: devDependencies
         linters:
-          - tagliatelle
+          - tagliatelle # camelCase field in package.json, not our config output
     paths:
       - \.gen\.go$
       - _templ\.go$

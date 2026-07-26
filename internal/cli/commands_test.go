@@ -349,13 +349,13 @@ func TestSummaryFromReport(t *testing.T) {
 	report.AddFindings([]finding.Finding{f})
 	report.ComputeSummary()
 
-	sv := summaryFromReport(report, &pipeline.PipelineResult{
+	summary := summaryFromReport(report, &pipeline.PipelineResult{
 		TotalIterations: 2,
 		Reason:          pipeline.ReasonStable,
 	})
-	assert.Equal(t, 1, sv.Total)
-	assert.True(t, sv.Stable)
-	assert.Equal(t, 2, sv.Iterations)
+	assert.Equal(t, 1, summary.Total)
+	assert.True(t, summary.Stable)
+	assert.Equal(t, 2, summary.Iterations)
 }
 
 func TestFindingsToViews(t *testing.T) {

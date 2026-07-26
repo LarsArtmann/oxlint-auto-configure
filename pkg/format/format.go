@@ -46,39 +46,39 @@ type SummaryView struct {
 }
 
 // PrintSummary writes a human-readable summary to w.
-func PrintSummary(w io.Writer, sv *SummaryView) error {
+func PrintSummary(w io.Writer, summary *SummaryView) error {
 	_, _ = fmt.Fprintf(w, "\n=== Analysis Results ===\n")
 
-	_, _ = fmt.Fprintf(w, "\n%d finding(s) across %d file(s)", sv.Total, sv.FilesAffected)
-	if sv.Iterations > 1 {
-		_, _ = fmt.Fprintf(w, " (%d iterations, stable=%t)", sv.Iterations, sv.Stable)
+	_, _ = fmt.Fprintf(w, "\n%d finding(s) across %d file(s)", summary.Total, summary.FilesAffected)
+	if summary.Iterations > 1 {
+		_, _ = fmt.Fprintf(w, " (%d iterations, stable=%t)", summary.Iterations, summary.Stable)
 	}
 
 	_, _ = fmt.Fprintln(w)
 
 	_, _ = fmt.Fprintln(w, "\nBy severity:")
-	for _, sev := range sortedKeys(sv.BySeverity) {
-		_, _ = fmt.Fprintf(w, "  %-10s %d\n", sev, sv.BySeverity[sev])
+	for _, sev := range sortedKeys(summary.BySeverity) {
+		_, _ = fmt.Fprintf(w, "  %-10s %d\n", sev, summary.BySeverity[sev])
 	}
 
 	_, _ = fmt.Fprintln(w, "\nBy category:")
-	for _, cat := range sortedKeys(sv.ByCategory) {
-		_, _ = fmt.Fprintf(w, "  %-15s %d\n", cat, sv.ByCategory[cat])
+	for _, cat := range sortedKeys(summary.ByCategory) {
+		_, _ = fmt.Fprintf(w, "  %-15s %d\n", cat, summary.ByCategory[cat])
 	}
 
-	if len(sv.ByFixStrategy) > 0 {
+	if len(summary.ByFixStrategy) > 0 {
 		_, _ = fmt.Fprintln(w, "\nBy fix strategy:")
-		for _, fix := range sortedKeys(sv.ByFixStrategy) {
-			_, _ = fmt.Fprintf(w, "  %-15s %d\n", fix, sv.ByFixStrategy[fix])
+		for _, fix := range sortedKeys(summary.ByFixStrategy) {
+			_, _ = fmt.Fprintf(w, "  %-15s %d\n", fix, summary.ByFixStrategy[fix])
 		}
 	}
 
-	topRules := topByRule(sv.Findings, defaultTopRules)
+	topRules := topByRule(summary.Findings, defaultTopRules)
 	if len(topRules) > 0 {
 		printTopEntries(w, "Top rules:", topRules, maxColumnWidth)
 	}
 
-	topFiles := topByFile(sv.Findings, defaultTopRules)
+	topFiles := topByFile(summary.Findings, defaultTopRules)
 	if len(topFiles) > 0 {
 		printTopEntries(w, "Top files:", topFiles, maxColumnWidth)
 	}

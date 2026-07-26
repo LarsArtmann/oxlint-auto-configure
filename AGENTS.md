@@ -166,8 +166,10 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **`slices.Sorted(maps.Keys(m))`** — Prefer over manual `make+loop+sort.Strings` for sorted map-key enumeration in Go 1.23+.
 - **profileSpecs table** — `pkg/profile/profile.go` uses a data-driven `profileSpecs` map as single source of truth for all severity decisions. Adding a profile = adding one map entry. No more parallel decide/decideCategory methods.
 - **Restriction denylist** — `restrictionDenylist` in `pkg/profile/profile.go` prevents auto-enabling rules that ban fundamental modern JS/TS syntax (`oxc/no-async-await`, `oxc/no-optional-chaining`, `oxc/no-rest-spread-properties`). These rules' own docs say they shouldn't be used in modern codebases. The denylist is checked first in `Decide()`, so denied rules are always `"off"` — emitted as explicit per-rule overrides even when the restriction category is set to error/warn.
-- **CI security** — GitHub Actions runs govulncheck on every push/PR. Three jobs: test, security, lint.
+- **CI security** — GitHub Actions runs four jobs on every push/PR: test (with `go mod tidy` consistency check), security (govulncheck), lint (golangci-lint pinned to `v2.12.2`), nix (`nix flake check`).
 - **No justfile** — Justfile was deleted. All build/test/lint commands use direct Go/nix commands. See AGENTS.md Testing section.
+- **Sentinel errors** — `pkg/oxlint/errors.go` (`ErrNotFound`, `ErrUnexpectedVersionOutput`, `ErrOxlintStderr`) and `internal/cli/cmd_root.go` (`errVerboseQuietConflict`, `errInvalidSeverity`, `errUnknownFormat`) are package-level sentinels for structured error contracts. `errUnknownFormat` has `errors.Is` callers in tests; the others are available for future programmatic matching.
+- **golangci-lint config** — `.golangci.yml` has 0 issues. Depguard allows `$gostd` + `$module` + actual dependencies (cobra, testify, larsartmann/*). Varnamelen has exemptions for idiomatic Go short names (`err`, `ok`, `tt`, `t`, `i`, etc.). Tagliatelle enforces `json: snake` for config output. Test files are excluded from `err113` and `mnd` (test error construction and magic numbers are idiomatic). CLI command files are excluded from `forbidigo` (they use `fmt.Println` by design).
 
 ---
 
