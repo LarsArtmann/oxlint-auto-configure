@@ -23,17 +23,34 @@
     "go-atomic-write": {
       "flake": false,
       "locked": {
-        "lastModified": 1784825939,
-        "narHash": "sha256-fHyuY3D2ZjJ7BrOOt5Hu63J3i4X1PwYrYCiUDQL8HJ4=",
+        "lastModified": 1785088583,
+        "narHash": "sha256-r3Ow5QGw09euTiS1US0Qa7wzSc8/jhjdLrFewFCvPJg=",
         "owner": "LarsArtmann",
         "repo": "go-atomic-write",
-        "rev": "edb2c1c1f2bd90335104876fa13662d7bef698d0",
+        "rev": "5557d5cb734155cbafce48bd0ac3d86e27958d5a",
         "type": "github"
       },
       "original": {
         "owner": "LarsArtmann",
-        "ref": "v0.3.0",
+        "ref": "v0.4.0",
         "repo": "go-atomic-write",
+        "type": "github"
+      }
+    },
+    "go-error-family": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785079049,
+        "narHash": "sha256-aKL1tjQ8AQzIV6g5+361HTTOOdtgzfWwwfQCZHwaojo=",
+        "owner": "LarsArtmann",
+        "repo": "go-error-family",
+        "rev": "4546000adb032fe450d4ea9bfbb2a9f359af3857",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LarsArtmann",
+        "ref": "v0.10.0",
+        "repo": "go-error-family",
         "type": "github"
       }
     },
@@ -108,6 +125,7 @@
       "inputs": {
         "flake-parts": "flake-parts",
         "go-atomic-write": "go-atomic-write",
+        "go-error-family": "go-error-family",
         "go-finding": "go-finding",
         "go-nix-helpers": "go-nix-helpers",
         "gogenfilter": "gogenfilter",
