@@ -4,8 +4,8 @@ go 1.26.5
 
 require (
 	github.com/larsartmann/go-atomic-write v0.4.0
-	github.com/larsartmann/go-finding v1.4.0
-	github.com/larsartmann/go-finding/pipeline v1.4.0
+	github.com/larsartmann/go-finding v1.4.1
+	github.com/larsartmann/go-finding/pipeline v1.4.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 )

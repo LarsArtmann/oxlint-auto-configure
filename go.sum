@@ -35,10 +35,10 @@ github.com/larsartmann/go-atomic-write v0.4.0 h1:4WVKiOhKz0K3Hq6+h7bmTLujkJDPf7g
 github.com/larsartmann/go-atomic-write v0.4.0/go.mod h1:pkmHWPaCXUdJstjggiHCQufE1vquDCfwYsQfHPywxNI=
 github.com/larsartmann/go-error-family v0.10.0 h1:xGPT8WzPr9EJ+SHCasLtZ2mJ7drVxmfkyM6kjzHoAWo=
 github.com/larsartmann/go-error-family v0.10.0/go.mod h1:c5ZKAqG/2xJmF7ZjShNAenbxHzWqut90ARS0lPuyUaY=
-github.com/larsartmann/go-finding v1.4.0 h1:VEQ2NsXEWZzocqXU9uz1KHyUlDv+DwyB5OjlYO9GM8s=
-github.com/larsartmann/go-finding v1.4.0/go.mod h1:Cky+x7QKcwIOzbl5ajcpwkxy2nuhE2lyfCjn3DrEVtQ=
-github.com/larsartmann/go-finding/pipeline v1.4.0 h1:iVnF4ade2RH9DDvIj8txeE7dzb40W0T1XUliNmJnhk4=
-github.com/larsartmann/go-finding/pipeline v1.4.0/go.mod h1:atxbxfNBg2drpfBL/I6SDCXMVs/YGMp5oIOuNX8pPXE=
+github.com/larsartmann/go-finding v1.4.1 h1:Xqqf9BgZge89HeM3oY/Jm+QDUbCmFPrHDRYW5xoow4c=
+github.com/larsartmann/go-finding v1.4.1/go.mod h1:kevYNKZtWDhPPqfdDaGFdgzEdtrbpJM0TTlSP5gZiYU=
+github.com/larsartmann/go-finding/pipeline v1.4.1 h1:QpV5s7MA7PhTcmmAlf01XKNqp4hT6wLTYmmkKNLtHkQ=
+github.com/larsartmann/go-finding/pipeline v1.4.1/go.mod h1:tTy0uqcCu0WFOUL9G6coAEK9y4NfufbjFnj+mjdLcr4=
 github.com/onsi/ginkgo/v2 v2.32.0 h1:Hw7s2pVrQo/8Yz5N77qdnpHaoc+c6cC9WIV1Jce+J6E=
 github.com/onsi/ginkgo/v2 v2.32.0/go.mod h1:+aXOY+vzZ5mu2iI2HpTZUPmM//oQfsNFX6gU9kNcA44=
 github.com/onsi/gomega v1.42.1 h1:iN1rCUX+44NZ1Dc97MPoeFYbFR0vh8zxoxMFwKdyZ6I=
