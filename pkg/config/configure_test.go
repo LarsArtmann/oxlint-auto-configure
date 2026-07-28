@@ -3,6 +3,7 @@ package config
 import (
 	"testing"
 
+	"github.com/larsartmann/oxlint-auto-configure/internal/testregistry"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
@@ -10,18 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func loadTestRegistry(t *testing.T) *rule.Registry {
-	t.Helper()
-
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
-
-	return reg
-}
-
 func TestGenerateProjectConfigRecommended(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	cfg, err := GenerateProjectConfig(profile.ProfileRecommended, reg, nil, nil)
 	require.NoError(t, err)
@@ -31,7 +23,7 @@ func TestGenerateProjectConfigRecommended(t *testing.T) {
 
 func TestGenerateProjectConfigMaximal(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	cfg, err := GenerateProjectConfig(profile.ProfileMaximalTypesafe, reg, nil, nil)
 	require.NoError(t, err)
@@ -41,7 +33,7 @@ func TestGenerateProjectConfigMaximal(t *testing.T) {
 
 func TestGenerateProjectConfigInvalidProfile(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	_, err := GenerateProjectConfig(profile.Profile("invalid"), reg, nil, nil)
 	require.Error(t, err)
@@ -50,7 +42,7 @@ func TestGenerateProjectConfigInvalidProfile(t *testing.T) {
 
 func TestGenerateProjectConfigWithNodeProject(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	cfg, err := GenerateProjectConfig(
 		profile.ProfileRecommended, reg, nil,
@@ -62,7 +54,7 @@ func TestGenerateProjectConfigWithNodeProject(t *testing.T) {
 
 func TestGenerateProjectConfigWithReactPlugins(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	pc := profile.PluginConfig{
 		rule.PluginReact:   true,

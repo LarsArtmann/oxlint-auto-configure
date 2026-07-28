@@ -3,19 +3,10 @@ package profile
 import (
 	"testing"
 
+	"github.com/larsartmann/oxlint-auto-configure/internal/testregistry"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
-
-func loadTestRegistry(t *testing.T) *rule.Registry {
-	t.Helper()
-
-	reg, err := rule.LoadRegistry()
-	require.NoError(t, err)
-
-	return reg
-}
 
 func TestProfileString(t *testing.T) {
 	t.Parallel()
@@ -218,7 +209,7 @@ func TestNonDeniedRestrictionRuleRespectsProfile(t *testing.T) {
 
 func TestRestrictionDenylistEntriesExistInRegistry(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	for name := range restrictionDenylist {
 		_, ok := reg.ByName(name)
@@ -228,7 +219,7 @@ func TestRestrictionDenylistEntriesExistInRegistry(t *testing.T) {
 
 func TestDecideAll(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	cat := NewCategorizer(ProfileRecommended, PluginConfig{})
 	decisions := cat.DecideAll(reg)

@@ -4,6 +4,7 @@ import (
 	"encoding/json/v2"
 	"testing"
 
+	"github.com/larsartmann/oxlint-auto-configure/internal/testregistry"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
@@ -13,7 +14,7 @@ import (
 
 func TestGeneratorRecommended(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)
@@ -34,7 +35,7 @@ func TestGeneratorRecommended(t *testing.T) {
 
 func TestGeneratorMaximalTypesafe(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileMaximalTypesafe, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)
@@ -51,7 +52,7 @@ func TestGeneratorMaximalTypesafe(t *testing.T) {
 
 func TestGeneratorWithReactProject(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	pc := profile.PluginConfig{
 		rule.PluginReact:     true,
@@ -70,7 +71,7 @@ func TestGeneratorWithReactProject(t *testing.T) {
 
 func TestGeneratorWithAllPlugins(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	pluginConfig := profile.PluginConfig{
 		rule.PluginReact: true, rule.PluginNextJS: true, rule.PluginVue: true,
@@ -111,7 +112,7 @@ func TestConfigToJSON(t *testing.T) {
 
 func TestConfigRoundTrip(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)
@@ -145,7 +146,7 @@ func TestFromJSON(t *testing.T) {
 
 func TestMinimalProfileConfig(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileMinimal, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)
@@ -170,7 +171,7 @@ func TestMinimalProfileConfig(t *testing.T) {
 
 func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil)
@@ -192,7 +193,7 @@ func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
 
 func TestRestrictionDenylistRulesAreOff(t *testing.T) {
 	t.Parallel()
-	reg := loadTestRegistry(t)
+	reg := testregistry.Load(t)
 
 	denied := []string{
 		"oxc/no-async-await",
