@@ -11,11 +11,11 @@
 
 Created `internal/testregistry/load.go` with a single `Load(t *testing.T) *rule.Registry` function. Migrated 2 byte-for-byte identical `loadTestRegistry` copies:
 
-| Package | Files changed | Call sites migrated |
-|---|---|---|
-| `pkg/config` | `configure_test.go`, `generator_test.go`, `validate_test.go` | 19 |
-| `pkg/profile` | `profile_test.go` | 2 |
-| **Total** | 4 files | **21 call sites** |
+| Package       | Files changed                                                | Call sites migrated |
+| ------------- | ------------------------------------------------------------ | ------------------- |
+| `pkg/config`  | `configure_test.go`, `generator_test.go`, `validate_test.go` | 19                  |
+| `pkg/profile` | `profile_test.go`                                            | 2                   |
+| **Total**     | 4 files                                                      | **21 call sites**   |
 
 The `require` import was correctly removed from `pkg/profile/profile_test.go` (it was only used inside the deleted helper). The `pkg/config` files retain `require` (used in test bodies).
 
@@ -27,16 +27,16 @@ This file's `loadTestRegistry` returns `*Registry` (unqualified) and the file te
 
 ### 3. Full verification matrix — all green
 
-| Check | Command | Result |
-|---|---|---|
-| Unit tests (no cache) | `go test -race -count=1 ./...` | 9/9 pass |
-| Lint (full config) | `golangci-lint run ./...` | 0 issues |
-| Vet | `go vet ./...` | clean |
-| Tidy consistency | `go mod tidy` + `git diff` | no changes |
-| Nix CI | `nix flake check .` | all checks passed |
-| art-dupl `-t 2` | `art-dupl --type-aware -t 2 --html` | 1 group, 16 test-only, **0 production** |
-| art-dupl `-t 1` | `art-dupl --type-aware -t 1 --html` | identical — no new clones |
-| art-dupl `--include-generated all` | `art-dupl --type-aware -t 2 --include-generated all --html` | identical — no generated clones |
+| Check                              | Command                                                     | Result                                  |
+| ---------------------------------- | ----------------------------------------------------------- | --------------------------------------- |
+| Unit tests (no cache)              | `go test -race -count=1 ./...`                              | 9/9 pass                                |
+| Lint (full config)                 | `golangci-lint run ./...`                                   | 0 issues                                |
+| Vet                                | `go vet ./...`                                              | clean                                   |
+| Tidy consistency                   | `go mod tidy` + `git diff`                                  | no changes                              |
+| Nix CI                             | `nix flake check .`                                         | all checks passed                       |
+| art-dupl `-t 2`                    | `art-dupl --type-aware -t 2 --html`                         | 1 group, 16 test-only, **0 production** |
+| art-dupl `-t 1`                    | `art-dupl --type-aware -t 1 --html`                         | identical — no new clones               |
+| art-dupl `--include-generated all` | `art-dupl --type-aware -t 2 --include-generated all --html` | identical — no generated clones         |
 
 ### 4. Documentation updated
 
