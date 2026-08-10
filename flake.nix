@@ -3,19 +3,15 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
-    systems.url = "github:nix-systems/default";
-    treefmt-nix = {
-      url = "github:numtide/treefmt-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     go-nix-helpers = {
       url = "git+ssh://git@github.com/LarsArtmann/go-nix-helpers?ref=master";
-      flake = false;
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     go-atomic-write = {
@@ -43,8 +39,6 @@
     inputs@{
       self,
       flake-parts,
-      systems,
-      treefmt-nix,
       ...
     }:
     let
@@ -53,11 +47,57 @@
       date = builtins.substring 0 8 (self.lastModifiedDate or "19700101");
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = import systems;
+      imports = [ inputs.go-nix-helpers.flakeModules.go-standard ];
 
-      imports = [
-        treefmt-nix.flakeModule
-      ];
+      go-standard = {
+        pname = "oxlint-auto-configure";
+        vendorHash = "sha256-4lkN+KTs3XltH2PU8qGeFTI3JZixkXGKY/FcFtYKlz8=";
+        description = "Auto-generate optimal .oxlintrc.json configurations";
+        enableCheck = false;
+
+        deps = {
+          "github.com/larsartmann/go-atomic-write" = inputs.go-atomic-write;
+          "github.com/larsartmann/go-error-family" = inputs.go-error-family;
+          "github.com/larsartmann/go-finding" = inputs.go-finding;
+          "github.com/LarsArtmann/gogenfilter/v3" = inputs.gogenfilter;
+        };
+
+        src = inputs.nixpkgs.lib.fileset.toSource {
+          root = ./.;
+          fileset = inputs.nixpkgs.lib.fileset.unions [
+            ./go.mod
+            ./go.sum
+            ./cmd
+            ./internal
+            ./pkg
+          ];
+        };
+
+        ldflags = [
+          "-s"
+          "-w"
+          "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.version=${version}"
+          "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.commit=${commit}"
+          "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.date=${date}"
+          "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.builtBy=nix"
+        ];
+
+        extraBuildAttrs.preBuild = "export GOEXPERIMENT=jsonv2";
+
+        shellExtraEnv = {
+          GOPRIVATE = "github.com/larsartmann/*,github.com/LarsArtmann/*";
+          GOEXPERIMENT = "jsonv2";
+        };
+
+        devShellExtraPackages = pkgs: [
+          pkgs.oxlint
+          pkgs.gopls
+          pkgs.gotools
+          pkgs.golangci-lint
+        ];
+
+        enableNixfmt = true;
+      };
 
       perSystem =
         {
@@ -66,81 +106,16 @@
           lib,
           ...
         }:
-        let
-          mkPreparedSource = import (inputs.go-nix-helpers + "/mkPreparedSource.nix") {
-            inherit pkgs lib;
-            goPkg = pkgs.go_1_26;
-          };
-
-          preparedSrc = mkPreparedSource {
-            name = "oxlint-auto-configure";
-            inherit version;
-            src = lib.fileset.toSource {
-              root = ./.;
-              fileset = lib.fileset.unions [
-                ./go.mod
-                ./go.sum
-                ./cmd
-                ./internal
-                ./pkg
-              ];
-            };
-            deps = {
-              "github.com/larsartmann/go-atomic-write" = inputs.go-atomic-write;
-              "github.com/larsartmann/go-error-family" = inputs.go-error-family;
-              "github.com/larsartmann/go-finding" = inputs.go-finding;
-              "github.com/LarsArtmann/gogenfilter/v3" = inputs.gogenfilter;
-            };
-          };
-
-          src = preparedSrc;
-
-          # To update after a dependency change: `nix build .#default`, then
-          # copy the `got:` sha256 from the hash-mismatch error below.
-          vendorHash = "sha256-4lkN+KTs3XltH2PU8qGeFTI3JZixkXGKY/FcFtYKlz8=";
-        in
         {
-          treefmt = {
-            projectRootFile = "go.mod";
-            programs = {
-              gofumpt.enable = true;
-              goimports.enable = true;
-              nixfmt.enable = true;
-            };
-          };
-
-          packages.default = pkgs.buildGoModule {
-            pname = "oxlint-auto-configure";
-            inherit version src vendorHash;
-            proxyVendor = false;
-            ldflags = [
-              "-s"
-              "-w"
-              "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.version=${version}"
-              "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.commit=${commit}"
-              "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.date=${date}"
-              "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.builtBy=nix"
-            ];
+          checks.test = config.packages.default.overrideAttrs (_old: {
+            doCheck = true;
             nativeCheckInputs = [ pkgs.oxlint ];
-            env.GOEXPERIMENT = "jsonv2";
-            meta = with lib; {
-              description = "Auto-generate optimal .oxlintrc.json configurations";
-              homepage = "https://github.com/larsartmann/oxlint-auto-configure";
-              license = licenses.mit;
-              maintainers = [
-                {
-                  name = "Lars Artmann";
-                  github = "LarsArtmann";
-                }
-              ];
-              mainProgram = "oxlint-auto-configure";
-            };
-          };
+          });
 
-          apps.default = {
+          apps.default = lib.mkForce {
             type = "app";
             program = "${
-              pkgs.runCommandLocal "oxlint-auto-configure"
+              pkgs.runCommandLocal "oxlint-auto-configure-wrapped"
                 {
                   nativeBuildInputs = [ pkgs.makeWrapper ];
                   meta.mainProgram = "oxlint-auto-configure";
@@ -152,45 +127,6 @@
                 ''
             }/bin/oxlint-auto-configure";
           };
-
-          devShells = {
-            default = pkgs.mkShell {
-              packages = with pkgs; [
-                go_1_26
-                gopls
-                gotools
-                golangci-lint
-                oxlint
-              ];
-
-              GOPRIVATE = "github.com/larsartmann/*,github.com/LarsArtmann/*";
-              GOWORK = "off";
-              GOEXPERIMENT = "jsonv2";
-            };
-
-            ci = pkgs.mkShellNoCC {
-              packages = [
-                pkgs.go_1_26
-                pkgs.golangci-lint
-              ];
-
-              GOWORK = "off";
-              GOPRIVATE = "github.com/larsartmann/*,github.com/LarsArtmann/*";
-              GOEXPERIMENT = "jsonv2";
-            };
-          };
-
-          checks = {
-            format = config.treefmt.build.check self;
-            build = config.packages.default;
-            test = config.packages.default.overrideAttrs (_: {
-              doCheck = true;
-            });
-          };
         };
-
-      flake.overlays.default = final: _prev: {
-        oxlint-auto-configure = self.packages.${final.stdenv.hostPlatform.system}.default;
-      };
     };
 }
