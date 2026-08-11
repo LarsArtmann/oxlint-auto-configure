@@ -1,5 +1,5 @@
-github.com/LarsArtmann/gogenfilter/v3 v3.3.2 h1:ZSxaKr6IMLzy2cjAp+wMOkS4UxbP5+gFDTNqkq2Ry9Q=
-github.com/LarsArtmann/gogenfilter/v3 v3.3.2/go.mod h1:Ejv6pjcX7bKH1eOVvMbm87Ng5dJNLC72mEvE3h2R4g4=
+github.com/LarsArtmann/gogenfilter/v3 v3.4.0 h1:vzNVJeJv7yx4rPIJ4UzALJXWdkOow1hLjgpgdbqA2lo=
+github.com/LarsArtmann/gogenfilter/v3 v3.4.0/go.mod h1:Ejv6pjcX7bKH1eOVvMbm87Ng5dJNLC72mEvE3h2R4g4=
 github.com/Masterminds/semver/v3 v3.5.0 h1:kQceYJfbupGfZOKZQg0kou0DgAKhzDg2NZPAwZ/2OOE=
 github.com/Masterminds/semver/v3 v3.5.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/bmatcuk/doublestar/v4 v4.10.0 h1:zU9WiOla1YA122oLM6i4EXvGW62DvKZVxIe6TYWexEs=
@@ -35,10 +35,10 @@ github.com/larsartmann/go-atomic-write v0.4.1 h1:Q1kyeYnmCghdGXoBi94zJysj9GllwB0
 github.com/larsartmann/go-atomic-write v0.4.1/go.mod h1:pkmHWPaCXUdJstjggiHCQufE1vquDCfwYsQfHPywxNI=
 github.com/larsartmann/go-error-family v0.10.0 h1:xGPT8WzPr9EJ+SHCasLtZ2mJ7drVxmfkyM6kjzHoAWo=
 github.com/larsartmann/go-error-family v0.10.0/go.mod h1:c5ZKAqG/2xJmF7ZjShNAenbxHzWqut90ARS0lPuyUaY=
-github.com/larsartmann/go-finding v1.4.1 h1:Xqqf9BgZge89HeM3oY/Jm+QDUbCmFPrHDRYW5xoow4c=
-github.com/larsartmann/go-finding v1.4.1/go.mod h1:kevYNKZtWDhPPqfdDaGFdgzEdtrbpJM0TTlSP5gZiYU=
-github.com/larsartmann/go-finding/pipeline v1.4.1 h1:QpV5s7MA7PhTcmmAlf01XKNqp4hT6wLTYmmkKNLtHkQ=
-github.com/larsartmann/go-finding/pipeline v1.4.1/go.mod h1:tTy0uqcCu0WFOUL9G6coAEK9y4NfufbjFnj+mjdLcr4=
+github.com/larsartmann/go-finding v1.6.0 h1:2dBSKc6s8IvszH0yU4WVpHa7a0e33KUunuGcBC1ITGU=
+github.com/larsartmann/go-finding v1.6.0/go.mod h1:kevYNKZtWDhPPqfdDaGFdgzEdtrbpJM0TTlSP5gZiYU=
+github.com/larsartmann/go-finding/pipeline v1.6.0 h1:ZkUpnVJ7M54pgdU8hwBDCL5fVwLpDNIdww5s2o1IzM8=
+github.com/larsartmann/go-finding/pipeline v1.6.0/go.mod h1:eNVh0M6mIWdAhjYcJ2TG3vVPf6UegoSPkCrq6Njrx34=
 github.com/onsi/ginkgo/v2 v2.32.0 h1:Hw7s2pVrQo/8Yz5N77qdnpHaoc+c6cC9WIV1Jce+J6E=
 github.com/onsi/ginkgo/v2 v2.32.0/go.mod h1:+aXOY+vzZ5mu2iI2HpTZUPmM//oQfsNFX6gU9kNcA44=
 github.com/onsi/gomega v1.42.1 h1:iN1rCUX+44NZ1Dc97MPoeFYbFR0vh8zxoxMFwKdyZ6I=
