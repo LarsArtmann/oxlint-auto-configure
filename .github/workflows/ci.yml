@@ -47,7 +47,7 @@ jobs:
 
       - name: Install oxlint
         run: |
-          npm install -g oxlint
+          pnpm add -g oxlint
 
       - name: Tidy
         env:
