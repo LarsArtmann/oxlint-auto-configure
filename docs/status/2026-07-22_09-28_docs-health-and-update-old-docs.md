@@ -1,9 +1,9 @@
 # Status Report — Docs Health + Update Old Docs Pass
 
-**Date:** 2026-07-22 09:28:25 CEST (Wednesday)  
-**Branch:** `master`  
-**Commit:** `4a64b0d` — `docs(status): improve resolution report navigation and readability`  
-**Report file:** `docs/status/2026-07-22_09-28_docs-health-and-update-old-docs.md`  
+**Date:** 2026-07-22 09:28:25 CEST (Wednesday)\
+**Branch:** `master`\
+**Commit:** `4a64b0d` — `docs(status): improve resolution report navigation and readability`\
+**Report file:** `docs/status/2026-07-22_09-28_docs-health-and-update-old-docs.md`\
 **Reporter:** Crush (this session)
 
 ---

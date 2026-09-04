@@ -121,7 +121,7 @@ This is the same cognitive error as round 1, just one layer less severe: I learn
 ### Dedup follow-up (direct from this session)
 
 1. **Create `internal/testregistry/load_test.go`** — `TestLoadReturnsNonEmptyRegistry`, `TestLoadReturnsAllRules` (841 count check)
-2. **Scan production code for cross-package helper duplication** — `rg` all `func ` signatures in non-test `.go` files, diff across packages
+2. **Scan production code for cross-package helper duplication** — `rg` all `func` signatures in non-test `.go` files, diff across packages
 3. **Add `internal/testregistry/load.go` to AGENTS.md Key Test Files table**
 4. **Add `internal/testregistry/` to any package listing in README.md or FEATURES.md** (if they enumerate internal packages)
 5. **Benchmark `testregistry.Load` call cost** — measure how long the embedded JSON parse takes; decide if `sync.Once` is warranted

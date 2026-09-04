@@ -31,14 +31,14 @@
         --radius: 0px;
         --radius-sm: 0px;
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
       * {
         box-sizing: border-box;
@@ -238,15 +238,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .severity {
         display: inline-block;
@@ -516,22 +528,27 @@
             <div class="tri"></div>
           </div>
           <div class="hero-badge">Build Fix &amp; Cleanup Session</div>
-          <h1>Status Report — go-finding v1.2.0 Migration &amp; Deep Cleanup</h1>
+          <h1>
+            Status Report — go-finding v1.2.0 Migration &amp; Deep Cleanup
+          </h1>
           <p class="hero-subtitle">
-            Started with a broken nix build from an uncommitted go-finding v1.2.0 upgrade. Ended
-            with 7 commits: build fix, dead config purge, architectural refactor, and zero lint
-            issues. Net result: -2,800 lines dead weight, split-brain profile logic eliminated.
+            Started with a broken nix build from an uncommitted go-finding
+            v1.2.0 upgrade. Ended with 7 commits: build fix, dead config purge,
+            architectural refactor, and zero lint issues. Net result: -2,800
+            lines dead weight, split-brain profile logic eliminated.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Update 2026-07-22</h4>
           <p>
-            Since this report, <code>GOEXPERIMENT=jsonv2</code> was enabled across the codebase
-            (8913345, 4216a2c), a restriction denylist was added to prevent auto-enabling rules that
-            ban modern JS/TS syntax (804d117), and the lint stack was hardened (87505b0). Full
-            item-by-item status is in the <a href="#resolution">Resolution</a> section at the bottom
-            of this report.
+            Since this report, <code>GOEXPERIMENT=jsonv2</code> was enabled
+            across the codebase (8913345, 4216a2c), a restriction denylist was
+            added to prevent auto-enabling rules that ban modern JS/TS syntax
+            (804d117), and the lint stack was hardened (87505b0). Full
+            item-by-item status is in the
+            <a href="#resolution">Resolution</a> section at the bottom of this
+            report.
           </p>
         </div>
 
@@ -568,32 +585,36 @@
         <div class="card card-solution">
           <h4>go-finding v1.2.0 Migration</h4>
           <p>
-            Branded <code>FilePath</code> type adopted in detector + analyze command.
-            <code>ToSARIFFiltered</code> →
-            <code>ToSARIFWithOpts(finding.WithMinSeverity(sev))</code>. Tests updated. Vendor
-            re-committed with <code>lockutil</code> subpackage staged for nix git-filter.
+            Branded <code>FilePath</code> type adopted in detector + analyze
+            command. <code>ToSARIFFiltered</code> →
+            <code>ToSARIFWithOpts(finding.WithMinSeverity(sev))</code>. Tests
+            updated. Vendor re-committed with <code>lockutil</code> subpackage
+            staged for nix git-filter.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>AGENTS.md Justfile Split Brain Fixed</h4>
           <p>
-            AGENTS.md documented <code>just test</code>, <code>just cover</code>,
-            <code>just vet</code>, <code>just check</code>, <code>just update-rules</code> — but no
-            justfile exists. Replaced with direct <code>GOWORK=off go test</code> and
-            <code>nix</code> commands. Also fixed stale <code>v1.0.0</code> reference →
-            <code>v1.2.0</code>.
+            AGENTS.md documented <code>just test</code>,
+            <code>just cover</code>, <code>just vet</code>,
+            <code>just check</code>, <code>just update-rules</code> — but no
+            justfile exists. Replaced with direct
+            <code>GOWORK=off go test</code> and <code>nix</code> commands. Also
+            fixed stale <code>v1.0.0</code> reference → <code>v1.2.0</code>.
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>.golangci.yml — 11 Dead Linters Removed</h4>
           <p>
-            Removed: <code>bodyclose</code>, <code>contextcheck</code>, <code>ginkgolinter</code>,
-            <code>gosmopolitan</code>, <code>loggercheck</code>, <code>musttag</code>,
-            <code>noctx</code>, <code>protogetter</code>, <code>rowserrcheck</code>,
-            <code>sqlclosecheck</code>, <code>zerologlint</code>. All had zero matching patterns.
-            Also removed 5 dead <code>goexperiment.*</code> build tags, empty
+            Removed: <code>bodyclose</code>, <code>contextcheck</code>,
+            <code>ginkgolinter</code>, <code>gosmopolitan</code>,
+            <code>loggercheck</code>, <code>musttag</code>, <code>noctx</code>,
+            <code>protogetter</code>, <code>rowserrcheck</code>,
+            <code>sqlclosecheck</code>, <code>zerologlint</code>. All had zero
+            matching patterns. Also removed 5 dead
+            <code>goexperiment.*</code> build tags, empty
             <code>formats: {}</code>, and ginkgolinter settings block.
           </p>
         </div>
@@ -601,10 +622,11 @@
         <div class="card card-solution">
           <h4>2,775 Lines of Stale Docs Deleted</h4>
           <p>
-            11 status reports, 1 completed planning doc, <code>PUBLIC_OR_PRIVATE.md</code> (one-time
-            decision, made), <code>CHANGELOG.md</code> (stale, wrong date, goreleaser
-            auto-generates), <code>DELETE_TO_IMPROVE_PLAN.md</code> (action items done or tracked
-            elsewhere). Git history is the archive.
+            11 status reports, 1 completed planning doc,
+            <code>PUBLIC_OR_PRIVATE.md</code> (one-time decision, made),
+            <code>CHANGELOG.md</code> (stale, wrong date, goreleaser
+            auto-generates), <code>DELETE_TO_IMPROVE_PLAN.md</code> (action
+            items done or tracked elsewhere). Git history is the archive.
           </p>
         </div>
 
@@ -612,10 +634,13 @@
           <h4>Dead Goreleaser Ldflags Fixed</h4>
           <p>
             <code>main.version</code> →
-            <code>github.com/larsartmann/oxlint-auto-configure/internal/cli.version</code>. Removed
-            dead <code>main.commit</code>, <code>main.date</code>, <code>main.builtBy</code> (those
-            vars don't exist in <code>main</code>). Removed unreachable
-            <code>darwin/386</code> ignore. Removed <code>CHANGELOG*</code> from archive files.
+            <code
+              >github.com/larsartmann/oxlint-auto-configure/internal/cli.version</code
+            >. Removed dead <code>main.commit</code>, <code>main.date</code>,
+            <code>main.builtBy</code> (those vars don't exist in
+            <code>main</code>). Removed unreachable
+            <code>darwin/386</code> ignore. Removed <code>CHANGELOG*</code> from
+            archive files.
           </p>
         </div>
 
@@ -625,9 +650,9 @@
             8 parallel decision methods (<code>decideMaximal</code>/<code
               >decideCategoryMaximal</code
             >
-            × 4 profiles) → 1 data-driven <code>profileSpecs</code> map. Adding a profile = adding
-            one map entry. <strong>-48 lines</strong>. Modernized <code>sort.Strings</code> →
-            <code>slices.Sort</code>.
+            × 4 profiles) → 1 data-driven <code>profileSpecs</code> map. Adding
+            a profile = adding one map entry. <strong>-48 lines</strong>.
+            Modernized <code>sort.Strings</code> → <code>slices.Sort</code>.
           </p>
         </div>
 
@@ -635,8 +660,9 @@
           <h4>Zero Lint Issues</h4>
           <p>
             Fixed pre-existing <code>unparam</code> warning:
-            <code>parseTestFindings(t, input)</code> always received <code>realOxlintOutput</code> —
-            inlined the constant. <code>golangci-lint run ./...</code> now reports
+            <code>parseTestFindings(t, input)</code> always received
+            <code>realOxlintOutput</code> — inlined the constant.
+            <code>golangci-lint run ./...</code> now reports
             <strong>0 issues</strong>.
           </p>
         </div>
@@ -645,15 +671,17 @@
           <h4>Stale .gitignore Entries Cleaned</h4>
           <p>
             Removed <code>/report/jscpd-report.json</code> (tool never used),
-            <code>/coverage</code> dir (never existed), <code>node_modules/</code> (Go project).
+            <code>/coverage</code> dir (never existed),
+            <code>node_modules/</code> (Go project).
           </p>
         </div>
 
         <div class="card card-solution">
           <h4>Full Verification Passed</h4>
           <p>
-            <code>go test -race</code> ✓, <code>go vet</code> ✓, <code>golangci-lint</code> ✓ (0
-            issues), <code>nix build</code> ✓. All pushed to <code>origin/master</code>.
+            <code>go test -race</code> ✓, <code>go vet</code> ✓,
+            <code>golangci-lint</code> ✓ (0 issues), <code>nix build</code> ✓.
+            All pushed to <code>origin/master</code>.
           </p>
         </div>
 
@@ -663,8 +691,8 @@
             <div class="text">
               <strong>High test coverage maintained</strong>
               <span
-                >config 94.9%, detect 95.0%, diff 92.9%, format 95.5%, rule 94.4%, profile 89.5%,
-                oxlint 81.9%, cli 73.9%</span
+                >config 94.9%, detect 95.0%, diff 92.9%, format 95.5%, rule
+                94.4%, profile 89.5%, oxlint 81.9%, cli 73.9%</span
               >
             </div>
           </div>
@@ -673,8 +701,8 @@
             <div class="text">
               <strong>Strong type safety with branded types</strong>
               <span
-                >go-finding branded types (RuleName, ToolName, ID, FilePath) prevent mixing strings
-                at compile time</span
+                >go-finding branded types (RuleName, ToolName, ID, FilePath)
+                prevent mixing strings at compile time</span
               >
             </div>
           </div>
@@ -683,8 +711,8 @@
             <div class="text">
               <strong>Data-driven profile engine</strong>
               <span
-                >Single source of truth map — impossible to create decide/decideCategory split
-                brain</span
+                >Single source of truth map — impossible to create
+                decide/decideCategory split brain</span
               >
             </div>
           </div>
@@ -692,7 +720,9 @@
             <div class="check">+</div>
             <div class="text">
               <strong>Reproducible nix builds</strong>
-              <span>Vendored deps, flake-based, oxlint runtime dep wrapped</span>
+              <span
+                >Vendored deps, flake-based, oxlint runtime dep wrapped</span
+              >
             </div>
           </div>
         </div>
@@ -702,16 +732,18 @@
         <div class="card card-warning">
           <h4>docs/planning/2026-04-29_22-15_coverage-lint-ci-hardening.md</h4>
           <p>
-            Still exists. Has open items for CI hardening and complexity reduction. Should be folded
-            into AGENTS.md or TODO_LIST.md and deleted, or updated to reflect current state.
+            Still exists. Has open items for CI hardening and complexity
+            reduction. Should be folded into AGENTS.md or TODO_LIST.md and
+            deleted, or updated to reflect current state.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>docs/modularization/ (3 files)</h4>
           <p>
-            Active proposal for Go module splitting — DEPENDENCY_GRAPH.md, EXECUTION_PLAN.md,
-            PROPOSAL.md. Not yet executed. Decision needed: proceed with modularization or archive?
+            Active proposal for Go module splitting — DEPENDENCY_GRAPH.md,
+            EXECUTION_PLAN.md, PROPOSAL.md. Not yet executed. Decision needed:
+            proceed with modularization or archive?
           </p>
         </div>
 
@@ -720,9 +752,10 @@
         <div class="card">
           <h4>testify → ginkgo/gomega migration</h4>
           <p>
-            The <code>how-to-golang</code> policy bans testify in favor of ginkgo/gomega. This
-            project uses testify in all 10 test files with <code>testifylint</code> configured.
-            Large effort — not recommended for a CLI tool unless the policy is non-negotiable.
+            The <code>how-to-golang</code> policy bans testify in favor of
+            ginkgo/gomega. This project uses testify in all 10 test files with
+            <code>testifylint</code> configured. Large effort — not recommended
+            for a CLI tool unless the policy is non-negotiable.
           </p>
         </div>
 
@@ -730,41 +763,48 @@
           <h4>encoding/json/v2 adoption</h4>
           <p>
             <strong>Done in 8913345 / 4216a2c.</strong> The project now uses
-            <code>encoding/json/v2</code> via <code>GOEXPERIMENT=jsonv2</code>, set in
-            <code>flake.nix</code>, CI workflows, and the documented local commands. The
-            <code>go 1.26.4</code> declaration remains, so gopls still warns that
-            <code>json.Unmarshal</code> needs Go 1.27.
+            <code>encoding/json/v2</code> via <code>GOEXPERIMENT=jsonv2</code>,
+            set in <code>flake.nix</code>, CI workflows, and the documented
+            local commands. The <code>go 1.26.4</code> declaration remains, so
+            gopls still warns that <code>json.Unmarshal</code> needs Go 1.27.
           </p>
         </div>
 
         <div class="card">
           <h4>CI Pipeline (GitHub Actions)</h4>
           <p>
-            <code>.github/workflows/</code> exists but coverage of CI hardening items from the
-            planning doc is unknown. The <code>DELETE_TO_IMPROVE_PLAN.md</code> noted "No CI" but
-            the workflow files exist now.
+            <code>.github/workflows/</code> exists but coverage of CI hardening
+            items from the planning doc is unknown. The
+            <code>DELETE_TO_IMPROVE_PLAN.md</code> noted "No CI" but the
+            workflow files exist now.
           </p>
         </div>
 
         <div class="card">
           <h4>GoReleaser ldflags — full version metadata</h4>
           <p>
-            Removed dead <code>commit</code>/<code>date</code>/<code>builtBy</code> ldflags. Could
-            instead add those variables to enable <code>--version</code> showing build metadata.
-            Tradeoff: more vars vs more info.
+            Removed dead <code>commit</code>/<code>date</code>/<code
+              >builtBy</code
+            >
+            ldflags. Could instead add those variables to enable
+            <code>--version</code> showing build metadata. Tradeoff: more vars
+            vs more info.
           </p>
         </div>
 
-        <h2 id="fucked"><span class="num">04</span>Totally Fucked Up (Now Fixed)</h2>
+        <h2 id="fucked">
+          <span class="num">04</span>Totally Fucked Up (Now Fixed)
+        </h2>
 
         <div class="card card-problem">
           <h4>Uncommitted go-finding v1.2.0 upgrade</h4>
           <p>
-            Previous session upgraded go-finding to v1.2.0, fixed the code, fixed tests, but
-            <strong>never committed</strong>. Six files sat modified in the working tree. The nix
-            build was broken because untracked vendor files (<code>lockutil/</code>,
-            <code>interval_index.go</code>) were invisible to nix's git-based flake source
-            filtering.
+            Previous session upgraded go-finding to v1.2.0, fixed the code,
+            fixed tests, but
+            <strong>never committed</strong>. Six files sat modified in the
+            working tree. The nix build was broken because untracked vendor
+            files (<code>lockutil/</code>, <code>interval_index.go</code>) were
+            invisible to nix's git-based flake source filtering.
           </p>
           <div class="callout callout-solution">
             <strong>Fixed</strong> Committed all changes, staged vendor with
@@ -775,24 +815,26 @@
         <div class="card card-problem">
           <h4>8-method profile split brain</h4>
           <p>
-            <code>Decide()</code> and <code>DecideCategory()</code> each had 4 profile-specific
-            methods expressing the same logic in parallel. Adding a profile required updating both —
-            if you forgot one, you'd get silent severity mismatches between per-rule and
-            per-category decisions.
+            <code>Decide()</code> and <code>DecideCategory()</code> each had 4
+            profile-specific methods expressing the same logic in parallel.
+            Adding a profile required updating both — if you forgot one, you'd
+            get silent severity mismatches between per-rule and per-category
+            decisions.
           </p>
           <div class="callout callout-solution">
-            <strong>Fixed</strong> Replaced with <code>profileSpecs</code> map — single data-driven
-            source of truth.
+            <strong>Fixed</strong> Replaced with <code>profileSpecs</code> map —
+            single data-driven source of truth.
           </div>
         </div>
 
         <div class="card card-problem">
           <h4>Goreleaser ldflags pointing to nonexistent vars</h4>
           <p>
-            <code>-X main.version</code> injected version into <code>main</code> package, but
-            <code>version</code> lives in <code>internal/cli</code>. <code>-X main.commit</code>,
-            <code>main.date</code>, <code>main.builtBy</code> — these variables never existed
-            anywhere. Four ldflags doing absolutely nothing.
+            <code>-X main.version</code> injected version into
+            <code>main</code> package, but <code>version</code> lives in
+            <code>internal/cli</code>. <code>-X main.commit</code>,
+            <code>main.date</code>, <code>main.builtBy</code> — these variables
+            never existed anywhere. Four ldflags doing absolutely nothing.
           </p>
           <div class="callout callout-solution">
             <strong>Fixed</strong> Correct path + removed dead vars.
@@ -802,8 +844,9 @@
         <div class="card card-problem">
           <h4>AGENTS.md referencing deleted justfile</h4>
           <p>
-            Every developer/AI session followed stale <code>just test</code> instructions that
-            pointed to a file that doesn't exist. Major documentation split brain.
+            Every developer/AI session followed stale
+            <code>just test</code> instructions that pointed to a file that
+            doesn't exist. Major documentation split brain.
           </p>
           <div class="callout callout-solution">
             <strong>Fixed</strong> Replaced with direct Go and nix commands.
@@ -815,24 +858,25 @@
         <div class="card card-warning">
           <h4>Commit immediately after fixes</h4>
           <p>
-            The root cause of the broken nix build was an uncommitted change. Always commit + verify
-            build before moving on.
+            The root cause of the broken nix build was an uncommitted change.
+            Always commit + verify build before moving on.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Run go vet + lint, not just tests</h4>
           <p>
-            Previous session ran <code>go test</code> but not <code>go vet</code> or
-            <code>golangci-lint</code>. The <code>unparam</code> issue was pre-existing but
-            unnoticed.
+            Previous session ran <code>go test</code> but not
+            <code>go vet</code> or <code>golangci-lint</code>. The
+            <code>unparam</code> issue was pre-existing but unnoticed.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Consider encoding/json/v2</h4>
           <p>
-            On Go 1.26.4 with json v1 still. The v2 API is faster, safer, and the
+            On Go 1.26.4 with json v1 still. The v2 API is faster, safer, and
+            the
             <code>how-to-golang</code> policy recommends it for Go 1.25+.
           </p>
         </div>
@@ -840,28 +884,32 @@
         <div class="card card-warning">
           <h4>docs/planning/ should be folded into AGENTS.md</h4>
           <p>
-            The remaining planning doc has open items that belong in AGENTS.md or a TODO_LIST.md.
-            Keeping stale planning docs creates confusion.
+            The remaining planning doc has open items that belong in AGENTS.md
+            or a TODO_LIST.md. Keeping stale planning docs creates confusion.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>CLI coverage at 73.9% — lowest in project</h4>
           <p>
-            <code>internal/cli</code> is the user-facing layer and has the lowest coverage. The
-            <code>Configure()</code> extraction enables testability — should push to 85%+.
+            <code>internal/cli</code> is the user-facing layer and has the
+            lowest coverage. The <code>Configure()</code> extraction enables
+            testability — should push to 85%+.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Dockerfile is minimal COPY-only</h4>
           <p>
-            No multi-stage build. Goreleaser handles the build, but the Dockerfile copies a binary
-            that must be pre-built. Could use <code>FROM scratch</code> or add a build stage.
+            No multi-stage build. Goreleaser handles the build, but the
+            Dockerfile copies a binary that must be pre-built. Could use
+            <code>FROM scratch</code> or add a build stage.
           </p>
         </div>
 
-        <h2 id="next"><span class="num">06</span>Next 50 Tasks (Sorted by Impact / Effort)</h2>
+        <h2 id="next">
+          <span class="num">06</span>Next 50 Tasks (Sorted by Impact / Effort)
+        </h2>
         <div class="table-wrap">
           <table>
             <thead>
@@ -876,7 +924,9 @@
               <tr>
                 <td>1</td>
                 <td><span class="badge badge-critical">Critical</span></td>
-                <td>Fold docs/planning/ open items into AGENTS.md, delete the doc</td>
+                <td>
+                  Fold docs/planning/ open items into AGENTS.md, delete the doc
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -900,7 +950,10 @@
               <tr>
                 <td>5</td>
                 <td><span class="badge badge-high">High</span></td>
-                <td>Add GoReleaser commit/date/builtBy vars to main.go for --version richness</td>
+                <td>
+                  Add GoReleaser commit/date/builtBy vars to main.go for
+                  --version richness
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -930,7 +983,9 @@
               <tr>
                 <td>10</td>
                 <td><span class="badge badge-medium">Medium</span></td>
-                <td>Consider testify → ginkgo/gomega migration (policy compliance)</td>
+                <td>
+                  Consider testify → ginkgo/gomega migration (policy compliance)
+                </td>
                 <td><span class="badge badge-critical">L</span></td>
               </tr>
               <tr>
@@ -948,7 +1003,9 @@
               <tr>
                 <td>13</td>
                 <td><span class="badge badge-medium">Medium</span></td>
-                <td>Profile.go: extract Minimal special-case into the spec table</td>
+                <td>
+                  Profile.go: extract Minimal special-case into the spec table
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -966,7 +1023,9 @@
               <tr>
                 <td>16</td>
                 <td><span class="badge badge-medium">Medium</span></td>
-                <td>README.md: update with current command examples (no justfile)</td>
+                <td>
+                  README.md: update with current command examples (no justfile)
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -978,7 +1037,10 @@
               <tr>
                 <td>18</td>
                 <td><span class="badge badge-medium">Medium</span></td>
-                <td>Consider slog structured logging adoption (currently uses log/slog already)</td>
+                <td>
+                  Consider slog structured logging adoption (currently uses
+                  log/slog already)
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -996,7 +1058,9 @@
               <tr>
                 <td>21</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Consider error wrapping with cockroachdb/errors (policy)</td>
+                <td>
+                  Consider error wrapping with cockroachdb/errors (policy)
+                </td>
                 <td><span class="badge badge-medium">M</span></td>
               </tr>
               <tr>
@@ -1014,7 +1078,9 @@
               <tr>
                 <td>24</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Registry: add test for rule count matching rules_data.json</td>
+                <td>
+                  Registry: add test for rule count matching rules_data.json
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -1032,19 +1098,27 @@
               <tr>
                 <td>27</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Consider adding oxfmt to formatter chain (already detected by buildflow)</td>
+                <td>
+                  Consider adding oxfmt to formatter chain (already detected by
+                  buildflow)
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
                 <td>28</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Profile: add Description() test for exact output strings</td>
+                <td>
+                  Profile: add Description() test for exact output strings
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
                 <td>29</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Consider version_test.go: test binary verification logic edge cases</td>
+                <td>
+                  Consider version_test.go: test binary verification logic edge
+                  cases
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -1074,7 +1148,10 @@
               <tr>
                 <td>34</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Consider adding CHANGELOG generation via goreleaser to release notes</td>
+                <td>
+                  Consider adding CHANGELOG generation via goreleaser to release
+                  notes
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -1122,13 +1199,19 @@
               <tr>
                 <td>42</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Consider adding --output flag to configure for custom output path</td>
+                <td>
+                  Consider adding --output flag to configure for custom output
+                  path
+                </td>
                 <td><span class="badge badge-medium">M</span></td>
               </tr>
               <tr>
                 <td>43</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Consider adding watch mode for auto-regen on package.json change</td>
+                <td>
+                  Consider adding watch mode for auto-regen on package.json
+                  change
+                </td>
                 <td><span class="badge badge-critical">L</span></td>
               </tr>
               <tr>
@@ -1140,7 +1223,9 @@
               <tr>
                 <td>45</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Consider otter cache for registry lookups if perf matters</td>
+                <td>
+                  Consider otter cache for registry lookups if perf matters
+                </td>
                 <td><span class="badge badge-medium">M</span></td>
               </tr>
               <tr>
@@ -1170,7 +1255,9 @@
               <tr>
                 <td>50</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Consider adding SARIF output to GitHub Actions security tab</td>
+                <td>
+                  Consider adding SARIF output to GitHub Actions security tab
+                </td>
                 <td><span class="badge badge-medium">M</span></td>
               </tr>
             </tbody>
@@ -1184,31 +1271,38 @@
         <div class="card card-problem">
           <h4>Q1: Should we migrate testify → ginkgo/gomega?</h4>
           <p>
-            The <code>how-to-golang</code> skill bans testify. This project uses it in all 10 test
-            files with <code>testifylint</code> configured and working well. Migrating to ginkgo for
-            a CLI tool that has pure-function tests (no BDD scenarios) feels like unnecessary churn.
+            The <code>how-to-golang</code> skill bans testify. This project uses
+            it in all 10 test files with <code>testifylint</code> configured and
+            working well. Migrating to ginkgo for a CLI tool that has
+            pure-function tests (no BDD scenarios) feels like unnecessary churn.
             But the policy is clear.
-            <strong>What's the call — enforce the policy or keep testify?</strong>
+            <strong
+              >What's the call — enforce the policy or keep testify?</strong
+            >
           </p>
         </div>
 
         <div class="card card-problem">
           <h4>Q2: Should we execute or archive the modularization proposal?</h4>
           <p>
-            <code>docs/modularization/</code> has a 3-file proposal to split this into multiple Go
-            modules. The project is ~2,900 lines of non-test code in a single module. Is
-            modularization worth the overhead for a tool this size, or should we archive the
-            proposal? <strong>What's the decision?</strong>
+            <code>docs/modularization/</code> has a 3-file proposal to split
+            this into multiple Go modules. The project is ~2,900 lines of
+            non-test code in a single module. Is modularization worth the
+            overhead for a tool this size, or should we archive the proposal?
+            <strong>What's the decision?</strong>
           </p>
         </div>
 
-        <h2 id="resolution"><span class="num">08</span>Resolution (2026-07-22)</h2>
+        <h2 id="resolution">
+          <span class="num">08</span>Resolution (2026-07-22)
+        </h2>
 
         <div class="card card-solution">
           <h4>GOEXPERIMENT=jsonv2 — now enabled</h4>
           <p>
-            The "encoding/json/v2 adoption" item under <strong>Not Started</strong> was completed in
-            commits 8913345 and 4216a2c. The experiment is now set in <code>flake.nix</code>, CI
+            The "encoding/json/v2 adoption" item under
+            <strong>Not Started</strong> was completed in commits 8913345 and
+            4216a2c. The experiment is now set in <code>flake.nix</code>, CI
             workflows, and documented local commands.
           </p>
         </div>
@@ -1216,26 +1310,29 @@
         <div class="card card-solution">
           <h4>Restriction denylist shipped</h4>
           <p>
-            Rules that ban fundamental modern JS/TS syntax (<code>oxc/no-async-await</code>,
-            <code>oxc/no-optional-chaining</code>, <code>oxc/no-rest-spread-properties</code>) are
-            forced to <code>"off"</code> in all profiles, even <code>maximal-typesafe</code>.
-            Shipped in 804d117.
+            Rules that ban fundamental modern JS/TS syntax
+            (<code>oxc/no-async-await</code>,
+            <code>oxc/no-optional-chaining</code>,
+            <code>oxc/no-rest-spread-properties</code>) are forced to
+            <code>"off"</code> in all profiles, even
+            <code>maximal-typesafe</code>. Shipped in 804d117.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Still open as of 2026-07-22</h4>
           <p>
-            <code>TODO_LIST.md</code> and <code>FEATURES.md</code> were still missing. The
-            testify/ginkgo question and the modularization proposal remain unresolved. See the
-            2026-07-22 docs-health pass for the living-doc fixes.
+            <code>TODO_LIST.md</code> and <code>FEATURES.md</code> were still
+            missing. The testify/ginkgo question and the modularization proposal
+            remain unresolved. See the 2026-07-22 docs-health pass for the
+            living-doc fixes.
           </p>
         </div>
 
         <footer class="footer">
-          Generated 2026-07-07 16:42 &middot; Based on session work: go-finding v1.2.0 migration,
-          dead config purge, profile refactor &middot; All claims verified via go test -race, go
-          vet, golangci-lint, nix build
+          Generated 2026-07-07 16:42 &middot; Based on session work: go-finding
+          v1.2.0 migration, dead config purge, profile refactor &middot; All
+          claims verified via go test -race, go vet, golangci-lint, nix build
         </footer>
       </main>
     </div>

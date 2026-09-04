@@ -7,14 +7,14 @@
 
 ## a) FULLY DONE
 
-| #   | Item                                                        | Evidence                                                                                                                              |
-| --- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Ran `art-dupl --type-aware --sort total-tokens -t 2 --html` | Report captured: **1 clone group, 26 occurrences, 52 tokens, 0 production**                                                           |
-| 2   | Identified the sole flagged group                           | `t.Parallel()` + `reg := loadTestRegistry(t)` across 5 test files                                                                     |
-| 3   | Empirically proved the group is **un-refactorable**         | Moved `t.Parallel()` into helper → `paralleltest` fires `Function TestX missing the call to method parallel` on every test. Restored. |
-| 4   | Verified restoration                                        | `go test -race ./...` → 9/9 packages pass; `golangci-lint run ./...` → 0 issues; `go vet ./...` → clean                               |
-| 5   | Wrote `dedup-acceptance.md`                                 | Documents the single accepted group + constraint. Auto-committed as `1eb269c`.                                                        |
-| 6   | Confirmed `AGENTS.md:164` already records the constraint    | No doc drift introduced                                                                                                               |
+| # | Item                                                        | Evidence                                                                                                                              |
+| - | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | Ran `art-dupl --type-aware --sort total-tokens -t 2 --html` | Report captured: **1 clone group, 26 occurrences, 52 tokens, 0 production**                                                           |
+| 2 | Identified the sole flagged group                           | `t.Parallel()` + `reg := loadTestRegistry(t)` across 5 test files                                                                     |
+| 3 | Empirically proved the group is **un-refactorable**         | Moved `t.Parallel()` into helper → `paralleltest` fires `Function TestX missing the call to method parallel` on every test. Restored. |
+| 4 | Verified restoration                                        | `go test -race ./...` → 9/9 packages pass; `golangci-lint run ./...` → 0 issues; `go vet ./...` → clean                               |
+| 5 | Wrote `dedup-acceptance.md`                                 | Documents the single accepted group + constraint. Auto-committed as `1eb269c`.                                                        |
+| 6 | Confirmed `AGENTS.md:164` already records the constraint    | No doc drift introduced                                                                                                               |
 
 ---
 
@@ -30,13 +30,13 @@ This is the failure mode the skill warns about: _"stop when the report is clean.
 
 ## c) NOT STARTED
 
-| #   | Item                                                                                                                                                                              |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Extract the 2 **byte-for-byte identical** `loadTestRegistry` copies (`pkg/config/configure_test.go` + `pkg/profile/profile_test.go`) into a shared `internal/testregistry` helper |
-| 2   | Evaluate whether the `pkg/rule/registry_test.go` copy (returns local `*Registry`) can share the same helper via the `rule_test` external package                                  |
-| 3   | Re-run `art-dupl` at `-t 1` to catch 1-statement clones I never looked at                                                                                                         |
-| 4   | Re-run `art-dupl --include-generated` to confirm embedded/generated assets are genuinely clean                                                                                    |
-| 5   | Run `nix flake check .` — I verified `go test` + `golangci-lint` + `go vet` but **not** the nix build path                                                                        |
+| # | Item                                                                                                                                                                              |
+| - | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | Extract the 2 **byte-for-byte identical** `loadTestRegistry` copies (`pkg/config/configure_test.go` + `pkg/profile/profile_test.go`) into a shared `internal/testregistry` helper |
+| 2 | Evaluate whether the `pkg/rule/registry_test.go` copy (returns local `*Registry`) can share the same helper via the `rule_test` external package                                  |
+| 3 | Re-run `art-dupl` at `-t 1` to catch 1-statement clones I never looked at                                                                                                         |
+| 4 | Re-run `art-dupl --include-generated` to confirm embedded/generated assets are genuinely clean                                                                                    |
+| 5 | Run `nix flake check .` — I verified `go test` + `golangci-lint` + `go vet` but **not** the nix build path                                                                        |
 
 ---
 

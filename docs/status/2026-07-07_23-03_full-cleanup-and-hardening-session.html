@@ -31,14 +31,14 @@
         --radius: 0px;
         --radius-sm: 0px;
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
       * {
         box-sizing: border-box;
@@ -229,15 +229,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .badge {
         display: inline-block;
@@ -472,21 +484,23 @@
           <div class="hero-badge">Full Cleanup &amp; Hardening</div>
           <h1>Status Report — 13 Commits, Zero Lint, Dead Weight Purged</h1>
           <p class="hero-subtitle">
-            Session started with a broken nix build from uncommitted go-finding v1.2.0 upgrade.
-            Ended with: build fix, profile split-brain elimination, 4,051 lines of dead
-            docs/config/code removed, CI govulncheck added, version metadata feature, zero lint
-            issues, and full AGENTS.md/README accuracy. All pushed.
+            Session started with a broken nix build from uncommitted go-finding
+            v1.2.0 upgrade. Ended with: build fix, profile split-brain
+            elimination, 4,051 lines of dead docs/config/code removed, CI
+            govulncheck added, version metadata feature, zero lint issues, and
+            full AGENTS.md/README accuracy. All pushed.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Update 2026-07-22</h4>
           <p>
-            Since this report, <code>GOEXPERIMENT=jsonv2</code> was enabled across the codebase
-            (8913345, 4216a2c), a restriction denylist was added to prevent auto-enabling rules that
-            ban modern JS/TS syntax (804d117), and the lint stack was hardened (87505b0). The
-            flake.nix version-metadata question (commit/date/builtBy) is still open. Full status in
-            the <a href="#resolution">Resolution</a> section below.
+            Since this report, <code>GOEXPERIMENT=jsonv2</code> was enabled
+            across the codebase (8913345, 4216a2c), a restriction denylist was
+            added to prevent auto-enabling rules that ban modern JS/TS syntax
+            (804d117), and the lint stack was hardened (87505b0). The flake.nix
+            version-metadata question (commit/date/builtBy) is still open. Full
+            status in the <a href="#resolution">Resolution</a> section below.
           </p>
         </div>
 
@@ -524,51 +538,59 @@
           <h4>go-finding v1.2.0 Migration</h4>
           <p>
             Branded <code>FilePath</code> type,
-            <code>ToSARIFWithOpts(finding.WithMinSeverity(sev))</code>, vendor re-committed with
-            lockutil. Detector, analyze command, and tests all updated.
+            <code>ToSARIFWithOpts(finding.WithMinSeverity(sev))</code>, vendor
+            re-committed with lockutil. Detector, analyze command, and tests all
+            updated.
           </p>
         </div>
         <div class="card card-solution">
           <h4>Profile Decision Split Brain Eliminated</h4>
           <p>
-            8 parallel decision methods → 1 data-driven <code>profileSpecs</code> map. Single source
-            of truth. <strong>-48 lines</strong>.
+            8 parallel decision methods → 1 data-driven
+            <code>profileSpecs</code> map. Single source of truth.
+            <strong>-48 lines</strong>.
           </p>
         </div>
         <div class="card card-solution">
           <h4>.golangci.yml — 11 Dead Linters + 5 Dead Build Tags Removed</h4>
           <p>
-            bodyclose, contextcheck, ginkgolinter, gosmopolitan, loggercheck, musttag, noctx,
-            protogetter, rowserrcheck, sqlclosecheck, zerologlint. All zero matching patterns.
+            bodyclose, contextcheck, ginkgolinter, gosmopolitan, loggercheck,
+            musttag, noctx, protogetter, rowserrcheck, sqlclosecheck,
+            zerologlint. All zero matching patterns.
           </p>
         </div>
         <div class="card card-solution">
           <h4>4,051 Lines of Dead Docs/Config Deleted</h4>
           <p>
-            11 status reports, 2 completed planning docs, 3 modularization proposal files,
-            PUBLIC_OR_PRIVATE.md, CHANGELOG.md, DELETE_TO_IMPROVE_PLAN.md.
+            11 status reports, 2 completed planning docs, 3 modularization
+            proposal files, PUBLIC_OR_PRIVATE.md, CHANGELOG.md,
+            DELETE_TO_IMPROVE_PLAN.md.
           </p>
         </div>
         <div class="card card-solution">
           <h4>Dead Gorereaser Ldflags Fixed + Version Metadata Added</h4>
           <p>
-            Corrected <code>main.version</code> → <code>internal/cli.version</code>. Added
-            <code>commit</code>, <code>date</code>, <code>builtBy</code> vars with
-            <code>SetVersionTemplate</code> for rich <code>--version</code> output.
+            Corrected <code>main.version</code> →
+            <code>internal/cli.version</code>. Added <code>commit</code>,
+            <code>date</code>, <code>builtBy</code> vars with
+            <code>SetVersionTemplate</code> for rich
+            <code>--version</code> output.
           </p>
         </div>
         <div class="card card-solution">
           <h4>CI Govulncheck Security Job Added</h4>
           <p>
-            New <code>security</code> job in <code>.github/workflows/ci.yml</code> runs
+            New <code>security</code> job in
+            <code>.github/workflows/ci.yml</code> runs
             <code>govulncheck</code> on every push/PR.
           </p>
         </div>
         <div class="card card-solution">
           <h4>Justfile References Purged Everywhere</h4>
           <p>
-            AGENTS.md, README.md — all <code>just test</code>, <code>just check</code>,
-            <code>just update-rules</code> references replaced with direct Go/nix commands.
+            AGENTS.md, README.md — all <code>just test</code>,
+            <code>just check</code>, <code>just update-rules</code> references
+            replaced with direct Go/nix commands.
           </p>
         </div>
         <div class="card card-solution">
@@ -589,8 +611,8 @@
             <div class="text">
               <strong>High test coverage</strong
               ><span
-                >config 94.9%, detect 95.0%, diff 92.9%, format 95.5%, rule 94.4%, profile 89.5%,
-                oxlint 81.9%, cli 74.0%</span
+                >config 94.9%, detect 95.0%, diff 92.9%, format 95.5%, rule
+                94.4%, profile 89.5%, oxlint 81.9%, cli 74.0%</span
               >
             </div>
           </div>
@@ -598,7 +620,10 @@
             <div class="check">+</div>
             <div class="text">
               <strong>Data-driven profile engine</strong
-              ><span>Single map — impossible to create decide/decideCategory drift</span>
+              ><span
+                >Single map — impossible to create decide/decideCategory
+                drift</span
+              >
             </div>
           </div>
           <div class="strength">
@@ -612,7 +637,10 @@
             <div class="check">+</div>
             <div class="text">
               <strong>CI pipeline: test + security + lint</strong
-              ><span>Three parallel jobs with GOPRIVATE, govulncheck, golangci-lint</span>
+              ><span
+                >Three parallel jobs with GOPRIVATE, govulncheck,
+                golangci-lint</span
+              >
             </div>
           </div>
         </div>
@@ -621,18 +649,19 @@
         <div class="card card-warning">
           <h4>CLI coverage at 74.0% — lowest in project</h4>
           <p>
-            <code>internal/cli</code> is the user-facing layer. <code>Configure()</code> extraction
-            enables testability. Target: 85%+. The main gaps are in
-            <code>cmd_analyze.go</code> pipeline wiring and <code>cmd_report.go</code> format
-            helpers.
+            <code>internal/cli</code> is the user-facing layer.
+            <code>Configure()</code> extraction enables testability. Target:
+            85%+. The main gaps are in <code>cmd_analyze.go</code> pipeline
+            wiring and <code>cmd_report.go</code> format helpers.
           </p>
         </div>
         <div class="card card-warning">
           <h4>flake.nix ldflags not updated for new version vars</h4>
           <p>
-            The flake.nix injects <code>internal/cli.version</code> via ldflags but does NOT inject
-            <code>commit</code>, <code>date</code>, or <code>builtBy</code>. Only goreleaser injects
-            all four. Nix builds will show "unknown" for those fields.
+            The flake.nix injects <code>internal/cli.version</code> via ldflags
+            but does NOT inject <code>commit</code>, <code>date</code>, or
+            <code>builtBy</code>. Only goreleaser injects all four. Nix builds
+            will show "unknown" for those fields.
           </p>
         </div>
 
@@ -640,36 +669,44 @@
         <div class="card">
           <h4>encoding/json/v2 migration</h4>
           <p>
-            Go 1.26.4 but still on json v1. <code>how-to-golang</code> policy recommends v2 for Go
-            1.25+.
+            Go 1.26.4 but still on json v1. <code>how-to-golang</code> policy
+            recommends v2 for Go 1.25+.
           </p>
         </div>
         <div class="card">
           <h4>testify → ginkgo/gomega</h4>
-          <p>Policy bans testify. Project uses it in all 10 test files. Decision needed.</p>
+          <p>
+            Policy bans testify. Project uses it in all 10 test files. Decision
+            needed.
+          </p>
         </div>
         <div class="card">
           <h4>Flake.nix ldflags for commit/date/builtBy</h4>
           <p>Nix builds only inject version, not the new metadata vars.</p>
         </div>
         <div class="card">
-          <h4>E2E integration test (configure → validate → report roundtrip)</h4>
+          <h4>
+            E2E integration test (configure → validate → report roundtrip)
+          </h4>
           <p>Was in deleted planning doc. Not yet implemented.</p>
         </div>
         <div class="card">
           <h4>TODO_LIST.md and FEATURES.md</h4>
           <p>
-            Referenced in AGENTS.md global policy as canonical files, but don't exist in this
-            project.
+            Referenced in AGENTS.md global policy as canonical files, but don't
+            exist in this project.
           </p>
         </div>
 
-        <h2 id="fucked"><span class="num">04</span>Totally Fucked Up (Now Fixed)</h2>
+        <h2 id="fucked">
+          <span class="num">04</span>Totally Fucked Up (Now Fixed)
+        </h2>
         <div class="card card-problem">
           <h4>Uncommitted go-finding v1.2.0 upgrade</h4>
           <p>
-            Previous session fixed code but never committed. Nix build broken because untracked
-            vendor files invisible to git-based flake source filtering.
+            Previous session fixed code but never committed. Nix build broken
+            because untracked vendor files invisible to git-based flake source
+            filtering.
           </p>
           <div class="callout callout-solution">
             <strong>Fixed</strong> Committed + staged vendor.
@@ -678,8 +715,9 @@
         <div class="card card-problem">
           <h4>8-method profile split brain</h4>
           <p>
-            Decide() and DecideCategory() had 4 parallel methods each. Adding a profile required
-            updating both — silent severity mismatches if forgotten.
+            Decide() and DecideCategory() had 4 parallel methods each. Adding a
+            profile required updating both — silent severity mismatches if
+            forgotten.
           </p>
           <div class="callout callout-solution">
             <strong>Fixed</strong> profileSpecs map — single source of truth.
@@ -689,8 +727,8 @@
           <h4>Dead ldflags pointing to nonexistent vars</h4>
           <p>
             <code>-X main.version</code> but version lives in internal/cli.
-            <code>main.commit/date/builtBy</code> never existed anywhere. Four ldflags doing
-            nothing.
+            <code>main.commit/date/builtBy</code> never existed anywhere. Four
+            ldflags doing nothing.
           </p>
           <div class="callout callout-solution">
             <strong>Fixed</strong> Correct paths + added missing vars.
@@ -699,7 +737,8 @@
         <div class="card card-problem">
           <h4>AGENTS.md + README referencing deleted justfile</h4>
           <p>
-            Every session followed <code>just test</code> instructions pointing to nonexistent file.
+            Every session followed <code>just test</code> instructions pointing
+            to nonexistent file.
           </p>
           <div class="callout callout-solution">
             <strong>Fixed</strong> Replaced with direct Go/nix commands.
@@ -710,45 +749,50 @@
         <div class="card card-warning">
           <h4>flake.nix should inject all version vars</h4>
           <p>
-            Currently only injects <code>version</code>. Should also inject <code>commit</code>,
-            <code>date</code>, <code>builtBy</code> so <code>nix run . -- --version</code> shows
-            full metadata.
+            Currently only injects <code>version</code>. Should also inject
+            <code>commit</code>, <code>date</code>, <code>builtBy</code> so
+            <code>nix run . -- --version</code> shows full metadata.
           </p>
         </div>
         <div class="card card-warning">
           <h4>CLI coverage needs pushing</h4>
           <p>
-            74% is below the 80% target. Focus on cmd_analyze pipeline wiring and cmd_report format
-            helpers.
+            74% is below the 80% target. Focus on cmd_analyze pipeline wiring
+            and cmd_report format helpers.
           </p>
         </div>
         <div class="card card-solution">
           <h4>encoding/json/v2 adoption</h4>
           <p>
             <strong>Done in 8913345 / 4216a2c.</strong> The project now uses
-            <code>encoding/json/v2</code> via <code>GOEXPERIMENT=jsonv2</code>, set in
-            <code>flake.nix</code>, CI workflows, and the documented local commands. The
-            <code>go 1.26.4</code> declaration remains, so gopls still warns that
-            <code>json.Unmarshal</code> needs Go 1.27.
+            <code>encoding/json/v2</code> via <code>GOEXPERIMENT=jsonv2</code>,
+            set in <code>flake.nix</code>, CI workflows, and the documented
+            local commands. The <code>go 1.26.4</code> declaration remains, so
+            gopls still warns that <code>json.Unmarshal</code> needs Go 1.27.
           </p>
         </div>
         <div class="card card-warning">
           <h4>No TODO_LIST.md or FEATURES.md</h4>
           <p>
-            Global AGENTS.md policy references these as canonical project files. They don't exist
-            here.
+            Global AGENTS.md policy references these as canonical project files.
+            They don't exist here.
           </p>
         </div>
         <div class="card card-warning">
           <h4>No E2E test</h4>
-          <p>No integration test verifying the configure → validate → report roundtrip.</p>
+          <p>
+            No integration test verifying the configure → validate → report
+            roundtrip.
+          </p>
         </div>
         <div class="card card-warning">
           <h4>docs/ only has DOMAIN_LANGUAGE.md and status/</h4>
           <p>Clean but could use ROADMAP.md for long-term direction.</p>
         </div>
 
-        <h2 id="next"><span class="num">06</span>Next 50 Tasks (Impact/Effort Sorted)</h2>
+        <h2 id="next">
+          <span class="num">06</span>Next 50 Tasks (Impact/Effort Sorted)
+        </h2>
         <div class="table-wrap">
           <table>
             <thead>
@@ -769,7 +813,10 @@
               <tr>
                 <td>2</td>
                 <td><span class="badge badge-critical">Critical</span></td>
-                <td>Increase internal/cli coverage: 74% → 85%+ (cmd_analyze, cmd_report)</td>
+                <td>
+                  Increase internal/cli coverage: 74% → 85%+ (cmd_analyze,
+                  cmd_report)
+                </td>
                 <td><span class="badge badge-medium">M</span></td>
               </tr>
               <tr>
@@ -817,13 +864,17 @@
               <tr>
                 <td>10</td>
                 <td><span class="badge badge-medium">Medium</span></td>
-                <td>Add property-based tests for profileSpecs decision logic</td>
+                <td>
+                  Add property-based tests for profileSpecs decision logic
+                </td>
                 <td><span class="badge badge-medium">M</span></td>
               </tr>
               <tr>
                 <td>11</td>
                 <td><span class="badge badge-medium">Medium</span></td>
-                <td>Profile: extract Minimal special-case into the spec table</td>
+                <td>
+                  Profile: extract Minimal special-case into the spec table
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -835,7 +886,9 @@
               <tr>
                 <td>13</td>
                 <td><span class="badge badge-medium">Medium</span></td>
-                <td>Consider testify → ginkgo/gomega migration (policy decision)</td>
+                <td>
+                  Consider testify → ginkgo/gomega migration (policy decision)
+                </td>
                 <td><span class="badge badge-critical">L</span></td>
               </tr>
               <tr>
@@ -847,7 +900,9 @@
               <tr>
                 <td>15</td>
                 <td><span class="badge badge-medium">Medium</span></td>
-                <td>Consider error wrapping with cockroachdb/errors (policy)</td>
+                <td>
+                  Consider error wrapping with cockroachdb/errors (policy)
+                </td>
                 <td><span class="badge badge-medium">M</span></td>
               </tr>
               <tr>
@@ -865,7 +920,9 @@
               <tr>
                 <td>18</td>
                 <td><span class="badge badge-medium">Medium</span></td>
-                <td>Registry: add test for rule count matching rules_data.json</td>
+                <td>
+                  Registry: add test for rule count matching rules_data.json
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -961,7 +1018,9 @@
               <tr>
                 <td>34</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Add version_test.go: test binary verification logic edge cases</td>
+                <td>
+                  Add version_test.go: test binary verification logic edge cases
+                </td>
                 <td><span class="badge badge-low">S</span></td>
               </tr>
               <tr>
@@ -1009,7 +1068,9 @@
               <tr>
                 <td>42</td>
                 <td><span class="badge badge-low">Low</span></td>
-                <td>Consider watch mode for auto-regen on package.json change</td>
+                <td>
+                  Consider watch mode for auto-regen on package.json change
+                </td>
                 <td><span class="badge badge-critical">L</span></td>
               </tr>
               <tr>
@@ -1064,32 +1125,43 @@
           </table>
         </div>
 
-        <h2 id="questions"><span class="num">07</span>Top 2 Questions I Cannot Answer</h2>
+        <h2 id="questions">
+          <span class="num">07</span>Top 2 Questions I Cannot Answer
+        </h2>
         <div class="card card-problem">
           <h4>Q1: testify → ginkgo/gomega — enforce policy or keep testify?</h4>
           <p>
-            The <code>how-to-golang</code> skill bans testify. This project uses it in all 10 test
-            files with <code>testifylint</code> working perfectly. Migrating a pure-function CLI
-            tool to BDD-style ginkgo feels like unnecessary churn. <strong>What's the call?</strong>
+            The <code>how-to-golang</code> skill bans testify. This project uses
+            it in all 10 test files with <code>testifylint</code> working
+            perfectly. Migrating a pure-function CLI tool to BDD-style ginkgo
+            feels like unnecessary churn. <strong>What's the call?</strong>
           </p>
         </div>
         <div class="card card-problem">
-          <h4>Q2: flake.nix ldflags — should nix builds show commit/date/builtBy?</h4>
+          <h4>
+            Q2: flake.nix ldflags — should nix builds show commit/date/builtBy?
+          </h4>
           <p>
-            Currently only <code>version</code> is injected via <code>flake.nix</code>. The new
-            <code>commit</code>/<code>date</code>/<code>builtBy</code> vars default to "unknown" in
-            nix builds. Should we wire <code>self.shortRev</code>/<code>self.lastModifiedDate</code>
-            into the flake ldflags? <strong>Or is "unknown" acceptable for nix dev builds?</strong>
+            Currently only <code>version</code> is injected via
+            <code>flake.nix</code>. The new
+            <code>commit</code>/<code>date</code>/<code>builtBy</code> vars
+            default to "unknown" in nix builds. Should we wire
+            <code>self.shortRev</code>/<code>self.lastModifiedDate</code> into
+            the flake ldflags?
+            <strong>Or is "unknown" acceptable for nix dev builds?</strong>
           </p>
         </div>
 
-        <h2 id="resolution"><span class="num">08</span>Resolution (2026-07-22)</h2>
+        <h2 id="resolution">
+          <span class="num">08</span>Resolution (2026-07-22)
+        </h2>
 
         <div class="card card-solution">
           <h4>GOEXPERIMENT=jsonv2 — now enabled</h4>
           <p>
-            The "encoding/json/v2 migration" item under <strong>Not Started</strong> was completed
-            in commits 8913345 and 4216a2c. The experiment is now set in <code>flake.nix</code>, CI
+            The "encoding/json/v2 migration" item under
+            <strong>Not Started</strong> was completed in commits 8913345 and
+            4216a2c. The experiment is now set in <code>flake.nix</code>, CI
             workflows, and documented local commands.
           </p>
         </div>
@@ -1097,27 +1169,31 @@
         <div class="card card-solution">
           <h4>Restriction denylist shipped</h4>
           <p>
-            Rules that ban fundamental modern JS/TS syntax (<code>oxc/no-async-await</code>,
-            <code>oxc/no-optional-chaining</code>, <code>oxc/no-rest-spread-properties</code>) are
-            forced to <code>"off"</code> in all profiles, even <code>maximal-typesafe</code>.
-            Shipped in 804d117.
+            Rules that ban fundamental modern JS/TS syntax
+            (<code>oxc/no-async-await</code>,
+            <code>oxc/no-optional-chaining</code>,
+            <code>oxc/no-rest-spread-properties</code>) are forced to
+            <code>"off"</code> in all profiles, even
+            <code>maximal-typesafe</code>. Shipped in 804d117.
           </p>
         </div>
 
         <div class="card card-warning">
           <h4>Still open as of 2026-07-22</h4>
           <p>
-            <code>TODO_LIST.md</code> and <code>FEATURES.md</code> were still missing. The flake.nix
-            ldflags question (commit/date/builtBy) is still open — nix builds still show "unknown"
-            for those fields. The testify/ginkgo policy question remains unresolved. See the
+            <code>TODO_LIST.md</code> and <code>FEATURES.md</code> were still
+            missing. The flake.nix ldflags question (commit/date/builtBy) is
+            still open — nix builds still show "unknown" for those fields. The
+            testify/ginkgo policy question remains unresolved. See the
             2026-07-22 docs-health pass for the living-doc fixes.
           </p>
         </div>
 
         <footer class="footer">
-          Generated 2026-07-07 23:03 &middot; Based on 13-commit session: go-finding v1.2.0
-          migration, dead config purge (-4,051 lines), profile refactor, CI hardening, version
-          metadata &middot; Verified via go test -race, go vet, golangci-lint (0 issues), nix build
+          Generated 2026-07-07 23:03 &middot; Based on 13-commit session:
+          go-finding v1.2.0 migration, dead config purge (-4,051 lines), profile
+          refactor, CI hardening, version metadata &middot; Verified via go test
+          -race, go vet, golangci-lint (0 issues), nix build
         </footer>
       </main>
     </div>
