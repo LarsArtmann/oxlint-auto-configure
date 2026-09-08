@@ -10,12 +10,12 @@
     };
 
     go-nix-helpers = {
-      url = "git+ssh://git@github.com/LarsArtmann/go-nix-helpers?ref=master";
+      url = "github:LarsArtmann/go-nix-helpers/a97742e806193cd7e4c457439c7e117a6cfd1fe7";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     go-atomic-write = {
-      url = "github:LarsArtmann/go-atomic-write/v0.4.0";
+      url = "github:LarsArtmann/go-atomic-write/v0.5.1";
       flake = false;
     };
 
@@ -25,12 +25,12 @@
     };
 
     go-finding = {
-      url = "git+ssh://git@github.com/LarsArtmann/go-finding?ref=master";
+      url = "github:LarsArtmann/go-finding/v1.8.0";
       flake = false;
     };
 
     gogenfilter = {
-      url = "git+ssh://git@github.com/LarsArtmann/gogenfilter?ref=master";
+      url = "github:LarsArtmann/gogenfilter/v3.4.0";
       flake = false;
     };
   };
@@ -51,7 +51,7 @@
 
       go-standard = {
         pname = "oxlint-auto-configure";
-        vendorHash = "sha256-iFfhLsAaTBfPHB4I0EOrpt6/T8VuFf1wt52xA6VyDW8=";
+        vendorHash = "sha256-wlHMTO7iYF3/esOhafI2B9lCo+sYL8erRbIEjFnEwAQ=";
         description = "Auto-generate optimal .oxlintrc.json configurations";
         enableCheck = false;
 
@@ -85,7 +85,6 @@
         extraBuildAttrs.preBuild = "export GOEXPERIMENT=jsonv2";
 
         shellExtraEnv = {
-          GOPRIVATE = "github.com/larsartmann/*,github.com/LarsArtmann/*";
           GOEXPERIMENT = "jsonv2";
         };
 
