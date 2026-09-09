@@ -24,7 +24,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      GOPRIVATE: github.com/LarsArtmann/*
       GOWORK: off
       GOEXPERIMENT: jsonv2
     strategy:
@@ -37,34 +36,20 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Configure GOPRIVATE
-        run: git config --global url."ssh://git@github.com/LarsArtmann/".insteadOf "https://github.com/LarsArtmann/"
-
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: Install oxlint
         run: |
           pnpm add -g oxlint
 
       - name: Tidy
-        env:
-          GOPRIVATE: github.com/LarsArtmann/*
         run: go mod tidy
 
       - name: Verify module consistency
         run: git diff --exit-code go.mod go.sum
 
       - name: Build
-        env:
-          GOPRIVATE: github.com/LarsArtmann/*
         run: go build -v ./...
 
       - name: Test
-        env:
-          GOPRIVATE: github.com/LarsArtmann/*
         run: go test -race -coverprofile=coverage.out ./pkg/... ./internal/...
 
       - name: Coverage
@@ -77,7 +62,6 @@ jobs:
   security:
     runs-on: ubuntu-latest
     env:
-      GOPRIVATE: github.com/LarsArtmann/*
       GOWORK: off
       GOEXPERIMENT: jsonv2
     steps:
@@ -87,17 +71,7 @@ jobs:
         with:
           go-version: "1.26"
 
-      - name: Configure GOPRIVATE
-        run: git config --global url."ssh://git@github.com/LarsArtmann/".insteadOf "https://github.com/LarsArtmann/"
-
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: Tidy
-        env:
-          GOPRIVATE: github.com/LarsArtmann/*
         run: go mod tidy
 
       - name: Govulncheck
@@ -107,7 +81,6 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     env:
-      GOPRIVATE: github.com/LarsArtmann/*
       GOWORK: off
       GOEXPERIMENT: jsonv2
     steps:
@@ -117,17 +90,7 @@ jobs:
         with:
           go-version: "1.26"
 
-      - name: Configure GOPRIVATE
-        run: git config --global url."ssh://git@github.com/LarsArtmann/".insteadOf "https://github.com/LarsArtmann/"
-
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - uses: golangci/golangci-lint-action@9fae48acfc02a90574d7c304a1758ef9895495fa # v7
-        env:
-          GOPRIVATE: github.com/LarsArtmann/*
         with:
           version: v2.12.2
           args: --timeout=5m
@@ -140,13 +103,6 @@ jobs:
       - uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-
-      - name: Configure SSH for private deps
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Flake check
         run: nix flake check --systems x86_64-linux

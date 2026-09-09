@@ -33,16 +33,11 @@ nix develop github:larsartmann/oxlint-auto-configure
 ### Go
 
 ```bash
-export GOPRIVATE=github.com/LarsArtmann/*
 go install github.com/larsartmann/oxlint-auto-configure/cmd/oxlint-auto-configure@latest
 ```
 
 Requires Go 1.26+ and [oxlint](https://oxc.rs/docs/guide/usage/linter.html) in PATH.
 
-> **Note:** The Go install method requires access to the private
-> [go-finding](https://github.com/larsartmann/go-finding) dependency.
-> The nix method works without any Go setup or Git authentication.
->
 > **Note:** When building or running from source, set `GOEXPERIMENT=jsonv2`.
 > The project uses `encoding/json/v2`, which is still behind the jsonv2 experiment
 > in Go 1.26. Nix builds and dev shells set this automatically.

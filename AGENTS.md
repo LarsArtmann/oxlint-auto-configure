@@ -66,8 +66,8 @@ nix run . -- configure .      # Run with oxlint in PATH
 nix develop .                  # Dev shell: go, oxlint, gopls, golangci-lint
 ```
 
-- **Vendored deps** — `vendor/` is GITIGNORED and regenerated locally (`go mod vendor` or auto-fetched by `go build` with `GOPRIVATE`); never committed. The nix build does NOT use `vendor/`; it re-vendors via `buildGoModule` from `mkPreparedSource` output
-- **`mkPreparedSource`** (from `go-nix-helpers`) — Injects every `github.com/[Ll]ars[Aa]rtmann/*` dep as a local `replace` in the sandbox. Each such dep needs BOTH a flake input (`flake = false`) AND an entry in the `deps` map. Public repos under the org (e.g. `go-atomic-write`) use the `github:` HTTPS shorthand pinned to the go.mod tag; private repos use `git+ssh://`. `validatePrivateDeps` enforces that none are missing
+- **Vendored deps** — `vendor/` is GITIGNORED and regenerated locally (`GOWORK=off go mod vendor`); never committed. The nix build does NOT use `vendor/`; it re-vendors via `buildGoModule` from `mkPreparedSource` output
+- **`mkPreparedSource`** (from `go-nix-helpers`) — Injects every `github.com/[Ll]ars[Aa]rtmann/*` dep as a local `replace` in the sandbox. Each such dep needs BOTH a flake input (`flake = false`) AND an entry in the `deps` map. All deps are public and use the `github:` HTTPS shorthand pinned to the go.mod tag (`go-nix-helpers` itself is pinned to a rev; it has no tags). `validatePrivateDeps` enforces that none are missing
 - **`GOWORK=off go mod vendor`** — Regenerate local `vendor/` after `go.mod` changes (`vendor/` is gitignored, never committed)
 - **Runtime dep** — `oxlint` is a runtime dependency; wrapped in `nix run` via `makeWrapper`
 - **Git-derived version** — `self.rev or self.dirtyRev or "dev"` injected via ldflags
@@ -90,9 +90,9 @@ nix flake check .                                    # All checks via nix
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` v1.4.0 — Unified static analysis model (private: `GOPRIVATE=github.com/LarsArtmann/*`; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
-- `github.com/larsartmann/go-atomic-write` v0.4.0 — Crash-durable atomic file writes (temp + `fsync` + atomic rename). Used for `.oxlintrc.json` output in `writeConfig` so a crash mid-write cannot truncate the user's config
-- `github.com/larsartmann/go-error-family` v0.10.0 — Structured error family helpers (transitive dep of `go-atomic-write` v0.4.0)
+- `github.com/larsartmann/go-finding` v1.8.0 — Unified static analysis model (public; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
+- `github.com/larsartmann/go-atomic-write` v0.5.1 — Crash-durable atomic file writes (temp + `fsync` + atomic rename). Used for `.oxlintrc.json` output in `writeConfig` so a crash mid-write cannot truncate the user's config
+- `github.com/larsartmann/go-error-family` v0.10.0 — Structured error family helpers (transitive dep of `go-atomic-write` v0.5.1)
 - `github.com/spf13/cobra` — CLI framework
 - `github.com/stretchr/testify` — Test assertions
 
@@ -106,7 +106,7 @@ nix flake check .                                    # All checks via nix
 6. **Self-describing types** — Plugin has `CLIFlag()`/`NeedsFlag()`; Registry has generic `Filter()`
 7. **Decoupled rendering** — `pkg/format` accepts plain view structs, not go-finding types
 8. **Testable commands** — `Configure()` extracted from cobra closure; independently callable
-9. **Atomic config writes** — `.oxlintrc.json` is written via `atomicwrite.Write(path, data)` (v0.4.0 refactored the API: `Write` now takes only path+data for crash durability; the TOCTOU-aware `WriteVerified(path, data, Fingerprint)` is a separate function). The tool uses plain `Write` because overwriting is the intended behavior. Never use raw `os.WriteFile` for user-facing config output — a crash can truncate it
+9. **Atomic config writes** — `.oxlintrc.json` is written via `atomicwrite.Write(path, data)` (since v0.4.0, `Write` takes only path+data for crash durability; the TOCTOU-aware `WriteVerified(path, data, Fingerprint)` is a separate function). The tool uses plain `Write` because overwriting is the intended behavior. Never use raw `os.WriteFile` for user-facing config output — a crash can truncate it
 
 ### Profiles
 
@@ -129,7 +129,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 
 ### Important Gotchas
 
-- **Private go-finding** — `GOPRIVATE=github.com/LarsArtmann/*` required; v1.4.0 from GitHub (no local replace)
+- **Public deps** — All `github.com/LarsArtmann/*` deps are public; no `GOPRIVATE` or SSH keys needed anywhere (build, CI, nix). Bumping a dep in `go.mod` requires bumping the matching flake input tag and updating `vendorHash`
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
 - **Version injected at build** — `internal/cli.version/commit/date/builtBy` via ldflags (default: "dev"/"unknown"). `SetVersionTemplate` shows full metadata in `--version`.

@@ -19,41 +19,37 @@ Install [Nix](https://nixos.org/) with flakes enabled. Everything else is handle
 nix develop .    # Enter dev shell: go, oxlint, gopls, golangci-lint
 ```
 
-No manual environment variable setup needed — the dev shell sets `GOPRIVATE`, `GOWORK=off`, and `GOEXPERIMENT=jsonv2` automatically.
+No manual environment variable setup needed — the dev shell sets `GOWORK=off` and `GOEXPERIMENT=jsonv2` automatically.
 
 ### Option B: Manual Go setup
 
 Requires Go 1.26+ and [oxlint](https://oxc.rs/) in PATH.
 
-Three environment variables are **required** for all `go` commands:
+Two environment variables are **required** for all `go` commands:
 
-| Variable       | Value                                               | Why                                                                                       |
-| -------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `GOEXPERIMENT` | `jsonv2`                                            | The codebase uses `encoding/json/v2`, still behind an experiment gate in Go 1.26.         |
-| `GOWORK`       | `off`                                               | A parent `go.work` at `/home/lars/projects/go.work` interferes; disable it.               |
-| `GOPRIVATE`    | `github.com/larsartmann/*,github.com/LarsArtmann/*` | Private dependencies (`go-finding`, `go-atomic-write`, `gogenfilter`) require Git access. |
+| Variable       | Value    | Why                                                                               |
+| -------------- | -------- | --------------------------------------------------------------------------------- |
+| `GOEXPERIMENT` | `jsonv2` | The codebase uses `encoding/json/v2`, still behind an experiment gate in Go 1.26. |
+| `GOWORK`       | `off`    | A parent `go.work` at `/home/lars/projects/go.work` interferes; disable it.       |
 
 ```bash
 export GOEXPERIMENT=jsonv2
 export GOWORK=off
-export GOPRIVATE="github.com/larsartmann/*,github.com/LarsArtmann/*"
 ```
 
-## Private Dependencies
+## Dependencies
 
-This project depends on three private `github.com/LarsArtmann/*` repositories:
+All dependencies are public — no Git authentication or `GOPRIVATE` needed:
 
 | Dependency               | Purpose                                                         |
 | ------------------------ | --------------------------------------------------------------- |
-| `go-finding` v1.4.0      | Unified static analysis model used by the `analyze` command     |
-| `go-atomic-write` v0.4.0 | Crash-durable atomic file writes (temp + fsync + atomic rename) |
-| `gogenfilter` v3.3.1     | Code generation filter (transitive, pulled in by `go-finding`)  |
-
-Git authentication (SSH key or token) for `github.com/LarsArtmann` is required to fetch them. The nix dev shell and build handle this via `GOPRIVATE`; the nix build sandbox injects them as local `replace` directives via `mkPreparedSource`.
+| `go-finding` v1.8.0      | Unified static analysis model used by the `analyze` command     |
+| `go-atomic-write` v0.5.1 | Crash-durable atomic file writes (temp + fsync + atomic rename) |
+| `gogenfilter` v3.4.0     | Code generation filter (transitive, pulled in by `go-finding`)  |
 
 ## Atomic Write
 
-Config output (`.oxlintrc.json`) is written via `atomicwrite.Write` from `go-atomic-write` v0.4.0 — temp file + fsync + atomic rename. A crash mid-write cannot truncate the user's existing config. Never use raw `os.WriteFile` for config output. See `internal/cli/cmd_configure.go` (`writeConfig`).
+Config output (`.oxlintrc.json`) is written via `atomicwrite.Write` from `go-atomic-write` v0.5.1 — temp file + fsync + atomic rename. A crash mid-write cannot truncate the user's existing config. Never use raw `os.WriteFile` for config output. See `internal/cli/cmd_configure.go` (`writeConfig`).
 
 ## Build, Test, and Lint
 
