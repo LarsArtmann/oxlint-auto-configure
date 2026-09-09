@@ -54,6 +54,7 @@
         vendorHash = "sha256-wlHMTO7iYF3/esOhafI2B9lCo+sYL8erRbIEjFnEwAQ=";
         description = "Auto-generate optimal .oxlintrc.json configurations";
         enableCheck = false;
+        subPackages = [ "cmd/oxlint-auto-configure" ];
 
         deps = {
           "github.com/larsartmann/go-atomic-write" = inputs.go-atomic-write;
