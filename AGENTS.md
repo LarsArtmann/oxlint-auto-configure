@@ -90,7 +90,7 @@ nix flake check .                                    # All checks via nix
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` v1.8.0 — Unified static analysis model (public; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
+- `github.com/larsartmann/go-finding` v1.10.0 (pipeline v1.9.2) — Unified static analysis model (public; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
 - `github.com/larsartmann/go-atomic-write` v0.5.1 — Crash-durable atomic file writes (temp + `fsync` + atomic rename). Used for `.oxlintrc.json` output in `writeConfig` so a crash mid-write cannot truncate the user's config
 - `github.com/larsartmann/go-error-family` v0.10.0 — Structured error family helpers (transitive dep of `go-atomic-write` v0.5.1)
 - `github.com/spf13/cobra` — CLI framework

@@ -110,7 +110,7 @@ brews:
 
 nix:
   - name: oxlint-auto-configure
-    skip_upload: auto
+    skip_upload: true
     repository:
       owner: LarsArtmann
       name: nur-packages
@@ -201,22 +201,15 @@ release:
   footer: |
     ## Installation
 
-    **Homebrew:**
+    **Go:**
     ```bash
-    brew tap LarsArtmann/tap
-    brew install oxlint-auto-configure
+    go install github.com/larsartmann/oxlint-auto-configure/cmd/oxlint-auto-configure@v{{ .Version }}
     ```
 
-    **Nix:**
+    **Nix (flake):**
     ```bash
-    nix run github:LarsArtmann/nur-packages#oxlint-auto-configure
+    nix run github:LarsArtmann/oxlint-auto-configure/v{{ .Version }}
     ```
 
-    **Linux (.deb):**
-    Download the .deb from the assets below.
-
-    **Windows (Scoop):**
-    ```bash
-    scoop bucket add LarsArtmann https://github.com/LarsArtmann/homebrew-tap
-    scoop install oxlint-auto-configure
-    ```
+    **Linux/macOS/Windows:** download the archive or .deb/.rpm below and verify
+    with `checksums.txt` (artifacts are cosign-keylessly signed, `*.sig`/`*.pem`).

@@ -8,46 +8,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- `FEATURES.md` and `TODO_LIST.md` for project tracking and honest feature inventory.
-- `ROADMAP.md` for long-term project direction and open questions.
-- Filled `docs/DOMAIN_LANGUAGE.md` with actual project domain terms.
-- `docs/DOMAIN_LANGUAGE.md` includes atomic-write vocabulary (Atomic Write, Crash Durability). Fingerprint and TOCTOU are kept out as implementation details of `go-atomic-write`.
-- `go-atomic-write` v0.4.0 dependency — config writes are crash-durable (temp + fsync + atomic rename). v0.4.0 refactored `Write` to take only path+data; the TOCTOU-aware `WriteVerified` is available but unused (overwriting is intended behavior).
-- Embedded rules data updated from oxlint `1.59.0` to `1.73.0` (716 → 841 rules, 108 → 113 enabled by default).
-- `go-error-family` v0.10.0 transitive dependency (via `go-atomic-write` v0.4.0) — structured error family helpers.
-- Entry-point tests for `cmd/oxlint-auto-configure/main.go` (`main_test.go`).
-- E2E integration tests: `configure` round-trip via `config.FromJSON` (`e2e_test.go`).
-- Atomic-write contract tests verifying no `.tmp` files and idempotent overwrite (`atomic_write_test.go`).
-- Coverage tests for `renderFindings`, `printSARIF`, `printReportJSON`, `sortedByPosition`, `resolveConfigPath`, `logDiffIfExisting`, `marshalConfigJSON` (`coverage_test.go`).
-- golangci-lint pinned to `v2.12.2` in CI (was `latest`).
-- Nix flake check CI job (`nix` job in `.github/workflows/ci.yml`).
-- Module consistency check in CI (`go mod tidy` + `git diff --exit-code`).
-- Full version metadata in nix builds (`commit`, `date`, `builtBy` via ldflags).
-- Sentinel errors for structured error contracts (`ErrUnexpectedVersionOutput`, `ErrOxlintStderr`, CLI validation sentinels).
-
-### Changed
-
-- `writeConfig` (`internal/cli/cmd_configure.go`) now uses `atomicwrite.Write` instead of raw `os.WriteFile` — a crash mid-write can no longer truncate the user's `.oxlintrc.json`.
-- Upgraded `go-finding` from v1.2.1 to v1.4.0.
-- `vendor/` directory removed from git tracking; now gitignored and regenerated locally (via `go mod vendor` or automatically by `go build`).
-- `CONTRIBUTING.md` expanded from a 27-line stub to a comprehensive guide: prerequisites, private dependencies, atomic-write policy, vendorHash workflow, rules update process, and CI overview.
-- golangci-lint baseline achieved: **0 issues** across all linters (was ~116 issues). Config includes depguard allow-list for actual dependencies, varnamelen exemptions for idiomatic Go short names, and tagliatelle `json: snake` for config output.
-- `internal/cli` test coverage increased from 74.2% to 82.7%.
+- Nothing yet.
 
 ### Fixed
 
-- `README.md` profile table now reflects actual oxlint categories (removed non-existent `TypeScript` category column; `strict` and `recommended` are now aligned with the code).
-- `README.md` project detection table now lists `node` for Vitest alongside `vitest`.
-- `README.md` Development commands include `GOEXPERIMENT=jsonv2`.
-- `AGENTS.md` dependency versions updated to `go-finding` v1.4.0, `go-atomic-write` v0.4.0, `go-error-family` v0.10.0. Profile description corrected.
-- `internal/cli/cmd_configure.go` help text no longer claims `TypeScript` is a severity category.
-- `pkg/profile/profile.go` comments now match the actual `profileSpecs` table.
-- `README.md` Next.js detection table now includes `react-perf` (was omitted; code enables it via shared React case).
-- `FEATURES.md` and `TODO_LIST.md` golangci-lint count corrected from stale ~117 to fresh ~116; linter list fixed (removed `stdversion` which is gopls, not golangci-lint; added `varnamelen`, `mnd`, `tagliatelle`, `err113`).
-- `FEATURES.md` Go version references corrected to `1.26.5` (aligned with `go.mod`).
-- `FEATURES.md` "Vendored dependencies" evidence column corrected — `vendor/` is gitignored, not a tracked path.
-- `CONTRIBUTING.md` `gogenfilter` dependency clarified as transitive (`// indirect` in `go.mod`, pulled in by `go-finding`).
-- `FEATURES.md` Nix row restored to FULLY_FUNCTIONAL — `nix flake check` passes; `go build`/`go test`/`go vet`/`golangci-lint` all clean.
+- Nothing yet.
+
+## [0.5.0] - 2026-09-11
+
+### Added
+
+- `FEATURES.md`, `TODO_LIST.md`, and `ROADMAP.md` for project tracking and honest feature inventory; `docs/DOMAIN_LANGUAGE.md` filled with actual project domain terms, including atomic-write vocabulary.
+- `go-atomic-write` v0.5.1 dependency — config writes are crash-durable (temp + fsync + atomic rename); `writeConfig` now uses `atomicwrite.Write` instead of raw `os.WriteFile`, so a crash mid-write can no longer truncate the user's `.oxlintrc.json`.
+- Embedded rules data updated from oxlint `1.59.0` to `1.73.0` (716 → 841 rules, 108 → 113 enabled by default).
+- Entry-point tests for `cmd/oxlint-auto-configure/main.go`; E2E `configure` round-trip via `config.FromJSON` (`e2e_test.go`); atomic-write contract tests (`atomic_write_test.go`); coverage tests for `renderFindings`, `printSARIF`, `printReportJSON`, `sortedByPosition`, `resolveConfigPath`, `logDiffIfExisting`, `marshalConfigJSON` (`coverage_test.go`).
+- Shared `internal/testregistry` package for loading test rule registries.
+- Sentinel errors for structured error contracts (`ErrUnexpectedVersionOutput`, `ErrOxlintStderr`, CLI validation sentinels).
+- golangci-lint pinned to `v2.12.2` in CI (was `latest`); Nix flake check CI job; `go mod tidy` module-consistency check in CI; Dependabot for Go modules.
+- Full version metadata in nix builds (`commit`, `date`, `builtBy` via ldflags).
+- dprint as canonical formatter for JSON, YAML, Markdown, and Dockerfile.
+- GitHub Actions supply-chain hardening: every third-party action pinned to a full commit SHA.
+
+### Changed
+
+- Upgraded `go-finding` to v1.10.0 (pipeline v1.9.2) — branded finding types, SARIF API, fix-strategy reporting.
+- Upgraded Go toolchain to 1.26.7.
+- `vendor/` directory removed from git tracking; now gitignored and regenerated locally (via `go mod vendor` or automatically by `go build`).
+- golangci-lint baseline achieved: **0 issues** across all linters (was ~116 issues). Config includes depguard allow-list for actual dependencies, varnamelen exemptions for idiomatic Go short names, and tagliatelle `json: snake` for config output.
+- `internal/cli` test coverage increased from 74.2% to 82.7%.
+- Nix flake simplified from 196 to 122 lines while keeping reproducible builds.
+- CI installs oxlint via pnpm instead of npm.
+- Repository went public after full de-privatization — no `GOPRIVATE` or SSH keys needed anywhere (build, CI, nix).
+
+### Fixed
+
+- Documentation accuracy pass: README profile/detection tables aligned with actual oxlint categories, FEATURES.md and TODO_LIST.md corrections, CONTRIBUTING.md transitive-dependency clarification, and help-text/comment fixes (`configure` help no longer claims `TypeScript` is a severity category; `profileSpecs` comments match the table).
+- Release pipeline: nix tap upload disabled (no `nur-packages` repository exists); release notes now advertise install paths that actually work (go install, flake run, verified binary downloads).
+
+## [0.4.0] - 2026-05-17
+
+- Tagged 2026-05-17 on the same commit as v0.3.0. No changelog was recorded at the time; the delta was release-engineering only (GoReleaser pipeline, CI signing).
+
+## [0.3.0] - 2026-05-17
+
+- Tagged 2026-05-17. No changelog was recorded at the time; see `git log v0.2.1..v0.3.0` for details.
 
 ## [0.2.1] - 2026-07-22
 
