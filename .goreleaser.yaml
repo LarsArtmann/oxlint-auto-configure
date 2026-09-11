@@ -106,7 +106,7 @@ brews:
     install: |
       bin.install "oxlint-auto-configure"
     test: |
-      system "#{{bin}}/oxlint-auto-configure --version"
+      system "#{bin}/oxlint-auto-configure --version"
 
 nix:
   - name: oxlint-auto-configure
@@ -121,7 +121,7 @@ nix:
     path: pkgs/oxlint-auto-configure/default.nix
     install: |
       mkdir -p $out/bin
-      cp -vr ./{{binary}} $out/bin/oxlint-auto-configure
+      cp -vr ./{{ .Binary }} $out/bin/oxlint-auto-configure
 
 nfpms:
   - id: default
