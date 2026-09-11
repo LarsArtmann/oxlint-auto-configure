@@ -8,14 +8,14 @@
 
 ## Session Summary
 
-| Step | Action | Result |
-| ---- | ------ | ------ |
-| 1 | Loaded `website-launch` skill Phase 6 (GitHub Metadata) | Trigger matched "set up GitHub metadata" |
-| 2 | Gathered facts: `gh repo view`, README, workflows, `.goreleaser.yaml`, website/ check | Repo had NO description, NO topics, NO homepage, NO badges |
-| 3 | `gh repo edit` — description + 15 topics | Applied, verified via `gh repo view` |
-| 4 | README badge bar (CI \| Docker \| MIT) at README.md:3-5 | Applied (application badge set per skill) |
-| 5 | AGENTS.md memory entry for metadata decisions | Applied |
-| 6 | Verification: release run, ghcr anonymous pull, license detection | All green (details below) |
+| Step | Action                                                                                | Result                                                     |
+| ---- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 1    | Loaded `website-launch` skill Phase 6 (GitHub Metadata)                               | Trigger matched "set up GitHub metadata"                   |
+| 2    | Gathered facts: `gh repo view`, README, workflows, `.goreleaser.yaml`, website/ check | Repo had NO description, NO topics, NO homepage, NO badges |
+| 3    | `gh repo edit` — description + 15 topics                                              | Applied, verified via `gh repo view`                       |
+| 4    | README badge bar (CI \| Docker \| MIT) at README.md:3-5                               | Applied (application badge set per skill)                  |
+| 5    | AGENTS.md memory entry for metadata decisions                                         | Applied                                                    |
+| 6    | Verification: release run, ghcr anonymous pull, license detection                     | All green (details below)                                  |
 
 README.md + AGENTS.md edits were auto-committed by the daemon (241537f).
 
@@ -56,7 +56,7 @@ Nothing destructive. But two honest process failures:
 ## e) WHAT WE SHOULD IMPROVE (self-review answers)
 
 1. **What did you forget?** Social preview image; Discussions/settings sweep; fetching the CI badge SVG; checking the sibling repo (`golangci-lint-auto-configure`) for house badge/metadata conventions before inventing mine — consistency across LarsArtmann repos beats per-revo originality.
-2. **What's stupid that we do anyway?** The Docker badge is a *static* shields.io badge — it can never show live data (ghcr has no pull-count shield) and must be manually recolored if conventions change. Acceptable, but it's decoration, not signal.
+2. **What's stupid that we do anyway?** The Docker badge is a _static_ shields.io badge — it can never show live data (ghcr has no pull-count shield) and must be manually recolored if conventions change. Acceptable, but it's decoration, not signal.
 3. **What could you have done better?** Verified the CI badge endpoint; batched the AGENTS.md view with the first edit attempt (would have avoided the guard rejection); checked sibling-repo conventions first.
 4. **What can you still improve?** Everything in section (f), top items first.
 5. **Did you lie to you?** No. Every claim above is backed by a command run this session (`gh repo view`, `gh release view`, `gh run list`, ghcr registry API). One claim leaned on inference: "package page may render login wall for logged-out users" — the registry pull is the verified fact; page rendering is cosmetic and unverified.
@@ -72,6 +72,7 @@ Nothing destructive. But two honest process failures:
 Impact-sorted. Items 1-10 are actionable soon; 11+ are brainstorm / ROADMAP fuel (do NOT treat all 50 as commitments — harvest selectively).
 
 **Metadata & presence (this session's thread):**
+
 1. Fetch `actions/workflows/ci.yml/badge.svg` → confirm 200 (close the verification gap).
 2. Diff badge/metadata against sibling `golangci-lint-auto-configure` → align conventions.
 3. Generate + upload a social preview OG image (1200×640; HyperFrames or simple render).
