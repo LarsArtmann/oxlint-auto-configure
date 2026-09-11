@@ -8,15 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Nothing yet.
+
+### Changed
+
+- Nothing yet.
+
+### Fixed
+
+- Nothing yet.
+
+## [0.6.0] - 2026-09-11
+
+### Added
+
 - `pkg/provider` package — BuildFlow integration via the `go-finding/toolsdk` v1.10.0 Spec contract. A package-level `toolsdk.Register` declares the tool (name `oxlint-auto-configure`, JS/TS trigger, `DependsOn: [oxlint]`), detects a missing `.oxlintrc.json` in recognizable JS/TS projects (`OXLOPT_CONFIG_MISSING` warning), and repairs it by generating the recommended-profile config (honoring BuildFlow's dry-run flag; never overwrites an existing config). BuildFlow consumers blank-import the package and drop their hand-written glue.
 
 ### Changed
 
 - Nix flake `go-finding` input bumped from the stale `v1.8.0` pin to `v1.10.0`, matching `go.mod` and the `toolsdk` sub-module's required core version.
-
-### Fixed
-
-- Nothing yet.
 
 ## [0.5.0] - 2026-09-11
 
