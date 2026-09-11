@@ -1,5 +1,9 @@
 # oxlint-auto-configure
 
+[![CI](https://github.com/LarsArtmann/oxlint-auto-configure/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/oxlint-auto-configure/actions/workflows/ci.yml)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io-2496ED?logo=docker&logoColor=white)](https://github.com/LarsArtmann/oxlint-auto-configure/pkgs/container/oxlint-auto-configure)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 **Generate the optimal `.oxlintrc.json` — not a linter, a configurator.**
 
 This tool's one job: inspect your project and write the best possible [oxlint](https://oxc.rs/docs/guide/usage/linter.html) config. It does **not** lint, fix, or replace oxlint — it configures oxlint so you don't have to.
