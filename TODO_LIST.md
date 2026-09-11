@@ -40,7 +40,9 @@ All previously listed build/tooling tasks have been completed:
 - ✅ BuildFlow glue deleted: hand-written `NewOxlintAutoConfigureProvider` replaced by blank import of `pkg/provider` (local `replace` makes it live immediately)
 - ✅ DAG flip (owner decision 2026-09-11): provider no longer depends on `oxlint`; BuildFlow's `NewOxlintProvider` now `WithDeps(ToolOxlintAutoConfigure)` so lint runs with the generated config
 - ✅ Provider bridged through `linter-autoconfigure-sdk` `ProviderFromSpec` (SDK tagged v0.2.0; our local `replace` dropped — released modules must not carry path replaces)
-- ⬜ Tag `v0.6.1` (v0.6.0 was already cut by a parallel session without the SDK bridge/flip) and bump BuildFlow's `flake.nix` input (`refs/tags/v0.5.0` → `v0.6.1` — NOT v0.6.0: the tagged source still declares `DependsOn: [oxlint]`, which would cycle with BuildFlow's new `WithDeps`) plus the `linter-autoconfigure-sdk` deps entry
+- ✅ Tagged `v0.6.1` (SDK bridge v0.2.0 + DAG flip + replace removed) and `v0.6.2` (Inputs contract restored after the SDK bridge derived Inputs from ConfigFile alone); v0.6.0 was cut by a parallel session without those — do NOT pair v0.6.0/v0.6.1 with BuildFlow's `WithDeps` (cycle)
+- ✅ BuildFlow flake bumped: `oxlint-auto-configure` input → `v0.6.2`, new `linter-autoconfigure-sdk` v0.2.0 input + deps entry, vendorHash refreshed, `nix build` green
+- ⬜ Drift detection decision: owner answered "All?!?!" (ambiguous) — queued until clarified whether Detect should also flag stale/divergent configs via `pkg/diff`
 
 ---
 
