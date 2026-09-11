@@ -12,28 +12,28 @@ Executed the owner's decisions: flipped the DAG (BuildFlow's oxlint lint step no
 
 ## a) FULLY DONE
 
-| # | Item | Evidence |
-| --- | --- | --- |
-| 1 | DAG flip (owner decision): provider `DependsOn = nil`; BuildFlow `NewOxlintProvider` gains `WithDeps(config.ToolOxlintAutoConfigure)` with rationale comment | `pkg/provider/provider.go:89-93`; BuildFlow `tools/providers/js_tools.go` |
-| 2 | Adopted the concurrent session's `ProviderFromSpec` rewrite without clobbering it: flip applied inside their `mustProvider` layering, domain logic preserved | `pkg/provider/provider.go` (their bridge + my layering) |
-| 3 | **linter-autoconfigure-sdk v0.2.0 released**: CHANGELOG `[0.2.0]` cut (Added + Changed), build/vet/race/lint gates green, committed with a real message, annotated tag, pushed | SDK repo commit `5dec8d9`, tag `v0.2.0` |
-| 4 | Local path `replace` of the SDK removed from our go.mod; require bumped to v0.2.0 (a published tag must not carry `../` replaces — breaks every external `go get`); no pseudo-versions | `go.mod` (verified `CLEAN`), vendored |
-| 5 | Our flake: `linter-autoconfigure-sdk` v0.2.0 input + deps-map entry added (validatePrivateDeps caught the unmapped dep); vendorHash refreshed; `nix build` + binary run green | `flake.nix`, commit `f8067cb` era |
-| 6 | **oxlint-autoconfigure v0.6.1 released**: CHANGELOG restructured truthfully (v0.6.0 left as actually-tagged; bridge/flip/FixStrategy/replace-removal in `[0.6.1]`), annotated tag on verified HEAD (`DependsOn nil`, SDK v0.2.0, new vendorHash), pushed; Release workflow success | tag `v0.6.1`, run 34600028180 success |
-| 7 | **v0.6.2 released**: `spec.Inputs = ["package.json", ".oxlintrc.json"]` restored in `mustProvider` (ProviderFromSpec derives Inputs from ConfigFile alone), test assertion added, tagged+pushed | tag `v0.6.2`; provider tests + lint green |
-| 8 | BuildFlow consumer wiring completed: tools/go.mod SDK → v0.2.0, stale `expected oxlint in DependsOn` assertion replaced with the flipped contract, data-flow snapshot back to 213 (inputs fix), flake ref → v0.6.2 with cycle warning comment, SDK input + deps entry + outputs-args fix, vendorHash.nix refreshed, `nix build` green | BuildFlow flake.nix, vendorHash.nix, go_auto_upgrade_helpers_test.go |
-| 9 | BuildFlow suite fully green post-flip (51.5s) — including the meta-guard and snapshot tests | `go test ./providers/` ok |
-| 10 | TODO_LIST BuildFlow section updated to the true release state, including the v0.6.0/v0.6.1 cycle warning for future flake bumps | `TODO_LIST.md` |
+| #  | Item                                                                                                                                                                                                                                                                                                                                  | Evidence                                                                  |
+| -- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 1  | DAG flip (owner decision): provider `DependsOn = nil`; BuildFlow `NewOxlintProvider` gains `WithDeps(config.ToolOxlintAutoConfigure)` with rationale comment                                                                                                                                                                          | `pkg/provider/provider.go:89-93`; BuildFlow `tools/providers/js_tools.go` |
+| 2  | Adopted the concurrent session's `ProviderFromSpec` rewrite without clobbering it: flip applied inside their `mustProvider` layering, domain logic preserved                                                                                                                                                                          | `pkg/provider/provider.go` (their bridge + my layering)                   |
+| 3  | **linter-autoconfigure-sdk v0.2.0 released**: CHANGELOG `[0.2.0]` cut (Added + Changed), build/vet/race/lint gates green, committed with a real message, annotated tag, pushed                                                                                                                                                        | SDK repo commit `5dec8d9`, tag `v0.2.0`                                   |
+| 4  | Local path `replace` of the SDK removed from our go.mod; require bumped to v0.2.0 (a published tag must not carry `../` replaces — breaks every external `go get`); no pseudo-versions                                                                                                                                                | `go.mod` (verified `CLEAN`), vendored                                     |
+| 5  | Our flake: `linter-autoconfigure-sdk` v0.2.0 input + deps-map entry added (validatePrivateDeps caught the unmapped dep); vendorHash refreshed; `nix build` + binary run green                                                                                                                                                         | `flake.nix`, commit `f8067cb` era                                         |
+| 6  | **oxlint-autoconfigure v0.6.1 released**: CHANGELOG restructured truthfully (v0.6.0 left as actually-tagged; bridge/flip/FixStrategy/replace-removal in `[0.6.1]`), annotated tag on verified HEAD (`DependsOn nil`, SDK v0.2.0, new vendorHash), pushed; Release workflow success                                                    | tag `v0.6.1`, run 34600028180 success                                     |
+| 7  | **v0.6.2 released**: `spec.Inputs = ["package.json", ".oxlintrc.json"]` restored in `mustProvider` (ProviderFromSpec derives Inputs from ConfigFile alone), test assertion added, tagged+pushed                                                                                                                                       | tag `v0.6.2`; provider tests + lint green                                 |
+| 8  | BuildFlow consumer wiring completed: tools/go.mod SDK → v0.2.0, stale `expected oxlint in DependsOn` assertion replaced with the flipped contract, data-flow snapshot back to 213 (inputs fix), flake ref → v0.6.2 with cycle warning comment, SDK input + deps entry + outputs-args fix, vendorHash.nix refreshed, `nix build` green | BuildFlow flake.nix, vendorHash.nix, go_auto_upgrade_helpers_test.go      |
+| 9  | BuildFlow suite fully green post-flip (51.5s) — including the meta-guard and snapshot tests                                                                                                                                                                                                                                           | `go test ./providers/` ok                                                 |
+| 10 | TODO_LIST BuildFlow section updated to the true release state, including the v0.6.0/v0.6.1 cycle warning for future flake bumps                                                                                                                                                                                                       | `TODO_LIST.md`                                                            |
 
 ## b) PARTIALLY DONE
 
-| # | Item | Works now | Missing | Blocker | Effort |
-| --- | --- | --- | --- | --- | --- |
-| 1 | v0.6.2 post-release verification | Tag pushed; Release + CI workflows **queued** at writing | Confirm Release workflow success + GoReleaser artifacts + proxy/pkg.go.dev propagation | Runner contention (4m43s queued) | S |
-| 2 | SDK v0.2.0 GitHub Release | Tag pushed, proxy resolved (our build fetched it) | No GitHub Release object created (library repo — gh release create was never run) | None | S |
-| 3 | Drift detection (owner answer "All?!?!") | Queued in TODO_LIST with the ambiguity documented | A decision on what "All" meant; then design (must not stomp user customizations) | Owner clarification | M |
-| 4 | Status report #1 accuracy | Written and committed | Its f-list item #1 ("tag v0.6.0") was overtaken by reality within 30 min — superseded by this report | None (point-in-time docs age by design) | — |
-| 5 | Carried-over gaps: README sales mention, BuildFlow CHANGELOG entry, dprint unavailability | Unchanged from report #1 | Same as documented there | dprint not installed; writing time | S |
+| # | Item                                                                                      | Works now                                                | Missing                                                                                              | Blocker                                 | Effort |
+| - | ----------------------------------------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------- | ------ |
+| 1 | v0.6.2 post-release verification                                                          | Tag pushed; Release + CI workflows **queued** at writing | Confirm Release workflow success + GoReleaser artifacts + proxy/pkg.go.dev propagation               | Runner contention (4m43s queued)        | S      |
+| 2 | SDK v0.2.0 GitHub Release                                                                 | Tag pushed, proxy resolved (our build fetched it)        | No GitHub Release object created (library repo — gh release create was never run)                    | None                                    | S      |
+| 3 | Drift detection (owner answer "All?!?!")                                                  | Queued in TODO_LIST with the ambiguity documented        | A decision on what "All" meant; then design (must not stomp user customizations)                     | Owner clarification                     | M      |
+| 4 | Status report #1 accuracy                                                                 | Written and committed                                    | Its f-list item #1 ("tag v0.6.0") was overtaken by reality within 30 min — superseded by this report | None (point-in-time docs age by design) | —      |
+| 5 | Carried-over gaps: README sales mention, BuildFlow CHANGELOG entry, dprint unavailability | Unchanged from report #1                                 | Same as documented there                                                                             | dprint not installed; writing time      | S      |
 
 ## c) NOT STARTED
 
@@ -65,25 +65,25 @@ No data loss, no broken released artifact (v0.6.2 supersedes v0.6.1's contract g
 
 ## f) Top things to get done next (ranked by impact)
 
-| # | Task | Impact | Effort | Category |
-| --- | --- | --- | --- | --- |
-| 1 | Confirm v0.6.2 Release workflow success + GoReleaser artifacts | High | S | Release |
-| 2 | Verify proxy/pkg.go.dev propagation for v0.6.1, v0.6.2, SDK v0.2.0 (`go list -m -versions` + clean-dir `go get`) | High | S | Release |
-| 3 | Clarify the drift decision ("All?!?!") and design detect-stale-config accordingly | High | S | Decision |
-| 4 | Create GitHub Release for SDK v0.2.0 (mirror v0.1.0's format) | Medium | S | Release |
-| 5 | Verify SDK CI run on `5dec8d9` went green (push bypassed the pending check) | Medium | S | Quality |
-| 6 | Watch BuildFlow CI (flake bump + tools changes are on their master) | Medium | S | Quality |
-| 7 | Update our AGENTS gotcha: released `DependsOn` flip + "never pair v0.6.0/v0.6.1 with BuildFlow WithDeps" cycle warning | Medium | S | Documentation |
-| 8 | README: document the BuildFlow integration + updated DAG direction | Medium | S | Documentation |
-| 9 | BuildFlow CHANGELOG entry for the glue removal, DAG flip, edge-count change | Medium | S | Documentation |
-| 10 | Upstream toolsdk: propose `Outputs []string` (restores producer edges for us + dependabot) | Medium | M | Feature |
-| 11 | Design drift detection: diff-based findings with a "generated marker" so Repair never stomps hand edits | Medium | M | Feature |
-| 12 | BuildFlow root-module test verification (SDK bump touched root go.mod) | Medium | S | Quality |
-| 13 | Wire dprint into a dev shell somewhere and format-validate the 6 edited .md files | Medium | S | Tooling |
-| 14 | gopls: restart after go.mod changes / configure GOEXPERIMENT env to kill stale diagnostics noise | Low | S | Tooling |
-| 15 | `-count=2` + shuffle run for `pkg/provider` (process-global registry isolation) | Low | S | Quality |
-| 16 | Dry-run contract test: assert `toolsdk.DryRunFromContext` reaches OUR closure through the SDK bridge (the bridge forwards ctx; pin it) | Low | S | Quality |
-| 17 | Consider dependabot-auto-configure + golangci-lint-auto-configure parity check: do their providers also lose Inputs/Outputs through `ProviderFromSpec`? (same bug class) | Low | M | Quality |
+| #  | Task                                                                                                                                                                     | Impact | Effort | Category      |
+| -- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ------ | ------------- |
+| 1  | Confirm v0.6.2 Release workflow success + GoReleaser artifacts                                                                                                           | High   | S      | Release       |
+| 2  | Verify proxy/pkg.go.dev propagation for v0.6.1, v0.6.2, SDK v0.2.0 (`go list -m -versions` + clean-dir `go get`)                                                         | High   | S      | Release       |
+| 3  | Clarify the drift decision ("All?!?!") and design detect-stale-config accordingly                                                                                        | High   | S      | Decision      |
+| 4  | Create GitHub Release for SDK v0.2.0 (mirror v0.1.0's format)                                                                                                            | Medium | S      | Release       |
+| 5  | Verify SDK CI run on `5dec8d9` went green (push bypassed the pending check)                                                                                              | Medium | S      | Quality       |
+| 6  | Watch BuildFlow CI (flake bump + tools changes are on their master)                                                                                                      | Medium | S      | Quality       |
+| 7  | Update our AGENTS gotcha: released `DependsOn` flip + "never pair v0.6.0/v0.6.1 with BuildFlow WithDeps" cycle warning                                                   | Medium | S      | Documentation |
+| 8  | README: document the BuildFlow integration + updated DAG direction                                                                                                       | Medium | S      | Documentation |
+| 9  | BuildFlow CHANGELOG entry for the glue removal, DAG flip, edge-count change                                                                                              | Medium | S      | Documentation |
+| 10 | Upstream toolsdk: propose `Outputs []string` (restores producer edges for us + dependabot)                                                                               | Medium | M      | Feature       |
+| 11 | Design drift detection: diff-based findings with a "generated marker" so Repair never stomps hand edits                                                                  | Medium | M      | Feature       |
+| 12 | BuildFlow root-module test verification (SDK bump touched root go.mod)                                                                                                   | Medium | S      | Quality       |
+| 13 | Wire dprint into a dev shell somewhere and format-validate the 6 edited .md files                                                                                        | Medium | S      | Tooling       |
+| 14 | gopls: restart after go.mod changes / configure GOEXPERIMENT env to kill stale diagnostics noise                                                                         | Low    | S      | Tooling       |
+| 15 | `-count=2` + shuffle run for `pkg/provider` (process-global registry isolation)                                                                                          | Low    | S      | Quality       |
+| 16 | Dry-run contract test: assert `toolsdk.DryRunFromContext` reaches OUR closure through the SDK bridge (the bridge forwards ctx; pin it)                                   | Low    | S      | Quality       |
+| 17 | Consider dependabot-auto-configure + golangci-lint-auto-configure parity check: do their providers also lose Inputs/Outputs through `ProviderFromSpec`? (same bug class) | Low    | M      | Quality       |
 
 (17 grounded items; the remaining headroom waits on items 1–3 — tagging more work onto an unconfirmed release chain or an undecided drift contract would be speculative.)
 
