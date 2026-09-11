@@ -20,7 +20,7 @@ import (
 	atomicwrite "github.com/larsartmann/go-atomic-write"
 	"github.com/larsartmann/go-finding"
 	toolsdk "github.com/larsartmann/go-finding/toolsdk"
-	"github.com/larsartmann/linter-autoconfigure-sdk"
+	autoconfigure "github.com/larsartmann/linter-autoconfigure-sdk"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
@@ -113,14 +113,18 @@ func detectMissingConfig(ctx context.Context) ([]autoconfigure.ConfigIssue, erro
 		return nil, nil
 	}
 
-	return []autoconfigure.ConfigIssue{{
-		Rule:      missingConfigRule,
-		Message:   "No " + configFileName + " found; generate the optimal config for the detected project type",
-		Severity:  finding.SeverityWarning,
-		File:      finding.FilePath(configFileName),
-		Confidence: finding.ConfidenceHigh,
-		Suggestion: "run `oxlint-auto-configure configure` or apply this repair to write " + configFileName,
-	}}, nil
+	return []autoconfigure.ConfigIssue{
+		{
+			Rule:        missingConfigRule,
+			Message:     "No " + configFileName + " found; generate the optimal config for the detected project type",
+			Severity:    finding.SeverityWarning,
+			File:        finding.FilePath(configFileName),
+			Line:        0,
+			Suggestion:  "run `oxlint-auto-configure configure` or apply this repair to write " + configFileName,
+			Confidence:  finding.ConfidenceHigh,
+			FixStrategy: nil,
+		},
+	}, nil
 }
 
 // hasKnownProjectType reports whether at least one detected project type is
