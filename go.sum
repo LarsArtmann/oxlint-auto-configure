@@ -33,6 +33,8 @@ github.com/larsartmann/go-finding v1.10.0 h1:TDV0K1Vg3frcR5zNB439M0IBq3EmwG05G8z
 github.com/larsartmann/go-finding v1.10.0/go.mod h1:RstMuPBVk89IU581aR7AutJR+WrseYLLRDz1Dejyt7Y=
 github.com/larsartmann/go-finding/pipeline v1.10.0 h1:xoXgC5noaj5PsH0AHkEdP6228/Ulo9ovBwK5v8z6Ftc=
 github.com/larsartmann/go-finding/pipeline v1.10.0/go.mod h1:pU7jhYxvsXt11v9EvUWT2Txj5GD4Hsf/BPgmUtu+J1M=
+github.com/larsartmann/go-finding/toolsdk v1.10.0 h1:TbVmHRrp77yWPyztfksEt5nqavV/5DrvqIRpfzWzYqg=
+github.com/larsartmann/go-finding/toolsdk v1.10.0/go.mod h1:1boklm10yzlEWnIVgn5psE03GLwa4Kqt9Z3FXrEZ6XE=
 github.com/onsi/ginkgo/v2 v2.32.1 h1:6tlvcDm/3sE8lGJbZ4+d4mO3RLy24/tQWOFzVSQNIfw=
 github.com/onsi/ginkgo/v2 v2.32.1/go.mod h1:+aXOY+vzZ5mu2iI2HpTZUPmM//oQfsNFX6gU9kNcA44=
 github.com/onsi/gomega v1.43.0 h1:VlG/1FxqNxhSO+lq/OHBNaaqwiBK/mO8JbVkX9Y+FeU=
