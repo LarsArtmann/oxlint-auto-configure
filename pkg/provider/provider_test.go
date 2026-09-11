@@ -62,7 +62,7 @@ func TestDetect_MissingConfigWithKnownProjectType(t *testing.T) {
 	require.Equal(t, finding.ToolName("oxlint-auto-configure"), findings[0].ToolName)
 	require.Equal(t, finding.SeverityWarning, findings[0].Severity)
 	require.Equal(t, finding.FilePath(".oxlintrc.json"), findings[0].Position.File)
-	require.Equal(t, finding.FixStrategyDirect, findings[0].FixStrategy)
+	require.Equal(t, finding.FixStrategySuggest, findings[0].FixStrategy)
 }
 
 func TestDetect_ExistingConfigNeverFlagged(t *testing.T) {

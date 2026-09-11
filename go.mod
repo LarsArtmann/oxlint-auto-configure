@@ -7,6 +7,7 @@ require (
 	github.com/larsartmann/go-finding v1.10.0
 	github.com/larsartmann/go-finding/pipeline v1.10.0
 	github.com/larsartmann/go-finding/toolsdk v1.10.0
+	github.com/larsartmann/linter-autoconfigure-sdk v0.1.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 )
@@ -28,3 +29,5 @@ require (
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 )
+
+replace github.com/larsartmann/linter-autoconfigure-sdk => ../linter-autoconfigure-sdk

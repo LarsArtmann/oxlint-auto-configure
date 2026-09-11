@@ -4,6 +4,11 @@
 // package:
 //
 //	import _ "github.com/larsartmann/oxlint-auto-configure/pkg/provider"
+//
+// The Spec is built with linter-autoconfigure-sdk's ProviderFromSpec so the
+// domain shape (Analyze reporting ConfigIssues, Repair describing what was
+// rewritten) stays in the auto-configurer's language and the finding emission
+// is owned by the shared SDK instead of re-implemented here.
 package provider
 
 import (
@@ -15,6 +20,7 @@ import (
 	atomicwrite "github.com/larsartmann/go-atomic-write"
 	"github.com/larsartmann/go-finding"
 	toolsdk "github.com/larsartmann/go-finding/toolsdk"
+	"github.com/larsartmann/linter-autoconfigure-sdk"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
@@ -58,32 +64,41 @@ func hasConfig(root string) bool {
 }
 
 //nolint:gochecknoglobals // BuildFlow plugin SDK requires package-level Provider registration
-var Provider = toolsdk.Register(toolsdk.Spec{
-	Name: toolName,
-	Description: "Detects a missing " + configFileName + " and repairs it: generates the optimal " +
-		"oxlint config from the detected project type (React, Next.js, Vue, ...)",
-	Trigger: toolsdk.OnFiles(
+var Provider = mustProvider()
+
+// mustProvider builds the Spec through the shared SDK bridge and layers the
+// oxlint-specific DAG wiring (Trigger, DependsOn) on top. Registration
+// panics on an invalid Spec, the same contract as toolsdk.Register.
+func mustProvider() toolsdk.Spec {
+	spec, err := autoconfigure.ProviderFromSpec(autoconfigure.ProviderSpec{
+		Name:        toolName,
+		Description: "Detects a missing " + configFileName + " and repairs it: generates the optimal " + configFileName + " for the detected project type (React, Next.js, Vue, ...)",
+		ConfigFile:  finding.FilePath(configFileName),
+		Analyze:     detectMissingConfig,
+		Repair:      repairConfig,
+	})
+	if err != nil {
+		panic("provider: invalid spec: " + err.Error())
+	}
+
+	spec.Trigger = toolsdk.OnFiles(
 		"javascript",
 		"**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.cjs",
 		"**/*.vue", "**/*.svelte", "**/*.astro",
-	),
-	Inputs: []string{
-		"package.json",
-		configFileName,
-	},
-	DependsOn: []string{"oxlint"},
-	Detect:    finding.NamedDetectorFunc(toolName, detectMissingConfig),
-	Repair:    toolsdk.RepairerFunc(repairConfig),
+	)
+	spec.DependsOn = []string{"oxlint"}
 	// nil = always healthy: config generation uses the embedded rule registry
 	// and never shells out to the oxlint binary.
-	HealthCheck: nil,
-})
+	spec.HealthCheck = nil
+
+	return toolsdk.Register(spec)
+}
 
 // detectMissingConfig reports a warning finding when the project is a
 // recognizable JS/TS project without an oxlint config. An existing config is
 // never flagged: this tool generates a fresh optimal config, so flagging a
 // user-customized config would lead Repair to stomp it.
-func detectMissingConfig(ctx context.Context) ([]finding.Finding, error) {
+func detectMissingConfig(ctx context.Context) ([]autoconfigure.ConfigIssue, error) {
 	root := workingDir(ctx)
 	if hasConfig(root) {
 		return nil, nil
@@ -98,7 +113,14 @@ func detectMissingConfig(ctx context.Context) ([]finding.Finding, error) {
 		return nil, nil
 	}
 
-	return []finding.Finding{missingConfigFinding()}, nil
+	return []autoconfigure.ConfigIssue{{
+		Rule:      missingConfigRule,
+		Message:   "No " + configFileName + " found; generate the optimal config for the detected project type",
+		Severity:  finding.SeverityWarning,
+		File:      finding.FilePath(configFileName),
+		Confidence: finding.ConfidenceHigh,
+		Suggestion: "run `oxlint-auto-configure configure` or apply this repair to write " + configFileName,
+	}}, nil
 }
 
 // hasKnownProjectType reports whether at least one detected project type is
@@ -113,55 +135,32 @@ func hasKnownProjectType(projectTypes []detect.ProjectType) bool {
 	return false
 }
 
-// missingConfigFinding builds the single finding this detector emits.
-func missingConfigFinding() finding.Finding {
-	f := finding.NewFinding(
-		missingConfigRule,
-		toolName,
-		"No "+configFileName+" found; generate the optimal config for the detected project type",
-		finding.SeverityWarning,
-		finding.Position{File: finding.FilePath(configFileName)},
-		finding.ConfidenceHigh,
-	)
-	f.Category = finding.CategoryStyle
-	f.FixStrategy = finding.FixStrategyDirect
-	f.Suggestion = "run `oxlint-auto-configure configure` or apply this repair to write " + configFileName
-
-	return f
-}
-
 // repairConfig generates the optimal oxlint config for the detected project
 // type and writes it, honoring the dry-run flag carried by the context. An
 // existing config is never overwritten: Repair only fires for projects whose
 // config is missing.
-func repairConfig(ctx context.Context) (toolsdk.RepairResult, error) {
+func repairConfig(ctx context.Context) (string, error) {
 	root := workingDir(ctx)
 	dryRun := toolsdk.DryRunFromContext(ctx)
 
 	if hasConfig(root) {
-		return toolsdk.RepairResult{
-			Description: configFileName + " already exists; keeping the existing configuration",
-		}, nil
+		return configFileName + " already exists; keeping the existing configuration", nil
 	}
 
 	data, ruleCount, err := generateConfig(root)
 	if err != nil {
-		return toolsdk.RepairResult{}, err
+		return "", err
 	}
 
 	if dryRun {
-		return toolsdk.RepairResult{
-			Description: fmt.Sprintf("held back by dry-run: would write %s (%d rules)", configFileName, ruleCount),
-		}, nil
+		return fmt.Sprintf("held back by dry-run: would write %s (%d rules)", configFileName, ruleCount), nil
 	}
 
 	if err := writeConfigFile(configPath(root), data); err != nil {
-		return toolsdk.RepairResult{}, err
+		return "", err
 	}
 
-	return toolsdk.RepairResult{
-		Description: fmt.Sprintf("wrote %s (%d rules)", configFileName, ruleCount),
-	}, nil
+	return fmt.Sprintf("wrote %s (%d rules)", configFileName, ruleCount), nil
 }
 
 // generateConfig runs the detect → profile → generate pipeline shared with
