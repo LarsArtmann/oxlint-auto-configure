@@ -8,15 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Nothing yet.
+- BuildFlow provider now built through `linter-autoconfigure-sdk`'s
+  `ProviderFromSpec` bridge: the missing-config finding is declared as a
+  `ConfigIssue` and the repair as a plain closure, with Trigger/DependsOn
+  layered on the returned Spec. First SDK consumer migration (tracks the SDK
+  via a local `replace` until its next tag).
 
 ### Changed
 
-- Nothing yet.
-
-### Fixed
-
-- Nothing yet.
+- The `OXLOPT_CONFIG_MISSING` finding now carries `FixStrategySuggest`
+  instead of `FixStrategyDirect` (go-finding validation requires before/after
+  code for direct fixes, which a generate-the-config repair does not have)
+  and category `configuration` instead of `style`. Confidence stays high,
+  message/suggestion/file are unchanged, and the registered Repair is
+  identical, so BuildFlow repair behavior is unchanged.
+- CLI detect/repair semantics and the generated `.oxlintrc.json` bytes are
+  the same.
 
 ## [0.6.0] - 2026-09-11
 
