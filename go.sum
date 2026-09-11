@@ -35,6 +35,8 @@ github.com/larsartmann/go-finding/pipeline v1.10.0 h1:xoXgC5noaj5PsH0AHkEdP6228/
 github.com/larsartmann/go-finding/pipeline v1.10.0/go.mod h1:pU7jhYxvsXt11v9EvUWT2Txj5GD4Hsf/BPgmUtu+J1M=
 github.com/larsartmann/go-finding/toolsdk v1.10.0 h1:TbVmHRrp77yWPyztfksEt5nqavV/5DrvqIRpfzWzYqg=
 github.com/larsartmann/go-finding/toolsdk v1.10.0/go.mod h1:1boklm10yzlEWnIVgn5psE03GLwa4Kqt9Z3FXrEZ6XE=
+github.com/larsartmann/linter-autoconfigure-sdk v0.2.0 h1:DtB/uqbm8yIkOpYu5H8OEY4QHPHJUoM4lOzSATXNosc=
+github.com/larsartmann/linter-autoconfigure-sdk v0.2.0/go.mod h1:Uc/YN6X01yWEKqaw3N8KOogwI+uam0BU11zqKhJiGwY=
 github.com/onsi/ginkgo/v2 v2.32.1 h1:6tlvcDm/3sE8lGJbZ4+d4mO3RLy24/tQWOFzVSQNIfw=
 github.com/onsi/ginkgo/v2 v2.32.1/go.mod h1:+aXOY+vzZ5mu2iI2HpTZUPmM//oQfsNFX6gU9kNcA44=
 github.com/onsi/gomega v1.43.0 h1:VlG/1FxqNxhSO+lq/OHBNaaqwiBK/mO8JbVkX9Y+FeU=
