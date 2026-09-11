@@ -34,6 +34,12 @@ All previously listed build/tooling tasks have been completed:
 - ✅ `deduplicate-code` skill run: **0 clone groups** at threshold 5
 - ✅ Broken `#resolution` anchor link fixed in `docs/status/2026-07-17_*.md`
 
+## BuildFlow Integration
+
+- ✅ `pkg/provider` toolsdk Spec shipped: Detect (missing-config) + Repair (generate, dry-run aware, no-overwrite); registered at import time
+- ✅ BuildFlow glue deleted: hand-written `NewOxlintAutoConfigureProvider` replaced by blank import of `pkg/provider` (local `replace` makes it live immediately)
+- ⬜ Tag the next release (e.g. `v0.6.0`) and bump BuildFlow's `flake.nix` input (`refs/tags/v0.5.0` → new tag) so BuildFlow's nix CI builds the provider instead of the v0.5.0 source without it
+
 ---
 
-_Last reviewed: 2026-07-26_
+_Last reviewed: 2026-09-11_

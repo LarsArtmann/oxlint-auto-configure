@@ -39,6 +39,7 @@ Oxlint has 841 rules across 7 categories and 15 plugins. Only 113 are enabled by
 | `pkg/oxlint/detector.go`            | go-finding Detector for oxlint; `Runner` interface seam                                |
 | `pkg/oxlint/version.go`             | oxlint version check and binary verification                                           |
 | `pkg/oxlint/fix.go`                 | oxlint --fix wrapper                                                                   |
+| `pkg/provider/provider.go`          | BuildFlow integration: toolsdk Spec (Detect missing config, Repair via generate)       |
 | `internal/cli/cmd_root.go`          | Root command, shared constants (defaultConfigPath, defaultProfile, version)            |
 | `internal/cli/cmd_configure.go`     | configure command + extracted `Configure(ctx, absRoot, opts)`                          |
 | `internal/cli/cmd_analyze.go`       | analyze command with go-finding pipeline integration                                   |
@@ -55,6 +56,7 @@ Oxlint has 841 rules across 7 categories and 15 plugins. Only 113 are enabled by
 | `internal/cli/atomic_write_test.go`      | Atomic write contract: no `.tmp` files left, idempotent overwrite             |
 | `internal/cli/coverage_test.go`          | Coverage tests: `renderFindings`, `printSARIF`, `sortedByPosition`, etc.      |
 | `internal/cli/commands_test.go`          | Command integration tests with assertions on rule counts and config structure |
+| `pkg/provider/provider_test.go`          | toolsdk Spec contract: registration, detect/repair semantics, dry-run, no-overwrite  |
 
 ### Nix
 
@@ -90,7 +92,8 @@ nix flake check .                                    # All checks via nix
 
 ### Dependencies
 
-- `github.com/larsartmann/go-finding` v1.10.0 (pipeline v1.9.2) — Unified static analysis model (public; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
+- `github.com/larsartmann/go-finding` v1.10.0 (pipeline v1.10.0) — Unified static analysis model (public; branded types `RuleName`/`ToolName`/`ID`/`FilePath` in `NewFinding`) + `go-finding/pipeline` submodule
+- `github.com/larsartmann/go-finding/toolsdk` v1.10.0 — BuildFlow provider contract (`Spec`/`Register`/`All`); used by `pkg/provider` (sub-module tag `toolsdk/v1.10.0`; resolves via module proxy in nix like `pipeline`)
 - `github.com/larsartmann/go-atomic-write` v0.5.1 — Crash-durable atomic file writes (temp + `fsync` + atomic rename). Used for `.oxlintrc.json` output in `writeConfig` so a crash mid-write cannot truncate the user's config
 - `github.com/larsartmann/go-error-family` v0.10.0 — Structured error family helpers (transitive dep of `go-atomic-write` v0.5.1)
 - `github.com/spf13/cobra` — CLI framework
@@ -172,6 +175,8 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Sentinel errors** — `pkg/oxlint/errors.go` (`ErrNotFound`, `ErrUnexpectedVersionOutput`, `ErrOxlintStderr`) and `internal/cli/cmd_root.go` (`errVerboseQuietConflict`, `errInvalidSeverity`, `errUnknownFormat`) are package-level sentinels for structured error contracts. `errUnknownFormat` has `errors.Is` callers in tests; the others are available for future programmatic matching.
 - **golangci-lint config** — `.golangci.yml` has 0 issues. Depguard allows `$gostd` + `$module` + actual dependencies (cobra, testify, larsartmann/*). Varnamelen has exemptions for idiomatic Go short names (`err`, `ok`, `tt`, `t`, `i`, etc.). Tagliatelle enforces `json: snake` for config output. Test files are excluded from `err113` and `mnd` (test error construction and magic numbers are idiomatic). CLI command files are excluded from `forbidigo` (they use `fmt.Println` by design).
 - **GitHub metadata** — Description + 15 topics (`go`, `golang`, `cli`, `oxlint`, `oxc`, `linter`, `linting`, `static-analysis`, `code-quality`, `code-analysis`, `typescript`, `javascript`, `developer-tools`, `sarif`, `nix`) set via `gh repo edit`. README badge bar uses the application set: CI | Docker (ghcr.io) | License — deliberately NO Go Reference / Go Report Card badges (CLI app, not an importable package). No homepage URL (no `website/`); add one via the website-launch skill if a docs site is ever built.
+- **BuildFlow integration** — `pkg/provider` self-registers a `toolsdk.Spec` at import time; BuildFlow consumes it via a blank import of `github.com/larsartmann/oxlint-auto-configure/pkg/provider` in `tools/providers/sdk_imports.go`. Spec name `oxlint-auto-configure` must stay in sync with BuildFlow's `config.ToolOxlintAutoConfigure`. Detect only flags a MISSING `.oxlintrc.json` (never config drift — flagging drift would lead Repair to stomp user customizations); Repair never overwrites an existing config. No HealthCheck: generation uses the embedded registry, not the oxlint binary. Registration is a package-level var (`toolsdk.Register` panics on invalid specs at startup).
+- **Stale flake pins get caught by builds** — `go-finding` sat at v1.8.0 in flake.nix while go.mod required v1.10.0 (additive API kept it compiling). Bumping a go.mod dep MUST bump the flake input tag in the same change (AGENTS Nix rule); verify with `nix build` + vendorHash refresh.
 
 ---
 

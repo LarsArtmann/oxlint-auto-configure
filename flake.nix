@@ -25,7 +25,7 @@
     };
 
     go-finding = {
-      url = "github:LarsArtmann/go-finding/v1.8.0";
+      url = "github:LarsArtmann/go-finding/v1.10.0";
       flake = false;
     };
 
@@ -51,7 +51,7 @@
 
       go-standard = {
         pname = "oxlint-auto-configure";
-        vendorHash = "sha256-jDclB+m7IbEv6hA1T2HTPmuhLaoNMkj8qwDTkHPFxQM=";
+        vendorHash = "sha256-rLMG5iKppAcySKggcltjaMTydOfxhqGQUb90v1YhbIE=";
         description = "Auto-generate optimal .oxlintrc.json configurations";
         enableCheck = false;
         subPackages = [ "cmd/oxlint-auto-configure" ];

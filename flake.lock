@@ -78,16 +78,16 @@
     "go-finding": {
       "flake": false,
       "locked": {
-        "lastModified": 1788895456,
-        "narHash": "sha256-1TK/bxe2YWLV2xMzOsarzbDXWRyFDH8RLh49vp2pZf8=",
+        "lastModified": 1789007954,
+        "narHash": "sha256-mcpAgNn/aFIzN9y4RdrMVNXao2tvytOcC0/C5fHz5kg=",
         "owner": "LarsArtmann",
         "repo": "go-finding",
-        "rev": "b09f3352781ffcc4e5ad6c5b9d83b063bac6db25",
+        "rev": "fc627fbb00b11005374e04627a2866b8527eb4ea",
         "type": "github"
       },
       "original": {
         "owner": "LarsArtmann",
-        "ref": "v1.8.0",
+        "ref": "v1.10.0",
         "repo": "go-finding",
         "type": "github"
       }
