@@ -39,7 +39,7 @@ jobs:
 
       - name: Install oxlint
         run: |
-          pnpm add -g oxlint
+          npm install -g oxlint
 
       - name: Tidy
         run: go mod tidy
@@ -106,7 +106,7 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Flake check
-        run: nix flake check --systems x86_64-linux
+        run: nix flake check
     timeout-minutes: 20
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
