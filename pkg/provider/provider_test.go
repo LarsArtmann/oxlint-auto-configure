@@ -45,6 +45,7 @@ func TestProviderRegistered(t *testing.T) {
 	require.NotNil(t, specs[0].Detect, "provider must detect")
 	require.NotNil(t, specs[0].Repair, "provider must repair")
 	require.Empty(t, specs[0].DependsOn, "provider must not depend on oxlint; oxlint depends on it")
+	require.Equal(t, []string{"package.json", ".oxlintrc.json"}, specs[0].Inputs)
 	require.Equal(t, "javascript", specs[0].Trigger.Language)
 }
 

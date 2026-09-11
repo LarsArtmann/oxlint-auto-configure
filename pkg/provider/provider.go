@@ -90,6 +90,9 @@ func mustProvider() toolsdk.Spec {
 	// step depends on US (BuildFlow's NewOxlintProvider WithDeps), so a
 	// missing config is generated before linting in the same run.
 	spec.DependsOn = nil
+	// ProviderFromSpec derives Inputs from ConfigFile alone; the detector
+	// also reads package.json, so restore the full read contract.
+	spec.Inputs = []string{"package.json", configFileName}
 	// nil = always healthy: config generation uses the embedded rule registry
 	// and never shells out to the oxlint binary.
 	spec.HealthCheck = nil
