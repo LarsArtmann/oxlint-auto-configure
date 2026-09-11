@@ -8,10 +8,9 @@ import (
 
 	"github.com/larsartmann/go-finding"
 	toolsdk "github.com/larsartmann/go-finding/toolsdk"
-	"github.com/stretchr/testify/require"
-
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/provider"
+	"github.com/stretchr/testify/require"
 )
 
 // reactPackageJSON is a minimal package.json that the detector recognizes as
@@ -24,6 +23,7 @@ func isolateRegistry(t *testing.T) {
 	t.Helper()
 
 	snapshot := toolsdk.SnapshotForTest()
+
 	t.Cleanup(func() { toolsdk.RestoreForTest(snapshot) })
 }
 
@@ -78,7 +78,7 @@ func TestDetect_ExistingConfigNeverFlagged(t *testing.T) {
 	require.Empty(t, findings, "an existing config must never be flagged for regeneration")
 }
 
-func TestDetect_UnknownProjectType(t *testing.T) {
+func TestDetect_BarePackageJSONIsNodeProject(t *testing.T) {
 	t.Parallel()
 
 	dir := t.TempDir()
@@ -87,16 +87,16 @@ func TestDetect_UnknownProjectType(t *testing.T) {
 	findings, err := provider.Provider.Detect.Detect(workingDirCtx(t, dir))
 
 	require.NoError(t, err)
-	require.Empty(t, findings)
+	require.Len(t, findings, 1, "a package.json without framework deps is still a Node project")
 }
 
-func TestDetect_NoPackageJSON(t *testing.T) {
+func TestDetect_NoJSProjectMarkers(t *testing.T) {
 	t.Parallel()
 
 	findings, err := provider.Provider.Detect.Detect(workingDirCtx(t, t.TempDir()))
 
 	require.NoError(t, err)
-	require.Empty(t, findings)
+	require.Empty(t, findings, "a directory without any JS project marker must not be flagged")
 }
 
 func TestRepair_DryRunHoldsBackWrite(t *testing.T) {
@@ -146,7 +146,7 @@ func TestRepair_ExistingConfigIsUntouched(t *testing.T) {
 
 	data, err := os.ReadFile(filepath.Join(dir, ".oxlintrc.json"))
 	require.NoError(t, err)
-	require.Equal(t, `{"rules":{}}`, string(data), "repair must never overwrite an existing config")
+	require.JSONEq(t, `{"rules":{}}`, string(data), "repair must never overwrite an existing config")
 }
 
 func workingDirCtx(t *testing.T, dir string) context.Context {

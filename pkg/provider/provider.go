@@ -12,10 +12,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/larsartmann/go-atomic-write"
+	atomicwrite "github.com/larsartmann/go-atomic-write"
 	"github.com/larsartmann/go-finding"
 	toolsdk "github.com/larsartmann/go-finding/toolsdk"
-
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
@@ -75,6 +74,9 @@ var Provider = toolsdk.Register(toolsdk.Spec{
 	DependsOn: []string{"oxlint"},
 	Detect:    finding.NamedDetectorFunc(toolName, detectMissingConfig),
 	Repair:    toolsdk.RepairerFunc(repairConfig),
+	// nil = always healthy: config generation uses the embedded rule registry
+	// and never shells out to the oxlint binary.
+	HealthCheck: nil,
 })
 
 // detectMissingConfig reports a warning finding when the project is a
