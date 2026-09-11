@@ -86,7 +86,10 @@ func mustProvider() toolsdk.Spec {
 		"**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.cjs",
 		"**/*.vue", "**/*.svelte", "**/*.astro",
 	)
-	spec.DependsOn = []string{"oxlint"}
+	// nil on purpose (DAG flip 2026-09-11, owner decision): the oxlint LINT
+	// step depends on US (BuildFlow's NewOxlintProvider WithDeps), so a
+	// missing config is generated before linting in the same run.
+	spec.DependsOn = nil
 	// nil = always healthy: config generation uses the embedded rule registry
 	// and never shells out to the oxlint binary.
 	spec.HealthCheck = nil
