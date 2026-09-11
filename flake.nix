@@ -29,6 +29,11 @@
       flake = false;
     };
 
+    linter-autoconfigure-sdk = {
+      url = "github:LarsArtmann/linter-autoconfigure-sdk/v0.2.0";
+      flake = false;
+    };
+
     gogenfilter = {
       url = "github:LarsArtmann/gogenfilter/v3.4.0";
       flake = false;
@@ -51,7 +56,7 @@
 
       go-standard = {
         pname = "oxlint-auto-configure";
-        vendorHash = "sha256-rLMG5iKppAcySKggcltjaMTydOfxhqGQUb90v1YhbIE=";
+        vendorHash = "sha256-lIC0FinZepEUJxqk4f5zO6mwm87LmfKGO5pLCa378Fw=";
         description = "Auto-generate optimal .oxlintrc.json configurations";
         enableCheck = false;
         subPackages = [ "cmd/oxlint-auto-configure" ];
@@ -60,6 +65,7 @@
           "github.com/larsartmann/go-atomic-write" = inputs.go-atomic-write;
           "github.com/larsartmann/go-error-family" = inputs.go-error-family;
           "github.com/larsartmann/go-finding" = inputs.go-finding;
+          "github.com/larsartmann/linter-autoconfigure-sdk" = inputs.linter-autoconfigure-sdk;
           "github.com/LarsArtmann/gogenfilter/v3" = inputs.gogenfilter;
         };
 

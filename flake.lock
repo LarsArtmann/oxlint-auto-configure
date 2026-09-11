@@ -133,6 +133,23 @@
         "type": "github"
       }
     },
+    "linter-autoconfigure-sdk": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789129974,
+        "narHash": "sha256-/A8aI656uMGgyluSIcIbQRisaoKxrKsfE3yhsUnRUEA=",
+        "owner": "LarsArtmann",
+        "repo": "linter-autoconfigure-sdk",
+        "rev": "5dec8d9b1f347bdd0483417b305d16f6f07c8d0a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LarsArtmann",
+        "ref": "v0.2.0",
+        "repo": "linter-autoconfigure-sdk",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1789006805,
@@ -157,6 +174,7 @@
         "go-finding": "go-finding",
         "go-nix-helpers": "go-nix-helpers",
         "gogenfilter": "gogenfilter",
+        "linter-autoconfigure-sdk": "linter-autoconfigure-sdk",
         "nixpkgs": "nixpkgs"
       }
     },
