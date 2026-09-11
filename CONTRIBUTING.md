@@ -112,10 +112,10 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 
 CI runs four jobs on every push/PR (`.github/workflows/ci.yml`):
 
-- **test** — `go test -race ./...` + `go mod tidy` consistency check
+- **test** — `go test -race ./...` + `go mod tidy` consistency check (oxlint installed via `npm install -g oxlint` — runners no longer ship pnpm)
 - **security** — `govulncheck`
 - **lint** — `golangci-lint run ./...` (pinned to `v2.12.2`)
-- **nix** — `nix flake check`
+- **nix** — `nix flake check` (no `--systems` flag — it does not exist)
 
 CI is the source of truth. If local results differ from CI, the CI result wins.
 
