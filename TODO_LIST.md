@@ -40,7 +40,7 @@ All previously listed build/tooling tasks have been completed:
 - ✅ BuildFlow glue deleted: hand-written `NewOxlintAutoConfigureProvider` replaced by blank import of `pkg/provider` (local `replace` makes it live immediately)
 - ✅ DAG flip (owner decision 2026-09-11): provider no longer depends on `oxlint`; BuildFlow's `NewOxlintProvider` now `WithDeps(ToolOxlintAutoConfigure)` so lint runs with the generated config
 - ✅ Provider bridged through `linter-autoconfigure-sdk` `ProviderFromSpec` (SDK tagged v0.2.0; our local `replace` dropped — released modules must not carry path replaces)
-- ⬜ Tag `v0.6.0` and bump BuildFlow's `flake.nix` input (`refs/tags/v0.5.0` → new tag, + `linter-autoconfigure-sdk` input for their deps map) so BuildFlow's nix CI builds the provider
+- ⬜ Tag `v0.6.1` (v0.6.0 was already cut by a parallel session without the SDK bridge/flip) and bump BuildFlow's `flake.nix` input (`refs/tags/v0.5.0` → `v0.6.1` — NOT v0.6.0: the tagged source still declares `DependsOn: [oxlint]`, which would cycle with BuildFlow's new `WithDeps`) plus the `linter-autoconfigure-sdk` deps entry
 
 ---
 

@@ -14,11 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Nothing yet.
 
-## [0.6.0] - 2026-09-11
+## [0.6.1] - 2026-09-11
 
 ### Added
 
-- `pkg/provider` package — BuildFlow integration via the `go-finding/toolsdk` v1.10.0 Spec contract. A package-level `toolsdk.Register` declares the tool (name `oxlint-auto-configure`, JS/TS trigger, dry-run-aware detect/repair), detects a missing `.oxlintrc.json` in recognizable JS/TS projects (`OXLOPT_CONFIG_MISSING` warning), and repairs it by generating the recommended-profile config (never overwrites an existing config). BuildFlow consumers blank-import the package and drop their hand-written glue.
 - BuildFlow provider now built through `linter-autoconfigure-sdk`'s `ProviderFromSpec` bridge (v0.2.0): the missing-config finding is declared as a `ConfigIssue` and the repair as a plain closure, with Trigger/DependsOn layered on the returned Spec. First SDK consumer migration.
 
 ### Changed
@@ -32,7 +31,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   identical, so BuildFlow repair behavior is unchanged.
 - CLI detect/repair semantics and the generated `.oxlintrc.json` bytes are
   the same.
-- Nix flake `go-finding` input bumped from the stale `v1.8.0` pin to `v1.10.0`, matching `go.mod` and the `toolsdk` sub-module's required core version; the local `replace` of `linter-autoconfigure-sdk` was removed in favor of the tagged v0.2.0 (a published tag must not carry local path replaces).
+- The local `replace` of `linter-autoconfigure-sdk` was removed in favor of the tagged v0.2.0 (a published tag must not carry local path replaces).
+
+## [0.6.0] - 2026-09-11
+
+### Added
+
+- `pkg/provider` package — BuildFlow integration via the `go-finding/toolsdk` v1.10.0 Spec contract. A package-level `toolsdk.Register` declares the tool (name `oxlint-auto-configure`, JS/TS trigger, dry-run-aware detect/repair), detects a missing `.oxlintrc.json` in recognizable JS/TS projects (`OXLOPT_CONFIG_MISSING` warning), and repairs it by generating the recommended-profile config (honoring BuildFlow's dry-run flag; never overwrites an existing config). BuildFlow consumers blank-import the package and drop their hand-written glue.
+
+### Changed
+
+- Nix flake `go-finding` input bumped from the stale `v1.8.0` pin to `v1.10.0`, matching `go.mod` and the `toolsdk` sub-module's required core version.
 
 ## [0.5.0] - 2026-09-11
 
