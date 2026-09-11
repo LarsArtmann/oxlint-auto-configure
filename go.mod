@@ -4,14 +4,14 @@ go 1.26.7
 
 require (
 	github.com/larsartmann/go-atomic-write v0.5.1
-	github.com/larsartmann/go-finding v1.9.2
+	github.com/larsartmann/go-finding v1.10.0
 	github.com/larsartmann/go-finding/pipeline v1.9.2
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 )
 
 require (
-	github.com/LarsArtmann/gogenfilter/v3 v3.4.0 // indirect
+	github.com/LarsArtmann/gogenfilter/v3 v3.6.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/go-faster/errors v0.8.0 // indirect

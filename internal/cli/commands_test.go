@@ -395,14 +395,14 @@ func TestPrintReportJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &parsed)
 	require.NoError(t, err)
 
-	tool := parsed["tool"].(map[string]any) //nolint:forcetypeassert // test knows the shape
+	tool := parsed["tool"].(map[string]any)
 	assert.Equal(t, "oxlint", tool["name"])
 	assert.Equal(t, "1.0.0", tool["version"])
 
-	summary := parsed["summary"].(map[string]any) //nolint:forcetypeassert // test knows the shape
+	summary := parsed["summary"].(map[string]any)
 	assert.InEpsilon(t, 1, summary["total"], 0.0001)
 
-	findings := parsed["findings"].([]any) //nolint:forcetypeassert // test knows the shape
+	findings := parsed["findings"].([]any)
 	assert.Len(t, findings, 1)
 }
 
