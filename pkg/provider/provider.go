@@ -40,6 +40,21 @@ const (
 	missingConfigRule = "OXLOPT_CONFIG_MISSING"
 )
 
+// oxlintConfigFiles are the config file names oxlint itself searches for, in
+// priority order (mirrors BuildFlow's findOxlintConfig in
+// tools/providers/js_tools.go). hasConfig must recognize ALL of them:
+// generating a fresh .oxlintrc.json in a repo whose curated config is
+// .oxlintrc.jsonc would SHADOW it (oxlint prefers .json), silently
+// clobbering the effective configuration — the exact overwrite the
+// "never overwrite an existing config" contract forbids.
+//
+//nolint:gochecknoglobals // mirrors BuildFlow's package-level oxlintConfigFiles
+var oxlintConfigFiles = []string{
+	".oxlintrc.json",
+	".oxlintrc.jsonc",
+	"oxlint.config.json",
+}
+
 // workingDir resolves the project directory from the context, falling back
 // to the process working directory, mirroring the other BuildFlow providers
 // so the WithWorkingDir fan-out works identically.
@@ -56,11 +71,17 @@ func configPath(root string) string {
 	return filepath.Join(root, configFileName)
 }
 
-// hasConfig reports whether an oxlint config already exists in root.
+// hasConfig reports whether any oxlint config file already exists in root.
+// All three discovery names count: an existing curated config must suppress
+// regeneration regardless of which filename it uses.
 func hasConfig(root string) bool {
-	_, err := os.Stat(configPath(root))
+	for _, name := range oxlintConfigFiles {
+		if _, err := os.Stat(filepath.Join(root, name)); err == nil {
+			return true
+		}
+	}
 
-	return err == nil
+	return false
 }
 
 //nolint:gochecknoglobals // BuildFlow plugin SDK requires package-level Provider registration

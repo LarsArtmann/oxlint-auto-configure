@@ -79,6 +79,19 @@ func TestDetect_ExistingConfigNeverFlagged(t *testing.T) {
 	require.Empty(t, findings, "an existing config must never be flagged for regeneration")
 }
 
+func TestDetect_ExistingJsoncConfigNeverFlagged(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writeFile(t, dir, "package.json", reactPackageJSON)
+	writeFile(t, dir, ".oxlintrc.jsonc", "// curated config with inline rationale\n{\"rules\":{}}")
+
+	findings, err := provider.Provider.Detect.Detect(workingDirCtx(t, dir))
+
+	require.NoError(t, err)
+	require.Empty(t, findings, "an existing .oxlintrc.jsonc is a config too — flagging it would make repair generate a shadowing .oxlintrc.json")
+}
+
 func TestDetect_BarePackageJSONIsNodeProject(t *testing.T) {
 	t.Parallel()
 
@@ -148,6 +161,25 @@ func TestRepair_ExistingConfigIsUntouched(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join(dir, ".oxlintrc.json"))
 	require.NoError(t, err)
 	require.JSONEq(t, `{"rules":{}}`, string(data), "repair must never overwrite an existing config")
+}
+
+func TestRepair_ExistingJsoncConfigIsNotShadowed(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writeFile(t, dir, "package.json", reactPackageJSON)
+	writeFile(t, dir, ".oxlintrc.jsonc", "// curated config with inline rationale\n{\"rules\":{}}")
+
+	result, err := provider.Provider.Repair.Repair(workingDirCtx(t, dir))
+
+	require.NoError(t, err)
+	require.Contains(t, result.Description, "already exists")
+
+	jsonc, err := os.ReadFile(filepath.Join(dir, ".oxlintrc.jsonc"))
+	require.NoError(t, err)
+	require.Contains(t, string(jsonc), "curated config", "the curated .oxlintrc.jsonc must be untouched")
+	require.NoFileExists(t, filepath.Join(dir, ".oxlintrc.json"),
+		"generating a .oxlintrc.json next to a curated .oxlintrc.jsonc would shadow it — oxlint prefers .json")
 }
 
 func workingDirCtx(t *testing.T, dir string) context.Context {
