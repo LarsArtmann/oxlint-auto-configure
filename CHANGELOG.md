@@ -14,6 +14,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Nothing yet.
 
+## [0.6.3] - 2026-09-13
+
+### Fixed
+
+- Config detection now recognizes all three oxlint config file names — `.oxlintrc.json`, `.oxlintrc.jsonc`, and `oxlint.config.json` (mirrors BuildFlow's `findOxlintConfig` priority). Previously only `.oxlintrc.json` was detected, so a repo with a curated `.oxlintrc.jsonc` was flagged as missing its config and the repair generated a shadowing `.oxlintrc.json` — violating the tool's never-overwrite contract and silently flipping lint to the wrong config. Regression tests cover both the detection and the no-shadow repair.
+
+## [0.6.2] - 2026-09-11
+
+### Fixed
+
+- Restored the provider's full input-read contract after the `ProviderFromSpec` migration: `spec.Inputs` is again `["package.json", ".oxlintrc.json"]`, so detection re-runs when `package.json` changes (the spec bridge had derived `Inputs` from the config file alone).
+
 ## [0.6.1] - 2026-09-11
 
 ### Added
