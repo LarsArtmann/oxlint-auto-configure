@@ -89,7 +89,11 @@ func TestDetect_ExistingJsoncConfigNeverFlagged(t *testing.T) {
 	findings, err := provider.Provider.Detect.Detect(workingDirCtx(t, dir))
 
 	require.NoError(t, err)
-	require.Empty(t, findings, "an existing .oxlintrc.jsonc is a config too — flagging it would make repair generate a shadowing .oxlintrc.json")
+	require.Empty(
+		t,
+		findings,
+		"an existing .oxlintrc.jsonc is a config too — flagging it would make repair generate a shadowing .oxlintrc.json",
+	)
 }
 
 func TestDetect_BarePackageJSONIsNodeProject(t *testing.T) {
