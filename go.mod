@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	github.com/LarsArtmann/gogenfilter/v3 v3.6.0 // indirect
+	github.com/LarsArtmann/gogenfilter/v3 v3.6.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/go-faster/errors v0.8.0 // indirect
