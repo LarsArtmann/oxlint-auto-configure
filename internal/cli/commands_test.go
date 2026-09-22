@@ -88,7 +88,7 @@ func TestValidateConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := config.NewGenerator(cat, reg, nil)
+	gen := config.NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 	data, err := cfg.ToJSON()
 	require.NoError(t, err)
@@ -216,7 +216,7 @@ func TestShowDiffExisting(t *testing.T) {
 	require.NoError(t, err)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := config.NewGenerator(cat, reg, nil)
+	gen := config.NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 	data, err := cfg.ToJSON()
 	require.NoError(t, err)
@@ -242,7 +242,7 @@ func TestShowDiffMalformed(t *testing.T) {
 	require.NoError(t, err)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := config.NewGenerator(cat, reg, nil)
+	gen := config.NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
 	diff := showDiffIfExisting(configPath, cfg)
@@ -258,7 +258,7 @@ func TestShowDiffMissing(t *testing.T) {
 	require.NoError(t, err)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := config.NewGenerator(cat, reg, nil)
+	gen := config.NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
 	diff := showDiffIfExisting(configPath, cfg)

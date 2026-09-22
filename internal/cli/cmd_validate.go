@@ -59,6 +59,7 @@ func Validate(configPath string) error {
 		"rules", len(cfg.Rules),
 		"enabled", result.EnabledCount,
 		"disabled", result.DisabledCount,
+		"external", len(result.ExternalRules),
 		"plugins", cfg.Plugins,
 		"categories", cfg.Categories,
 	)

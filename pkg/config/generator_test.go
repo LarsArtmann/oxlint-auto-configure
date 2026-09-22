@@ -17,7 +17,7 @@ func TestGeneratorRecommended(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg, nil)
+	gen := NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
 	assert.Contains(t, cfg.Plugins, "typescript")
@@ -38,7 +38,7 @@ func TestGeneratorMaximalTypesafe(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileMaximalTypesafe, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg, nil)
+	gen := NewGenerator(cat, reg, nil, nil)
 	cfg := gen.GenerateMaximal()
 
 	assert.Equal(t, SeverityError, cfg.Categories["correctness"])
@@ -60,7 +60,7 @@ func TestGeneratorWithReactProject(t *testing.T) {
 		rule.PluginReactPerf: true,
 	}
 	cat := profile.NewCategorizer(profile.ProfileRecommended, pc)
-	gen := NewGenerator(cat, reg, []detect.ProjectType{detect.ProjectTypeReact})
+	gen := NewGenerator(cat, reg, []detect.ProjectType{detect.ProjectTypeReact}, nil)
 	cfg := gen.Generate()
 
 	assert.Contains(t, cfg.Plugins, "react")
@@ -80,7 +80,7 @@ func TestGeneratorWithAllPlugins(t *testing.T) {
 		rule.PluginPromise: true, rule.PluginReactPerf: true,
 	}
 	cat := profile.NewCategorizer(profile.ProfileRecommended, pluginConfig)
-	gen := NewGenerator(cat, reg, []detect.ProjectType{detect.ProjectTypeNode})
+	gen := NewGenerator(cat, reg, []detect.ProjectType{detect.ProjectTypeNode}, nil)
 	cfg := gen.Generate()
 
 	assert.Contains(t, cfg.Plugins, "react")
@@ -115,7 +115,7 @@ func TestConfigRoundTrip(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg, nil)
+	gen := NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
 	data, err := cfg.ToJSON()
@@ -149,7 +149,7 @@ func TestMinimalProfileConfig(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileMinimal, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg, nil)
+	gen := NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
 	assert.Equal(t, SeverityError, cfg.Categories["correctness"])
@@ -174,7 +174,7 @@ func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg, nil)
+	gen := NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
 	for ruleName, ruleSev := range cfg.Rules {
@@ -203,7 +203,7 @@ func TestRestrictionDenylistRulesAreOff(t *testing.T) {
 
 	// Even in maximal-typesafe (restriction=error), denied rules must be off.
 	cat := profile.NewCategorizer(profile.ProfileMaximalTypesafe, profile.PluginConfig{})
-	gen := NewGenerator(cat, reg, nil)
+	gen := NewGenerator(cat, reg, nil, nil)
 	cfg := gen.GenerateMaximal()
 
 	for _, name := range denied {

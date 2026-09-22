@@ -104,16 +104,22 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 		return fmt.Errorf("absRoot=%s: detect project type: %w", absRoot, err)
 	}
 
+	externalPlugins := det.DetectExternalPlugins()
+
 	slog.Info("detected project", "types", detect.FormatTypes(projectTypes))
 	slog.Info("profile", "name", opts.Profile)
 	slog.Info("rules loaded", "total", reg.Len())
 
-	cfg, err := config.GenerateProjectConfig(opts.Profile, reg, pluginConfig, projectTypes)
+	cfg, err := config.GenerateProjectConfig(opts.Profile, reg, pluginConfig, projectTypes, externalPlugins)
 	if err != nil {
 		return fmt.Errorf("absRoot=%s: generate config: %w", absRoot, err)
 	}
 
 	targetPath := resolveConfigPath(opts.ConfigPath, absRoot)
+
+	cfg = preserveExistingExternal(targetPath, cfg)
+	warnJsPluginsVersion(ctx, cfg)
+	logExternalPluginHint(cfg, externalPlugins)
 
 	if opts.DryRun {
 		return writeDryRun(cfg, targetPath)
@@ -166,6 +172,69 @@ func logDiffIfExisting(targetPath string, cfg *config.OxlintConfig) {
 	if diff := showDiffIfExisting(targetPath, cfg); diff != "" {
 		slog.Info(diff)
 	}
+}
+
+// preserveExistingExternal loads the existing config at targetPath (if any)
+// and carries its external-plugin registrations, rules, and settings into
+// the freshly generated config so regeneration cannot destroy setup the
+// tool cannot re-derive (e.g. an @shadcn/lint design-system policy).
+func preserveExistingExternal(targetPath string, cfg *config.OxlintConfig) *config.OxlintConfig {
+	existingData, err := os.ReadFile(targetPath)
+	if err != nil {
+		return cfg
+	}
+
+	existing, err := config.FromJSON(existingData)
+	if err != nil {
+		slog.Warn("existing config is malformed, cannot preserve external plugins", "error", err)
+
+		return cfg
+	}
+
+	return config.PreserveExternal(existing, cfg)
+}
+
+// warnJsPluginsVersion warns when the config registers external JS plugins
+// but the oxlint binary found in PATH is older than the first version that
+// supports the "jsPlugins" key. A missing binary is not a warning: version
+// checks already skip it elsewhere.
+func warnJsPluginsVersion(ctx context.Context, cfg *config.OxlintConfig) {
+	if len(cfg.JsPlugins) == 0 {
+		return
+	}
+
+	oxlintVer, err := oxlint.CheckVersion(ctx)
+	if err != nil {
+		return
+	}
+
+	if !oxlint.VersionAtLeast(oxlintVer, oxlint.MinVersionForJsPlugins) {
+		slog.Warn("registered jsPlugins require a newer oxlint",
+			"found", oxlintVer,
+			"required", oxlint.MinVersionForJsPlugins,
+		)
+	}
+}
+
+// logExternalPluginHint tells the user that a detected external plugin was
+// registered but its rules stay off, and where to enable them. Emitted only
+// when a plugin was newly detected and no external rules exist yet, so an
+// already-configured design system is not nagged.
+func logExternalPluginHint(cfg *config.OxlintConfig, detected []rule.ExternalPlugin) {
+	if len(detected) == 0 || config.HasExternalRules(cfg) {
+		return
+	}
+
+	packages := make([]string, 0, len(detected))
+	for _, p := range detected {
+		packages = append(packages, p.Package)
+	}
+
+	slog.Info("registered external JS plugins without enabling rules; "+
+		"enable design-system rules under \"rules\" with a \""+detected[0].Prefix+"/\" prefix when ready",
+		"jsPlugins", packages,
+		"docs", "https://github.com/shadcn-ui/lint#rules",
+	)
 }
 
 func marshalConfigJSON(cfg *config.OxlintConfig) ([]byte, error) {

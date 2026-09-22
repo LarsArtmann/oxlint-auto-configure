@@ -204,12 +204,17 @@ func generateConfig(root string) ([]byte, int, error) {
 		return nil, 0, fmt.Errorf("%s repair: load rule registry: %w", toolName, err)
 	}
 
-	pluginConfig, projectTypes, err := detect.NewDetector(root).Detect()
+	det := detect.NewDetector(root)
+
+	pluginConfig, projectTypes, err := det.Detect()
 	if err != nil {
 		return nil, 0, fmt.Errorf("%s repair: detect project type: %w", toolName, err)
 	}
 
-	cfg, err := config.GenerateProjectConfig(profile.ProfileRecommended, reg, pluginConfig, projectTypes)
+	externalPlugins := det.DetectExternalPlugins()
+
+	cfg, err := config.GenerateProjectConfig(
+		profile.ProfileRecommended, reg, pluginConfig, projectTypes, externalPlugins)
 	if err != nil {
 		return nil, 0, fmt.Errorf("%s repair: generate config: %w", toolName, err)
 	}
