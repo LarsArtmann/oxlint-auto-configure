@@ -265,7 +265,6 @@ func TestPreserveExternalDedupsOverrides(t *testing.T) {
 		"exact duplicates collapse (key order irrelevant), distinct blocks survive in order")
 }
 
-
 func TestHasExternalRules(t *testing.T) {
 	t.Parallel()
 
