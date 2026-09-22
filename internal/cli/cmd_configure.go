@@ -88,9 +88,11 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 		)
 	}
 
-	if err := checkOxlintVersion(ctx); err != nil {
+	oxlintVer, oxlintFound, err := checkOxlintVersion(ctx)
+	if err != nil {
 		return err
 	}
+
 
 	reg, err := rule.LoadRegistry()
 	if err != nil {
@@ -117,8 +119,13 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 
 	targetPath := resolveConfigPath(opts.ConfigPath, absRoot)
 
-	cfg = preserveExistingExternal(targetPath, cfg)
-	warnJsPluginsVersion(ctx, cfg)
+	cfg, preserved := preserveExistingExternal(targetPath, cfg)
+	if preserved > 0 {
+		slog.Info("preserved external plugins from existing config", "count", preserved)
+	}
+
+	warnOrphanedJsPlugins(cfg, externalPlugins)
+	warnJsPluginsVersion(oxlintFound, oxlintVer, cfg)
 	logExternalPluginHint(cfg, externalPlugins)
 
 	if opts.DryRun {
@@ -134,16 +141,20 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 	return runFixIfNeeded(ctx, absRoot, targetPath, opts.Fix)
 }
 
-func checkOxlintVersion(ctx context.Context) error {
+// checkOxlintVersion runs `oxlint --version` once per Configure run and
+// reports both the version and whether a binary was found at all. A missing
+// binary is a warning — generation works from the embedded registry — while
+// any other failure aborts the run.
+func checkOxlintVersion(ctx context.Context) (version string, found bool, err error) {
 	oxlintVer, err := oxlint.CheckVersion(ctx)
 	if err != nil {
 		if errors.Is(err, oxlint.ErrNotFound) {
 			slog.Warn("oxlint not found in PATH; skipping version check")
 
-			return nil
+			return "", false, nil
 		}
 
-		return fmt.Errorf("oxlint version check: %w", err)
+		return "", false, fmt.Errorf("oxlint version check: %w", err)
 	}
 
 	slog.Info("oxlint version", "version", oxlintVer)
@@ -157,7 +168,7 @@ func checkOxlintVersion(ctx context.Context) error {
 		)
 	}
 
-	return nil
+	return oxlintVer, true, nil
 }
 
 func resolveConfigPath(configPath, absRoot string) string {
@@ -177,34 +188,30 @@ func logDiffIfExisting(targetPath string, cfg *config.OxlintConfig) {
 // preserveExistingExternal loads the existing config at targetPath (if any)
 // and carries its external-plugin registrations, rules, and settings into
 // the freshly generated config so regeneration cannot destroy setup the
-// tool cannot re-derive (e.g. an @shadcn/lint design-system policy).
-func preserveExistingExternal(targetPath string, cfg *config.OxlintConfig) *config.OxlintConfig {
+// tool cannot re-derive (e.g. an @shadcn/lint design-system policy). The
+// second return value is the number of jsPlugins registrations carried over.
+func preserveExistingExternal(targetPath string, cfg *config.OxlintConfig) (*config.OxlintConfig, int) {
 	existingData, err := os.ReadFile(targetPath)
 	if err != nil {
-		return cfg
+		return cfg, 0
 	}
 
 	existing, err := config.FromJSON(existingData)
 	if err != nil {
 		slog.Warn("existing config is malformed, cannot preserve external plugins", "error", err)
 
-		return cfg
+		return cfg, 0
 	}
 
-	return config.PreserveExternal(existing, cfg)
+	return config.PreserveExternal(existing, cfg), len(existing.JsPlugins)
 }
 
 // warnJsPluginsVersion warns when the config registers external JS plugins
-// but the oxlint binary found in PATH is older than the first version that
-// supports the "jsPlugins" key. A missing binary is not a warning: version
-// checks already skip it elsewhere.
-func warnJsPluginsVersion(ctx context.Context, cfg *config.OxlintConfig) {
-	if len(cfg.JsPlugins) == 0 {
-		return
-	}
-
-	oxlintVer, err := oxlint.CheckVersion(ctx)
-	if err != nil {
+// but the oxlint binary found earlier in this run is older than the first
+// version that supports the "jsPlugins" key. A missing binary is not a
+// warning: version checks already skip it elsewhere.
+func warnJsPluginsVersion(oxlintFound bool, oxlintVer string, cfg *config.OxlintConfig) {
+	if len(cfg.JsPlugins) == 0 || !oxlintFound {
 		return
 	}
 
@@ -213,6 +220,27 @@ func warnJsPluginsVersion(ctx context.Context, cfg *config.OxlintConfig) {
 			"found", oxlintVer,
 			"required", oxlint.MinVersionForJsPlugins,
 		)
+	}
+}
+
+// warnOrphanedJsPlugins warns about a preserved jsPlugins registration whose
+// known external plugin package is no longer a project dependency.
+// Preservation never drops entries, so a stale registration would keep
+// failing oxlint at runtime until it is removed here. Hand-registered
+// unknown packages are left alone — this tool cannot know their deps.
+func warnOrphanedJsPlugins(cfg *config.OxlintConfig, detected []rule.ExternalPlugin) {
+	installed := make(map[string]bool, len(detected))
+	for _, p := range detected {
+		installed[p.Package] = true
+	}
+
+	for _, pkg := range cfg.JsPlugins {
+		if _, known := rule.ExternalPluginByPackage(pkg); !known || installed[pkg] {
+			continue
+		}
+
+		slog.Warn("jsPlugins entry is not a project dependency; "+
+			"remove it from the config or install the package", "package", pkg)
 	}
 }
 
@@ -225,16 +253,13 @@ func logExternalPluginHint(cfg *config.OxlintConfig, detected []rule.ExternalPlu
 		return
 	}
 
-	packages := make([]string, 0, len(detected))
 	for _, p := range detected {
-		packages = append(packages, p.Package)
+		slog.Info("registered external JS plugin without enabling rules; "+
+			"enable its rules under \"rules\" with a \""+p.Prefix+"/\" prefix when ready",
+			"plugin", p.Package,
+			"docs", p.Docs,
+		)
 	}
-
-	slog.Info("registered external JS plugins without enabling rules; "+
-		"enable design-system rules under \"rules\" with a \""+detected[0].Prefix+"/\" prefix when ready",
-		"jsPlugins", packages,
-		"docs", "https://github.com/shadcn-ui/lint#rules",
-	)
 }
 
 func marshalConfigJSON(cfg *config.OxlintConfig) ([]byte, error) {

@@ -16,6 +16,8 @@ type ExternalPlugin struct {
 	// "shadcn" in "shadcn/no-restyle"). It doubles as the plugin's settings
 	// key under "settings" (e.g. "settings.shadcn").
 	Prefix string
+	// Docs links to the plugin's rules documentation, for user-facing hints.
+	Docs string
 }
 
 // knownExternalPlugins lists the oxlint JS plugins this tool recognizes.
@@ -29,6 +31,7 @@ var knownExternalPlugins = []ExternalPlugin{
 		// linter for Tailwind v4 (React, Vue, Svelte). Requires oxlint 1.80+.
 		Package: "@shadcn/lint",
 		Prefix:  "shadcn",
+		Docs:    "https://github.com/shadcn-ui/lint#rules",
 	},
 }
 

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
@@ -32,6 +33,9 @@ const (
 // Detector detects project type from the filesystem.
 type Detector struct {
 	rootDir string
+
+	depsOnce sync.Once
+	deps     map[string]bool
 }
 
 // NewDetector creates a project detector for the given root directory.
@@ -41,8 +45,7 @@ func NewDetector(rootDir string) *Detector {
 
 // Detect analyzes the project and returns the plugin configuration.
 func (d *Detector) Detect() (profile.PluginConfig, []ProjectType, error) {
-	pkg := d.readPackageJSON()
-	deps := d.collectDependencies(pkg)
+	deps := d.dependencies()
 
 	types := d.detectProjectTypes(deps)
 	pc := d.toPluginConfig(types, deps)
@@ -57,8 +60,7 @@ func (d *Detector) Detect() (profile.PluginConfig, []ProjectType, error) {
 // config, while its rules stay off (design-system policy is the project's
 // choice, not ours).
 func (d *Detector) DetectExternalPlugins() []rule.ExternalPlugin {
-	pkg := d.readPackageJSON()
-	deps := d.collectDependencies(pkg)
+	deps := d.dependencies()
 
 	var found []rule.ExternalPlugin
 
@@ -73,6 +75,16 @@ func (d *Detector) DetectExternalPlugins() []rule.ExternalPlugin {
 	})
 
 	return found
+}
+
+// dependencies returns the merged dependency set, reading package.json at
+// most once per Detector so Detect and DetectExternalPlugins share the work.
+func (d *Detector) dependencies() map[string]bool {
+	d.depsOnce.Do(func() {
+		d.deps = d.collectDependencies(d.readPackageJSON())
+	})
+
+	return d.deps
 }
 
 // depTypeRules maps dependency names to project types.
