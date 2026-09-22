@@ -30,7 +30,7 @@ jobs:
         uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0
+        uses: anchore/sbom-action/download-syft@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
@@ -46,6 +46,21 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
           COSIGN_YES: true
           GOEXPERIMENT: jsonv2
+
+      - name: Smoke test release artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          gh release download "${tag}" --pattern '*Linux_x86_64.tar.gz' --dir smoke --clobber
+          tar -xzf smoke/*Linux_x86_64.tar.gz -C smoke
+          chmod +x smoke/oxlint-auto-configure
+          version="$(./smoke/oxlint-auto-configure --version)"
+          echo "${version}"
+          echo "${version}" | grep -q "${tag}" || {
+            echo "::error::smoke test failed: --version output does not contain ${tag}"
+            exit 1
+          }

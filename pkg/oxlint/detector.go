@@ -145,9 +145,32 @@ type oxlintSpan struct {
 }
 
 // parseOutput converts raw oxlint JSON into go-finding findings.
-func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
+// decodeOutput parses oxlint's stdout as JSON. Some oxlint versions prepend
+// human-readable notices (e.g. "No files found to lint. ...") to the JSON on
+// stdout, so a failed whole-output parse retries on the embedded JSON object
+// before giving up.
+func decodeOutput(data []byte) (oxlintOutput, error) {
 	var output oxlintOutput
-	if err := json.Unmarshal(data, &output); err != nil {
+
+	wholeErr := json.Unmarshal(data, &output)
+	if wholeErr == nil {
+		return output, nil
+	}
+
+	start := bytes.IndexByte(data, '{')
+	end := bytes.LastIndexByte(data, '}')
+	if start >= 0 && end > start {
+		if err := json.Unmarshal(data[start:end+1], &output); err == nil {
+			return output, nil
+		}
+	}
+
+	return oxlintOutput{}, wholeErr
+}
+
+func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
+	output, err := decodeOutput(data)
+	if err != nil {
 		// oxlint reports startup failures (e.g. a jsPlugins package that
 		// cannot be loaded) as plain text on stdout with exit code 1 — the
 		// same code it uses for real findings. Surface a snippet so the

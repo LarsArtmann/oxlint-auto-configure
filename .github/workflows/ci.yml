@@ -85,7 +85,7 @@ jobs:
         run: go mod tidy
 
       - name: Govulncheck
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.8.0 ./...
 
     timeout-minutes: 15
   lint:

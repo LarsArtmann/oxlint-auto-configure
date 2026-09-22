@@ -1,0 +1,41 @@
+name: Workflow Health
+
+# Canary against silently disabled workflows: the Jul-Sep 2026 billing block
+# left CI disabled_manually for ~2 months without anyone noticing. This
+# schedule asserts every workflow in .github/workflows/ is active.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Assert every workflow is active
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          failed=0
+          while IFS= read -r file; do
+            name="$(basename "${file}")"
+            state="$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/${name}" --jq '.state')"
+            echo "${name}: ${state}"
+            if [ "${state}" != "active" ]; then
+              echo "::error::workflow ${name} is '${state}', not active — re-enable with: gh workflow enable ${name}"
+              failed=1
+            fi
+          done < <(find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+          exit "${failed}"
+    timeout-minutes: 5
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
