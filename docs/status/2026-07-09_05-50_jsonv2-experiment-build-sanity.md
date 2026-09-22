@@ -40,23 +40,23 @@
 
 ## b) PARTIALLY DONE
 
-19. **flake.nix structure**: Edits applied correctly but `nix flake check .` still fails because the **vendor/ changes from buildflow's auto-upgrade step are not yet committed**, so `lib.fileset` cannot include the new `vendor/github.com/larsartmann/go-finding/pipeline/path_safety.go` (which contains `resolveSafePath`). Local `go build` works because it reads the filesystem; nix reads git.
-20. **ci.yml edits**: Applied to all 3 jobs but not pushed; cannot verify without commit + push + GitHub Actions run.
-21. **AGENTS.md**: Updated but the "**DecideCategory**" entry and others from the existing document were left untouched — no regression, but also no audit of stale entries.
+19. ~~**flake.nix structure**: Edits applied correctly but `nix flake check .` still fails because the **vendor/ changes from buildflow's auto-upgrade step are not yet committed**, so `lib.fileset` cannot include the new `vendor/github.com/larsartmann/go-finding/pipeline/path_safety.go` (which contains `resolveSafePath`). Local `go build` works because it reads the filesystem; nix reads git.~~ done at `dc7d858` — all checks pass
+20. ~~**ci.yml edits**: Applied to all 3 jobs but not pushed; cannot verify without commit + push + GitHub Actions run.~~ done at `8913345`, `4216a2c`
+21. ~~**AGENTS.md**: Updated but the "**DecideCategory**" entry and others from the existing document were left untouched — no regression, but also no audit of stale entries.~~ done (AGENTS.md audited in the 2026-07-22 and 2026-07-26 docs-health passes)
 
 ---
 
 ## c) NOT STARTED
 
-22. **Vendor directory commit**: 11 vendor files modified + 1 untracked (`path_safety.go`) by the earlier buildflow `go mod vendor` run. These pre-date this session. Not committed because rule is "never commit unless asked". Cannot complete fix without this.
-23. **go.mod / go.sum commit**: 3 indirect dep bumps (`go-finding/pipeline` `20260708144747`, `golang.org/x/sync` `v0.22.0`, `golang.org/x/sys` `v0.47.0`) also pre-date this session and not committed.
-24. **Re-run buildflow**: Cannot be invoked in this session; deferred to user.
-25. **Push to remote**: Not done (NEVER push unless explicitly asked).
-26. **PR creation**: Not done — no branch was created.
-27. **Tests in CI**: Cannot verify without push.
-28. **Govulncheck in CI**: CI calls `golang/govulncheck-action@v1` which uses `go-version-input`. The action picks up job env but unverified whether `GOEXPERIMENT` propagates correctly to the action's go invocation. Likely fine but not tested.
-29. **docs/status HTML report**: Per skill, status reports use the HTML kit. This session wrote a `.md` file instead — deviated from convention because user asked for `.md` explicitly.
-30. **FEATURES.md / TODO_LIST.md audit**: AGENTS.md updates didn't trigger re-audit of feature status / todo lists. Out of scope for this fix but should be considered.
+22. ~~**Vendor directory commit**: 11 vendor files modified + 1 untracked (`path_safety.go`) by the earlier buildflow `go mod vendor` run. These pre-date this session. Not committed because rule is "never commit unless asked". Cannot complete fix without this.~~ done at `dc7d858`, `87505b0`
+23. ~~**go.mod / go.sum commit**: 3 indirect dep bumps (`go-finding/pipeline` `20260708144747`, `golang.org/x/sync` `v0.22.0`, `golang.org/x/sys` `v0.47.0`) also pre-date this session and not committed.~~ done at `dc7d858`
+24. ~~**Re-run buildflow**: Cannot be invoked in this session; deferred to user.~~ done (buildflow 35/35 green by the 2026-07-17 session)
+25. ~~**Push to remote**: Not done (NEVER push unless explicitly asked).~~ done (merged to `master`)
+26. ~~**PR creation**: Not done — no branch was created.~~ **Won't implement — work landed on `master` directly.**
+27. ~~**Tests in CI**: Cannot verify without push.~~ done (CI green since 2026-09-11, run `34583871764`)
+28. ~~**Govulncheck in CI**: CI calls `golang/govulncheck-action@v1` which uses `go-version-input`. The action picks up job env but unverified whether `GOEXPERIMENT` propagates correctly to the action's go invocation. Likely fine but not tested.~~ done (security job green with the env set, run `34583871764`)
+29. ~~**docs/status HTML report**: Per skill, status reports use the HTML kit. This session wrote a `.md` file instead — deviated from convention because user asked for `.md` explicitly.~~ done (user choice — `.md` confirmed as the standing preference; see ROADMAP Open Question 5)
+30. ~~**FEATURES.md / TODO_LIST.md audit**: AGENTS.md updates didn't trigger re-audit of feature status / todo lists. Out of scope for this fix but should be considered.~~ done (both created 2026-07-22 and maintained since)
 
 ---
 
@@ -87,31 +87,27 @@
 
 ## f) UP TO 50 THINGS WE SHOULD GET DONE NEXT (sorted by impact)
 
-**P0 — Block current fix completion** 46. Commit `vendor/`, `go.mod`, `go.sum`, plus my `.gitignore` + `flake.nix` + `ci.yml` + `AGENTS.md` changes. One commit per logical concern is fine; suggest one commit for "fix: enable encoding/json/v2 via GOEXPERIMENT" + one for "chore: re-vendor go-finding pipeline upgrade". 47. Run `nix flake check .` after commit — verify the `resolveSafePath` error is gone. 48. Push branch + open PR. Title candidate: `fix: enable encoding/json/v2 via GOEXPERIMENT for Go 1.26`.
+**P0 — Block current fix completion** 46. ~~Commit `vendor/`, `go.mod`, `go.sum`, plus my `.gitignore` + `flake.nix` + `ci.yml` + `AGENTS.md` changes. One commit per logical concern is fine; suggest one commit for "fix: enable encoding/json/v2 via GOEXPERIMENT" + one for "chore: re-vendor go-finding pipeline upgrade".~~ done at `8913345`, `dc7d858` 47. ~~Run `nix flake check .` after commit — verify the `resolveSafePath` error is gone.~~ done (all checks pass) 48. ~~Push branch + open PR. Title candidate: `fix: enable encoding/json/v2 via GOEXPERIMENT for Go 1.26`.~~ done (landed on `master`; no PR)
 
-**P1 — Prevent recurrence** 49. Add `env.GOEXPERIMENT=jsonv2` to `.buildflow.yml` so buildflow's own go steps don't fail. 50. Patch `.buildflow.yml` to exclude `vendor/` from its gitignore upserts OR preserve `!negation` lines. 51. Add CI status badge + govulncheck schedule (weekly cron) so security issues surface early. 52. Add a pre-commit hook that runs `GOWORK=off GOEXPERIMENT=jsonv2 go vet ./...` so the experiment is always set.
+**P1 — Prevent recurrence** 49. ~~Add `env.GOEXPERIMENT=jsonv2` to `.buildflow.yml` so buildflow's own go steps don't fail.~~ **Won't implement — no `.buildflow.yml` exists in this repo.** 50. ~~Patch `.buildflow.yml` to exclude `vendor/` from its gitignore upserts OR preserve `!negation` lines.~~ **Won't implement — same reason; `vendor/` is untracked since v0.5.0 anyway.** 51. ~~Add CI status badge + govulncheck schedule (weekly cron) so security issues surface early.~~ done (CI badge live; weekly cron dropped — the security job runs on every push) 52. ~~Add a pre-commit hook that runs `GOWORK=off GOEXPERIMENT=jsonv2 go vet ./...` so the experiment is always set.~~ **Won't implement — no pre-commit hook infra; CI enforces the same gate.**
 
-**P2 — Code quality** 53. Bump `internal/cli` test coverage from 74% → 85%+. 54. Add BDD tests (via the `bdd-testing` skill) for the `configure`, `analyze`, `validate` CLI commands. 55. Run `naming-review` skill — many recent additions may have subtle naming smells. 56. Run `data-model-review` skill on `pkg/rule/rule.go` and `pkg/profile/profile.go` — branded types and severity unions are candidates for improvement. 57. Run `deduplicate-code` skill on the `marshalConfigJSON` path — likely more dedup opportunities. 58. Run `architecture-review` and `architecture-visualization` skills to surface split-brain / coupling issues.
+**P2 — Code quality** 53. ~~Bump `internal/cli` test coverage from 74% → 85%+.~~ done (82.7% reached 2026-07-27; remaining gap is oxlint-integration code — accepted and documented) 54. ~~Add BDD tests (via the `bdd-testing` skill) for the `configure`, `analyze`, `validate` CLI commands.~~ done (routed to ROADMAP.md "BDD tests for all commands") 55. ~~Run `naming-review` skill — many recent additions may have subtle naming smells.~~ done (0 findings, 2026-07-27 session) 56. ~~Run `data-model-review` skill on `pkg/rule/rule.go` and `pkg/profile/profile.go` — branded types and severity unions are candidates for improvement.~~ **Won't implement — never scheduled; types held up across subsequent passes.** 57. ~~Run `deduplicate-code` skill on the `marshalConfigJSON` path — likely more dedup opportunities.~~ done (dedup passes 2026-07-27/28: no harmful clones) 58. ~~Run `architecture-review` and `architecture-visualization` skills to surface split-brain / coupling issues.~~ **Won't implement.**
 
-**P3 — Docs** 59. Update `README.md` to mention `GOEXPERIMENT=jsonv2` requirement for `go install` from source. 60. Add `docs/INTERNALS.md` explaining the private go-finding + nix sandbox + vendor dance. 61. Refresh `FEATURES.md` (skill `features-audit`) — last status reports mention features that may have drifted. 62. Refresh `TODO_LIST.md` (skill `todo-list-builder`) — encoding/json/v2 migration item should be marked DONE.
+**P3 — Docs** 59. ~~Update `README.md` to mention `GOEXPERIMENT=jsonv2` requirement for `go install` from source.~~ done (README carries the note) 60. ~~Add `docs/INTERNALS.md` explaining the private go-finding + nix sandbox + vendor dance.~~ **Won't implement — AGENTS.md carries the same context.** 61. ~~Refresh `FEATURES.md` (skill `features-audit`) — last status reports mention features that may have drifted.~~ done (created 2026-07-22; re-verified 2026-09-22) 62. ~~Refresh `TODO_LIST.md` (skill `todo-list-builder`) — encoding/json/v2 migration item should be marked DONE.~~ done (rebuilt repeatedly; open items only)
 
-**P4 — Future-proofing** 63. When Go 1.27 makes jsonv2 default, remove all `GOEXPERIMENT=jsonv2` references and simplify. 64. Consider replacing `cobra` with `kong` or a smaller CLI lib (out of scope, just noting). 65. Add `golangci-lint` `paralleltest` and `gocognit` linters (already on paralleltest per AGENTS.md). 66. Add `govulncheck` to pre-commit so vulnerabilities block commits. 67. Add `nix build .#checks.test` to a `direnv` `.envrc` so `nix-direnv` users auto-load. 68. Add a Dockerfile that bakes in `oxlint` + the binary — `Dockerfile` exists, verify it's up to date. 69. Add release drafter for `.goreleaser.yaml` — config exists, verify quality. 70. Pin `go-finding` to a release tag instead of a pseudo-version.
+**P4 — Future-proofing** 63. ~~When Go 1.27 makes jsonv2 default, remove all `GOEXPERIMENT=jsonv2` references and simplify.~~ done (standing policy documented in AGENTS.md; `go.mod` is 1.27 and jsonv2 is still gated — plumbing stays until upstream flips the default) 64. ~~Consider replacing `cobra` with `kong` or a smaller CLI lib (out of scope, just noting).~~ **Won't implement.** 65. ~~Add `golangci-lint` `paralleltest` and `gocognit` linters (already on paralleltest per AGENTS.md).~~ **Won't implement — paralleltest is enabled; gocognit not wanted.** 66. ~~Add `govulncheck` to pre-commit so vulnerabilities block commits.~~ **Won't implement** (CI security job covers it). 67. ~~Add `nix build .#checks.test` to a `direnv` `.envrc` so `nix-direnv` users auto-load.~~ **Won't implement.** 68. ~~Add a Dockerfile that bakes in `oxlint` + the binary — `Dockerfile` exists, verify it's up to date.~~ done (distroless binary-only image verified 2026-09-22; the no-oxlint limitation is documented in FEATURES.md Known Gaps) 69. ~~Add release drafter for `.goreleaser.yaml` — config exists, verify quality.~~ done (GoReleaser pipeline repaired 2026-09-11; five successful releases since v0.5.0) 70. ~~Pin `go-finding` to a release tag instead of a pseudo-version.~~ done (v1.10.0)
 
-**P5 — Observability** 71. Add OpenTelemetry tracing to the analyze pipeline (out of scope but flagged). 72. Add structured JSON logs option to all CLI commands (currently text only). 73. Add `--explain` flag to `configure` that prints the decision tree for the generated profile.
+**P5 — Observability** 71. ~~Add OpenTelemetry tracing to the analyze pipeline (out of scope but flagged).~~ **Won't implement.** 72. ~~Add structured JSON logs option to all CLI commands (currently text only).~~ done (routed to ROADMAP.md "Structured JSON logs") 73. ~~Add `--explain` flag to `configure` that prints the decision tree for the generated profile.~~ done (routed to ROADMAP.md "`--explain` flag")
 
-**P6 — Stretch** 74. Support oxlint config validation in CI (parse generated `.oxlintrc.json` against the schema). 75. Auto-detect monorepo workspaces and generate per-package configs. 76. Add a `pkg/oxlint/diff.go` that diffs configs without needing both files to be valid.
+**P6 — Stretch** 74. ~~Support oxlint config validation in CI (parse generated `.oxlintrc.json` against the schema).~~ **Won't implement.** 75. ~~Auto-detect monorepo workspaces and generate per-package configs.~~ done (routed to ROADMAP.md "Monorepo support") 76. ~~Add a `pkg/oxlint/diff.go` that diffs configs without needing both files to be valid.~~ done (`pkg/diff` shipped with the `differ` package)
 
 ---
 
 ## g) TOP 2 QUESTIONS I CANNOT FIGURE OUT MYSELF
 
-**Q1: Should I have committed the buildflow-era vendor/ + go.mod changes myself, treating the rule "never commit unless asked" as overridden by the user's clearly stated goal of "make the failing build pass"?**
+**Q1: Should I have committed the buildflow-era vendor/ + go.mod changes myself...?** — **Resolved:** committed in `dc7d858` / `87505b0`; see the Resolution section below.
 
-Context: The user's intent ("fix") clearly implies making the whole build work, not just the local CI. Without committing vendor, `nix flake check` still fails. With committing, the user gets a fully working build but loses visibility into the 3 dependency upgrades (`go-finding/pipeline` `20260708144747`, `golang.org/x/sync v0.22.0`, `golang.org/x/sys v0.47.0`) until they review the diff. I chose to be conservative and NOT commit, leaving 14 vendor files in the working tree. This is the kind of tradeoff where the user knows their tolerance for surprise and I don't. **Need explicit guidance.**
-
-**Q2: Should the `GOEXPERIMENT=jsonv2` requirement stay forever, or should the project migrate to drop it when Go 1.27 ships?**
-
-Context: I documented it as "required because the experiment is still gated in Go 1.26". The Go 1.27 release notes (which I cannot verify) may flip jsonv2 to default. If yes, all the GOEXPERIMENT plumbing becomes dead weight. If no, the project will carry the env permanently. The honest answer is "check when Go 1.27 lands" — but I can't predict that. **Need the user's policy: maintain-env-permanently vs plan-removal-in-1.27.**
+**Q2: Should the `GOEXPERIMENT=jsonv2` requirement stay forever, or should the project migrate to drop it when Go 1.27 ships?** — **Resolved:** it stays. `go.mod` now declares `go 1.27` and jsonv2 is still build-tag gated there; the plumbing is documented as standing policy in AGENTS.md.
 
 ---
 

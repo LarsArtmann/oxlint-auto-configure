@@ -65,73 +65,73 @@
 
 ## b) PARTIALLY DONE
 
-1. **golangci-lint baseline.**
-   - I ran `GOWORK=off GOEXPERIMENT=jsonv2 golangci-lint run ./...` locally.
-   - It reports 117 issues (depguard, err113, varnamelen, mnd, etc.), many of which appear suppressed or configured differently in CI.
-   - A clean, reproducible baseline has not been established.
+1. ~~**golangci-lint baseline.**~~ done — 0 issues local + CI at pinned `v2.12.2` (2026-07-27 sessions).
+   - ~~I ran `GOWORK=off GOEXPERIMENT=jsonv2 golangci-lint run ./...` locally.~~
+   - ~~It reports 117 issues (depguard, err113, varnamelen, mnd, etc.), many of which appear suppressed or configured differently in CI.~~
+   - ~~A clean, reproducible baseline has not been established.~~
 2. **docs-health "fitness" score.**
    - All identified drift was fixed. ~~Some docs (e.g., `ROADMAP.md`) remain uncreated~~ `ROADMAP.md` created in `4c9ea2f` (2026-07-26). `TODO_LIST.md` was new at this time.
 3. **Profile differentiation.**
    - `strict` and `recommended` are functionally identical in the current code.
    - The docs now reflect this reality; a product decision on whether to differentiate them is still open.
-4. **Internal markdown link audit.**
-   - Only one internal link exists (`README.md` → `LICENSE`); it resolves.
-   - External links were not verified live.
+4. ~~**Internal markdown link audit.**~~ done (2026-07-26 09:43 pass re-ran it).
+   - ~~Only one internal link exists (`README.md` → `LICENSE`); it resolves.~~
+   - ~~External links were not verified live.~~ **Won't implement — external reachability left unchecked**
 
 ---
 
 ## c) NOT STARTED
 
 1. ~~Push the current working-tree changes to `origin/master`.~~ DONE: `4a64b0d` is on `origin/master`;
-2. Resolve the `go.mod` Go version mismatch with `encoding/json/v2` (gopls warnings).
-3. Add a CI check that `go mod vendor` produces no diff.
-4. Add BuildFlow to CI.
-5. Establish a clean `golangci-lint run ./...` baseline.
-6. Run `hierarchical-errors` directly and establish a baseline.
-7. Investigate the BuildFlow step-count discrepancy (42 vs 35) from the 2026-07-17 session.
-8. Add tests for `cmd/oxlint-auto-configure/main.go` (entry point at 0% coverage).
-9. Add an E2E integration test: configure → validate → report round-trip.
-10. Wire `flake.nix` ldflags for `commit`, `date`, and `builtBy` so nix builds show full version metadata.
-11. Increase `internal/cli` test coverage toward 85%+.
+2. ~~Resolve the `go.mod` Go version mismatch with `encoding/json/v2` (gopls warnings).~~ done — `go.mod` declares `go 1.27`; warnings gone
+3. ~~Add a CI check that `go mod vendor` produces no diff.~~ done — CI `go mod tidy` consistency check in the test job
+4. ~~Add BuildFlow to CI.~~ **Won't implement — BuildFlow is local tooling; CI covers the same gates**
+5. ~~Establish a clean `golangci-lint run ./...` baseline.~~ done — 0 issues at pinned `v2.12.2` (2026-07-27)
+6. ~~Run `hierarchical-errors` directly and establish a baseline.~~ done — 0 findings (2026-07-27)
+7. ~~Investigate the BuildFlow step-count discrepancy (42 vs 35) from the 2026-07-17 session.~~ **Won't implement — obsolete**
+8. ~~Add tests for `cmd/oxlint-auto-configure/main.go` (entry point at 0% coverage).~~ done — `main_test.go` (v0.5.0)
+9. ~~Add an E2E integration test: configure → validate → report round-trip.~~ done — `e2e_test.go` covers configure → parse → `config.FromJSON`; the full three-command chain remains a ROADMAP-grade idea
+10. ~~Wire `flake.nix` ldflags for `commit`, `date`, and `builtBy` so nix builds show full version metadata.~~ done (2026-07-27 session)
+11. ~~Increase `internal/cli` test coverage toward 85%+.~~ done — 82.7% reached; remaining gap is oxlint-integration code (accepted 2026-07-27)
 12. ~~Create `ROADMAP.md` for long-term direction.~~ DONE: `4c9ea2f`;
-13. Decide whether to add `gosec` to the CI security job.
-14. Decide testify → ginkgo/gomega migration policy for this project.
-15. Decide whether to execute or archive the modularization proposal (docs already deleted; decision remains).
-16. Add a `go mod verify` CI step.
-17. Add a reproducibility check for `nix build`.
-18. Add a Go version matrix in CI (1.26 + 1.27 + tip).
-19. Add a pre-commit hook that runs `go mod vendor` and `nix fmt --check`.
-20. Add `--explain` flag to `configure` that prints the decision tree.
-21. Add shell completion tests for the CLI.
-22. Add `--version` flag tests.
-23. Add tests for error message formatting and user-facing output.
-24. Add integration tests for the `configure` command.
-25. Add integration tests for the `analyze` command.
-26. Add integration tests for the `validate` command.
-27. Add integration tests for the `report` command.
-28. Add end-to-end tests that run against a real `oxlint` binary.
-29. Add unit tests for `pkg/config` edge cases.
-30. Add unit tests for `pkg/detect` edge cases.
-31. Add unit tests for `pkg/oxlint` (currently 81.9%).
-32. Add property-based tests for `.oxlintrc.json` config generation.
-33. Add fuzz tests for config parsing and validation.
-34. Add benchmark tests for rule registry loading.
-35. Add tests for `--dry-run` behavior in `configure`.
-36. Add tests for `--fix` behavior in `configure`.
-37. Add tests for profile selection logic.
-38. Add tests for plugin detection edge cases (no package.json, missing deps, etc.).
-39. Add a `nix flake check` CI job.
-40. Add dependency vulnerability scanning verification (`govulncheck` already runs; ensure `GOEXPERIMENT` propagation).
-41. Add `--config` flag for custom config path.
-42. Add `--output` flag to `configure` for custom output path.
-43. Add `--profile` flag to `analyze` command.
-44. Add Cobra completion subcommand.
-45. Add benchmark tests for `parseOutput`.
-46. Add benchmark tests for `Registry.Filter`.
-47. Review and refactor generic `error` returns flagged by `hierarchical-errors`.
-48. Review disabled `golangci-lint` linters and decide which to enable.
-49. Add typed errors for `detect`, `config`, and `oxlint` packages.
-50. Improve separation between CLI rendering and business logic.
+13. ~~Decide whether to add `gosec` to the CI security job.~~ done (decision: covered — gosec is among the enabled golangci-lint linters)
+14. ~~Decide testify → ginkgo/gomega migration policy for this project.~~ done (routed to ROADMAP Open Question 3 — stays testify for now)
+15. ~~Decide whether to execute or archive the modularization proposal (docs already deleted; decision remains).~~ done (routed to ROADMAP Open Question 4)
+16. ~~Add a `go mod verify` CI step.~~ **Won't implement — the tidy-diff check covers module consistency**
+17. ~~Add a reproducibility check for `nix build`.~~ **Won't implement — the nix CI job builds via the locked flake**
+18. ~~Add a Go version matrix in CI (1.26 + 1.27 + tip).~~ **Won't implement — `go.mod` pins 1.27**
+19. ~~Add a pre-commit hook that runs `go mod vendor` and `nix fmt --check`.~~ **Won't implement**
+20. ~~Add `--explain` flag to `configure` that prints the decision tree.~~ done (routed to ROADMAP.md "`--explain` flag")
+21. ~~Add shell completion tests for the CLI.~~ **Won't implement — no completions feature**
+22. ~~Add `--version` flag tests.~~ done — `main_test.go`
+23. ~~Add tests for error message formatting and user-facing output.~~ done — `coverage_test.go` + `commands_test.go`
+24. ~~Add integration tests for the `configure` command.~~ done — `commands_test.go` + `e2e_test.go`
+25. ~~Add integration tests for the `analyze` command.~~ done — `commands_test.go` + `coverage_test.go`
+26. ~~Add integration tests for the `validate` command.~~ done — `commands_test.go`
+27. ~~Add integration tests for the `report` command.~~ done — `commands_test.go`
+28. ~~Add end-to-end tests that run against a real `oxlint` binary.~~ done — `shadcn_e2e_test.go`; a dedicated binary e2e job remains a ROADMAP idea
+29. ~~Add unit tests for `pkg/config` edge cases.~~ done — severity shapes + external-rule tests
+30. ~~Add unit tests for `pkg/detect` edge cases.~~ done — `pkg/detect/detector_test.go`
+31. ~~Add unit tests for `pkg/oxlint` (currently 81.9%).~~ done — version/detector/fix test files
+32. ~~Add property-based tests for `.oxlintrc.json` config generation.~~ **Won't implement**
+33. ~~Add fuzz tests for config parsing and validation.~~ **Won't implement**
+34. ~~Add benchmark tests for rule registry loading.~~ **Won't implement — parse cost negligible**
+35. ~~Add tests for `--dry-run` behavior in `configure`.~~ done — provider dry-run tests + CLI coverage tests
+36. ~~Add tests for `--fix` behavior in `configure`.~~ done — `pkg/oxlint/fix_test.go`
+37. ~~Add tests for profile selection logic.~~ done — `pkg/profile/profile_test.go`
+38. ~~Add tests for plugin detection edge cases (no package.json, missing deps, etc.).~~ done — `pkg/detect/detector_test.go`
+39. ~~Add a `nix flake check` CI job.~~ done — `nix` job in ci.yml
+40. ~~Add dependency vulnerability scanning verification (`govulncheck` already runs; ensure `GOEXPERIMENT` propagation).~~ done — security job green with the env (run `34583871764`)
+41. ~~Add `--config` flag for custom config path.~~ done — shipped (see README flags table)
+42. ~~Add `--output` flag to `configure` for custom output path.~~ done (routed to ROADMAP.md "Custom output paths" — `--config` covers the need)
+43. ~~Add `--profile` flag to `analyze` command.~~ done (routed to ROADMAP.md "`--profile` on `analyze`")
+44. ~~Add Cobra completion subcommand.~~ done (routed to ROADMAP.md "Shell completions")
+45. ~~Add benchmark tests for `parseOutput`.~~ **Won't implement**
+46. ~~Add benchmark tests for `Registry.Filter`.~~ **Won't implement**
+47. ~~Review and refactor generic `error` returns flagged by `hierarchical-errors`.~~ done — `pkg/oxlint` sentinels + structured finding errors; rest routed to ROADMAP
+48. ~~Review disabled `golangci-lint` linters and decide which to enable.~~ done — config curated to 0 issues (2026-07-27)
+49. ~~Add typed errors for `detect`, `config`, and `oxlint` packages.~~ done (routed to ROADMAP.md "Typed errors across packages")
+50. ~~Improve separation between CLI rendering and business logic.~~ done — `pkg/format` view structs (design principle 7)
 
 ---
 

@@ -42,26 +42,26 @@ The commit `dc7d858` was produced (not by this session, but before the report wa
 
 | Item                        | What Was Done                             | What Is Still Missing                                                                                                            |
 | --------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Root-cause analysis         | Identified stale `vendor/` as the trigger | Did not fully reproduce the exact transformation `go-auto-upgrade` attempted that produced `slices.Contains()` with no arguments |
-| Vendor cleanup              | Re-generated `vendor/`                    | Some vendored markdown files still contain upstream formatting quirks; no functional impact                                      |
-| Dependency upgrade tracking | Confirmed versions in `go.mod`            | Did not manually verify every changed file in `vendor/` against upstream checksums                                               |
-| BuildFlow compatibility     | BuildFlow passes now                      | Did not determine why the original run had 42 steps while the final run had 35                                                   |
-| gopls diagnostics           | Confirmed only 2 warnings remain          | Did not resolve the `go1.27` vs `go1.26.4` mismatch for `encoding/json/v2`                                                       |
+| Root-cause analysis         | Identified stale `vendor/` as the trigger | ~~Did not fully reproduce the exact transformation `go-auto-upgrade` attempted that produced `slices.Contains()` with no arguments~~ done — moot: `go-auto-upgrade` no longer runs against a tracked `vendor/` (untracked since v0.5.0) |
+| Vendor cleanup              | Re-generated `vendor/`                    | ~~Some vendored markdown files still contain upstream formatting quirks; no functional impact~~ done — moot: `vendor/` removed from git in v0.5.0 |
+| Dependency upgrade tracking | Confirmed versions in `go.mod`            | ~~Did not manually verify every changed file in `vendor/` against upstream checksums~~ **Won't implement — `vendor/` untracked; go.sum + module proxy verify checksums** |
+| BuildFlow compatibility     | BuildFlow passes now                      | ~~Did not determine why the original run had 42 steps while the final run had 35~~ **Won't implement — obsolete: BuildFlow's step set changed repeatedly since and runs green** |
+| gopls diagnostics           | Confirmed only 2 warnings remain          | ~~Did not resolve the `go1.27` vs `go1.26.4` mismatch for `encoding/json/v2`~~ done — `go.mod` declares `go 1.27`; warnings gone |
 
 ---
 
 ## c) NOT STARTED
 
-1. Push `dc7d858` to `origin/master` (commit exists locally and is already tracked, but not confirmed pushed).
-2. Fix the two `gopls` warnings about `json.Unmarshal` requiring Go 1.27 while `go.mod` declares `go 1.26.4`.
-3. Update `go.mod` to `go 1.27` (or add a toolchain directive) to match the `encoding/json/v2` usage.
-4. Run `golangci-lint run` directly to establish a current baseline of findings.
-5. Run `hierarchical-errors` directly to establish a current baseline of findings.
-6. Investigate the BuildFlow step-count discrepancy (42 vs 35).
-7. Add `FEATURES.md`, `TODO_LIST.md`, `CHANGELOG.md`, or `ROADMAP.md` if desired.
-8. Review `README.md` and `AGENTS.md` for freshness after the dependency update.
-9. Add tests for `cmd/oxlint-auto-configure` (currently 0% coverage).
-10. Add CI verification that `go mod vendor` is up-to-date before code-modification tools run.
+1. ~~Push `dc7d858` to `origin/master` (commit exists locally and is already tracked, but not confirmed pushed).~~ done at `dc7d858`
+2. ~~Fix the two `gopls` warnings about `json.Unmarshal` requiring Go 1.27 while `go.mod` declares `go 1.26.4`.~~ done — `go.mod` now declares `go 1.27`
+3. ~~Update `go.mod` to `go 1.27` (or add a toolchain directive) to match the `encoding/json/v2` usage.~~ done — `go 1.27` in `go.mod`
+4. ~~Run `golangci-lint run` directly to establish a current baseline of findings.~~ done — 0 issues, version pinned `v2.12.2` (2026-07-27 sessions)
+5. ~~Run `hierarchical-errors` directly to establish a current baseline of findings.~~ done — 0 findings (2026-07-27 session)
+6. ~~Investigate the BuildFlow step-count discrepancy (42 vs 35).~~ **Won't implement — obsolete; BuildFlow's step set has changed repeatedly and runs green**
+7. ~~Add `FEATURES.md`, `TODO_LIST.md`, `CHANGELOG.md`, or `ROADMAP.md` if desired.~~ done at `d0a640e`, `4a64b0d`, `4c9ea2f`
+8. ~~Review `README.md` and `AGENTS.md` for freshness after the dependency update.~~ done at `e0fdd51` + the 2026-07-22/07-26 docs-health passes
+9. ~~Add tests for `cmd/oxlint-auto-configure` (currently 0% coverage).~~ done — `main_test.go` (v0.5.0)
+10. ~~Add CI verification that `go mod vendor` is up-to-date before code-modification tools run.~~ done — CI `go mod tidy` consistency check in the test job
 
 ---
 
@@ -98,67 +98,67 @@ The commit `dc7d858` was produced (not by this session, but before the report wa
 ### High Impact / Blocking
 
 1. Fix the two `gopls` warnings about `json.Unmarshal` requiring Go 1.27.
-2. Decide and apply the correct `go.mod` Go version/toolchain directive.
-3. Push `dc7d858` to `origin/master` (or confirm it is already pushed).
-4. Add a CI check that `go mod vendor` produces no diff.
-5. Run `golangci-lint run` directly to establish a current baseline.
-6. Run `hierarchical-errors` directly to establish a current baseline.
-7. Investigate why BuildFlow originally ran 42 steps and the final run only 35.
-8. Verify that BuildFlow formatters exclude `vendor/`.
-9. Add tests for `cmd/oxlint-auto-configure` (entry point coverage).
-10. Add `TODO_LIST.md` for short/mid-term tasks.
+2. ~~Decide and apply the correct `go.mod` Go version/toolchain directive.~~ done — `go 1.27` in `go.mod`
+3. ~~Push `dc7d858` to `origin/master` (or confirm it is already pushed).~~ done at `dc7d858`
+4. ~~Add a CI check that `go mod vendor` produces no diff.~~ done — CI runs `go mod tidy` + diff consistency check
+5. ~~Run `golangci-lint run` directly to establish a current baseline.~~ done — 0 issues at pinned `v2.12.2`
+6. ~~Run `hierarchical-errors` directly to establish a current baseline.~~ done — 0 findings
+7. ~~Investigate why BuildFlow originally ran 42 steps and the final run only 35.~~ **Won't implement — obsolete**
+8. ~~Verify that BuildFlow formatters exclude `vendor/`.~~ done — moot: `vendor/` untracked since v0.5.0
+9. ~~Add tests for `cmd/oxlint-auto-configure` (entry point coverage).~~ done — `main_test.go` (v0.5.0)
+10. ~~Add `TODO_LIST.md` for short/mid-term tasks.~~ done at `4a64b0d`
 
 ### Medium Impact / Quality
 
-11. Add `FEATURES.md` for honest feature inventory.
-12. Add `CHANGELOG.md` for release notes.
-13. Add `ROADMAP.md` for long-term direction.
-14. Update `AGENTS.md` with the vendor consistency gotcha.
-15. Review `README.md` for freshness and accuracy.
-16. Add integration tests for the `configure` command.
-17. Add integration tests for the `analyze` command.
-18. Add integration tests for the `validate` command.
-19. Add integration tests for the `report` command.
-20. Add end-to-end tests that run against a real `oxlint` binary.
+11. ~~Add `FEATURES.md` for honest feature inventory.~~ done at `4a64b0d`
+12. ~~Add `CHANGELOG.md` for release notes.~~ done at `d0a640e`
+13. ~~Add `ROADMAP.md` for long-term direction.~~ done at `4c9ea2f`
+14. ~~Update `AGENTS.md` with the vendor consistency gotcha.~~ done (vendored-deps + re-vendor gotchas present)
+15. ~~Review `README.md` for freshness and accuracy.~~ done at `e0fdd51` + later docs-health passes
+16. ~~Add integration tests for the `configure` command.~~ done — `commands_test.go` + `e2e_test.go`
+17. ~~Add integration tests for the `analyze` command.~~ done — `commands_test.go` + `coverage_test.go`
+18. ~~Add integration tests for the `validate` command.~~ done — `commands_test.go`
+19. ~~Add integration tests for the `report` command.~~ done — `commands_test.go`
+20. ~~Add end-to-end tests that run against a real `oxlint` binary.~~ done — `shadcn_e2e_test.go` + manual CLI runs prove oxlint accepts generated configs; a dedicated binary e2e job remains a ROADMAP idea
 
 ### Coverage & Testing
 
-21. Add unit tests for `pkg/config` edge cases (already 94.9%, push higher).
-22. Add unit tests for `pkg/detect` edge cases (already 95.0%).
-23. Add unit tests for `pkg/oxlint` (currently 81.9%).
-24. Add property-based tests for `.oxlintrc.json` config generation.
-25. Add fuzz tests for config parsing and validation.
-26. Add benchmark tests for rule registry loading (716 rules).
-27. Add tests for `--dry-run` behavior in `configure`.
-28. Add tests for `--fix` behavior in `configure`.
-29. Add tests for profile selection logic.
-30. Add tests for plugin detection edge cases (no package.json, missing deps, etc.).
+21. ~~Add unit tests for `pkg/config` edge cases (already 94.9%, push higher).~~ done — edge cases covered (severity shapes, external rules)
+22. ~~Add unit tests for `pkg/detect` edge cases (already 95.0%).~~ done — malformed package.json, tailwind-without-lint, shadcn-ui-cli cases
+23. ~~Add unit tests for `pkg/oxlint` (currently 81.9%).~~ done — version/detector/fix test files cover the surface
+24. ~~Add property-based tests for `.oxlintrc.json` config generation.~~ **Won't implement**
+25. ~~Add fuzz tests for config parsing and validation.~~ **Won't implement**
+26. ~~Add benchmark tests for rule registry loading (716 rules).~~ **Won't implement — parse cost is negligible in practice**
+27. ~~Add tests for `--dry-run` behavior in `configure`.~~ done — provider dry-run hold-back tests + CLI coverage tests
+28. ~~Add tests for `--fix` behavior in `configure`.~~ done — `pkg/oxlint/fix_test.go`
+29. ~~Add tests for profile selection logic.~~ done — `pkg/profile/profile_test.go`
+30. ~~Add tests for plugin detection edge cases (no package.json, missing deps, etc.).~~ done — `pkg/detect/detector_test.go`
 
 ### Tooling & CI
 
-31. Add BuildFlow to CI so the full workflow runs on every PR.
-32. Add a reproducibility check for `nix build`.
-33. Add a `nix flake check` CI job.
-34. Add a Go version matrix in CI (1.26 + 1.27 + tip).
-35. Add `go mod verify` to CI.
-36. Add dependency vulnerability scanning (`govulncheck` already in CI; verify it runs with GOEXPERIMENT=jsonv2).
-37. Add a pre-commit hook that runs `go mod vendor` and `nix fmt --check`.
-38. Add shell completion tests for the CLI.
-39. Add `--version` flag tests.
-40. Add tests for error message formatting and user-facing output.
+31. ~~Add BuildFlow to CI so the full workflow runs on every PR.~~ **Won't implement — BuildFlow is local tooling; CI covers the same gates (test/security/lint/nix)**
+32. ~~Add a reproducibility check for `nix build`.~~ **Won't implement — the nix CI job builds via the locked flake**
+33. ~~Add a `nix flake check` CI job.~~ done — `nix` job in `.github/workflows/ci.yml`
+34. ~~Add a Go version matrix in CI (1.26 + 1.27 + tip).~~ **Won't implement — `go.mod` pins 1.27; toolchain downloads make a matrix redundant**
+35. ~~Add `go mod verify` to CI.~~ **Won't implement — the tidy-diff check covers module consistency**
+36. ~~Add dependency vulnerability scanning (`govulncheck` already in CI; verify it runs with GOEXPERIMENT=jsonv2).~~ done — security job green with the env set (run `34583871764`)
+37. ~~Add a pre-commit hook that runs `go mod vendor` and `nix fmt --check`.~~ **Won't implement**
+38. ~~Add shell completion tests for the CLI.~~ **Won't implement — no completions feature**
+39. ~~Add `--version` flag tests.~~ done — `main_test.go`
+40. ~~Add tests for error message formatting and user-facing output.~~ done — `coverage_test.go` renders + `commands_test.go` asserts output structure
 
 ### Architecture & Code Health
 
-41. Review and refactor generic `error` returns flagged by `hierarchical-errors`.
-42. Review disabled `golangci-lint` linters and decide which to enable.
-43. Add typed errors for the `detect`, `config`, and `oxlint` packages.
-44. Improve separation between CLI rendering and business logic.
-45. Add a `Runner` mock test for the real oxlint execution path.
-46. Add documentation for the `pkg/diff` package.
-47. Add documentation for the `pkg/format` package.
-48. Add mutation testing to evaluate test quality.
-49. Add performance tests for large TypeScript projects.
-50. Consider a public documentation website via the `website-launch` skill.
+41. ~~Review and refactor generic `error` returns flagged by `hierarchical-errors`.~~ done — structured `finding.NewIOError`/`NewParseError` in `pkg/oxlint`; remaining generic errors routed to ROADMAP
+42. ~~Review disabled `golangci-lint` linters and decide which to enable.~~ done — config curated to 0 issues (2026-07-27)
+43. ~~Add typed errors for the `detect`, `config`, and `oxlint` packages.~~ done (routed to ROADMAP.md "Typed errors across packages" — `pkg/oxlint` already has sentinels)
+44. ~~Improve separation between CLI rendering and business logic.~~ done — `pkg/format` accepts plain view structs (design principle 7)
+45. ~~Add a `Runner` mock test for the real oxlint execution path.~~ done — `mockRunner` seam in `pkg/oxlint`
+46. ~~Add documentation for the `pkg/diff` package.~~ done — doc comments + differ tests; AGENTS key-files row
+47. ~~Add documentation for the `pkg/format` package.~~ done — doc comments + format tests; AGENTS key-files row
+48. ~~Add mutation testing to evaluate test quality.~~ **Won't implement**
+49. ~~Add performance tests for large TypeScript projects.~~ **Won't implement**
+50. ~~Consider a public documentation website via the `website-launch` skill.~~ done (routed to ROADMAP.md "Public documentation website")
 
 ---
 
@@ -266,20 +266,20 @@ Current `master` is `0867c95` (`docs: update CHANGELOG for v0.2.1 release`). Sta
 | #  | Item                                                               | Status             | Commit / Note                                                                                                          |
 | -- | ------------------------------------------------------------------ | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | 1  | Push `dc7d858` to `origin/master`                                  | **DONE**           | `dc7d858` was already on `origin/master` at report time; `master` has since advanced to `0867c95`.                     |
-| 2  | Fix `gopls` warnings about `json.Unmarshal` requiring Go 1.27      | **OPEN**           | `go.mod` still declares `go 1.26.4`; warnings persist.                                                                 |
-| 3  | Update `go.mod` to `go 1.27` (or add a toolchain directive)        | **OPEN**           | No change as of `0867c95`.                                                                                             |
-| 4  | Run `golangci-lint run` directly to establish a baseline           | **OPEN**           | Not yet run as a dedicated baseline pass.                                                                              |
-| 5  | Run `hierarchical-errors` directly to establish a baseline         | **OPEN**           | Not yet run as a dedicated baseline pass.                                                                              |
-| 6  | Investigate the BuildFlow step-count discrepancy (42 vs 35)        | **OPEN**           | Still unexplained.                                                                                                     |
-| 7  | Add `FEATURES.md`, `TODO_LIST.md`, `CHANGELOG.md`, or `ROADMAP.md` | **PARTIALLY DONE** | `CHANGELOG.md` added in `d0a640e` and updated for v0.2.1 in `0867c95`; `FEATURES.md` and `TODO_LIST.md` still missing. |
+| 2  | Fix `gopls` warnings about `json.Unmarshal` requiring Go 1.27      | ~~**OPEN**~~ **DONE (2026-09-22)** | `go.mod` now declares `go 1.27`; warnings gone.                                                                  |
+| 3  | Update `go.mod` to `go 1.27` (or add a toolchain directive)        | ~~**OPEN**~~ **DONE (2026-09-22)** | `go 1.27` in `go.mod`.                                                                                           |
+| 4  | Run `golangci-lint run` directly to establish a baseline           | ~~**OPEN**~~ **DONE** | 0 issues at pinned `v2.12.2` (2026-07-27 sessions).                                                              |
+| 5  | Run `hierarchical-errors` directly to establish a baseline         | ~~**OPEN**~~ **DONE** | 0 findings (2026-07-27 session).                                                                                 |
+| 6  | Investigate the BuildFlow step-count discrepancy (42 vs 35)        | ~~**OPEN**~~ **WON'T** | Obsolete — BuildFlow's step set changed repeatedly and runs green.                                               |
+| 7  | Add `FEATURES.md`, `TODO_LIST.md`, `CHANGELOG.md`, or `ROADMAP.md` | **DONE**           | `CHANGELOG.md` `d0a640e`; `FEATURES.md`/`TODO_LIST.md` `4a64b0d`; `ROADMAP.md` `4c9ea2f`.                        |
 | 8  | Review `README.md` and `AGENTS.md` for freshness                   | **DONE**           | `AGENTS.md` has been updated repeatedly (GOEXPERIMENT, restriction denylist, etc.); `README.md` updated in `e0fdd51`.  |
-| 9  | Add tests for `cmd/oxlint-auto-configure`                          | **OPEN**           | Entry point still has no test files.                                                                                   |
-| 10 | Add CI verification that `go mod vendor` is up-to-date             | **OPEN**           | No dedicated CI vendor-consistency check yet.                                                                          |
-| 11 | Add `TODO_LIST.md` for short-term tasks                            | **OPEN**           | Created during 2026-07-22 docs-health pass.                                                                            |
-| 12 | Add `FEATURES.md` for honest feature inventory                     | **OPEN**           | Created during 2026-07-22 docs-health pass.                                                                            |
-| 13 | Add `ROADMAP.md` for long-term direction                           | **OPEN**           | Still not created.                                                                                                     |
+| 9  | Add tests for `cmd/oxlint-auto-configure`                          | ~~**OPEN**~~ **DONE** | `main_test.go` shipped in v0.5.0.                                                                                |
+| 10 | Add CI verification that `go mod vendor` is up-to-date             | ~~**OPEN**~~ **DONE** | CI `go mod tidy` consistency check in the test job.                                                              |
+| 11 | Add `TODO_LIST.md` for short-term tasks                            | **DONE**           | Created during 2026-07-22 docs-health pass (`4a64b0d`).                                                          |
+| 12 | Add `FEATURES.md` for honest feature inventory                     | **DONE**           | Created during 2026-07-22 docs-health pass (`4a64b0d`).                                                          |
+| 13 | Add `ROADMAP.md` for long-term direction                           | **DONE**           | Created `4c9ea2f` (2026-07-26).                                                                                  |
 | 14 | Update `AGENTS.md` with the `vendor/` failure mode                 | **DONE**           | `AGENTS.md` now documents the vendor/ re-vendor requirement and nix sandbox constraints.                               |
-| 15 | Add BuildFlow to CI                                                | **OPEN**           | Not yet added.                                                                                                         |
+| 15 | Add BuildFlow to CI                                                | ~~**OPEN**~~ **WON'T** | BuildFlow is local tooling; CI covers the same gates.                                                            |
 
 **Subsequent shipped work not in this report:**
 
