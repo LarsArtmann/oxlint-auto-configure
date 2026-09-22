@@ -5,6 +5,7 @@ import (
 	"encoding/json/v2"
 	"errors"
 	"io"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -290,6 +291,19 @@ func TestValidateInvalidSeverity(t *testing.T) {
 	err = Validate(configPath)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid severities")
+}
+
+func TestValidateMissingConfig(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+
+	err := Validate(filepath.Join(dir, ".oxlintrc.json"))
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "configure",
+		"the error must tell the user how to produce a config")
+	require.ErrorIs(t, err, fs.ErrNotExist,
+		"a missing config must stay programmatically detectable via the SDK error chain")
 }
 
 func TestSetupLoggingVerboseQuietConflict(t *testing.T) {

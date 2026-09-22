@@ -1,10 +1,12 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
-	"os"
 
+	autoconfigure "github.com/larsartmann/linter-autoconfigure-sdk"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/spf13/cobra"
@@ -28,20 +30,24 @@ func newValidateCommand() *cobra.Command {
 }
 
 // Validate checks an existing .oxlintrc.json for unknown rules and invalid severities.
+// Config I/O goes through linter-autoconfigure-sdk's typed LoadJSON so a
+// missing or malformed file surfaces as a structured *ConfigError
+// (errors.Is(err, fs.ErrNotExist) works for programmatic callers).
 func Validate(configPath string) error {
 	targetPath := configPath
 	if targetPath == "" {
 		targetPath = defaultConfigPath
 	}
 
-	data, err := os.ReadFile(targetPath)
-	if err != nil {
-		return fmt.Errorf("read config %s: %w", targetPath, err)
-	}
+	cfg, cerr := autoconfigure.LoadJSON[config.OxlintConfig](targetPath)
+	if cerr != nil {
+		if errors.Is(cerr, fs.ErrNotExist) {
+			return fmt.Errorf(
+				"no config at %s; run `oxlint-auto-configure configure` to generate one",
+				targetPath)
+		}
 
-	cfg, err := config.FromJSON(data)
-	if err != nil {
-		return fmt.Errorf("parse config: %w", err)
+		return fmt.Errorf("load config %s: %w", targetPath, cerr)
 	}
 
 	reg, err := rule.LoadRegistry()
