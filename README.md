@@ -10,7 +10,7 @@ This tool's one job: inspect your project and write the best possible [oxlint](h
 
 ## Why
 
-Oxlint has **841 rules** across **7 categories** and **15 plugins**. Only 113 are enabled by default. Manually configuring each rule for maximum type safety is tedious and error-prone. This tool automates the entire process:
+Oxlint has **870 rules** across **7 categories** and **15 plugins**. Only 111 are enabled by default. Manually configuring each rule for maximum type safety is tedious and error-prone. This tool automates the entire process:
 
 - Discovers your project type (React, Next.js, Vue, etc.)
 - Enables relevant plugins automatically
@@ -64,7 +64,7 @@ oxlint-auto-configure validate
 # Analyze project and show findings (SARIF output)
 oxlint-auto-configure analyze
 
-# Report of all 841 rules and their recommended severity
+# Report of all 870 rules and their recommended severity
 oxlint-auto-configure report
 ```
 
@@ -165,18 +165,18 @@ oxlint-auto-configure report [-p recommended] [-f table|json|summary]
 
 | Category    | Count   | Default         |
 | ----------- | ------- | --------------- |
-| Correctness | 259     | 111 enabled     |
-| Style       | 275     | mostly disabled |
-| Pedantic    | 125     | disabled        |
-| Restriction | 97      | disabled        |
-| Suspicious  | 59      | disabled        |
-| Perf        | 14      | disabled        |
-| Nursery     | 12      | disabled        |
-| **Total**   | **841** | **113 enabled** |
+| Correctness | 272     | 111 enabled     |
+| Style       | 280     | mostly disabled |
+| Pedantic    | 126     | disabled        |
+| Restriction | 103     | disabled        |
+| Suspicious  | 63      | disabled        |
+| Perf        | 15      | disabled        |
+| Nursery     | 11      | disabled        |
+| **Total**   | **870** | **111 enabled** |
 
 | Plugin     | Rules |
 | ---------- | ----- |
-| eslint     | 185   |
+| eslint     | 187   |
 | unicorn    | 138   |
 | vitest     | 72    |
 | react      | 63    |
@@ -210,7 +210,7 @@ GOWORK=off go mod vendor                             # Re-vendor deps (needed af
 oxlint-auto-configure/
 ├── cmd/oxlint-auto-configure/   # CLI entry point
 ├── pkg/
-│   ├── rule/                   # Rule types, registry (841 embedded rules)
+│   ├── rule/                   # Rule types, registry (870 embedded rules)
 │   ├── profile/                # Profiles, categorization engine
 │   ├── config/                 # .oxlintrc.json generator
 │   ├── detect/                 # Project type detection

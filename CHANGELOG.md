@@ -11,6 +11,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - External JS plugin support (`@shadcn/lint`): `configure` detects `@shadcn/lint` in `package.json` dependencies and registers it under `jsPlugins` (requires oxlint >= 1.80; warns when the oxlint in PATH is older). Its `shadcn/*` design-system rules are never enabled automatically — the tool points to the rule docs instead of fighting your design-system policy. Regenerating a config preserves an existing setup verbatim: `jsPlugins`, every `shadcn/*` rule including array-form options, and `settings.shadcn` (`pkg/config/preserve.go`). `validate` accepts external rules (reported as `external`, not unknown) and understands oxlint's array-form rule values.
 - `pkg/rule/external.go` — known external-plugin table (`@shadcn/lint` → `shadcn`) with lookup helpers; `pkg/detect.DetectExternalPlugins()` scans dependencies and dev-dependencies.
 - Direct test coverage for the shared `internal/testregistry` helper (previously only transitively exercised).
+- `scripts/pre-release-check.sh` — the full local release gate in one command: module consistency, build, vet, race tests, lint, `goreleaser check`, and a GoReleaser snapshot run. Encodes the manual v0.5.0-session validation that was never codified.
+- Disabled-workflow canary (`.github/workflows/workflow-health.yml`): weekly scheduled job asserting every workflow in `.github/workflows/` has state `active` — the Jul–Sep 2026 billing block went unnoticed for ~2 months.
+- Post-release smoke step in `release.yml`: downloads the just-published Linux archive from its own GitHub Release and runs `--version`, so a broken release fails visibly instead of silently.
+- Repository hygiene: `SECURITY.md` (private vulnerability reporting), bug/feature issue templates, pull-request template, and `CODEOWNERS`.
+
+### Changed
+
+- Embedded rule registry refreshed to oxlint **1.82.0**: **870 rules** (was 841 at 1.73.0), 111 enabled by default. CI now installs oxlint pinned to the embedded version (`oxlint@$(cat pkg/rule/rules_version.txt)`) and fails when the installed binary and `rules_version.txt` drift apart.
+- External-plugin handling polish: `configure` spawns `oxlint --version` once per run (was twice), reads `package.json` once for detection (memoized in the detector), logs how many external registrations were preserved, emits the enable-rules hint per detected plugin (was only the first), and warns when a preserved `jsPlugins` entry's package is no longer a dependency.
+- GoReleaser config migrated off deprecated keys: `brews` → `homebrew_casks`, `dockers`/`docker_manifests` → a single multi-platform `dockers_v2` entry, archives `format` → `formats`. Container images are now cosign-signed (`docker_signs`, keyless) and get an SBOM (`dockers_v2.sbom`).
+
+### Fixed
+
+- `analyze` no longer reports a clean project when oxlint itself fails to start. oxlint signals startup failures (e.g. a `jsPlugins` package that cannot load) with exit code 1 and the error text on stdout — indistinguishable from "findings found" — which the pipeline swallowed under graceful degradation into "no findings — project is clean". Detector parse failures now surface oxlint's own message (with a stdout snippet), pipeline partial errors fail the command visibly, and plain notices oxlint prepends to the JSON (e.g. "No files found to lint.") are still parsed correctly instead of becoming false errors.
 
 ## [0.6.3] - 2026-09-13
 
