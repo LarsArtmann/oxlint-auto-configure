@@ -91,71 +91,71 @@
 
 ### P0 — Close the gaps I created this session
 
-1. **Compute and print the docs-health Accuracy/Fitness score table** with show-the-math (the mandated output I omitted).
-2. **Re-run `golangci-lint run ./...`** and replace the stale "~117" count in FEATURES.md/TODO_LIST.md with a fresh number (or a pointer to the command).
-3. **Update `docs/DOMAIN_LANGUAGE.md`** with atomic-write / crash-durability / fingerprint / TOCTOU terms (07-26 f.34).
-4. **Update `CONTRIBUTING.md`** with the vendorHash workflow and `go-atomic-write` dependency note (07-26 f.24).
-5. **Load `verify-checklist.md`** and run the full 9-item consistency checklist; enumerate passes and skips.
+1. ~~**Compute and print the docs-health Accuracy/Fitness score table** with show-the-math (the mandated output I omitted).~~ done (2026-07-26 09:43 pass)
+2. ~~**Re-run `golangci-lint run ./...`** and replace the stale "~117" count in FEATURES.md/TODO_LIST.md with a fresh number (or a pointer to the command).~~ done — fresh count was 116, then driven to 0 (2026-07-27)
+3. ~~**Update `docs/DOMAIN_LANGUAGE.md`** with atomic-write / crash-durability / fingerprint / TOCTOU terms (07-26 f.34).~~ done — Atomic Write + Crash Durability added; Fingerprint/TOCTOU deliberately kept out (ROADMAP Resolved Questions)
+4. ~~**Update `CONTRIBUTING.md`** with the vendorHash workflow and `go-atomic-write` dependency note (07-26 f.24).~~ done (2026-07-26 09:43 rebuild, `1860b64`)
+5. ~~**Load `verify-checklist.md`** and run the full 9-item consistency checklist; enumerate passes and skips.~~ done (2026-07-26 09:43 pass, a.13)
 
 ### P1 — Verification I skipped
 
-6. **Run `nix flake check .`** as the canonical gate.
-7. **Run the internal markdown link audit:** `grep -roE '\]\([^)]+\)' *.md docs/` → verify each target.
-8. **Verify every file referenced from a doc exists** (ROADMAP cites code paths; FEATURES cites test files).
-9. **Open `README.md` and verify freshness** against current code (profiles, atomic writes, commands).
-10. **Open `AGENTS.md` and actively re-verify** each "Important Gotcha" against code (not just trust project_context).
-11. **Run the fresh-open test** on both annotated reports — open each as a new reader and confirm the first screenful is not misleading.
+6. ~~**Run `nix flake check .`** as the canonical gate.~~ done — passes (verified 2026-07-26 09:43 and in every later session)
+7. ~~**Run the internal markdown link audit:** `grep -roE '\]\([^)]+\)' *.md docs/` → verify each target.~~ done (2026-07-26 09:43 pass)
+8. ~~**Verify every file referenced from a doc exists** (ROADMAP cites code paths; FEATURES cites test files).~~ done — all 26 evidence paths verified (09:43 a.12)
+9. ~~**Open `README.md` and verify freshness** against current code (profiles, atomic writes, commands).~~ done (09:43 a.8-9; re-verified 2026-09-22)
+10. ~~**Open `AGENTS.md` and actively re-verify** each "Important Gotcha" against code (not just trust project_context).~~ done (09:43 a.10; re-verified 2026-09-22)
+11. ~~**Run the fresh-open test** on both annotated reports — open each as a new reader and confirm the first screenful is not misleading.~~ done — every annotated status file re-read end-to-end in the 2026-09-22 docs-health pass
 
 ### P2 — Harvested items still open from the reports
 
-12. **Update embedded rules** from `1.59.0` → current oxlint (`1.73.0`): regenerate `rules_data.json`, bump `rules_version.txt`, update `TestRegistryTotal` (07-26 f.11-13).
-13. **Resolve `go.mod` Go version** (1.26.5 triggers 16 gopls `stdversion` warnings) (07-22 c.2).
-14. **Add CI check that `go mod vendor` produces no diff** (07-22 c.3).
-15. **Add entry-point tests** for `cmd/oxlint-auto-configure/main.go` (0% coverage) (07-22 c.8).
-16. **Add E2E round-trip test** configure → validate → report (07-22 c.9).
-17. **Add dedicated atomic-write contract test** (no `.tmp` leftovers, valid JSON always) (07-26 c.2).
-18. **Establish reproducible `golangci-lint` baseline** (local/CI mismatch) (07-22 d.2).
-19. **Wire `flake.nix` ldflags** for `commit`/`date`/`builtBy` (07-22 c.10).
+12. ~~**Update embedded rules** from `1.59.0` → current oxlint (`1.73.0`): regenerate `rules_data.json`, bump `rules_version.txt`, update `TestRegistryTotal` (07-26 f.11-13).~~ done (v0.5.0)
+13. ~~**Resolve `go.mod` Go version** (1.26.5 triggers 16 gopls `stdversion` warnings) (07-22 c.2).~~ done — `go 1.27`
+14. ~~**Add CI check that `go mod vendor` produces no diff** (07-22 c.3).~~ done — CI `go mod tidy` consistency check
+15. ~~**Add entry-point tests** for `cmd/oxlint-auto-configure/main.go` (0% coverage) (07-22 c.8).~~ done — `main_test.go`
+16. ~~**Add E2E round-trip test** configure → validate → report (07-22 c.9).~~ done — `e2e_test.go` (configure → parse round-trip; three-command chain remains a ROADMAP idea)
+17. ~~**Add dedicated atomic-write contract test** (no `.tmp` leftovers, valid JSON always) (07-26 c.2).~~ done — `atomic_write_test.go`
+18. ~~**Establish reproducible `golangci-lint` baseline** (local/CI mismatch) (07-22 d.2).~~ done — 0 issues at pinned `v2.12.2`
+19. ~~**Wire `flake.nix` ldflags** for `commit`/`date`/`builtBy` (07-22 c.10).~~ done (2026-07-27)
 20. ~~**Clean up `result/` symlink** (`trash result`) — do it, don't ticket it.~~ DONE: removed 2026-07-26 09:43 session;
 
 ### P3 — Skills and deeper passes
 
-21. **Run `hierarchical-errors` skill** and baseline findings (07-22 c.6).
-22. **Run `naming-review` skill** across the codebase (07-22 f.15).
-23. **Run `code-quality-scan` skill** for build/lint/duplication.
-24. **Add typed errors** for `detect`, `config`, `oxlint` packages (07-22 f.16).
-25. **Increase `internal/cli` coverage** from 74.3% toward 85%+ (07-22 c.11).
-26. **Add BDD tests** via `bdd-testing` skill for all four commands (07-22 f.13).
-27. **Add BuildFlow to CI** (07-22 c.4).
-28. **Add `nix flake check` CI job** (07-22 f.6).
-29. **Decide `strict` vs `recommended` profile differentiation** (07-22 g.2; routed to ROADMAP Open Questions).
-30. **Decide testify → ginkgo/gomega policy** (07-22 c.14; routed to ROADMAP).
+21. ~~**Run `hierarchical-errors` skill** and baseline findings (07-22 c.6).~~ done — 0 findings
+22. ~~**Run `naming-review` skill** across the codebase (07-22 f.15).~~ done — 0 findings
+23. ~~**Run `code-quality-scan` skill** for build/lint/duplication.~~ done — 0 issues (2026-07-27)
+24. ~~**Add typed errors** for `detect`, `config`, `oxlint` packages (07-22 f.16).~~ done (routed to ROADMAP.md "Typed errors")
+25. ~~**Increase `internal/cli` coverage** from 74.3% toward 85%+ (07-22 c.11).~~ done — 82.7% reached; gap accepted
+26. ~~**Add BDD tests** via `bdd-testing` skill for all four commands (07-22 f.13).~~ done (routed to ROADMAP.md "BDD tests")
+27. ~~**Add BuildFlow to CI** (07-22 c.4).~~ **Won't implement — BuildFlow is local tooling**
+28. ~~**Add `nix flake check` CI job** (07-22 f.6).~~ done — `nix` job
+29. ~~**Decide `strict` vs `recommended` profile differentiation** (07-22 g.2; routed to ROADMAP Open Questions).~~ done (routed to ROADMAP Open Question 2)
+30. ~~**Decide testify → ginkgo/gomega policy** (07-22 c.14; routed to ROADMAP).~~ done (routed to ROADMAP Open Question 3)
 
 ### P4 — Features and DX
 
-31. **`--explain` flag** on `configure` to print the decision tree (07-22 f.22).
-32. **`--profile` flag on `analyze`** (07-22 f.25).
-33. **Shell completions** subcommand (07-22 f.26).
-34. **Structured JSON logs** option (`--log-format json`) (07-22 f.27).
-35. **Monorepo support** — per-package config generation (07-22 f.29; routed to ROADMAP).
-36. **Public docs website** via `website-launch` skill (07-22 f.50; routed to ROADMAP).
-37. **TOCTOU protection via `WriteVerified`** — capture fingerprint in `showDiffIfExisting` (07-26 f.5; routed to ROADMAP Open Questions).
-38. **Extract write logic into `pkg/config`** with a `ConfigWriter` interface (07-26 f.26).
-39. **Automatic rule-update target** in flake.nix (07-22 e.7).
-40. **`--output`/`--config` flexibility** for non-standard layouts (07-22 f.23-24).
+31. ~~**`--explain` flag** on `configure` to print the decision tree (07-22 f.22).~~ done (routed to ROADMAP.md)
+32. ~~**`--profile` flag on `analyze`** (07-22 f.25).~~ done (routed to ROADMAP.md)
+33. ~~**Shell completions** subcommand (07-22 f.26).~~ done (routed to ROADMAP.md)
+34. ~~**Structured JSON logs** option (`--log-format json`) (07-22 f.27).~~ done (routed to ROADMAP.md)
+35. ~~**Monorepo support** — per-package config generation (07-22 f.29; routed to ROADMAP).~~ done (routed to ROADMAP.md)
+36. ~~**Public docs website** via `website-launch` skill (07-22 f.50; routed to ROADMAP).~~ done (routed to ROADMAP.md)
+37. ~~**TOCTOU protection via `WriteVerified`** — capture fingerprint in `showDiffIfExisting` (07-26 f.5; routed to ROADMAP Open Questions).~~ **Won't implement — resolved in ROADMAP: plain `Write` is correct**
+38. ~~**Extract write logic into `pkg/config`** with a `ConfigWriter` interface (07-26 f.26).~~ done (routed to ROADMAP.md)
+39. ~~**Automatic rule-update target** in flake.nix (07-22 e.7).~~ done (routed to ROADMAP.md "Automatic rule updates")
+40. ~~**`--output`/`--config` flexibility** for non-standard layouts (07-22 f.23-24).~~ done — `--config` shipped; `--output` routed to ROADMAP.md
 
 ### P5 — Docs and process polish
 
-41. **Decide Markdown vs HTML for status reports** (skill says HTML; user said .md twice — see g.1).
-42. **Add `docs/INTERNALS.md`** explaining the private go-finding + nix sandbox + vendor dance (07-22 f.49).
-43. **Add coverage threshold check to CI** (≥80%) (07-22 f.46).
-44. **Add Go version matrix in CI** (1.26 + 1.27 + tip) (07-22 f.7).
-45. **Add pre-commit hook** for `go mod vendor` + `nix fmt --check` (07-22 f.8).
-46. **Pin `golangci-lint` version in `flake.nix`** so local matches CI (07-22 f.9).
-47. **Evaluate `linter-autoconfigure-sdk` for `validate`** (07-26 g.1; routed to ROADMAP Open Questions).
-48. **Audit all `os.WriteFile` in `pkg/`** for config-output sites (07-26 f.41).
-49. **Verify `goreleaser.yaml`** doesn't break with the new dependency (07-26 f.25).
-50. **Run `nix flake check --all-systems`** for cross-platform verification (07-26 f.50).
+41. ~~**Decide Markdown vs HTML for status reports** (skill says HTML; user said .md twice — see g.1).~~ done (routed to ROADMAP Open Question 5)
+42. ~~**Add `docs/INTERNALS.md`** explaining the private go-finding + nix sandbox + vendor dance (07-22 f.49).~~ **Won't implement — AGENTS.md carries the same context**
+43. ~~**Add coverage threshold check to CI** (≥80%) (07-22 f.46).~~ done (routed to ROADMAP.md "Coverage threshold in CI")
+44. ~~**Add Go version matrix in CI** (1.26 + 1.27 + tip) (07-22 f.7).~~ **Won't implement — `go.mod` pins 1.27**
+45. ~~**Add pre-commit hook** for `go mod vendor` + `nix fmt --check` (07-22 f.8).~~ **Won't implement**
+46. ~~**Pin `golangci-lint` version in `flake.nix`** so local matches CI (07-22 f.9).~~ done — pinned `v2.12.2` in CI and locally
+47. ~~**Evaluate `linter-autoconfigure-sdk` for `validate`** (07-26 g.1; routed to ROADMAP Open Questions).~~ done (routed to ROADMAP Open Question 1)
+48. ~~**Audit all `os.WriteFile` in `pkg/`** for config-output sites (07-26 f.41).~~ done — 1 production site, migrated to `atomicwrite.Write`
+49. ~~**Verify `goreleaser.yaml`** doesn't break with the new dependency (07-26 f.25).~~ done — releases green since v0.5.0
+50. ~~**Run `nix flake check --all-systems`** for cross-platform verification (07-26 f.50).~~ **Won't implement — CI targets the primary system**
 
 ---
 

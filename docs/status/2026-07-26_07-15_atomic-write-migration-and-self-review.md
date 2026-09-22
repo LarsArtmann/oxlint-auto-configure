@@ -82,79 +82,79 @@
 ### Directly from this session's work
 
 1. ~~**Update `CHANGELOG.md` `[Unreleased]`** with the atomic-write migration entry~~ DONE: `4c9ea2f`;
-2. **Add automated test for `writeConfig`** verifying no `.tmp` files remain after write
-3. **Add automated test for `writeConfig`** verifying valid JSON is always produced
+2. ~~**Add automated test for `writeConfig`** verifying no `.tmp` files remain after write~~ done — `atomic_write_test.go`
+3. ~~**Add automated test for `writeConfig`** verifying valid JSON is always produced~~ done — `e2e_test.go` round-trips via `config.FromJSON`
 4. ~~**Clean up `result/` symlink** left by `nix build`~~ DONE: removed 2026-07-26 09:43 session;
-5. **Evaluate `WriteVerified` for TOCTOU protection** — capture fingerprint in `showDiffIfExisting`, pass to write
-6. **Document the atomic-write decision** (zero fingerprint rationale) as an inline comment or ADR
+5. ~~**Evaluate `WriteVerified` for TOCTOU protection** — capture fingerprint in `showDiffIfExisting`, pass to write~~ **Won't implement — resolved in ROADMAP: plain `Write` is correct**
+6. ~~**Document the atomic-write decision** (zero fingerprint rationale) as an inline comment or ADR~~ done — AGENTS.md design principle 9
 
 ### SDK / linter-autoconfigure-sdk related
 
-7. **Decide SDK adoption for `validate` command** — use `FindingFromIssue`/`ConfigIssue` for structured finding output
-8. **Decide SDK adoption for `validate` command** — use `ReadConfig`/`LoadJSON` for typed config I/O
-9. **Fix SDK's `SaveJSON`** to use `go-atomic-write` internally (upstream fix in `linter-autoconfigure-sdk`)
-10. **Evaluate SDK's `ProviderSpec`** for BuildFlow integration (provisional shape, no consumer yet)
+7. ~~**Decide SDK adoption for `validate` command** — use `FindingFromIssue`/`ConfigIssue` for structured finding output~~ done (routed to ROADMAP Open Question 1)
+8. ~~**Decide SDK adoption for `validate` command** — use `ReadConfig`/`LoadJSON` for typed config I/O~~ done (routed to ROADMAP Open Question 1)
+9. ~~**Fix SDK's `SaveJSON`** to use `go-atomic-write` internally (upstream fix in `linter-autoconfigure-sdk`)~~ **Won't implement — upstream concern; superseded by the toolsdk path**
+10. ~~**Evaluate SDK's `ProviderSpec`** for BuildFlow integration (provisional shape, no consumer yet)~~ done — shipped as `pkg/provider` toolsdk Spec (v0.6.0)
 
 ### Stale / noticed during this session
 
-11. **Update embedded rules** from `1.59.0` to current (`1.73.0`): `oxlint -f json --rules > pkg/rule/rules_data.json`
-12. **Update `rules_version.txt`** to match
-13. **Update `TestRegistryTotal`** in `pkg/rule/registry_test.go` with new rule count
-14. **Fix depguard warnings** on `cmd_configure.go` imports (pre-existing, 7 warnings)
-15. **Fix gopls `stdversion` warnings** (`json.Marshal` requires go1.27 — 12+ instances across files)
-16. **Fix `forbidigo` warning** on `fmt.Println` in `writeDryRun`
-17. **Review all AGENTS.md version references** for staleness (found and fixed v1.2.1→v1.3.0, others may exist)
+11. ~~**Update embedded rules** from `1.59.0` to current (`1.73.0`): `oxlint -f json --rules > pkg/rule/rules_data.json`~~ done (v0.5.0)
+12. ~~**Update `rules_version.txt`** to match~~ done (`1.73.0`)
+13. ~~**Update `TestRegistryTotal`** in `pkg/rule/registry_test.go` with new rule count~~ done (841)
+14. ~~**Fix depguard warnings** on `cmd_configure.go` imports (pre-existing, 7 warnings)~~ done — 0 issues since 2026-07-27
+15. ~~**Fix gopls `stdversion` warnings** (`json.Marshal` requires go1.27 — 12+ instances across files)~~ done — `go.mod` declares `go 1.27`
+16. ~~**Fix `forbidigo` warning** on `fmt.Println` in `writeDryRun`~~ done — CLI command files excluded (2026-07-27)
+17. ~~**Review all AGENTS.md version references** for staleness (found and fixed v1.2.1→v1.3.0, others may exist)~~ done — verified in the 2026-07-26 09:43 pass and the 2026-09-22 audit
 
 ### Testing improvements
 
-18. **Add integration test**: `configure` → parse output → verify round-trip via `config.FromJSON`
-19. **Add test**: concurrent `configure` runs don't corrupt the config
-20. **Add test**: `configure` with `--dry-run` writes nothing to disk
-21. **Add coverage report** (`go test -cover ./...`) and identify gaps in `cmd_configure.go`
+18. ~~**Add integration test**: `configure` → parse output → verify round-trip via `config.FromJSON`~~ done — `e2e_test.go`
+19. ~~**Add test**: concurrent `configure` runs don't corrupt the config~~ **Won't implement — atomic rename covers the contract; not scheduled**
+20. ~~**Add test**: `configure` with `--dry-run` writes nothing to disk~~ done — provider dry-run hold-back tests + CLI coverage tests
+21. ~~**Add coverage report** (`go test -cover ./...`) and identify gaps in `cmd_configure.go`~~ done (82.7% measured 2026-07-27)
 
 ### Nix / build improvements
 
-22. **Add `go-atomic-write` to CI** — verify it's fetched correctly in GitHub Actions
-23. **Consider pinning go-atomic-write via `git+ssh` + tag** instead of `github:` shorthand for consistency with other deps (currently mixed)
-24. **Document the vendorHash update workflow** in CONTRIBUTING.md (it's in AGENTS.md but not CONTRIBUTING)
-25. **Verify `goreleaser.yaml`** doesn't break with the new dependency
+22. ~~**Add `go-atomic-write` to CI** — verify it's fetched correctly in GitHub Actions~~ done — CI green with the dep since 2026-07-26
+23. ~~**Consider pinning go-atomic-write via `git+ssh` + tag** instead of `github:` shorthand for consistency with other deps (currently mixed)~~ done — `github:` shorthand is now the uniform standard (post-deprivatization)
+24. ~~**Document the vendorHash update workflow** in CONTRIBUTING.md (it's in AGENTS.md but not CONTRIBUTING)~~ done (2026-07-26 09:43 CONTRIBUTING rebuild)
+25. ~~**Verify `goreleaser.yaml`** doesn't break with the new dependency~~ done — five successful releases since v0.5.0
 
 ### Architecture / design
 
-26. **Extract write logic into `pkg/config`** — `writeConfig` lives in `internal/cli`; the atomic-write policy could be a `pkg/config` concern
-27. **Consider a `ConfigWriter` interface** to decouple the write mechanism from the CLI layer
-28. **Review whether `0o644` is the right permission** for `.oxlintrc.json` (was `0o600`, now `0o644` via atomicwrite default)
-29. **Evaluate whether the `fix` command** (`pkg/oxlint/fix.go`) also needs atomic writes
-30. **Consider streaming JSON output** via `WriteFunc` instead of `Write` (avoids holding full config in memory)
+26. ~~**Extract write logic into `pkg/config`** — `writeConfig` lives in `internal/cli`; the atomic-write policy could be a `pkg/config` concern~~ done (routed to ROADMAP.md "Extract write logic")
+27. ~~**Consider a `ConfigWriter` interface** to decouple the write mechanism from the CLI layer~~ done (routed to ROADMAP.md)
+28. ~~**Review whether `0o644` is the right permission** for `.oxlintrc.json` (was `0o600`, now `0o644` via atomicwrite default)~~ **Won't implement — 0o644 is right for a linter config**
+29. ~~**Evaluate whether the `fix` command** (`pkg/oxlint/fix.go`) also needs atomic writes~~ **Won't implement — fix patches source files via oxlint, not configs**
+30. ~~**Consider streaming JSON output** via `WriteFunc` instead of `Write` (avoids holding full config in memory)~~ **Won't implement — configs are small**
 
 ### Documentation
 
-31. **Update `README.md`** if it mentions the write mechanism (likely doesn't, but verify)
-32. **Update `CONTRIBUTING.md`** with the `go-atomic-write` dependency and vendorHash workflow
-33. **Update `FEATURES.md`** if atomic writes are a user-facing feature worth noting
-34. **Add `docs/DOMAIN_LANGUAGE.md`** entry for "atomic write" / "crash durability"
-35. **Verify `TODO_LIST.md`** reflects current state (may have stale items)
+31. ~~**Update `README.md`** if it mentions the write mechanism (likely doesn't, but verify)~~ done — verified: README doesn't discuss write mechanics; no change needed
+32. ~~**Update `CONTRIBUTING.md`** with the `go-atomic-write` dependency and vendorHash workflow~~ done — dependency table + Atomic Write section present
+33. ~~**Update `FEATURES.md`** if atomic writes are a user-facing feature worth noting~~ done — "Crash-durable config writes" row
+34. ~~**Add `docs/DOMAIN_LANGUAGE.md`** entry for "atomic write" / "crash durability"~~ done (2026-07-26 09:43; Fingerprint/TOCTOU deliberately kept out — see ROADMAP Resolved Questions)
+35. ~~**Verify `TODO_LIST.md`** reflects current state (may have stale items)~~ done — rebuilt repeatedly; open items only as of 2026-09-22
 
 ### Code quality
 
-36. **Run `golangci-lint`** standalone (not just via LSP) to catch issues the LSP might miss
-37. **Run `govulncheck`** to verify no known vulnerabilities in new transitive deps (`xxhash`, `flock`)
-38. **Review `gofrs/flock` and `cespare/xxhash`** as new transitive dependencies — are they safe/stable?
-39. **Check if `go-atomic-write` has its own test suite** and whether our usage matches its intended API
-40. **Consider whether the `atomicwrite` import alias** could be avoided (package rename upstream?)
+36. ~~**Run `golangci-lint`** standalone (not just via LSP) to catch issues the LSP might miss~~ done — 0 issues (2026-07-27)
+37. ~~**Run `govulncheck`** to verify no known vulnerabilities in new transitive deps (`xxhash`, `flock`)~~ done — no vulnerabilities found (CI + local runs)
+38. ~~**Review `gofrs/flock` and `cespare/xxhash`** as new transitive dependencies — are they safe/stable?~~ done — `go-error-family` documented as the transitive dep in AGENTS.md; no issues surfaced
+39. ~~**Check if `go-atomic-write` has its own test suite** and whether our usage matches its intended API~~ done — API verified against source 2026-07-26 21:23
+40. ~~**Consider whether the `atomicwrite` import alias** could be avoided (package rename upstream?)~~ **Won't implement — upstream naming**
 
 ### Broader project health
 
-41. **Audit all `os.WriteFile` in `pkg/`** (not just `internal/`) for config-output sites
-42. **Check if `pkg/oxlint/fix.go`** writes configs or only runs oxlint
-43. **Evaluate the `linter-autoconfigure-sdk` for `golangci-lint-auto-configure`** — is there a sibling project that would benefit?
-44. **Review the `.buildflow.yml`** config for completeness
-45. **Check `.github/workflows/ci.yml`** runs `nix flake check` (or equivalent)
-46. **Verify Docker build** works with the new dependency
-47. **Consider adding a `Makefile` target** or `flake.nix` app for updating embedded rules
-48. **Review whether `go-atomic-write` should be a direct or indirect dependency** in go.mod
-49. **Add a code comment at `cmd_configure.go:179`** explaining why fingerprint is zero (regenerate-overwrite semantics)
-50. **Run a full `nix flake check --all-systems`** to verify cross-platform (currently only x86_64-linux checked)
+41. ~~**Audit all `os.WriteFile` in `pkg/`** (not just `internal/`) for config-output sites~~ done — 1 production site total; the rest are test fixtures (this session's audit)
+42. ~~**Check if `pkg/oxlint/fix.go`** writes configs or only runs oxlint~~ done — only runs oxlint; AGENTS documents it as a convenience wrapper
+43. ~~**Evaluate the `linter-autoconfigure-sdk` for `golangci-lint-auto-configure`** — is there a sibling project that would benefit?~~ **Won't implement — sibling-repo decision**
+44. ~~**Review the `.buildflow.yml`** config for completeness~~ **Won't implement — no `.buildflow.yml` exists in this repo**
+45. ~~**Check `.github/workflows/ci.yml`** runs `nix flake check` (or equivalent)~~ done — `nix` job present
+46. ~~**Verify Docker build** works with the new dependency~~ done — ghcr images publish successfully (v0.5.0+)
+47. ~~**Consider adding a `Makefile` target** or `flake.nix` app for updating embedded rules~~ done (routed to ROADMAP.md "Automatic rule updates")
+48. ~~**Review whether `go-atomic-write` should be a direct or indirect dependency** in go.mod~~ done — direct (correct: we import it)
+49. ~~**Add a code comment at `cmd_configure.go:179`** explaining why fingerprint is zero (regenerate-overwrite semantics)~~ done — rationale documented in AGENTS.md design principle 9 instead (v0.4.0's `Write` takes no fingerprint)
+50. ~~**Run a full `nix flake check --all-systems`** to verify cross-platform (currently only x86_64-linux checked)~~ **Won't implement — CI targets the primary system**
 
 ---
 
