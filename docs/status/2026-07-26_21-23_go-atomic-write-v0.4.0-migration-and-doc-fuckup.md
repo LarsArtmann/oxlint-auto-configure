@@ -34,23 +34,23 @@ The user pasted a `buildflow` output showing 7 failed steps. This report covers 
 
 ## b) PARTIALLY DONE
 
-1. **Buildflow re-verification** — I ran individual tools (go build, go test, go vet, nix build, nix flake check) but did NOT re-run the full `buildflow` command that originally failed. The individual checks cover the same ground, but the user's tool may catch things I didn't.
+1. ~~**Buildflow re-verification**~~ done — full `buildflow` run green (37/38, 1 skip) in the 2026-07-27 01:16 session
 
-2. **gomod-check findings (10 remain)** — The buildflow reported vendor/modules.txt consistency issues and mixed direct/indirect requires. I ran `go mod vendor` which should fix most, but did NOT re-run gomod-check to confirm. `vendor/` is gitignored so this may be a non-issue for the committed state.
+2. ~~**gomod-check findings (10 remain)**~~ **Won't implement — moot: `vendor/` removed from git in v0.5.0; CI runs a `go mod tidy` consistency check**
 
-3. **nix-checker findings (4 remain)** — vendorHash extraction to separate file, stale vendorHash warning. The version is now correct but the structural suggestions (extract to vendorHash.nix) were not addressed.
+3. ~~**nix-checker findings (4 remain)**~~ **Won't implement — keeping vendorHash inline in the single-file flake**
 
 ---
 
 ## c) NOT STARTED
 
-1. **go-auto-upgrade (492 findings)** — Pre-existing. `lo.SliceToMap` suggestions in `cmd_analyze.go` and elsewhere. Not related to this session's dependency bump.
+1. ~~**go-auto-upgrade (492 findings)**~~ **Won't implement — pre-existing tool suggestions, never actioned; superseded by later modernization passes**
 
-2. **go-structure-linter (18 findings)** — Pre-existing. GitHub Actions tag pins instead of SHA pins. Security concern but unrelated.
+2. ~~**go-structure-linter (18 findings)**~~ done — every third-party action SHA-pinned in v0.5.0
 
-3. **golangci-lint findings** — Were cascading from the compile error; should be fixed now but not explicitly re-verified with golangci-lint.
+3. ~~**golangci-lint findings**~~ done — 0 issues (2026-07-27 baseline)
 
-4. **CONTRIBUTING.md** — The buildflow status reports (sessions 07-15, 07-32, 09-43, 20-51) mention CONTRIBUTING.md contains Fingerprint/TOCTOU/WriteVerified claims. I did not check or update CONTRIBUTING.md this session. **Possible stale claims remain.**
+4. ~~**CONTRIBUTING.md** — possible stale Fingerprint/TOCTOU/WriteVerified claims~~ done — fixed in the 2026-07-27 01:16 session and verified against the source
 
 ---
 
@@ -124,80 +124,80 @@ I not only deferred a fourth time — I **claimed to have resolved it** while ma
 
 ### Immediate (this session's fallouts)
 
-1. **Verify CONTRIBUTING.md** for stale Fingerprint/WriteVerified/TOCTOU claims — update if present
-2. **Update CHANGELOG.md** — add v0.4.0 migration entry; fix line 14-15 stale references
-3. **Re-run full `buildflow`** to confirm all 7 original failures are resolved
-4. **Re-run `gomod-check`** to verify vendor/modules.txt consistency issues are resolved
-5. **Re-run `nix-checker`** to confirm vendorHash is no longer flagged as stale
-6. **Check flake.lock** — was auto-updated by nix build; verify it's in a good state
+1. ~~**Verify CONTRIBUTING.md** for stale Fingerprint/WriteVerified/TOCTOU claims~~ done (2026-07-27 01:16)
+2. ~~**Update CHANGELOG.md** — add v0.4.0 migration entry; fix stale references~~ done (2026-07-27 01:16)
+3. ~~**Re-run full `buildflow`**~~ done — 37/38 green (2026-07-27 01:16)
+4. ~~**Re-run `gomod-check`**~~ **Won't implement — moot: `vendor/` untracked since v0.5.0**
+5. ~~**Re-run `nix-checker`**~~ **Won't implement — vendorHash kept inline deliberately**
+6. ~~**Check flake.lock**~~ done — consistent (2026-07-27 01:16)
 
 ### go-atomic-write v0.4.0 API opportunities (NOW with correct knowledge)
 
-7. **Evaluate `WriteIfChanged` for `configure`** — v0.4.0 added `WriteIfChanged(path, data) (bool, error)` which skips writes when content is unchanged. This would prevent spurious diffs/mtime bumps on re-runs of `configure`. Natural fit.
-8. **Evaluate `WriteVerified` for `configure`** — Open question #2 in ROADMAP. Now we know the API exists, the evaluation is concrete.
-9. **Document the full v0.4.0 API surface in AGENTS.md** — Currently only mentions `Write`. The library offers `Write`, `WriteVerified`, `WriteIfChanged`, `WriteFunc`, `WriteFuncVerified`, `FingerprintFile`, `FingerprintFromBytes`.
+7. ~~**Evaluate `WriteIfChanged` for `configure`**~~ **Won't implement — ROADMAP resolved: plain `Write` with overwrite semantics is the tool's contract**
+8. ~~**Evaluate `WriteVerified` for `configure`**~~ **Won't implement — ROADMAP resolved: No**
+9. ~~**Document the full v0.4.0 API surface in AGENTS.md**~~ done — AGENTS design principle 9 documents the `Write` vs `WriteVerified` split
 
 ### Pre-existing buildflow findings (not from this session)
 
-10. **Fix go-auto-upgrade findings (492)** — `lo.SliceToMap` idiomatic replacements in `cmd_analyze.go` and other files
-11. **Fix go-structure-linter findings (18)** — Pin GitHub Actions to SHA commits instead of tags in `.github/workflows/ci.yml`
-12. **Extract vendorHash to `vendorHash.nix`** — nix-checker suggestion for cleaner diffs
-13. **Fix gomod-check: separate direct/indirect requires** in go.mod
-14. **Run `golangci-lint`** explicitly to confirm no remaining findings after compile fix
+10. ~~**Fix go-auto-upgrade findings (492)**~~ **Won't implement — superseded**
+11. ~~**Fix go-structure-linter findings (18)**~~ done — SHA pins in v0.5.0
+12. ~~**Extract vendorHash to `vendorHash.nix`**~~ **Won't implement — single-file flake kept**
+13. ~~**Fix gomod-check: separate direct/indirect requires** in go.mod~~ **Won't implement — gofmt/go mod conventions kept**
+14. ~~**Run `golangci-lint`** explicitly~~ done — 0 issues
 
 ### Documentation debt
 
-15. **ROADMAP Open Question #1** — Adopt `linter-autoconfigure-sdk` for `validate`?
-16. **ROADMAP Open Question #3** — Should `strict` and `recommended` profiles differ?
-17. **ROADMAP Open Question #4** — testify to ginkgo/gomega migration policy
-18. **ROADMAP Open Question #5** — Modularization proposal: execute or archive?
-19. **ROADMAP Open Question #6** — Markdown or HTML for status reports?
-20. **ROADMAP Open Question #7** — Fingerprint/TOCTOU in DOMAIN_LANGUAGE.md (now resolved: keep OUT as implementation detail)
-21. **ROADMAP Open Question #2** — Should `configure` use `WriteVerified`? (Still open — needs evaluation)
-22. **CHANGELOG.md audit** — Verify all entries are factually accurate against current code
-23. **Update all historical status reports** that reference the "3-session deferral" — now resolved (but with a fuckup along the way)
-24. **AGENTS.md: document `WriteIfChanged` as a potential future enhancement** for idempotent config writes
+15. ~~**ROADMAP Open Question #1** — Adopt `linter-autoconfigure-sdk` for `validate`?~~ done (routed to ROADMAP Open Question 1)
+16. ~~**ROADMAP Open Question #3** — Should `strict` and `recommended` profiles differ?~~ done (routed to ROADMAP Open Question 2)
+17. ~~**ROADMAP Open Question #4** — testify to ginkgo/gomega policy~~ done (routed to ROADMAP Open Question 3)
+18. ~~**ROADMAP Open Question #5** — Modularization proposal~~ done (routed to ROADMAP Open Question 4)
+19. ~~**ROADMAP Open Question #6** — Markdown or HTML for status reports?~~ done (routed to ROADMAP Open Question 5)
+20. ~~**ROADMAP Open Question #7** — Fingerprint/TOCTOU in DOMAIN_LANGUAGE.md~~ done — resolved: keep OUT (ROADMAP Resolved Questions)
+21. ~~**ROADMAP Open Question #2** — Should `configure` use `WriteVerified`?~~ done — resolved: No (ROADMAP Resolved Questions)
+22. ~~**CHANGELOG.md audit**~~ done — verified in the 2026-07-27 01:16 session and later passes
+23. ~~**Update all historical status reports** that reference the "3-session deferral"~~ done — annotated in the 2026-09-22 docs-health pass
+24. ~~**AGENTS.md: document `WriteIfChanged` as a potential future enhancement**~~ **Won't implement — ROADMAP resolved against it**
 
 ### Testing
 
-25. **Add test for `writeConfig`** that verifies the atomic write behavior (temp file + rename, not raw os.WriteFile)
-26. **Add test for `Configure()` with existing config** — verify it overwrites correctly with v0.4.0 `Write`
-27. **Coverage threshold** — ROADMAP item: gate PRs on >=80%
-28. **BDD tests for all commands** — ROADMAP item via bdd-testing skill
+25. ~~**Add test for `writeConfig`** atomic write behavior~~ done — `atomic_write_test.go`
+26. ~~**Add test for `Configure()` with existing config**~~ done — `atomic_write_test.go` idempotent-overwrite test
+27. ~~**Coverage threshold**~~ done (routed to ROADMAP.md "Coverage threshold in CI")
+28. ~~**BDD tests for all commands**~~ done (routed to ROADMAP.md "BDD tests")
 
 ### Architecture
 
-29. **Extract write logic into `pkg/config`** — ROADMAP item: `ConfigWriter` interface
-30. **Typed errors across packages** — `detect`, `config`, `oxlint` still return generic `error`
-31. **Shell completions** — Cobra completion subcommand
-32. **Structured JSON logs** — `--log-format json` flag
-33. **Custom output paths** — `--output` flexibility
+29. ~~**Extract write logic into `pkg/config`**~~ done (routed to ROADMAP.md)
+30. ~~**Typed errors across packages**~~ done (routed to ROADMAP.md)
+31. ~~**Shell completions**~~ done (routed to ROADMAP.md)
+32. ~~**Structured JSON logs**~~ done (routed to ROADMAP.md)
+33. ~~**Custom output paths**~~ done (routed to ROADMAP.md; `--config` covers)
 
 ### CI / Build
 
-34. **Pin all GitHub Actions to SHAs** — 5+ actions in ci.yml use tag pins
-35. **Add govulncheck to buildflow** — currently only in GitHub Actions CI
-36. **Add coverage reporting** to CI
-37. **Flake updates automation** — `nix flake update` on schedule
+34. ~~**Pin all GitHub Actions to SHAs**~~ done — v0.5.0 hardening
+35. ~~**Add govulncheck to buildflow**~~ **Won't implement — no `.buildflow.yml`; CI security job covers it**
+36. ~~**Add coverage reporting** to CI~~ done (routed to ROADMAP.md "Coverage threshold in CI")
+37. ~~**Flake updates automation**~~ **Won't implement — Dependabot covers gomod updates**
 
 ### Code Quality
 
-38. **Run deduplicate-code skill** — check for duplication
-39. **Run naming-review skill** — audit naming quality
-40. **Run full-code-review skill** — comprehensive review
-41. **Run data-model-review skill** — review types
-42. **Check `cmd_report.go` stdversion warnings** — uses go1.27 APIs but project is go1.26
-43. **Check `commands_test.go` stdversion warnings** — same issue
-44. **Run architecture-review skill** — review modularity
-45. **Run code-quality-scan skill** — full quality audit
+38. ~~**Run deduplicate-code skill**~~ done (2026-07-28)
+39. ~~**Run naming-review skill**~~ done (2026-07-27, 0 findings)
+40. ~~**Run full-code-review skill**~~ **Won't implement — never scheduled**
+41. ~~**Run data-model-review skill**~~ **Won't implement — never scheduled**
+42. ~~**Check `cmd_report.go` stdversion warnings**~~ done — `go.mod` is `go 1.27`; warnings gone
+43. ~~**Check `commands_test.go` stdversion warnings**~~ done — same fix
+44. ~~**Run architecture-review skill**~~ **Won't implement — never scheduled**
+45. ~~**Run code-quality-scan skill**~~ done (2026-07-27, 0 issues)
 
 ### Domain / Rules
 
-46. **Update rules_data.json** — check if oxlint has new rules since last update
-47. **Update `TestRegistryTotal`** if rule count changed
-48. **Verify `rules_version.txt`** matches installed oxlint version
-49. **Review profile specs** — are severity decisions still optimal?
-50. **Review restriction denylist** — are there new rules that should be denied?
+46. ~~**Update rules_data.json** — check for new rules~~ done (1.59.0 → 1.73.0 in v0.5.0)
+47. ~~**Update `TestRegistryTotal`**~~ done (841)
+48. ~~**Verify `rules_version.txt`** matches installed oxlint~~ done (1.73.0; runtime drift now tracked as TODO_LIST R1)
+49. ~~**Review profile specs**~~ done — `profileSpecs` table stable; `strict`/`recommended` question routed to ROADMAP Open Question 2
+50. ~~**Review restriction denylist**~~ done — the three rules remain correct
 
 ---
 

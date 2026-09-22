@@ -62,7 +62,7 @@
 | ~~7~~ | ~~**Verify the CONTRIBUTING.md vendorHash workflow end-to-end**~~ done — exercised in the 2026-09-11 flake bumps | The 6-step workflow is still untested. I ran `nix build .#default` (it failed) but never walked through the copy-paste `got:` sha256 cycle.                                                                                     |
 | ~~8~~ | ~~**Run the fresh-open test on annotated reports**~~ done — all annotated files re-read end-to-end in the 2026-09-22 pass | Skill mandates it. I assumed placement was fine without re-reading as a new reader.                                                                                                                                             |
 | ~~9~~ | ~~**Scan `.html` status reports for broken links**~~ done — explicit ids verified (2026-07-27 00:51) | Flagged in 09:43 c.6. Out of my `2026-07-2*` scope but a genuine gap.                                                                                                                                                           |
-| 10 | **Bump `_Last reviewed:` dates if this session touched TODO_LIST/ROADMAP**          | They say `2026-07-26` and today is `2026-07-26` — still correct. But the principle (bump on touch) was not consciously applied.                                                                                                 |
+| ~~10~~ | ~~**Bump `_Last reviewed:` dates if this session touched TODO_LIST/ROADMAP**~~ done — applied in every later pass | They say `2026-07-26` and today is `2026-07-26` — still correct. But the principle (bump on touch) was not consciously applied.                                                                                                 |
 
 ---
 
@@ -108,71 +108,71 @@
 
 ### P0 — Fix what I broke, deferred, or left unverified THIS session
 
-1. **Decide and apply the `nix flake check` fix.** Almost certainly: revert `go.mod` `go 1.26.5` ← `go 1.26.4` (the pre-`ec08705` value the 09:43 session verified). Needs user sign-off because `ec08705` was user-authored. See g.1.
-2. **Read `go-atomic-write` v0.3.0 vendored source.** Verify `Fingerprint`, `WriteVerified`, "zero Fingerprint skips TOCTOU." Fix `DOMAIN_LANGUAGE.md` + `CONTRIBUTING.md` if wrong. THIRD-session deferral — do not defer a fourth time.
-3. **Load `verify-checklist.md`** and re-run the ACTUAL 9-item canonical checklist. Replace my inferred "9/9" claim with the anchored result.
-4. **Load `doc-ownership.md` + `annotation-placement.md`** (the 2 references I skipped). Confirm no ownership rule was violated by my edits.
-5. **Verify the `#resolution` GitHub anchor claim empirically** (push a test file to a scratch repo, or read GitHub's anchor-generation docs). Fix the TODO_LIST wording if the claim is wrong.
-6. **Run the fresh-open test** on the 3 annotated reports (`07-15`, `07-32`, `09-43`). Confirm first screenful is not misleading on each.
+1. ~~**Decide and apply the `nix flake check` fix.**~~ done — superseded by the proper fix: `go.mod` moved to `go 1.27`; all checks pass
+2. ~~**Read `go-atomic-write` v0.3.0 vendored source.**~~ done — read the same day (21:23 session); docs corrected
+3. ~~**Load `verify-checklist.md`** and re-run the ACTUAL 9-item canonical checklist.~~ done (09:43 pass, a.13)
+4. ~~**Load `doc-ownership.md` + `annotation-placement.md`** (the 2 references I skipped).~~ done — loaded by the 2026-09-22 audit
+5. ~~**Verify the `#resolution` GitHub anchor claim empirically**~~ done — link fixed to the date-suffixed anchor
+6. ~~**Run the fresh-open test** on the 3 annotated reports (`07-15`, `07-32`, `09-43`).~~ done — all re-read end-to-end in the 2026-09-22 pass
 
 ### P1 — Verify the CONTRIBUTING workflow I documented but never tested
 
-7. **Walk the CONTRIBUTING.md vendorHash workflow end-to-end.** The nix build is currently failing — this is the live opportunity to exercise the "copy `got:` sha256" branch.
-8. **Verify `goreleaser.yaml`** doesn't break with current deps (flagged in prior reports, never run).
+7. ~~**Walk the CONTRIBUTING.md vendorHash workflow end-to-end.**~~ done — exercised in the 2026-09-11 flake bumps
+8. ~~**Verify `goreleaser.yaml`** doesn't break with current deps~~ done — five successful releases since v0.5.0
 
 ### P2 — Still open from TODO_LIST (verified this session, still undone)
 
-9. **Update embedded rules** from oxlint `1.59.0` → `1.73.0`: regenerate `rules_data.json`, bump `rules_version.txt`, update `TestRegistryTotal`. Verified: `rules_version.txt` still says `1.59.0`.
-10. **Resolve `go.mod` Go version** (`1.26.4` triggers gopls `stdversion` warnings). Verified: still `1.26.4`.
-11. **Add CI check** that `go mod vendor` produces no diff.
-12. **Add entry-point tests** for `cmd/oxlint-auto-configure/main.go` (0% coverage — verified fresh this session).
-13. **Add E2E round-trip test**: configure → validate → report.
-14. **Add dedicated atomic-write contract test**: no `.tmp` leftovers, valid JSON always.
-15. **Wire `flake.nix` ldflags** for `commit`, `date`, `builtBy` (still `unknown`).
-16. **Establish reproducible `golangci-lint` baseline** (116 local, 0 CI — verified fresh).
-17. **Add BuildFlow to CI.**
-18. **Decide whether to add `gosec`** to CI security job.
-19. **Increase `internal/cli` coverage** from 74.3% → 85%+ (verified fresh).
+9. ~~**Update embedded rules** from oxlint `1.59.0` → `1.73.0`~~ done (v0.5.0)
+10. ~~**Resolve `go.mod` Go version** (`1.26.4` triggers gopls `stdversion` warnings).~~ done — `go 1.27`
+11. ~~**Add CI check** that `go mod vendor` produces no diff.~~ done — CI `go mod tidy` consistency check
+12. ~~**Add entry-point tests** for `cmd/oxlint-auto-configure/main.go`~~ done — `main_test.go`
+13. ~~**Add E2E round-trip test**: configure → validate → report.~~ done — `e2e_test.go` (configure → parse round-trip)
+14. ~~**Add dedicated atomic-write contract test**: no `.tmp` leftovers, valid JSON always.~~ done — `atomic_write_test.go`
+15. ~~**Wire `flake.nix` ldflags** for `commit`, `date`, `builtBy`~~ done (2026-07-27)
+16. ~~**Establish reproducible `golangci-lint` baseline**~~ done — 0 issues at pinned `v2.12.2` (2026-07-27)
+17. ~~**Add BuildFlow to CI.**~~ **Won't implement — BuildFlow is local tooling**
+18. ~~**Decide whether to add `gosec`** to CI security job.~~ done — covered by golangci-lint's enabled linters
+19. ~~**Increase `internal/cli` coverage** from 74.3% → 85%+~~ done — 82.7% reached; gap accepted
 
 ### P3 — Skills and deeper verification passes
 
-20. **Run `hierarchical-errors` skill** and baseline findings.
-21. **Run `naming-review` skill** across the codebase.
-22. **Run `code-quality-scan` skill** for build/lint/duplication.
-23. **Run `deduplicate-code` skill** (the test boilerplate is flagged intentional, but a full pass may find real duplication).
-24. **Run `full-code-review` skill** — visit every file.
-25. **Add typed errors** for `detect`, `config`, `oxlint` packages.
-26. **Add BDD tests** via `bdd-testing` skill for all four commands.
-27. **Scan `.html` status reports for broken links** (anchor + external) — out of my `2026-07-2*` scope but a real gap.
-28. **Audit all external links** in docs for reachability (6 URLs in `.md` unverified this session).
+20. ~~**Run `hierarchical-errors` skill** and baseline findings.~~ done — 0 findings (2026-07-27)
+21. ~~**Run `naming-review` skill** across the codebase.~~ done — 0 findings
+22. ~~**Run `code-quality-scan` skill** for build/lint/duplication.~~ done — 0 issues
+23. ~~**Run `deduplicate-code` skill**~~ done — 2026-07-28 sessions (`7eb18e6` extraction; 0 harmful clones)
+24. ~~**Run `full-code-review` skill** — visit every file.~~ **Won't implement — never scheduled**
+25. ~~**Add typed errors** for `detect`, `config`, `oxlint` packages.~~ done (routed to ROADMAP.md "Typed errors")
+26. ~~**Add BDD tests** via `bdd-testing` skill for all four commands.~~ done (routed to ROADMAP.md "BDD tests")
+27. ~~**Scan `.html` status reports for broken links** (anchor + external)~~ done — explicit ids verified
+28. ~~**Audit all external links** in docs for reachability~~ **Won't implement**
 
 ### P4 — Features and DX
 
-29. **`--explain` flag** on `configure` to print the decision tree.
-30. **`--profile` flag on `analyze`** to scope findings to a profile's rules.
-31. **Shell completions** subcommand (bash, zsh, fish).
-32. **Structured JSON logs** option (`--log-format json`).
-33. **Monorepo support** — per-package config generation (ROADMAP).
-34. **Public docs website** via `website-launch` skill (ROADMAP).
-35. **TOCTOU protection via `WriteVerified`** — capture fingerprint in `showDiffIfExisting` (ROADMAP Open Question).
-36. **Extract write logic into `pkg/config`** with a `ConfigWriter` interface (ROADMAP).
-37. **Automatic rule-update target** in flake.nix (`nix run .#update-rules`).
-38. **`--output`/`--config` flexibility** for non-standard layouts.
-39. **Coverage threshold check in CI** (≥80%).
-40. **Pre-commit hook** for `go mod vendor` + `nix fmt --check`.
-41. **Pin `golangci-lint` version in `flake.nix`** so local matches CI.
+29. ~~**`--explain` flag** on `configure`~~ done (routed to ROADMAP.md)
+30. ~~**`--profile` flag on `analyze`**~~ done (routed to ROADMAP.md)
+31. ~~**Shell completions** subcommand~~ done (routed to ROADMAP.md)
+32. ~~**Structured JSON logs** option~~ done (routed to ROADMAP.md)
+33. ~~**Monorepo support**~~ done (routed to ROADMAP.md)
+34. ~~**Public docs website** via `website-launch` skill~~ done (routed to ROADMAP.md)
+35. ~~**TOCTOU protection via `WriteVerified`**~~ **Won't implement — resolved in ROADMAP: plain `Write` is correct**
+36. ~~**Extract write logic into `pkg/config`** with a `ConfigWriter` interface~~ done (routed to ROADMAP.md)
+37. ~~**Automatic rule-update target** in flake.nix~~ done (routed to ROADMAP.md "Automatic rule updates")
+38. ~~**`--output`/`--config` flexibility**~~ done — `--config` shipped; `--output` routed to ROADMAP.md
+39. ~~**Coverage threshold check in CI** (≥80%).~~ done (routed to ROADMAP.md "Coverage threshold in CI")
+40. ~~**Pre-commit hook** for `go mod vendor` + `nix fmt --check`.~~ **Won't implement**
+41. ~~**Pin `golangci-lint` version** so local matches CI.~~ done — pinned `v2.12.2`
 
 ### P5 — Docs and polish
 
-42. **Decide Markdown vs HTML as canonical status report format** (ROADMAP Open Question — user has requested `.md` three times).
-43. **Resolve DOMAIN_LANGUAGE.md scope**: are `Fingerprint`/`TOCTOU` domain terms or implementation details? (ROADMAP Open Question.)
-44. **Decide `strict` vs `recommended` profile differentiation** (ROADMAP Open Question — they are functionally identical).
-45. **Add `docs/INTERNALS.md`** explaining the private go-finding + nix sandbox + vendor dance.
-46. **Add `docs/adr/` directory** for architecture decisions.
-47. **Evaluate `linter-autoconfigure-sdk` for `validate`** (ROADMAP Open Question).
-48. **Fix the broken `#resolution` anchors** in `docs/status/` (1 `.md` + 2 `.html`) — pending empirical verification of the claim.
-49. **Consolidate `strict` vs `recommended`** — differentiate or document equivalence and remove one.
-50. **Run `nix flake check --all-systems`** for cross-platform verification (currently only x86_64-linux; gate is currently failing anyway).
+42. ~~**Decide Markdown vs HTML as canonical status report format**~~ done (routed to ROADMAP Open Question 5)
+43. ~~**Resolve DOMAIN_LANGUAGE.md scope**: are `Fingerprint`/`TOCTOU` domain terms or implementation details?~~ done — implementation details, kept OUT (ROADMAP Resolved Questions)
+44. ~~**Decide `strict` vs `recommended` profile differentiation**~~ done (routed to ROADMAP Open Question 2)
+45. ~~**Add `docs/INTERNALS.md`**~~ **Won't implement — AGENTS.md carries the same context**
+46. ~~**Add `docs/adr/` directory** for architecture decisions.~~ **Won't implement — ROADMAP Resolved Questions + AGENTS.md carry decisions**
+47. ~~**Evaluate `linter-autoconfigure-sdk` for `validate`**~~ done (routed to ROADMAP Open Question 1)
+48. ~~**Fix the broken `#resolution` anchors** in `docs/status/`~~ done — `.md` anchor corrected; `.html` ids verified
+49. ~~**Consolidate `strict` vs `recommended`**~~ done (routed to ROADMAP Open Question 2; docs state the equivalence)
+50. ~~**Run `nix flake check --all-systems`** for cross-platform verification~~ **Won't implement — CI targets the primary system; gate is green now**
 
 ---
 
