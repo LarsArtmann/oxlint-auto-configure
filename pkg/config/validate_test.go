@@ -15,7 +15,7 @@ func TestValidateConfigValid(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{testRuleNoDebugger: SeverityError},
+		Rules: map[string]any{testRuleNoDebugger: SeverityError},
 	}
 
 	result, err := ValidateConfig(cfg, reg)
@@ -31,7 +31,7 @@ func TestValidateConfigUnknownRules(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{"nonexistent-rule-xyz": SeverityError},
+		Rules: map[string]any{"nonexistent-rule-xyz": SeverityError},
 	}
 
 	result, err := ValidateConfig(cfg, reg)
@@ -45,7 +45,7 @@ func TestValidateConfigInvalidSeverity(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{testRuleNoDebugger: "badsev"},
+		Rules: map[string]any{testRuleNoDebugger: "badsev"},
 	}
 
 	result, err := ValidateConfig(cfg, reg)
@@ -59,7 +59,7 @@ func TestValidateConfigDisabledRule(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{testRuleNoDebugger: SeverityOff},
+		Rules: map[string]any{testRuleNoDebugger: SeverityOff},
 	}
 
 	result, err := ValidateConfig(cfg, reg)
@@ -72,7 +72,7 @@ func TestValidateConfigEmptyRules(t *testing.T) {
 	t.Parallel()
 	reg := testregistry.Load(t)
 
-	cfg := &OxlintConfig{Rules: map[string]string{}}
+	cfg := &OxlintConfig{Rules: map[string]any{}}
 
 	result, err := ValidateConfig(cfg, reg)
 	require.NoError(t, err)
@@ -85,7 +85,7 @@ func TestValidateConfigErrInvalidConfigWrapped(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cfg := &OxlintConfig{
-		Rules: map[string]string{"nonexistent-rule-xyz": SeverityError},
+		Rules: map[string]any{"nonexistent-rule-xyz": SeverityError},
 	}
 
 	_, err := ValidateConfig(cfg, reg)

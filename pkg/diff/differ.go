@@ -50,11 +50,12 @@ func (d *Differ) Diff() []Change {
 	changes := make([]Change, 0, estimatedChangeCount)
 
 	changes = append(changes, d.compareSlices(d.before.Plugins, d.after.Plugins, "plugin:")...)
+	changes = append(changes, d.compareSlices(d.before.JsPlugins, d.after.JsPlugins, "jsPlugin:")...)
 	changes = append(
 		changes,
 		d.compareMaps(d.before.Categories, d.after.Categories, "category:")...,
 	)
-	changes = append(changes, d.compareMaps(d.before.Rules, d.after.Rules, "")...)
+	changes = append(changes, d.compareAnyMaps(d.before.Rules, d.after.Rules, "")...)
 	changes = append(changes, d.compareBoolMaps(d.before.Env, d.after.Env, "env:")...)
 	changes = append(changes, d.compareAnyMaps(d.before.Settings, d.after.Settings, "settings:")...)
 
@@ -205,25 +206,35 @@ func (d *Differ) compareBoolMaps(before, after map[string]bool, prefix string) [
 	return d.compareMaps(bStr, aStr, prefix)
 }
 
-// compareAnyMaps compares two map[string]any by JSON-serializing values for comparison.
+// compareAnyMaps compares two map[string]any by serializing values for
+// comparison. Plain strings (severities, settings strings) display bare;
+// structured values (rule options, settings objects) display as JSON.
 func (d *Differ) compareAnyMaps(before, after map[string]any, prefix string) []Change {
 	stringify := func(m map[string]any) map[string]string {
 		result := make(map[string]string, len(m))
 		for k, v := range m {
-			data, err := json.Marshal(v)
-			if err != nil {
-				result[k] = fmt.Sprintf("%v", v)
-
-				continue
-			}
-
-			result[k] = string(data)
+			result[k] = formatValue(v)
 		}
 
 		return result
 	}
 
 	return d.compareMaps(stringify(before), stringify(after), prefix)
+}
+
+// formatValue renders a config value for diff display: bare strings as-is,
+// anything else as compact JSON.
+func formatValue(v any) string {
+	if s, ok := v.(string); ok {
+		return s
+	}
+
+	data, err := json.Marshal(v)
+	if err != nil {
+		return fmt.Sprintf("%v", v)
+	}
+
+	return string(data)
 }
 
 func (d *Differ) collectAllKeys(before, after map[string]string) []string {

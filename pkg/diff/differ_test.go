@@ -21,9 +21,9 @@ func TestDiffNoChanges(t *testing.T) {
 	t.Parallel()
 
 	before := &config.OxlintConfig{
-		Rules: map[string]string{testRuleNoUnusedVars: testSeverityError},
+		Rules: map[string]any{testRuleNoUnusedVars: testSeverityError},
 	}
-	after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityError}}
+	after := &config.OxlintConfig{Rules: map[string]any{testRuleNoUnusedVars: testSeverityError}}
 
 	d := NewDiffer(before, after)
 	changes := d.Diff()
@@ -33,8 +33,8 @@ func TestDiffNoChanges(t *testing.T) {
 func TestDiffAdded(t *testing.T) {
 	t.Parallel()
 
-	before := &config.OxlintConfig{Rules: map[string]string{}}
-	after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityError}}
+	before := &config.OxlintConfig{Rules: map[string]any{}}
+	after := &config.OxlintConfig{Rules: map[string]any{testRuleNoUnusedVars: testSeverityError}}
 
 	d := NewDiffer(before, after)
 	changes := d.Diff()
@@ -47,9 +47,9 @@ func TestDiffRemoved(t *testing.T) {
 	t.Parallel()
 
 	before := &config.OxlintConfig{
-		Rules: map[string]string{testRuleNoUnusedVars: testSeverityError},
+		Rules: map[string]any{testRuleNoUnusedVars: testSeverityError},
 	}
-	after := &config.OxlintConfig{Rules: map[string]string{}}
+	after := &config.OxlintConfig{Rules: map[string]any{}}
 
 	d := NewDiffer(before, after)
 	changes := d.Diff()
@@ -60,8 +60,8 @@ func TestDiffRemoved(t *testing.T) {
 func TestDiffChanged(t *testing.T) {
 	t.Parallel()
 
-	before := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityWarn}}
-	after := &config.OxlintConfig{Rules: map[string]string{testRuleNoUnusedVars: testSeverityError}}
+	before := &config.OxlintConfig{Rules: map[string]any{testRuleNoUnusedVars: testSeverityWarn}}
+	after := &config.OxlintConfig{Rules: map[string]any{testRuleNoUnusedVars: testSeverityError}}
 
 	d := NewDiffer(before, after)
 	changes := d.Diff()
@@ -74,9 +74,9 @@ func TestDiffChanged(t *testing.T) {
 func TestDiffSummary(t *testing.T) {
 	t.Parallel()
 
-	before := &config.OxlintConfig{Rules: map[string]string{"a": testSeverityWarn}}
+	before := &config.OxlintConfig{Rules: map[string]any{"a": testSeverityWarn}}
 	after := &config.OxlintConfig{
-		Rules: map[string]string{"a": testSeverityError, "b": testSeverityError},
+		Rules: map[string]any{"a": testSeverityError, "b": testSeverityError},
 	}
 
 	d := NewDiffer(before, after)
@@ -161,9 +161,9 @@ func filterChanges(changes []Change, prefix string) []Change {
 func TestDiffFormatDiff(t *testing.T) {
 	t.Parallel()
 
-	before := &config.OxlintConfig{Rules: map[string]string{"a": testSeverityWarn}}
+	before := &config.OxlintConfig{Rules: map[string]any{"a": testSeverityWarn}}
 	after := &config.OxlintConfig{
-		Rules: map[string]string{"a": testSeverityError, "b": testSeverityError},
+		Rules: map[string]any{"a": testSeverityError, "b": testSeverityError},
 	}
 
 	d := NewDiffer(before, after)

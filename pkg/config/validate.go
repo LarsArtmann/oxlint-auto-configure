@@ -19,8 +19,12 @@ var ErrInvalidProfile = errors.New("invalid profile")
 type ValidateResult struct {
 	UnknownRules      []string
 	InvalidSeverities []string
-	EnabledCount      int
-	DisabledCount     int
+	// ExternalRules are rules owned by runtime-loaded JS plugins (e.g.
+	// "shadcn/no-restyle"). They are not in the embedded registry and are
+	// therefore exempt from the unknown-rule check, not evidence of a typo.
+	ExternalRules []string
+	EnabledCount  int
+	DisabledCount int
 }
 
 // ValidateConfig checks an OxlintConfig for unknown rules and invalid severities.
@@ -29,6 +33,7 @@ func ValidateConfig(cfg *OxlintConfig, reg *rule.Registry) (*ValidateResult, err
 	result := &ValidateResult{
 		UnknownRules:      nil,
 		InvalidSeverities: nil,
+		ExternalRules:     nil,
 		EnabledCount:      0,
 		DisabledCount:     0,
 	}
@@ -46,10 +51,18 @@ func ValidateConfig(cfg *OxlintConfig, reg *rule.Registry) (*ValidateResult, err
 
 func validateRules(cfg *OxlintConfig, reg *rule.Registry, result *ValidateResult) error {
 	for name := range cfg.Rules {
+		if _, external := rule.ExternalPluginByRuleName(name); external {
+			result.ExternalRules = append(result.ExternalRules, name)
+
+			continue
+		}
+
 		if _, ok := reg.ByName(name); !ok {
 			result.UnknownRules = append(result.UnknownRules, name)
 		}
 	}
+
+	slices.Sort(result.ExternalRules)
 
 	if len(result.UnknownRules) > 0 {
 		slices.Sort(result.UnknownRules)
@@ -62,11 +75,30 @@ func validateRules(cfg *OxlintConfig, reg *rule.Registry, result *ValidateResult
 	return nil
 }
 
+// severityFromValue extracts the severity string from a rules-map value,
+// which is either a bare severity ("error") or oxlint's array form
+// ("[\"error\", {options}]"). ok is false when the value has neither shape.
+func severityFromValue(value any) (severity string, ok bool) {
+	switch v := value.(type) {
+	case string:
+		return v, true
+	case []any:
+		if len(v) > 0 {
+			if s, isString := v[0].(string); isString {
+				return s, true
+			}
+		}
+	}
+
+	return "", false
+}
+
 func validateSeverities(cfg *OxlintConfig, result *ValidateResult) error {
-	for name, sev := range cfg.Rules {
-		if !rule.SeverityDecision(sev).IsValid() {
+	for name, value := range cfg.Rules {
+		sev, ok := severityFromValue(value)
+		if !ok || !rule.SeverityDecision(sev).IsValid() {
 			result.InvalidSeverities = append(result.InvalidSeverities,
-				fmt.Sprintf("%s=%s", name, sev))
+				fmt.Sprintf("%s=%v", name, value))
 		}
 	}
 
@@ -78,7 +110,8 @@ func validateSeverities(cfg *OxlintConfig, result *ValidateResult) error {
 			strings.Join(result.InvalidSeverities, ", "))
 	}
 
-	for _, sev := range cfg.Rules {
+	for _, value := range cfg.Rules {
+		sev, _ := severityFromValue(value)
 		if sev != "off" {
 			result.EnabledCount++
 		}

@@ -30,31 +30,43 @@ type OxlintConfig struct {
 	Categories map[string]string `json:"categories,omitempty"`
 	// Rules values are either a severity string ("error") or oxlint's
 	// array form ("["error", {options}]") used by external plugin rules.
-	Rules    map[string]any `json:"rules,omitempty"`
-	Settings map[string]any `json:"settings,omitempty"`
+	Rules    map[string]any  `json:"rules,omitempty"`
+	Settings map[string]any  `json:"settings,omitempty"`
 	Env      map[string]bool `json:"env,omitempty"`
 }
 
 // Generator creates oxlint configuration from profile decisions.
 type Generator struct {
-	categorizer  *profile.Categorizer
-	registry     *rule.Registry
-	projectTypes []detect.ProjectType
+	categorizer     *profile.Categorizer
+	registry        *rule.Registry
+	projectTypes    []detect.ProjectType
+	externalPlugins []rule.ExternalPlugin
 }
 
-// NewGenerator creates a config generator.
+// NewGenerator creates a config generator. externalPlugins are runtime-loaded
+// JS plugins detected in the project (e.g. @shadcn/lint); they are registered
+// under "jsPlugins" but their rules are never enabled automatically —
+// external plugin rules encode project-specific policy and stay off until
+// the project opts in.
 func NewGenerator(
 	c *profile.Categorizer,
 	r *rule.Registry,
 	projectTypes []detect.ProjectType,
+	externalPlugins []rule.ExternalPlugin,
 ) *Generator {
-	return &Generator{categorizer: c, registry: r, projectTypes: projectTypes}
+	return &Generator{
+		categorizer:     c,
+		registry:        r,
+		projectTypes:    projectTypes,
+		externalPlugins: externalPlugins,
+	}
 }
 
 // Generate creates an OxlintConfig based on the categorizer's decisions.
 func (g *Generator) Generate() *OxlintConfig {
 	cfg := &OxlintConfig{
 		Plugins:    g.enabledPlugins(),
+		JsPlugins:  g.externalPluginNames(),
 		Categories: g.categorySeverityMap(),
 		Rules:      g.ruleSeverityMap(),
 		Settings:   g.buildSettings(),
@@ -146,6 +158,25 @@ func (g *Generator) allPlugins() []string {
 	return plugins
 }
 
+// externalPluginNames returns the npm package names of the detected
+// external JS plugins, deduplicated and sorted for deterministic output.
+func (g *Generator) externalPluginNames() []string {
+	seen := make(map[string]bool, len(g.externalPlugins))
+
+	var names []string
+
+	for _, p := range g.externalPlugins {
+		if !seen[p.Package] {
+			seen[p.Package] = true
+			names = append(names, p.Package)
+		}
+	}
+
+	sort.Strings(names)
+
+	return names
+}
+
 // categorySeverityMap returns the category→severity mapping for the profile.
 // Uses Categorizer.DecideCategory instead of sampling rules, ensuring
 // correct category severities even for profiles with mixed-severity categories.
@@ -172,12 +203,12 @@ func (g *Generator) categorySeverityMap() map[string]string {
 // are skipped entirely — oxlint defaults apply.
 func (g *Generator) ruleSeverityMap() map[string]any {
 	if g.categorizer == nil {
-		return map[string]string{}
+		return map[string]any{}
 	}
 
 	decisions := g.categorizer.DecideAll(g.registry)
 	catMap := g.categorySeverityMap()
-	rules := make(map[string]string)
+	rules := make(map[string]any)
 
 	for _, d := range decisions {
 		if !g.categorizer.IsPluginRelevant(d.Rule) {

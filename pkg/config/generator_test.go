@@ -96,7 +96,7 @@ func TestConfigToJSON(t *testing.T) {
 	cfg := &OxlintConfig{
 		Plugins:    []string{"typescript", "unicorn"},
 		Categories: map[string]string{"correctness": SeverityError},
-		Rules:      map[string]string{"no-unused-vars": SeverityError},
+		Rules:      map[string]any{"no-unused-vars": SeverityError},
 		Env:        map[string]bool{"builtin": true},
 	}
 

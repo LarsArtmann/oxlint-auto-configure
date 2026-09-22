@@ -11,11 +11,15 @@ import (
 
 // GenerateProjectConfig creates an OxlintConfig for the given project.
 // This is the core business logic separated from CLI concerns.
+// externalPlugins are runtime-loaded JS plugins detected in the project
+// (e.g. @shadcn/lint); they are registered under "jsPlugins" without
+// enabling any of their rules.
 func GenerateProjectConfig(
 	p profile.Profile,
 	reg *rule.Registry,
 	pluginConfig profile.PluginConfig,
 	projectTypes []detect.ProjectType,
+	externalPlugins []rule.ExternalPlugin,
 ) (*OxlintConfig, error) {
 	if !p.IsValid() {
 		return nil, fmt.Errorf("%w %q: choose from %s",
@@ -23,7 +27,7 @@ func GenerateProjectConfig(
 	}
 
 	cat := profile.NewCategorizer(p, pluginConfig)
-	gen := NewGenerator(cat, reg, projectTypes)
+	gen := NewGenerator(cat, reg, projectTypes, externalPlugins)
 
 	if p == profile.ProfileMaximalTypesafe {
 		return gen.GenerateMaximal(), nil
