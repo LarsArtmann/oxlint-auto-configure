@@ -25,7 +25,7 @@ const (
 	testFileATS  = "a.ts"
 )
 
-func TestConfigureDryRunRecommended(t *testing.T) {
+func TestConfigureDryRunStrict(t *testing.T) {
 	t.Parallel()
 
 	cmd := NewRootCommand()
@@ -58,6 +58,18 @@ func TestConfigureInvalidProfile(t *testing.T) {
 	assert.Contains(t, err.Error(), "invalid profile")
 }
 
+func TestConfigureRemovedRecommendedProfile(t *testing.T) {
+	t.Parallel()
+
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{CmdConfigure, "--dry-run", "-p", "recommended", testFlagRoot, t.TempDir()})
+
+	err := cmd.Execute()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "strict",
+		"the migration error must tell the user which profile to use instead")
+}
+
 func TestConfigureWritesFile(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
@@ -88,7 +100,7 @@ func TestValidateConfig(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	gen := config.NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 	data, err := cfg.ToJSON()
@@ -166,7 +178,7 @@ func TestReportJSON(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	decisions := cat.DecideAll(reg)
 
 	// Verify we can generate the report data
@@ -192,7 +204,7 @@ func TestReportJSONDirect(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	decisions := cat.DecideAll(reg)
 
 	var buf bytes.Buffer
@@ -216,7 +228,7 @@ func TestShowDiffExisting(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	gen := config.NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 	data, err := cfg.ToJSON()
@@ -242,7 +254,7 @@ func TestShowDiffMalformed(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	gen := config.NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
@@ -258,7 +270,7 @@ func TestShowDiffMissing(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	gen := config.NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
@@ -321,8 +333,10 @@ func TestProfileNames(t *testing.T) {
 	t.Parallel()
 
 	names := profile.AllProfileNames()
-	assert.Len(t, names, 4)
-	assert.Contains(t, names, "recommended")
+	assert.Len(t, names, 3)
+	assert.Contains(t, names, "strict")
+	assert.NotContains(t, names, "recommended",
+		"the removed profile name must not resurface in the valid set")
 }
 
 func TestPrintFormatErrorNil(t *testing.T) {

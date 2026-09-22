@@ -144,7 +144,7 @@ func TestLogDiffIfExistingWithFile(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cfg, err := config.GenerateProjectConfig(profile.ProfileRecommended, reg, nil, nil, nil)
+	cfg, err := config.GenerateProjectConfig(profile.ProfileStrict, reg, nil, nil, nil)
 	require.NoError(t, err)
 
 	data, err := cfg.ToJSON()
@@ -164,7 +164,7 @@ func TestMarshalConfigJSON(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cfg, err := config.GenerateProjectConfig(profile.ProfileRecommended, reg, nil, nil, nil)
+	cfg, err := config.GenerateProjectConfig(profile.ProfileStrict, reg, nil, nil, nil)
 	require.NoError(t, err)
 
 	data, err := marshalConfigJSON(cfg)

@@ -25,7 +25,7 @@ func TestConfigureE2ERoundTrip(t *testing.T) {
 	require.NoError(t, err)
 
 	opts := ConfigureOptions{
-		Profile:    profile.ProfileRecommended,
+		Profile:    profile.ProfileStrict,
 		ConfigPath: filepath.Join(dir, ".oxlintrc.json"),
 	}
 

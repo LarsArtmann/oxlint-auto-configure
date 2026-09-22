@@ -15,7 +15,7 @@ func TestGenerateProjectConfigRecommended(t *testing.T) {
 	t.Parallel()
 	reg := testregistry.Load(t)
 
-	cfg, err := GenerateProjectConfig(profile.ProfileRecommended, reg, nil, nil, nil)
+	cfg, err := GenerateProjectConfig(profile.ProfileStrict, reg, nil, nil, nil)
 	require.NoError(t, err)
 	assert.Contains(t, cfg.Plugins, "typescript")
 	assert.Equal(t, "error", cfg.Categories["correctness"])
@@ -45,7 +45,7 @@ func TestGenerateProjectConfigWithNodeProject(t *testing.T) {
 	reg := testregistry.Load(t)
 
 	cfg, err := GenerateProjectConfig(
-		profile.ProfileRecommended, reg, nil,
+		profile.ProfileStrict, reg, nil,
 		[]detect.ProjectType{detect.ProjectTypeNode}, nil,
 	)
 	require.NoError(t, err)
@@ -60,7 +60,7 @@ func TestGenerateProjectConfigWithReactPlugins(t *testing.T) {
 		rule.PluginReact:   true,
 		rule.PluginJSXA11y: true,
 	}
-	cfg, err := GenerateProjectConfig(profile.ProfileRecommended, reg, pc, nil, nil)
+	cfg, err := GenerateProjectConfig(profile.ProfileStrict, reg, pc, nil, nil)
 	require.NoError(t, err)
 	assert.Contains(t, cfg.Plugins, "react")
 	assert.Contains(t, cfg.Plugins, "jsx_a11y")

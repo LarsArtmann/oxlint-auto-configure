@@ -64,7 +64,7 @@ func TestGenerateRegistersDetectedExternalPlugins(t *testing.T) {
 	t.Parallel()
 	reg := testregistry.Load(t)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil, []rule.ExternalPlugin{shadcnPlugin})
 	cfg := gen.Generate()
 
@@ -81,7 +81,7 @@ func TestGenerateWithoutExternalPlugins(t *testing.T) {
 	t.Parallel()
 	reg := testregistry.Load(t)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	cfg := NewGenerator(cat, reg, nil, nil).Generate()
 
 	assert.Empty(t, cfg.JsPlugins)

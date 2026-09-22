@@ -21,7 +21,7 @@ func TestWriteConfigLeavesNoTempFiles(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cfg, err := config.GenerateProjectConfig(profile.ProfileRecommended, reg, nil, nil, nil)
+	cfg, err := config.GenerateProjectConfig(profile.ProfileStrict, reg, nil, nil, nil)
 	require.NoError(t, err)
 
 	dir := t.TempDir()
@@ -56,7 +56,7 @@ func TestWriteConfigOverwriteIdempotent(t *testing.T) {
 	reg, err := rule.LoadRegistry()
 	require.NoError(t, err)
 
-	cfg, err := config.GenerateProjectConfig(profile.ProfileRecommended, reg, nil, nil, nil)
+	cfg, err := config.GenerateProjectConfig(profile.ProfileStrict, reg, nil, nil, nil)
 	require.NoError(t, err)
 
 	dir := t.TempDir()

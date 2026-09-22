@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"

@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGeneratorRecommended(t *testing.T) {
+func TestGeneratorStrict(t *testing.T) {
 	t.Parallel()
 	reg := testregistry.Load(t)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
@@ -59,7 +59,7 @@ func TestGeneratorWithReactProject(t *testing.T) {
 		rule.PluginJSXA11y:   true,
 		rule.PluginReactPerf: true,
 	}
-	cat := profile.NewCategorizer(profile.ProfileRecommended, pc)
+	cat := profile.NewCategorizer(profile.ProfileStrict, pc)
 	gen := NewGenerator(cat, reg, []detect.ProjectType{detect.ProjectTypeReact}, nil)
 	cfg := gen.Generate()
 
@@ -79,7 +79,7 @@ func TestGeneratorWithAllPlugins(t *testing.T) {
 		rule.PluginJSXA11y: true, rule.PluginNode: true, rule.PluginImport: true,
 		rule.PluginPromise: true, rule.PluginReactPerf: true,
 	}
-	cat := profile.NewCategorizer(profile.ProfileRecommended, pluginConfig)
+	cat := profile.NewCategorizer(profile.ProfileStrict, pluginConfig)
 	gen := NewGenerator(cat, reg, []detect.ProjectType{detect.ProjectTypeNode}, nil)
 	cfg := gen.Generate()
 
@@ -114,7 +114,7 @@ func TestConfigRoundTrip(t *testing.T) {
 	t.Parallel()
 	reg := testregistry.Load(t)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 
@@ -169,11 +169,11 @@ func TestMinimalProfileConfig(t *testing.T) {
 	assert.Empty(t, cfg.Rules, "minimal should have no per-rule overrides")
 }
 
-func TestRecommendedProfileNoRedundantOverrides(t *testing.T) {
+func TestStrictProfileNoRedundantOverrides(t *testing.T) {
 	t.Parallel()
 	reg := testregistry.Load(t)
 
-	cat := profile.NewCategorizer(profile.ProfileRecommended, profile.PluginConfig{})
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
 	gen := NewGenerator(cat, reg, nil, nil)
 	cfg := gen.Generate()
 

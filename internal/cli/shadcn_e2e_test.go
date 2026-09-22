@@ -28,7 +28,7 @@ func TestConfigureE2ERegistersShadcnLint(t *testing.T) {
 
 	configPath := filepath.Join(dir, ".oxlintrc.json")
 	require.NoError(t, Configure(context.Background(), dir, ConfigureOptions{
-		Profile:    profile.ProfileRecommended,
+		Profile:    profile.ProfileStrict,
 		ConfigPath: configPath,
 	}))
 
@@ -68,7 +68,7 @@ func TestConfigureE2EPreservesShadcnSetup(t *testing.T) {
 	}`), 0o644))
 
 	require.NoError(t, Configure(context.Background(), dir, ConfigureOptions{
-		Profile:    profile.ProfileRecommended,
+		Profile:    profile.ProfileStrict,
 		ConfigPath: configPath,
 	}))
 
@@ -142,7 +142,7 @@ func TestConfigureE2EWarnsOnlyForOrphanedJsPlugins(t *testing.T) {
 	}`), 0o644))
 
 	require.NoError(t, Configure(context.Background(), dir, ConfigureOptions{
-		Profile:    profile.ProfileRecommended,
+		Profile:    profile.ProfileStrict,
 		ConfigPath: configPath,
 	}))
 

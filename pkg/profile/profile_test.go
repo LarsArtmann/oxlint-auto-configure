@@ -6,12 +6,12 @@ import (
 	"github.com/larsartmann/oxlint-auto-configure/internal/testregistry"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestProfileString(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, "maximal-typesafe", ProfileMaximalTypesafe.String())
-	assert.Equal(t, "recommended", ProfileRecommended.String())
 	assert.Equal(t, "strict", ProfileStrict.String())
 	assert.Equal(t, "minimal", ProfileMinimal.String())
 }
@@ -19,16 +19,15 @@ func TestProfileString(t *testing.T) {
 func TestProfileIsValid(t *testing.T) {
 	t.Parallel()
 	assert.True(t, ProfileMaximalTypesafe.IsValid())
-	assert.True(t, ProfileRecommended.IsValid())
 	assert.True(t, ProfileStrict.IsValid())
 	assert.True(t, ProfileMinimal.IsValid())
 	assert.False(t, Profile("invalid").IsValid())
+	assert.False(t, Profile("recommended").IsValid(), "removed profile name is no longer valid")
 }
 
 func TestProfileDescription(t *testing.T) {
 	t.Parallel()
 	assert.NotEmpty(t, ProfileMaximalTypesafe.Description())
-	assert.NotEmpty(t, ProfileRecommended.Description())
 	assert.NotEmpty(t, ProfileStrict.Description())
 	assert.NotEmpty(t, ProfileMinimal.Description())
 	assert.Equal(t, "unknown profile", Profile("invalid").Description())
@@ -46,20 +45,8 @@ func TestCategorizerMaximalTypesafe(t *testing.T) {
 	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryRestriction}))
 }
 
-func TestCategorizerRecommended(t *testing.T) {
-	t.Parallel()
-
-	cat := NewCategorizer(ProfileRecommended, PluginConfig{})
-
-	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryCorrectness}))
-	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategorySuspicious}))
-	assert.Equal(t, rule.SeverityWarn, cat.Decide(rule.Rule{Category: rule.CategoryStyle}))
-	assert.Equal(t, rule.SeverityWarn, cat.Decide(rule.Rule{Category: rule.CategoryPerf}))
-	assert.Equal(t, rule.SeverityWarn, cat.Decide(rule.Rule{Category: rule.CategoryPedantic}))
-	assert.Equal(t, rule.SeverityWarn, cat.Decide(rule.Rule{Category: rule.CategoryRestriction}))
-	assert.Equal(t, rule.SeverityOff, cat.Decide(rule.Rule{Category: rule.CategoryNursery}))
-}
-
+// TestCategorizerStrict replaces the former recommended/strict pair: the two
+// profiles were byte-identical and `recommended` was removed.
 func TestCategorizerStrict(t *testing.T) {
 	t.Parallel()
 
@@ -68,7 +55,9 @@ func TestCategorizerStrict(t *testing.T) {
 	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategoryCorrectness}))
 	assert.Equal(t, rule.SeverityError, cat.Decide(rule.Rule{Category: rule.CategorySuspicious}))
 	assert.Equal(t, rule.SeverityWarn, cat.Decide(rule.Rule{Category: rule.CategoryStyle}))
+	assert.Equal(t, rule.SeverityWarn, cat.Decide(rule.Rule{Category: rule.CategoryPerf}))
 	assert.Equal(t, rule.SeverityWarn, cat.Decide(rule.Rule{Category: rule.CategoryPedantic}))
+	assert.Equal(t, rule.SeverityWarn, cat.Decide(rule.Rule{Category: rule.CategoryRestriction}))
 	assert.Equal(t, rule.SeverityOff, cat.Decide(rule.Rule{Category: rule.CategoryNursery}))
 }
 
@@ -90,15 +79,6 @@ func TestDecideCategory(t *testing.T) {
 			true,
 		},
 		{"maximal nursery", ProfileMaximalTypesafe, rule.CategoryNursery, rule.SeverityWarn, true},
-		{
-			"recommended correctness",
-			ProfileRecommended,
-			rule.CategoryCorrectness,
-			rule.SeverityError,
-			true,
-		},
-		{"recommended style", ProfileRecommended, rule.CategoryStyle, rule.SeverityWarn, true},
-		{"recommended nursery", ProfileRecommended, rule.CategoryNursery, rule.SeverityOff, true},
 		{"strict correctness", ProfileStrict, rule.CategoryCorrectness, rule.SeverityError, true},
 		{"strict style", ProfileStrict, rule.CategoryStyle, rule.SeverityWarn, true},
 		{"strict nursery", ProfileStrict, rule.CategoryNursery, rule.SeverityOff, true},
@@ -144,7 +124,7 @@ func TestCategorizerMinimal(t *testing.T) {
 func TestPluginRelevance(t *testing.T) {
 	t.Parallel()
 
-	cat := NewCategorizer(ProfileRecommended, PluginConfig{
+	cat := NewCategorizer(ProfileStrict, PluginConfig{
 		rule.PluginReact:  true,
 		rule.PluginNextJS: true,
 		rule.PluginJest:   true,
@@ -166,7 +146,7 @@ func TestPluginRelevance(t *testing.T) {
 func TestEnabledPlugins(t *testing.T) {
 	t.Parallel()
 
-	cat := NewCategorizer(ProfileRecommended, PluginConfig{
+	cat := NewCategorizer(ProfileStrict, PluginConfig{
 		rule.PluginReact:   true,
 		rule.PluginJest:    true,
 		rule.PluginJSXA11y: true,
@@ -221,7 +201,7 @@ func TestDecideAll(t *testing.T) {
 	t.Parallel()
 	reg := testregistry.Load(t)
 
-	cat := NewCategorizer(ProfileRecommended, PluginConfig{})
+	cat := NewCategorizer(ProfileStrict, PluginConfig{})
 	decisions := cat.DecideAll(reg)
 
 	assert.NotEmpty(t, decisions)
@@ -232,7 +212,7 @@ func TestAllProfiles(t *testing.T) {
 	t.Parallel()
 
 	profiles := AllProfiles()
-	assert.Len(t, profiles, 4)
+	assert.Len(t, profiles, 3)
 }
 
 func TestDecideCategoryUnknown(t *testing.T) {
@@ -260,19 +240,44 @@ func TestDecideCategoryUnknown(t *testing.T) {
 		)
 	})
 
-	t.Run("recommended", func(t *testing.T) {
-		t.Parallel()
-
-		c := NewCategorizer(ProfileRecommended, nil)
-		_, hasCat := c.DecideCategory(unknownCat)
-		assert.True(t, hasCat, "unknown category gets default severity for recommended")
-	})
-
 	t.Run("strict", func(t *testing.T) {
 		t.Parallel()
 
 		c := NewCategorizer(ProfileStrict, nil)
 		_, hasCat := c.DecideCategory(unknownCat)
 		assert.True(t, hasCat, "unknown category gets default severity for strict")
+	})
+}
+
+func TestParse(t *testing.T) {
+	t.Parallel()
+
+	t.Run("valid names round-trip", func(t *testing.T) {
+		t.Parallel()
+
+		for _, p := range AllProfiles() {
+			got, err := Parse(p.String())
+			assert.NoError(t, err)
+			assert.Equal(t, p, got)
+		}
+	})
+
+	t.Run("removed recommended name migrates to strict", func(t *testing.T) {
+		t.Parallel()
+
+		_, err := Parse("recommended")
+		require.Error(t, err)
+		assert.ErrorIs(t, err, ErrProfileRemoved)
+		assert.Contains(t, err.Error(), "strict",
+			"migration error must name the replacement profile")
+	})
+
+	t.Run("unknown name lists choices", func(t *testing.T) {
+		t.Parallel()
+
+		_, err := Parse("no-such-profile")
+		require.Error(t, err)
+		assert.ErrorIs(t, err, ErrInvalidProfile)
+		assert.Contains(t, err.Error(), "maximal-typesafe, strict, minimal")
 	})
 }
