@@ -174,6 +174,98 @@ func TestPreserveExternalNilGeneratedRules(t *testing.T) {
 	assert.Equal(t, "error", merged.Rules["shadcn/no-raw-colors"])
 }
 
+func TestFromJSONWithOverrides(t *testing.T) {
+	t.Parallel()
+
+	// The shape @shadcn/lint's setup produces: per-glob overrides disabling
+	// rules inside component directories. Regeneration used to drop this
+	// silently.
+	data := []byte(`{
+		"rules": {"no-console": "error"},
+		"overrides": [
+			{
+				"files": ["src/components/ui/**"],
+				"rules": {"shadcn/no-restyle": "off"}
+			}
+		]
+	}`)
+
+	cfg, err := FromJSON(data)
+	require.NoError(t, err)
+
+	require.Len(t, cfg.Overrides, 1)
+	assert.Equal(t, []any{"src/components/ui/**"}, cfg.Overrides[0]["files"])
+
+	rules, ok := cfg.Overrides[0]["rules"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "off", rules["shadcn/no-restyle"])
+
+	roundTripped, err := FromJSON(mustJSON(t, cfg))
+	require.NoError(t, err)
+	assert.Equal(t, cfg.Overrides, roundTripped.Overrides)
+}
+
+func TestToJSONOmitsEmptyOverrides(t *testing.T) {
+	t.Parallel()
+
+	cfg := &OxlintConfig{Rules: map[string]any{"no-console": SeverityError}}
+
+	data, err := cfg.ToJSON()
+	require.NoError(t, err)
+	assert.NotContains(t, string(data), "overrides",
+		"projects without overrides must not get an overrides key")
+}
+
+func TestPreserveExternalCopiesOverridesVerbatim(t *testing.T) {
+	t.Parallel()
+
+	existing := &OxlintConfig{
+		Overrides: []map[string]any{
+			{
+				"files": []any{"src/components/ui/**"},
+				"rules": map[string]any{"shadcn/no-restyle": "off"},
+			},
+			{
+				"files": []any{"*.config.js"},
+				"rules": map[string]any{"no-console": "off"},
+			},
+		},
+	}
+	generated := &OxlintConfig{Rules: map[string]any{"no-console": SeverityError}}
+
+	merged := PreserveExternal(existing, generated)
+
+	assert.Equal(t, existing.Overrides, merged.Overrides,
+		"overrides are pure existing policy and must survive regeneration verbatim")
+}
+
+func TestPreserveExternalDedupsOverrides(t *testing.T) {
+	t.Parallel()
+
+	duplicate := map[string]any{
+		"files": []any{"src/components/ui/**"},
+		"rules": map[string]any{"shadcn/no-restyle": "off"},
+	}
+	distinct := map[string]any{
+		"files": []any{"*.config.js"},
+		"rules": map[string]any{"no-console": "off"},
+	}
+	// Same content as duplicate but different key order: must still dedup.
+	reordered := map[string]any{
+		"rules": map[string]any{"shadcn/no-restyle": "off"},
+		"files": []any{"src/components/ui/**"},
+	}
+
+	existing := &OxlintConfig{Overrides: []map[string]any{duplicate, distinct, duplicate}}
+	generated := &OxlintConfig{Overrides: []map[string]any{reordered}}
+
+	merged := PreserveExternal(existing, generated)
+
+	assert.Equal(t, []map[string]any{reordered, distinct}, merged.Overrides,
+		"exact duplicates collapse (key order irrelevant), distinct blocks survive in order")
+}
+
+
 func TestHasExternalRules(t *testing.T) {
 	t.Parallel()
 

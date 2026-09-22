@@ -33,6 +33,12 @@ type OxlintConfig struct {
 	Rules    map[string]any  `json:"rules,omitempty"`
 	Settings map[string]any  `json:"settings,omitempty"`
 	Env      map[string]bool `json:"env,omitempty"`
+	// Overrides holds oxlint's per-glob rule overrides (an array of
+	// {files, rules} objects, e.g. @shadcn/lint's component-dir disables).
+	// The generator never produces this field: PreserveExternal copies it
+	// verbatim (deduplicated) from an existing config so regeneration
+	// cannot drop deliberate per-directory policy.
+	Overrides []map[string]any `json:"overrides,omitempty"`
 }
 
 // Generator creates oxlint configuration from profile decisions.
