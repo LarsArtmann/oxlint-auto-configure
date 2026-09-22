@@ -8,13 +8,13 @@
 
 User ran `art-dupl --sort total-tokens -t 1 --type-aware` → 4 clone groups. Task: deduplicate with judgment (eliminate harmful, accept intentional, document rationale).
 
-| Verdict | Group | Location | Action |
-|---|---|---|---|
-| Eliminated | `var zero ExternalPlugin; return zero, false` ×2 | `pkg/rule/external.go` | Extracted `findExternalPlugin(match)` — single iteration + zero-return point |
-| Accepted | `t.Parallel()` + `reg := testregistry.Load(t)` ×17 | 4 test files | Linter-enforced boilerplate (`paralleltest`); already in AGENTS.md |
-| Accepted | `~string`→`[]string` conversion loops ×2 | `detect.FormatTypes`, `profile.AllProfileNames` | No `slices.Map` in stdlib (verified); inline rationale comments added |
-| Accepted | `ToJSON` vs `marshalConfigJSON` error wraps ×2 | `pkg/config`, `internal/cli` | Layered error context; AGENTS.md: "intentionally not abstracted further" |
-| Accepted (late) | `seen`-map mirror passes ×2, `case KindUnchanged:` ×2 | `pkg/diff/differ.go` | Mirror passes of a diff algorithm; extraction needs 4+ params |
+| Verdict         | Group                                                 | Location                                        | Action                                                                       |
+| --------------- | ----------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------- |
+| Eliminated      | `var zero ExternalPlugin; return zero, false` ×2      | `pkg/rule/external.go`                          | Extracted `findExternalPlugin(match)` — single iteration + zero-return point |
+| Accepted        | `t.Parallel()` + `reg := testregistry.Load(t)` ×17    | 4 test files                                    | Linter-enforced boilerplate (`paralleltest`); already in AGENTS.md           |
+| Accepted        | `~string`→`[]string` conversion loops ×2              | `detect.FormatTypes`, `profile.AllProfileNames` | No `slices.Map` in stdlib (verified); inline rationale comments added        |
+| Accepted        | `ToJSON` vs `marshalConfigJSON` error wraps ×2        | `pkg/config`, `internal/cli`                    | Layered error context; AGENTS.md: "intentionally not abstracted further"     |
+| Accepted (late) | `seen`-map mirror passes ×2, `case KindUnchanged:` ×2 | `pkg/diff/differ.go`                            | Mirror passes of a diff algorithm; extraction needs 4+ params                |
 
 **Verification done:** full `go test -race ./...` green, `go vet` clean, gofmt clean, `golangci-lint` 0 issues on the 3 touched packages, art-dupl re-run confirms the `external.go` group dissolved.
 
@@ -46,7 +46,7 @@ User ran `art-dupl --sort total-tokens -t 1 --type-aware` → 4 clone groups. Ta
 
 No code is broken — full suite, vet, lint are green and nothing was reverted or stomped. Honest near-fuckups, ranked:
 
-1. **I reported a "clean report" without explaining a changed report.** The largest clone group (17 occurrences) disappeared between your run and my verification runs and I did not determine why. A verification step that produces *different* input than it verifies against is a weak verification — I should have re-run art-dupl on the pre-edit tree (or investigated determinism) before claiming the outcome. The G3-eliminated conclusion is solid (group demonstrably gone); the "everything else unchanged" part was assumed, not proven.
+1. **I reported a "clean report" without explaining a changed report.** The largest clone group (17 occurrences) disappeared between your run and my verification runs and I did not determine why. A verification step that produces _different_ input than it verifies against is a weak verification — I should have re-run art-dupl on the pre-edit tree (or investigated determinism) before claiming the outcome. The G3-eliminated conclusion is solid (group demonstrably gone); the "everything else unchanged" part was assumed, not proven.
 2. **Self-contradictory final summary** (see b2). You got a wrong count in the last line of my hand-off. Sloppy.
 3. **Acceptance decisions made but not written down where the next session will look** (differ.go, see b1/b3) — this is exactly how split-brain baselines form: chat says "accepted", AGENTS.md says "judge individually", next agent re-judges differently.
 
@@ -63,6 +63,7 @@ No code is broken — full suite, vet, lint are green and nothing was reverted o
 Brainstorm (most are ROADMAP fuel, not commitments), roughly impact-ordered. Items 1–8 are session leftovers; 9+ are adjacent observations from this session.
 
 **Session leftovers (close the loop)**
+
 1. Add the two `pkg/diff/differ.go` accepted groups to the AGENTS.md accepted-baseline entry (5-minute doc fix).
 2. Investigate art-dupl output stability: run it 3× on the clean tree, diff outputs; if nondeterministic, note it in AGENTS.md as a known-tool quirk (and pin a canonical invocation).
 3. Determine why the `t.Parallel()` group left the report (rerun with `--html` and without, on the same tree, before/after any edits).
@@ -130,8 +131,8 @@ Brainstorm (most are ROADMAP fuel, not commitments), roughly impact-ordered. Ite
 
 1. **The dirty `pkg/diff/differ_test.go` at session start** — the auto-daemon committed it mid-session under a heuristic message. Was that change intentional (yours or a prior session's), and does its content still reflect what you want tested in `pkg/diff`? I deliberately never read or touched it.
 2. **Gate policy for duplication** — should art-dupl become an enforced, recurring check (CI/pre-commit, with accepted-baseline exclusions), or stay an ad-hoc audit tool? This is an owner policy call; it determines whether items 9–12 are work or waste.
-3. **Acceptance home** — when we *accept* a clone, do you want the rationale as inline code comments (current G2 approach), only in AGENTS.md (G1/G4 approach), or both? Two homes for one decision is a split brain waiting to drift; you should pick one.
+3. **Acceptance home** — when we _accept_ a clone, do you want the rationale as inline code comments (current G2 approach), only in AGENTS.md (G1/G4 approach), or both? Two homes for one decision is a split brain waiting to drift; you should pick one.
 
 ---
 
-*Generated by Crush · dedup session close-out · 2026-09-22 23:39 CEST*
+_Generated by Crush · dedup session close-out · 2026-09-22 23:39 CEST_

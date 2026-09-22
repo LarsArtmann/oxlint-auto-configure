@@ -46,7 +46,7 @@ Owner instruction: READ → UNDERSTAND → RESEARCH → REFLECT → break into s
 4. **Repeated the "lint last" mistake** — the prior session's lesson #11 was literally "lint ran last, not continuously"; this session I again ran SDK tests first and only found the two `wsl_v5` findings when lint ran afterwards. Small this time, but the pattern is now a repeat offender.
 5. **`LINT_EXIT=${PIPESTATUS[0]}` printed empty** in mvdan/sh — my exit-code plumbing was broken and I reported lint status from output text instead ("0 issues."). Worked out, but the verification instrumentation was silently wrong.
 6. **`sed -i` swap dance on source files for the bite-check** — reverted and re-applied the fix via `sed` instead of a cleaner mechanism (stash, or a test-local option override). Worked, but it's the exact "bash-edit before View" hazard class from the prior session's (d) #4.
-7. **Chased a stale LSP diagnostic as if it were real** — after regenerating vendor I restarted golangci_lint_ls and it *still* claimed inconsistent vendoring; I spent a round verifying ground truth (which was fine) instead of immediately distrusting a channel that had already been wrong once. Note: the diagnostic persisted across restart — the cache is stickier than `lsp_restart` suggests.
+7. **Chased a stale LSP diagnostic as if it were real** — after regenerating vendor I restarted golangci_lint_ls and it _still_ claimed inconsistent vendoring; I spent a round verifying ground truth (which was fine) instead of immediately distrusting a channel that had already been wrong once. Note: the diagnostic persisted across restart — the cache is stickier than `lsp_restart` suggests.
 
 ## e) WHAT WE SHOULD IMPROVE
 
