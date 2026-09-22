@@ -13,6 +13,7 @@ import (
 	finding "github.com/larsartmann/go-finding"
 	"github.com/larsartmann/go-finding/pipeline"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
+	"github.com/larsartmann/oxlint-auto-configure/pkg/oxlint"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/stretchr/testify/assert"
@@ -455,4 +456,45 @@ func TestActiveWithFilter(t *testing.T) {
 
 	warnings := activeWithFilter(report, finding.SeverityWarning)
 	assert.Len(t, warnings, 2)
+}
+
+// emptyPATH points PATH at a guaranteed-empty directory so no oxlint binary
+// can be found, exercising the oxlint.ErrNotFound branches.
+func emptyPATH(t *testing.T) {
+	t.Helper()
+	t.Setenv("PATH", t.TempDir())
+}
+
+func TestConfigureSucceedsWithoutOxlintBinary(t *testing.T) { //nolint:paralleltest // t.Setenv requires a sequential test
+	emptyPATH(t)
+
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, ".oxlintrc.json")
+
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{CmdConfigure, "-c", configPath, testFlagRoot, dir})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	assert.NotEmpty(t, data)
+
+	var cfg config.OxlintConfig
+	err = json.Unmarshal(data, &cfg)
+	require.NoError(t, err)
+	assert.Equal(t, "error", cfg.Categories["correctness"])
+}
+
+func TestAnalyzeFailsWithoutOxlintBinary(t *testing.T) { //nolint:paralleltest // t.Setenv requires a sequential test
+	emptyPATH(t)
+
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{CmdAnalyze, testFlagRoot, t.TempDir()})
+
+	err := cmd.Execute()
+	require.Error(t, err)
+	assert.ErrorIs(t, err, oxlint.ErrNotFound)
+	assert.Contains(t, err.Error(), "oxlint is required for analyze")
 }

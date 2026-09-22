@@ -37,9 +37,18 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Install oxlint
+      - name: Install oxlint (pinned to the embedded rules version)
+        run: npm install -g "oxlint@$(cat pkg/rule/rules_version.txt)"
+
+      - name: Verify embedded rules match installed oxlint
         run: |
-          npm install -g oxlint
+          installed="$(oxlint --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+          embedded="$(cat pkg/rule/rules_version.txt)"
+          if [ "$installed" != "$embedded" ]; then
+            echo "::error::installed oxlint ($installed) does not match the embedded rules version ($embedded)"
+            echo "::error::refresh with: oxlint -f json --rules > pkg/rule/rules_data.json and bump pkg/rule/rules_version.txt"
+            exit 1
+          fi
 
       - name: Tidy
         run: go mod tidy
