@@ -144,7 +144,9 @@ func TestDetectExternalPluginsShadcnDevDependency(t *testing.T) {
 		`{"dependencies": {"react": "^18.0.0"}, "devDependencies": {"@shadcn/lint": "^1.0.0"}}`,
 	)
 
-	want := []rule.ExternalPlugin{{Package: "@shadcn/lint", Prefix: "shadcn", Docs: "https://github.com/shadcn-ui/lint#rules"}}
+	want := []rule.ExternalPlugin{
+		{Package: "@shadcn/lint", Prefix: "shadcn", Docs: "https://github.com/shadcn-ui/lint#rules"},
+	}
 	assert.Equal(t, want, external)
 }
 
@@ -156,7 +158,9 @@ func TestDetectExternalPluginsShadcnDependency(t *testing.T) {
 		`{"dependencies": {"@shadcn/lint": "^1.0.0"}}`,
 	)
 
-	want := []rule.ExternalPlugin{{Package: "@shadcn/lint", Prefix: "shadcn", Docs: "https://github.com/shadcn-ui/lint#rules"}}
+	want := []rule.ExternalPlugin{
+		{Package: "@shadcn/lint", Prefix: "shadcn", Docs: "https://github.com/shadcn-ui/lint#rules"},
+	}
 	assert.Equal(t, want, external)
 }
 

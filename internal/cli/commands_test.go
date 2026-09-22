@@ -465,7 +465,8 @@ func emptyPATH(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
 }
 
-func TestConfigureSucceedsWithoutOxlintBinary(t *testing.T) { //nolint:paralleltest // t.Setenv requires a sequential test
+//nolint:paralleltest // t.Setenv requires a sequential test
+func TestConfigureSucceedsWithoutOxlintBinary(t *testing.T) {
 	emptyPATH(t)
 
 	dir := t.TempDir()
@@ -482,12 +483,14 @@ func TestConfigureSucceedsWithoutOxlintBinary(t *testing.T) { //nolint:parallelt
 	assert.NotEmpty(t, data)
 
 	var cfg config.OxlintConfig
+
 	err = json.Unmarshal(data, &cfg)
 	require.NoError(t, err)
 	assert.Equal(t, "error", cfg.Categories["correctness"])
 }
 
-func TestAnalyzeFailsWithoutOxlintBinary(t *testing.T) { //nolint:paralleltest // t.Setenv requires a sequential test
+//nolint:paralleltest // t.Setenv requires a sequential test
+func TestAnalyzeFailsWithoutOxlintBinary(t *testing.T) {
 	emptyPATH(t)
 
 	cmd := NewRootCommand()
@@ -495,6 +498,6 @@ func TestAnalyzeFailsWithoutOxlintBinary(t *testing.T) { //nolint:paralleltest /
 
 	err := cmd.Execute()
 	require.Error(t, err)
-	assert.ErrorIs(t, err, oxlint.ErrNotFound)
+	require.ErrorIs(t, err, oxlint.ErrNotFound)
 	assert.Contains(t, err.Error(), "oxlint is required for analyze")
 }

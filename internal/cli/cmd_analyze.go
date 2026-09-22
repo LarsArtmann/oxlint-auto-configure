@@ -128,6 +128,7 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 		// a lie, so analyze fails visibly instead.
 		names := slices.Sorted(maps.Keys(result.PartialErrors))
 		errs := make([]error, 0, len(names))
+
 		for _, name := range names {
 			errs = append(errs, fmt.Errorf("%s: %w", name, result.PartialErrors[name]))
 

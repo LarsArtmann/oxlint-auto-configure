@@ -586,7 +586,7 @@ func TestWithRegistry(t *testing.T) {
 func TestDetectPluginLoadFailureSurfacesError(t *testing.T) {
 	t.Parallel()
 
-	_, exitErr := exec.Command("false").Output()
+	_, exitErr := exec.CommandContext(context.Background(), "false").Output()
 	require.Error(t, exitErr)
 
 	pluginFailure := "Failed to parse oxlint configuration file.\n\n" +
@@ -606,7 +606,7 @@ func TestDetectPluginLoadFailureSurfacesError(t *testing.T) {
 func TestDetectParsesJSONAfterNotice(t *testing.T) {
 	t.Parallel()
 
-	_, exitErr := exec.Command("false").Output()
+	_, exitErr := exec.CommandContext(context.Background(), "false").Output()
 	require.Error(t, exitErr)
 
 	mixed := "No files found to lint. Please check your paths and ignore patterns.\n" +

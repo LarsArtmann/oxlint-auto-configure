@@ -37,7 +37,11 @@ func TestExternalPluginByPackage(t *testing.T) {
 		want      ExternalPlugin
 		wantFound bool
 	}{
-		{"@shadcn/lint", ExternalPlugin{Package: "@shadcn/lint", Prefix: "shadcn", Docs: "https://github.com/shadcn-ui/lint#rules"}, true},
+		{
+			"@shadcn/lint",
+			ExternalPlugin{Package: "@shadcn/lint", Prefix: "shadcn", Docs: "https://github.com/shadcn-ui/lint#rules"},
+			true,
+		},
 		{"shadcn", ExternalPlugin{}, false},
 		{"", ExternalPlugin{}, false},
 	}
