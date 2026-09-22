@@ -1179,13 +1179,17 @@
         </div>
 
         <div class="card card-warning">
-          <h4>Still open as of 2026-07-22</h4>
+          <h4>Update 2026-09-22 (docs-health pass)</h4>
           <p>
-            <code>TODO_LIST.md</code> and <code>FEATURES.md</code> were still
+            <del><code>TODO_LIST.md</code> and <code>FEATURES.md</code> were still
             missing. The flake.nix ldflags question (commit/date/builtBy) is
             still open — nix builds still show "unknown" for those fields. The
-            testify/ginkgo policy question remains unresolved. See the
-            2026-07-22 docs-health pass for the living-doc fixes.
+            testify/ginkgo policy question remains unresolved.</del>
+            Resolved since: both docs were created in the 2026-07-22 pass
+            (<code>4a64b0d</code>); flake.nix ldflags were wired 2026-07-27
+            (commit/date/builtBy injected — verified in the v0.5.0+ nix builds);
+            encoding/json/v2 shipped via GOEXPERIMENT=jsonv2; the testify/ginkgo
+            question is now ROADMAP.md Open Question 3.
           </p>
         </div>
 

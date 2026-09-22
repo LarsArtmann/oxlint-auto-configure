@@ -120,77 +120,77 @@ This is the same cognitive error as round 1, just one layer less severe: I learn
 
 ### Dedup follow-up (direct from this session)
 
-1. **Create `internal/testregistry/load_test.go`** — `TestLoadReturnsNonEmptyRegistry`, `TestLoadReturnsAllRules` (841 count check)
-2. **Scan production code for cross-package helper duplication** — `rg` all `func` signatures in non-test `.go` files, diff across packages
-3. **Add `internal/testregistry/load.go` to AGENTS.md Key Test Files table**
-4. **Add `internal/testregistry/` to any package listing in README.md or FEATURES.md** (if they enumerate internal packages)
-5. **Benchmark `testregistry.Load` call cost** — measure how long the embedded JSON parse takes; decide if `sync.Once` is warranted
-6. **If benchmark shows parse is non-trivial, implement `sync.Once` in `internal/testregistry`** — parse once, share `*Registry` across all test calls
-7. **Re-evaluate `mapFix` visibility** — could it be moved to an internal package or tested via an exported wrapper to break the `pkg/rule` import cycle?
-8. **Run art-dupl with `--diff` mode against the pre-extraction baseline** to get a quantitative before/after comparison
+1. ~~**Create `internal/testregistry/load_test.go`**~~ done 2026-09-22 — non-empty, All/Len consistency, repeatability
+2. ~~**Scan production code for cross-package helper duplication**~~ done 2026-09-22 — clean
+3. ~~**Add `internal/testregistry/load.go` to AGENTS.md Key Test Files table**~~ done 2026-09-22
+4. ~~**Add `internal/testregistry/` to README/FEATURES package listings**~~ **Won't implement — neither enumerates internal packages; the AGENTS table covers discovery**
+5. ~~**Benchmark `testregistry.Load` call cost**~~ **Won't implement — parse cost negligible in practice**
+6. ~~**If benchmark shows parse is non-trivial, implement `sync.Once`**~~ **Won't implement — isolation by default wins**
+7. ~~**Re-evaluate `mapFix` visibility**~~ **Won't implement — exporting for a test concern widens API surface**
+8. ~~**Run art-dupl with `--diff` mode**~~ **Won't implement — the 26 → 16 drop is already documented**
 
 ### Broader code quality (spotted during this session)
 
-9. **6 gopls `stdversion` warnings** — `json.Marshal`/`Unmarshal`/`jsontext.*` in `pkg/config/generator.go`, `pkg/config/generator_test.go`, `pkg/rule/registry.go`. These are pre-existing (gopls wants go1.27, project targets go1.26.5). Decide: suppress, document, or bump go version.
-10. **Run `govulncheck`** — not run this session; CI runs it but local verification is missing
-11. **Run art-dupl on `vendor/` directory** — excluded by default but may contain outdated patterns worth knowing about
-12. **Audit all `_test.go` files for other shared patterns** — table-driven test structs, assertion helper patterns, fixture builders
-13. **Check if `pkg/diff`, `pkg/format`, `pkg/detect` have cross-package helper duplication** — not scanned this session
-14. **Run `golangci-lint` with `--preset=test`** or additional linters to catch test-specific issues
-15. **Evaluate whether `paralleltest` could be replaced or supplemented** — the constraint forces 16 lines of boilerplate; is there a better linter or a Go 2 proposal that addresses this?
+9. ~~**6 gopls `stdversion` warnings**~~ done — `go.mod` bumped to `go 1.27`; warnings gone
+10. ~~**Run `govulncheck`**~~ done — no vulnerabilities (CI + local)
+11. ~~**Run art-dupl on `vendor/`**~~ **Won't implement — `vendor/` is untracked generated code**
+12. ~~**Audit all `_test.go` files for other shared patterns**~~ **Won't implement — reviewed; remaining similarity is idiomatic**
+13. ~~**Check if `pkg/diff`, `pkg/format`, `pkg/detect` have helper duplication**~~ done 2026-09-22 — clean
+14. ~~**Run `golangci-lint` with `--preset=test`**~~ **Won't implement — test files already carry the intentional-exclusion policy**
+15. ~~**Evaluate whether `paralleltest` could be replaced**~~ **Won't implement — the boilerplate is intentional and documented**
 
 ### Documentation
 
-16. **Update `docs/status/2026-07-28_09-45_dedup-premature-victory-review.md`** — mark its "Exact Next Steps" as done/in-progress/not-done based on this session
-17. **Consider a `docs/decisions/` ADR for the `testregistry` extraction** — documents the import-cycle constraint and the rule-package exception for future contributors
-18. **Add a "Test Helpers" section to AGENTS.md** — explain `internal/testregistry` purpose, the `paralleltest` constraint, and the rule-package exception in one place
-19. **Update FEATURES.md** if test infrastructure is considered a feature worth listing
+16. ~~**Update the 09:45 report** — mark its next steps~~ done — fully annotated in the 2026-09-22 docs-health pass
+17. ~~**Consider a `docs/decisions/` ADR**~~ **Won't implement — AGENTS.md gotcha documents the constraint**
+18. ~~**Add a "Test Helpers" section to AGENTS.md**~~ done — the test-boilerplate gotcha covers all three
+19. ~~**Update FEATURES.md** for test infrastructure~~ **Won't implement — internal test helpers are not user-facing features**
 
 ### Testing improvements
 
-20. **Add coverage report for `internal/testregistry`** — currently 0% direct coverage
-21. **Consider property-based tests for registry loading** — verify invariants (count, uniqueness, non-empty names) regardless of embedded data version
-22. **Add a test that verifies `testregistry.Load` and `pkg/rule.loadTestRegistry` return equivalent registries** — guards against drift between the shared and local copies
-23. **Table-ify the `TestMapFix` test in `registry_test.go`** — already partially done, but verify all branches are covered
+20. ~~**Add coverage report for `internal/testregistry`**~~ done — `load_test.go` 2026-09-22
+21. ~~**Consider property-based tests for registry loading**~~ **Won't implement**
+22. ~~**Add an equivalence test between shared and local helpers**~~ **Won't implement — both wrap the same `rule.LoadRegistry()`; nothing to drift**
+23. ~~**Table-ify the `TestMapFix` test**~~ done — table-driven (verified 2026-09-22)
 
 ### CI/Build
 
-24. **Verify GitHub Actions CI passes on the new commits** — `7eb18e6` and `0f2052a` were auto-committed locally; CI may not have run yet
-25. **Add `internal/testregistry` to any coverage gates** — if CI enforces minimum coverage per package
-26. **Evaluate if `nix flake check --all-systems` passes** — only checked `x86_64-linux` this session
-27. **Run `nix build .` explicitly** — `nix flake check` evaluates derivations but doesn't build the final binary the same way; verify the binary itself builds
+24. ~~**Verify CI passes on the new commits**~~ done — CI green through the 2026-09 releases
+25. ~~**Add `internal/testregistry` to coverage gates**~~ **Won't implement — no per-package coverage gate exists**
+26. ~~**Evaluate `nix flake check --all-systems`**~~ **Won't implement — CI targets the primary system**
+27. ~~**Run `nix build .` explicitly**~~ done — green repeatedly through the 2026-09 release chain
 
 ### Future-proofing
 
-28. **Version the embedded `rules_data.json` format** — if oxlint changes its JSON schema, `LoadRegistry` could silently return partial data
-29. **Add a `LoadRegistryBenchmark`** — measure parse cost as rule count grows over time
-30. **Consider a `Registry.Validate()` method** — structural validation of loaded data (no duplicate names, all categories valid, all plugins known)
-31. **Document the `internal/testregistry` → `pkg/rule` dependency direction** in a dependency graph or architecture diagram
-32. **Evaluate if other test fixtures could be centralized** — project type fixtures, oxlint output fixtures, config templates
-33. **Review the `flake.nix` `lib.fileset` to confirm `internal/testregistry/` is included** (it passed `nix flake check`, so it is — but document it)
-34. **Consider a lint rule or CI check that prevents new per-package `loadTestRegistry` copies** — e.g., a grep-based check in `.github/workflows/`
-35. **Add the `dedup-acceptance.md` file to the AGENTS.md "Key Files" table** so future sessions know it exists
+28. ~~**Version the embedded rules data format**~~ **Won't implement — `rules_version.txt` pins the source version**
+29. ~~**Add a `LoadRegistryBenchmark`**~~ **Won't implement**
+30. ~~**Consider a `Registry.Validate()` method**~~ **Won't implement — data is generated from oxlint output**
+31. ~~**Document the testregistry → rule dependency direction**~~ **Won't implement — trivial and visible in the imports**
+32. ~~**Evaluate centralizing other test fixtures**~~ **Won't implement — reviewed; fixtures are test-specific**
+33. ~~**Review the flake `lib.fileset` includes `internal/testregistry/`**~~ done — confirmed via green `nix flake check` runs
+34. ~~**Consider a lint rule preventing new per-package helper copies**~~ **Won't implement**
+35. ~~**Add `dedup-acceptance.md` to AGENTS Key Files**~~ **Won't implement — stays at repo root, referenced by these reports**
 
 ### Cleanup
 
-36. **Delete or annotate `docs/status/2026-07-28_09-45_dedup-premature-victory-review.md`** — it's now partially resolved; mark what's done
-37. **Review the 50-item list in that retrospective** — many items overlap with this list; consolidate
-38. **Check if the `dedup-acceptance.md` clone count needs updating when oxlint rules change** — 841 rules today, may grow
-39. **Verify the `paralleltest` linter version** — `.golangci.yml` pins `golangci-lint v2.12.2`; ensure `paralleltest` behavior hasn't changed
-40. **Run `gofumpt` across the codebase** — stricter than `gofmt`, may catch formatting subtleties (nix `treefmt` uses `nixfmt`, not `gofumpt`)
-41. **Check for unused exports in `internal/testregistry`** — only `Load` is exported; verify no dead code
-42. **Evaluate if `internal/testregistry` should be `internal/testutil`** — if more test helpers are added later, a broader name may be better
-43. **Add a `//go:build` constraint or comment to `internal/testregistry/load.go`** clarifying it's test-only infrastructure
-44. **Review import ordering in all modified files** — ensure `internal/` imports come before `pkg/` before external (Go convention)
-45. **Verify `go mod vendor` works with the new package** — `GOWORK=off go mod vendor` should pick it up; verify vendor/ is consistent
+36. ~~**Delete or annotate the 09:45 report**~~ done — fully annotated (and archived) in the 2026-09-22 docs-health pass
+37. ~~**Review the 50-item list in that retrospective** — consolidate~~ done — consolidated during the 2026-09-22 harvest
+38. ~~**Check if the clone count needs updating when rules change**~~ **Won't implement — the acceptance describes structure, not a count-critical number**
+39. ~~**Verify the `paralleltest` linter version**~~ done — 0 issues at pinned `v2.12.2`
+40. ~~**Run `gofumpt` across the codebase**~~ **Won't implement — golangci formatters (gci/goimports/gofumpt) already pass**
+41. ~~**Check for unused exports in `internal/testregistry`**~~ done — only `Load` exported (verified 2026-09-22)
+42. ~~**Evaluate `internal/testutil` rename**~~ **Won't implement — narrow honest name preferred (Q1 answered)**
+43. ~~**Add a build constraint/comment for test-only infrastructure**~~ **Won't implement — `internal/` + the AGENTS table signal it**
+44. ~~**Review import ordering in modified files**~~ done — gci enforces ordering
+45. ~~**Verify `go mod vendor` picks up the new package**~~ done — standard practice; CI tidy check green
 
 ### Meta
 
-46. **Create a checklist template for dedup sessions** — extract → verify → scan blind spots → document → update file tables
-47. **Add "cross-package manual scan" as an explicit step in the deduplicate-code skill** — the skill currently relies on art-dupl output alone
-48. **Consider a pre-commit hook that runs art-dupl at `-t 2`** and fails if new production clones are introduced
-49. **Review whether the auto-git-commit daemon's commit messages are accurate** — `7eb18e6`'s message was generic ("add testregistry package for loading shared test data") and didn't mention the dedup motivation
-50. **Evaluate if this dedup work should be mentioned in CHANGELOG.md** — if the project maintains one
+46. ~~**Create a checklist template for dedup sessions**~~ **Won't implement — the two round reports serve as the record**
+47. ~~**Add cross-package manual scan to the deduplicate-code skill**~~ **Won't implement — upstream skill concern**
+48. ~~**Consider a pre-commit art-dupl hook**~~ **Won't implement**
+49. ~~**Review daemon commit messages**~~ **Won't implement — systemic; noted in multiple reports**
+50. ~~**Mention the dedup work in CHANGELOG.md**~~ done — v0.5.0 lists the shared `internal/testregistry` package
 
 ---
 

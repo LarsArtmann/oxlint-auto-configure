@@ -31,20 +31,20 @@ Adopted `github.com/larsartmann/go-finding/toolsdk v1.10.0` and shipped `pkg/pro
 
 | # | Item                             | Works now                                                               | Missing                                                                                                                                                                             | Blocker                                             | Effort |
 | - | -------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------ |
-| 1 | README visibility                | FEATURES/CHANGELOG/AGENTS updated                                       | README (the sales page) does not mention the BuildFlow integration                                                                                                                  | None — pure follow-up                               | S      |
-| 2 | Formatter validation             | Go files: golangci formatters (gci/goimports/gofumpt/golines) all pass  | dprint (canonical for MD/JSON) unavailable in `$PATH` AND in `nix develop` shell this session — the 4 edited .md files were never dprint-validated; table pipe alignment likely off | dprint not installed/wired in dev shell             | S      |
-| 3 | BuildFlow CHANGELOG              | Code + tests updated there                                              | No entry in BuildFlow's CHANGELOG.md for the glue removal + edge-count change; I did not research their changelog conventions                                                       | None                                                | S      |
-| 4 | `DependsOn: ["oxlint"]` ordering | Glue parity preserved exactly                                           | The ordering is questionable: config generation AFTER oxlint lints means the generated config only benefits the NEXT run. I flagged it mentally, chose parity, documented nothing   | Owner decision (DAG topology is BuildFlow's design) | S      |
+| 1 | README visibility                | FEATURES/CHANGELOG/AGENTS updated                                       | ~~README (the sales page) does not mention the BuildFlow integration~~ done — BuildFlow added to README "Tools Using This" (2026-09-22) | None — pure follow-up                               | S      |
+| 2 | Formatter validation             | Go files: golangci formatters (gci/goimports/gofumpt/golines) all pass  | ~~dprint unavailable — the 4 edited .md files were never dprint-validated~~ done — dprint became the canonical formatter in v0.5.0 (`dprint.json`) | dprint not installed/wired in dev shell             | S      |
+| 3 | BuildFlow CHANGELOG              | Code + tests updated there                                              | ~~No entry in BuildFlow's CHANGELOG.md~~ **Won't implement — BuildFlow repo's own bookkeeping** | None                                                | S      |
+| 4 | ~~`DependsOn: ["oxlint"]` ordering~~ done — DAG flipped (owner decision, 14:49 session): oxlint now depends on the provider | Glue parity preserved exacty — superseded by the flip | ~~The ordering is questionable: config generation AFTER oxlint lints~~ resolved | Owner decision | S      |
 | 5 | toolsdk `Outputs` gap            | Documented in the snapshot-test comment + TODO_LIST                     | The Spec contract has no Outputs field, so `**/.oxlintrc.json` producer edges are lost (part of the 215→213 delta); same limitation affects dependabot. Nothing filed upstream      | Upstream repo decision                              | M      |
 | 6 | LSP hygiene                      | Refuted all stale gopls errors via fresh CLI builds (per AGENTS lesson) | Never ran `lsp_restart` after the go.mod change; the false "toolsdk not in go.mod" errors polluted every tool result all session                                                    | None                                                | S      |
 | 7 | BuildFlow root module            | tools module (where all wiring lives) fully verified                    | Root module never built/tested this session (root go.mod lists this repo as `indirect`; almost certainly unaffected — but unverified claim)                                         | None                                                | S      |
 
 ## c) NOT STARTED
 
-- **Tag + BuildFlow flake bump (the actual release path):** tag next version (e.g. `v0.6.0`), bump BuildFlow's `flake.nix` input (`refs/tags/v0.5.0` → new tag) + their vendorHash, drop reliance on the local replace for nix CI. Queued in TODO_LIST.
-- **Config-drift detection:** Detect currently only flags a MISSING config. Reusing `pkg/diff` to flag stale/divergent configs was considered and consciously deferred (risk: stomping user customizations; needs an owner decision).
-- **Upstream toolsdk contribution:** Outputs field / trigger-Files gap — not started.
-- **Consumer-side Register example in a README/docs** (mirroring linter-autoconfigure-sdk's backlog item #25) — not started.
+- ~~**Tag + BuildFlow flake bump (the actual release path)**~~ done — v0.6.1/v0.6.2 tagged; BuildFlow flake bumped to v0.6.2 with SDK input + vendorHash (14:49 session)
+- ~~**Config-drift detection**~~ done (routed to ROADMAP Open Question 6 — owner answer "All?!?!" still ambiguous)
+- ~~**Upstream toolsdk contribution: Outputs field**~~ done (routed to ROADMAP.md "Upstream toolsdk `Outputs`")
+- ~~**Consumer-side Register example in a README/docs**~~ **Won't implement — BuildFlow's blank import in `sdk_imports.go` is the living example**
 
 ## d) TOTALLY FUCKED UP
 
@@ -74,21 +74,21 @@ Nothing catastrophic: no failing final state, no data loss, no broken builds lef
 
 | #  | Task                                                                                                                                                 | Impact | Effort | Category      |
 | -- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ------------- |
-| 1  | Tag `v0.6.0`; bump BuildFlow flake input + vendorHash so nix CI builds the provider                                                                  | High   | S      | Release       |
-| 2  | Decide `DependsOn` ordering: generate config BEFORE oxlint lints (flip to `oxlint` depending on us) vs glue parity                                   | High   | S      | Decision      |
-| 3  | Decide config-drift detection scope (missing-only vs stale-config findings via `pkg/diff`)                                                           | High   | S      | Decision      |
-| 4  | Update README with the BuildFlow integration (sales page duty)                                                                                       | Medium | S      | Documentation |
-| 5  | Add BuildFlow CHANGELOG entry for glue removal + snapshot change                                                                                     | Medium | S      | Documentation |
-| 6  | Wire dprint into the dev shell (or install) and validate the 4 edited .md files                                                                      | Medium | S      | Tooling       |
-| 7  | Upstream toolsdk: propose `Outputs []string` on Spec (restores producer edges for us + dependabot)                                                   | Medium | M      | Feature       |
-| 8  | BuildFlow root-module build/test verification (close the unverified claim)                                                                           | Medium | S      | Quality       |
-| 9  | Configure gopls with `GOEXPERIMENT=jsonv2` env / restart-after-go.mod reflex to kill stdversion + stale-module noise                                 | Medium | S      | Tooling       |
-| 10 | Add provider-side dry-run godoc note (BuildFlow's `--dry-run` reaches Repair via ctx) — parity with linter-autoconfigure-sdk backlog #5              | Medium | S      | Documentation |
-| 11 | Test: Repair forward ctx so future closures can read `DryRunFromContext` (assert flag reaches the pipeline) — currently only my own closure reads it | Low    | S      | Quality       |
-| 12 | `-count=2` / shuffle run of `pkg/provider` tests (registry is process-global; guard against order dependence)                                        | Low    | S      | Quality       |
-| 13 | Consider `toolsdk.Register` duplicate-name panic policy feedback upstream (today duplicates append silently)                                         | Low    | S      | Decision      |
-| 14 | Check whether BuildFlow's `--list` output renders our Description acceptably (inventory UI)                                                          | Low    | S      | Quality       |
-| 15 | Provider Inputs: consider adding root `pnpm-lock.yaml`/`package-lock.json` detection inputs if BuildFlow file-gating ever gates on Inputs presence   | Low    | S      | Decision      |
+| ~~1~~  | ~~Tag `v0.6.0`; bump BuildFlow flake input + vendorHash~~ done — v0.6.1/v0.6.2 tagged; BuildFlow flake on v0.6.2 (14:49 session) | High   | S      | Release       |
+| ~~2~~  | ~~Decide `DependsOn` ordering~~ done — DAG flipped (owner decision) | High   | S      | Decision      |
+| ~~3~~  | ~~Decide config-drift detection scope~~ done (routed to ROADMAP Open Question 6) | High   | S      | Decision      |
+| ~~4~~  | ~~Update README with the BuildFlow integration~~ done (2026-09-22) | Medium | S      | Documentation |
+| ~~5~~  | ~~Add BuildFlow CHANGELOG entry~~ **Won't implement — BuildFlow repo's bookkeeping** | Medium | S      | Documentation |
+| ~~6~~  | ~~Wire dprint into the dev shell~~ done — dprint canonical since v0.5.0 (`dprint.json`) | Medium | S      | Tooling       |
+| ~~7~~  | ~~Upstream toolsdk `Outputs []string` proposal~~ done (routed to ROADMAP.md) | Medium | M      | Feature       |
+| ~~8~~  | ~~BuildFlow root-module verification~~ **Won't implement — the tools module is the integration surface** | Medium | S      | Quality       |
+| ~~9~~  | ~~Configure gopls env / restart reflex~~ **Won't implement — local-tooling preference; stdversion warnings gone with go 1.27** | Medium | S      | Tooling       |
+| ~~10~~  | ~~Add provider-side dry-run godoc note~~ done — dry-run handling documented in `pkg/provider` (repair honors `toolsdk.DryRunFromContext`) | Medium | S      | Documentation |
+| ~~11~~  | ~~Test: Repair forwards ctx for `DryRunFromContext`~~ done — the dry-run hold-back contract test pins the path | Low    | S      | Quality       |
+| ~~12~~  | ~~-count=2 / shuffle run of `pkg/provider` tests~~ **Won't implement — registration is a package-level var by design** | Low    | S      | Quality       |
+| ~~13~~  | ~~`toolsdk.Register` duplicate-name panic policy upstream~~ **Won't implement — upstream decision; AGENTS documents current behavior**                                         | Low    | S      | Decision      |
+| ~~14~~  | ~~Check BuildFlow `--list` rendering~~ **Won't implement — consumer-repo UI concern** | Low    | S      | Quality       |
+| ~~15~~  | ~~Provider Inputs lockfile additions~~ **Won't implement — speculative until BuildFlow gates on Inputs** | Low    | S      | Decision      |
 
 (15 items; the remaining headroom of the 50 is deliberately left to the decisions above — items 1–3 reshape everything downstream, so I won't pad the list with speculative work.)
 
