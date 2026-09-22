@@ -40,12 +40,12 @@ const (
 	// missingConfigRule is the go-finding rule name reported when a
 	// recognizable JS/TS project has no oxlint config yet.
 	missingConfigRule = "OXLOPT_CONFIG_MISSING"
-
-	// errConfigDrift is wrapped by the HealthCheck when an existing config no
-	// longer matches what the tool would generate. Advisory only: consumers
-	// must never treat it as a trigger to rewrite the config.
-	errConfigDrift = errors.New("config drift detected")
 )
+
+// errConfigDrift is wrapped by the HealthCheck when an existing config no
+// longer matches what the tool would generate. Advisory only: consumers
+// must never treat it as a trigger to rewrite the config.
+var errConfigDrift = errors.New("config drift detected")
 
 // oxlintConfigFiles are the config file names oxlint itself searches for, in
 // priority order (mirrors BuildFlow's findOxlintConfig in

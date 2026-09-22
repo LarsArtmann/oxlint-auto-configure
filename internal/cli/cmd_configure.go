@@ -86,7 +86,7 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 	if !opts.Profile.IsValid() {
 		return fmt.Errorf(
 			"%w %q: choose from %s",
-			config.ErrInvalidProfile,
+			profile.ErrInvalidProfile,
 			opts.Profile,
 			strings.Join(profile.AllProfileNames(), ", "),
 		)

@@ -20,9 +20,9 @@ import (
 // existing config survives a regeneration verbatim; entries are only ever
 // added, never removed.
 //
-// "overrides" blocks are preserved wholesale for the same reason: the
-// generator never emits them. They are pure existing policy (for example
-// @shadcn/lint's component-dir disables). Exact-duplicate blocks are
+// Overrides blocks are preserved wholesale for the same reason: the
+// generator never emits them. They are pure existing policy, for example
+// @shadcn/lint's component-dir disables. Exact-duplicate blocks are
 // collapsed; everything else survives verbatim, order preserved.
 func PreserveExternal(existing, generated *OxlintConfig) *OxlintConfig {
 	if existing == nil {
