@@ -78,13 +78,23 @@ func (d *Differ) compareOverrides(before, after []map[string]any, prefix string)
 
 	for _, key := range sortedKeys(beforeKeys) {
 		if !afterKeys[key] {
-			changes = append(changes, Change{Rule: prefix + key, Kind: KindRemoved})
+			changes = append(changes, Change{
+				Rule:     prefix + key,
+				OldValue: key,
+				NewValue: "",
+				Kind:     KindRemoved,
+			})
 		}
 	}
 
 	for _, key := range sortedKeys(afterKeys) {
 		if !beforeKeys[key] {
-			changes = append(changes, Change{Rule: prefix + key, Kind: KindAdded})
+			changes = append(changes, Change{
+				Rule:     prefix + key,
+				OldValue: "",
+				NewValue: key,
+				Kind:     KindAdded,
+			})
 		}
 	}
 

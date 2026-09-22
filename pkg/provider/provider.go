@@ -13,6 +13,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -39,6 +40,11 @@ const (
 	// missingConfigRule is the go-finding rule name reported when a
 	// recognizable JS/TS project has no oxlint config yet.
 	missingConfigRule = "OXLOPT_CONFIG_MISSING"
+
+	// errConfigDrift is wrapped by the HealthCheck when an existing config no
+	// longer matches what the tool would generate. Advisory only: consumers
+	// must never treat it as a trigger to rewrite the config.
+	errConfigDrift = errors.New("config drift detected")
 )
 
 // oxlintConfigFiles are the config file names oxlint itself searches for, in
@@ -164,13 +170,14 @@ func detectMissingConfig(ctx context.Context) ([]autoconfigure.ConfigIssue, erro
 // missing-config finding, and Repair generates on demand); the other config
 // file names oxlint accepts (.oxlintrc.jsonc, oxlint.config.json) are
 // user-curated configs this tool never writes, so they are out of scope. A
-// returned error is advisory by contract: it names the drift and the fix,
-// and states that nothing was modified.
+// returned error is advisory by contract: it wraps errConfigDrift, names the
+// fix, and states that nothing was modified.
 func healthCheckDrift(ctx context.Context) error {
 	root := workingDir(ctx)
 
 	path := configPath(root)
 	if _, err := os.Stat(path); err != nil {
+		//nolint:nilerr // a missing config is healthy: Detect owns that finding
 		return nil
 	}
 
@@ -182,7 +189,7 @@ func healthCheckDrift(ctx context.Context) error {
 	existing, err := config.FromJSON(existingData)
 	if err != nil {
 		return fmt.Errorf(
-			"%s health: %s is malformed (%v); run `oxlint-auto-configure configure` to regenerate",
+			"%s health: %s is malformed (%w); run `oxlint-auto-configure configure` to regenerate",
 			toolName, configFileName, err)
 	}
 
@@ -208,8 +215,10 @@ func healthCheckDrift(ctx context.Context) error {
 	}
 
 	return fmt.Errorf(
-		"%s health: %s has drifted from the generated config (%s); run `oxlint-auto-configure configure` to regenerate (advisory only — nothing was modified)",
-		toolName, configFileName, d.Summary())
+		"%w: %s has drifted from the generated config (%s); "+
+			"run `oxlint-auto-configure configure` to regenerate "+
+			"(advisory only — nothing was modified)",
+		errConfigDrift, configFileName, d.Summary())
 }
 
 // hasKnownProjectType reports whether at least one detected project type is

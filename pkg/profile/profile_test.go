@@ -257,7 +257,7 @@ func TestParse(t *testing.T) {
 
 		for _, p := range AllProfiles() {
 			got, err := Parse(p.String())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, p, got)
 		}
 	})
@@ -267,7 +267,7 @@ func TestParse(t *testing.T) {
 
 		_, err := Parse("recommended")
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrProfileRemoved)
+		require.ErrorIs(t, err, ErrProfileRemoved)
 		assert.Contains(t, err.Error(), "strict",
 			"migration error must name the replacement profile")
 	})
@@ -277,7 +277,7 @@ func TestParse(t *testing.T) {
 
 		_, err := Parse("no-such-profile")
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrInvalidProfile)
+		require.ErrorIs(t, err, ErrInvalidProfile)
 		assert.Contains(t, err.Error(), "maximal-typesafe, strict, minimal")
 	})
 }

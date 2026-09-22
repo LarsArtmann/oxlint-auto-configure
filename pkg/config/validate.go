@@ -14,6 +14,7 @@ import (
 var ErrInvalidConfig = errors.New("invalid config")
 
 // ErrInvalidProfile is returned when an unknown profile name is given.
+//
 // Deprecated: alias of profile.ErrInvalidProfile (same value), kept so
 // errors.Is callers keep matching; use profile.ErrInvalidProfile directly.
 var ErrInvalidProfile = profile.ErrInvalidProfile

@@ -21,7 +21,7 @@ import (
 // added, never removed.
 //
 // "overrides" blocks are preserved wholesale for the same reason: the
-// generator never emits them, so they are pure existing policy (e.g.
+// generator never emits them. They are pure existing policy (for example
 // @shadcn/lint's component-dir disables). Exact-duplicate blocks are
 // collapsed; everything else survives verbatim, order preserved.
 func PreserveExternal(existing, generated *OxlintConfig) *OxlintConfig {
@@ -111,6 +111,7 @@ func preserveOverrides(existing, generated *OxlintConfig) {
 		}
 
 		seen[key] = true
+
 		merged = append(merged, block)
 	}
 

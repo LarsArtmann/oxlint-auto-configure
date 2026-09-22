@@ -37,7 +37,7 @@ func newReportCommand() *cobra.Command {
 
 			p, err := profile.Parse(profileFlag)
 			if err != nil {
-				return err
+				return fmt.Errorf("parse profile flag: %w", err)
 			}
 
 			reg, err := rule.LoadRegistry()

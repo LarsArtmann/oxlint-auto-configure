@@ -49,7 +49,7 @@ Profiles:
 
 			p, err := profile.Parse(profileFlag)
 			if err != nil {
-				return err
+				return fmt.Errorf("parse profile flag: %w", err)
 			}
 
 			opts := ConfigureOptions{

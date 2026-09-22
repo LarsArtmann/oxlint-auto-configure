@@ -302,6 +302,7 @@ func TestHealthCheck_PreservedOverridesAreNotDrift(t *testing.T) {
 
 	cfg, err := config.FromJSON(data)
 	require.NoError(t, err)
+
 	cfg.Overrides = append(cfg.Overrides, map[string]any{
 		"files": []any{"src/components/ui/**"},
 		"rules": map[string]any{"shadcn/no-restyle": "off"},
