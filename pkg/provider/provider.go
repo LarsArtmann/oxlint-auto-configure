@@ -210,7 +210,7 @@ func healthCheckDrift(ctx context.Context) error {
 	expected = config.PreserveExternal(existing, expected)
 
 	d := diff.NewDiffer(existing, expected)
-	if len(d.Diff()) == 0 {
+	if !d.HasChanges() {
 		return nil
 	}
 

@@ -67,6 +67,11 @@ func (d *Differ) Diff() []Change {
 	return changes
 }
 
+// HasChanges reports whether the two configs differ at all.
+func (d *Differ) HasChanges() bool {
+	return len(d.Diff()) > 0
+}
+
 // compareOverrides compares overrides blocks by their canonical JSON form.
 // Array order is ignored: a pure reorder is not a meaningful drift signal for
 // an advisory check (oxlint applies the whole list either way).
