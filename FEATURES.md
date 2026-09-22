@@ -52,6 +52,7 @@ Status legend:
 | Version metadata at build time                                 | FULLY_FUNCTIONAL     | `internal/cli/cmd_root.go`, `.goreleaser.yaml`, `flake.nix` | Goreleaser and nix both inject `version`, `commit`, `date`, `builtBy` via ldflags.                                                                        |
 | Entry-point test coverage                                      | FULLY_FUNCTIONAL     | `cmd/oxlint-auto-configure/main_test.go`             | `--version`, `--help`, and binary-build tests.                                                                                                           |
 | E2E round-trip test (configure → parse → verify)               | FULLY_FUNCTIONAL     | `internal/cli/e2e_test.go`                           | Generates a config and re-parses it via `config.FromJSON`. A three-command chain (configure → validate → report) is not covered.                         |
+
 ## Documentation
 
 | Feature                   | Status           | Evidence                  | Notes                                   |
@@ -67,11 +68,11 @@ Status legend:
 
 ## Known Gaps (captured in TODO_LIST.md)
 
-- `go.mod` pins `go 1.26.4`; `encoding/json/v2` triggers gopls `stdversion` warnings (`json.Marshal` requires go1.27).
-- No `go mod vendor` consistency check in CI.
-- No entry-point tests for `cmd/oxlint-auto-configure` (0% coverage).
-- No E2E round-trip test (configure -> validate -> report).
-- Embedded rules pinned to oxlint `1.59.0` while runtime is `1.73.0` (produces a `WARN` on every run).
-- Local `golangci-lint run ./...` reports ~116 issues (depguard, varnamelen, mnd, tagliatelle, err113, forbidigo) while CI passes (version/config mismatch).
-- No dedicated test for the atomic-write contract (no `.tmp` leftovers, valid JSON always).
-- `nix build .` and `nix flake check .` fail after `ec08705` (go directive `1.26.5` -> `1.26.4`); the `mkPreparedSource` go-modules derivation reports "go: updates to go.mod needed." `go build`/`go test`/`go vet` all pass.
+- Embedded registry pinned to oxlint `1.73.0`; newer oxlint releases (1.82.x) trigger the version-mismatch warning on every run. Refresh pending (`oxlint -f json --rules` + `TestRegistryTotal`).
+- CI installs unpinned oxlint (`npm install -g oxlint`); an upstream rule addition can break `TestRegistryTotal` without warning.
+- `analyze` is untested against configs that register `jsPlugins`; a registered-but-uninstalled plugin makes oxlint fail to load and the pipeline's error surfacing is unknown.
+- `report`/`analyze` have no external-plugin awareness (stats cover the embedded registry only).
+- `internal/cli` coverage is 82.7%; the remaining gap is oxlint-integration code (`runAnalyze`, `runFixIfNeeded`).
+- Docker image is distroless with the binary only — no oxlint inside, so `analyze` and `--fix` cannot run in the container (`configure` works and warns).
+- Release-hardening backlog: no `scripts/pre-release-check.sh`, no disabled-workflow canary, no container image signing/SLSA, GoReleaser `brews`/`dockers` deprecation warnings, `anchore/sbom-action@v0` still tag-pinned.
+- Community files missing: `SECURITY.md`, issue/PR templates, `CODEOWNERS`; no social preview image.

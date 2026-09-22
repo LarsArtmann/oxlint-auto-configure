@@ -19,7 +19,7 @@ Raw ideas:
 
 ### 2. Profile and Rule Intelligence
 
-Profiles are functional but `strict` and `recommended` are currently identical. The rule registry is updated to oxlint `1.73.0` (matching runtime).
+Profiles are functional but `strict` and `recommended` are currently identical. The rule registry is pinned to oxlint `1.73.0`; newer runtime releases trigger a version-mismatch warning (refresh tracked in `TODO_LIST.md` R1).
 
 Raw ideas:
 
@@ -49,6 +49,9 @@ Raw ideas:
 - **Typed errors across packages.** `detect`, `config`, and `oxlint` packages still return generic `error`; migrate to typed errors via the `hierarchical-errors` pattern.
 - **BDD tests for all commands.** Behavior-driven tests (via the `bdd-testing` skill) for `configure`, `analyze`, `validate`, `report`.
 - **Coverage threshold in CI.** Gate PRs on >=80% coverage to prevent regression.
+- **Upstream toolsdk `Outputs`.** Propose `Outputs []string` on `Spec` so BuildFlow regains `**/.oxlintrc.json` producer edges (lost in the `ProviderFromSpec` migration; affects dependabot the same way).
+- **`doctor` command.** One-shot diagnosis: oxlint version vs. `jsPlugins` needs, plugin installed-but-unregistered, registered-but-uninstalled, registry-version drift.
+- **Docker image with oxlint.** The distroless image ships the binary only; `analyze`/`--fix` cannot run inside it. Either bake oxlint in or document the limitation.
 
 ## Open Questions
 
@@ -59,6 +62,9 @@ Decisions that need user input before they can become actionable tasks:
 3. **testify to ginkgo/gomega migration?** Establish a testing framework policy for this project.
 4. **Modularization proposal: execute or archive?** The docs were deleted but the decision to pursue modularization remains open.
 5. **Markdown or HTML for status reports?** The `status-report` skill prescribes styled HTML dashboards; the user has requested `.md` repeatedly. A split format exists in `docs/status/`. Pick one canonical format and document the decision.
+6. **Config-drift detection scope?** Owner answer to "detect stale configs too?" was "All?!?!" (ambiguous). Detect currently flags only a MISSING config; flagging drift risks Repair stomping user customizations. Needs a decision before design. _(Source: 2026-09-11 14:49 report, §g.1)_
+7. **Preserve `overrides` blocks for external rules?** `@shadcn/lint`'s setup disables rules inside component dirs via an `overrides` block, which regeneration drops today — same data-loss class as the one `PreserveExternal` fixed. Preserving broadens the "tool owns the file" contract. _(Source: 2026-09-22 report, §g.2)_
+8. **GitHub Discussions on/off, and social-preview branding?** Community-surface and visual-identity calls only the owner can make. _(Source: 2026-09-11 07:27 report, §g.1–2)_
 
 ## Resolved Questions
 
@@ -77,4 +83,4 @@ Things we are deliberately NOT pursuing, per the project scope boundary:
 
 ---
 
-_Last reviewed: 2026-07-27_
+_Last reviewed: 2026-09-22_

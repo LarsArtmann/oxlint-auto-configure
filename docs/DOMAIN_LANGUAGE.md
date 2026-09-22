@@ -22,6 +22,7 @@ If a word means something different to a developer than to a customer, define it
 | **go-finding**            | The static-analysis pipeline library used by `analyze`.                                                                                        | Dependency                                         |
 | **Atomic Write**          | Crash-durable file write: temp file + fsync + atomic rename. Used for `.oxlintrc.json` output so a crash mid-write cannot truncate the config. | `internal/cli/cmd_configure.go`, `go-atomic-write` |
 | **Crash Durability**      | The guarantee that a config write either fully succeeds or leaves the existing file untouched, even if the process is killed mid-write.        | Quality attribute                                  |
+| **External Plugin**       | An oxlint JS plugin loaded at runtime via `jsPlugins` (e.g. `@shadcn/lint`). Contract: detect it, register it, never enable its rules, always preserve an existing setup. | `pkg/rule/external.go`, `pkg/config/preserve.go`   |
 
 ## Entities
 
@@ -34,6 +35,7 @@ Objects with identity and lifecycle.
 | **Generator**     | Creates the `.oxlintrc.json` structure from profile decisions.         | `pkg/config/generator.go` |
 | **Detector**      | Discovers project type from `package.json` and filesystem.             | `pkg/detect/detector.go`  |
 | **Report**        | A go-finding `Report` produced by the `analyze` command.               | `pkg/oxlint/detector.go`  |
+| **Spec**          | The toolsdk provider contract (`Detect`/`Repair`) exposing this tool to BuildFlow; registered at import time. | `pkg/provider/provider.go` |
 
 ## Value Objects
 
