@@ -122,8 +122,8 @@ This session produced the `GOEXPERIMENT=jsonv2` fix but left it uncommitted. The
 | `AGENTS.md` GOEXPERIMENT note            | Updated locally                | **SHIPPED**; later expanded with full gotcha section                  | 8913345           |
 | `.gitignore` `!vendor/` negation         | Restored locally               | **SHIPPED** and still present                                         | 8913345           |
 | `vendor/` + go.mod/go.sum changes        | Left dirty                     | **COMMITTED** through re-vendor in dc7d858 and hardening in 87505b0   | dc7d858 / 87505b0 |
-| BuildFlow `GOEXPERIMENT` support         | Suggested for `.buildflow.yml` | **OPEN** — not yet addressed in `.buildflow.yml`                      | —                 |
-| `go.mod` Go 1.27 bump                    | Not started                    | **OPEN** — `go.mod` still declares `go 1.26.4`; gopls warnings remain | —                 |
-| `TODO_LIST.md` / `FEATURES.md`           | Not started                    | **OPEN** — still missing as of 2026-07-22                             | —                 |
+| BuildFlow `GOEXPERIMENT` support         | Suggested for `.buildflow.yml` | ~~**OPEN**~~ **WON'T** — no `.buildflow.yml` exists in this repo      | —                 |
+| `go.mod` Go 1.27 bump                    | Not started                    | ~~**OPEN**~~ **DONE** — `go.mod` declares `go 1.27`; warnings gone    | —                 |
+| `TODO_LIST.md` / `FEATURES.md`           | Not started                    | ~~**OPEN**~~ **DONE** — created in the 2026-07-22 pass (`4a64b0d`)    | —                 |
 
 Current `master` is `0867c95` (CHANGELOG v0.2.1 update). The gopls warning and the missing project docs are still tracked in TODO_LIST.md.
