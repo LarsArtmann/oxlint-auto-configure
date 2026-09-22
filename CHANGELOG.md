@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Nothing yet.
+
+### Fixed
+
+- Nothing yet.
+
+## [0.7.0] - 2026-09-23
+
+### Added
+
 - `overrides` preservation: regeneration now copies every `overrides` block from an existing `.oxlintrc.json` verbatim (deduplicating exact duplicates by canonical JSON form, key order irrelevant). The generator never emits the field, so blocks like @shadcn/lint's component-dir disables can no longer be silently dropped — the same data-loss class `PreserveExternal` fixed for `jsPlugins`/rules/settings. The config differ compares overrides too.
 - Provider `HealthCheck` (toolsdk v1.13.0): an existing `.oxlintrc.json` that no longer matches what the tool would generate is reported as **advisory drift** — the error names the fix (`oxlint-auto-configure configure`) and states nothing was modified. BuildFlow treats health-check failures as warn-log + summary only (never skips the tool, never triggers a repair), so drift is visible without any risk of Repair stomping user customizations. Detect stays missing-only; Repair keeps its never-overwrite contract. Missing configs and user-curated `.oxlintrc.jsonc`/`oxlint.config.json` files are healthy.
 - `validate` now reads configs through linter-autoconfigure-sdk's typed `LoadJSON[config.OxlintConfig]` (first SDK consumer for CLI I/O). A missing config produces an error naming the fix (`run oxlint-auto-configure configure`) that stays programmatically detectable via `errors.Is(err, fs.ErrNotExist)` through the SDK's `*ConfigError` chain.
@@ -35,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Generated configs are byte-stable across runs.** `encoding/json/v2` serializes map keys in an order that changes between calls on the same map, so regenerating an unchanged config shuffled `rules`/`settings`/`env` key order (noisy VCS diffs, flaky comparisons). All output-facing marshals now set `json.Deterministic(true)`; pinned by `TestToJSONIsDeterministic`. The drift health check depends on this: its before/after comparison flapped without it.
 - `analyze` no longer reports a clean project when oxlint itself fails to start. oxlint signals startup failures (e.g. a `jsPlugins` package that cannot load) with exit code 1 and the error text on stdout — indistinguishable from "findings found" — which the pipeline swallowed under graceful degradation into "no findings — project is clean". Detector parse failures now surface oxlint's own message (with a stdout snippet), pipeline partial errors fail the command visibly, and plain notices oxlint prepends to the JSON (e.g. "No files found to lint.") are still parsed correctly instead of becoming false errors.
+- **Docker images publish with SBOM attestations again.** v0.6.4's release run died before publishing any artifact: the runner's default `docker` buildx driver rejects the `--attest=type=sbom` flag GoReleaser's `dockers_v2` passes (`Attestation is not supported for the docker driver`). The release workflow now provisions the `docker-container` driver via `docker/setup-buildx-action` before GoReleaser. The v0.6.4 tag itself stays tag-only (immutable once pushed); no published release was affected.
 
 ## [0.6.4] - 2026-09-22
 

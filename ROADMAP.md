@@ -62,6 +62,9 @@ Decisions that need user input before they can become actionable tasks:
 5. **Config-drift detection scope?** → **Resolved 2026-09-22: advisory drift reporting via the toolsdk Spec's HealthCheck** (owner: "use toolsdk to the max"). BuildFlow treats health-check failures as warn-log + summary only — it never skips the tool nor triggers Repair, so drift is visible without stomp risk. Detect stays missing-only; Repair keeps never-overwrite.
 6. **Preserve `overrides` blocks for external rules?** → **Resolved 2026-09-22: preserved wholesale** (owner: "preserve all, with smart deduplication"). `PreserveExternal` copies every `overrides` block verbatim, deduplicating exact duplicates by canonical JSON form (key-order-insensitive). The generator never emits the field.
 7. **GitHub Discussions on/off, and social-preview branding?** → **Resolved 2026-09-22: Discussions stay off** (issues only); social-preview branding not pursued.
+8. **Cut v0.7.0 now or batch?** → **Resolved 2026-09-22: tag now** (owner). The pre-release gate passed end-to-end (module consistency, build, vet, race tests, lint, `goreleaser check`, full snapshot), and the v0.6.4 release-pipeline blocker (Docker SBOM attestation vs. runner driver) is fixed in the same change.
+9. **Archived HTML status reports: trash or keep?** → **Resolved 2026-09-22: keep them** (owner) as historical artifacts; markdown remains canonical for new reports.
+10. **`errConfigDrift` visibility: unexported or export as `ErrConfigDrift`?** → **Resolved 2026-09-22: keep unexported** (owner; YAGNI — no programmatic consumer today). Export when BuildFlow/CI first needs `errors.Is` drift detection.
 
 ## Resolved Questions
 
