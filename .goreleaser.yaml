@@ -43,7 +43,8 @@ archives:
         {{- else }}{{ .Arch }}{{ end }}
     format_overrides:
       - goos: windows
-        format: zip
+        formats:
+          - zip
     files:
       - LICENSE*
       - README*
@@ -90,7 +91,7 @@ signs:
 sboms:
   - artifacts: archive
 
-brews:
+homebrew_casks:
   - name: oxlint-auto-configure
     skip_upload: true
     homepage: "https://github.com/LarsArtmann/oxlint-auto-configure"
@@ -99,14 +100,12 @@ brews:
     repository:
       owner: LarsArtmann
       name: homebrew-tap
-    directory: Formula
+    directory: Casks
     commit_author:
       name: goreleaserbot
       email: goreleaser@larsartmann.com
-    install: |
-      bin.install "oxlint-auto-configure"
-    test: |
-      system "#{bin}/oxlint-auto-configure --version"
+    binaries:
+      - oxlint-auto-configure
 
 nix:
   - name: oxlint-auto-configure
@@ -155,41 +154,36 @@ scoops:
     description: "Auto-configure oxlint for JavaScript/TypeScript projects"
     license: MIT
 
-dockers:
-  - image_templates:
-      - "ghcr.io/larsartmann/oxlint-auto-configure:{{ .Tag }}-amd64"
+dockers_v2:
+  - id: oxlint-auto-configure
+    images:
+      - "ghcr.io/larsartmann/oxlint-auto-configure"
+    tags:
+      - "{{ .Tag }}"
+      - latest
     dockerfile: Dockerfile
-    goarch: amd64
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source={{.GitURL}}"
-      - "--platform=linux/amd64"
-  - image_templates:
-      - "ghcr.io/larsartmann/oxlint-auto-configure:{{ .Tag }}-arm64"
-    dockerfile: Dockerfile
-    goarch: arm64
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source={{.GitURL}}"
-      - "--platform=linux/arm64"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    flags:
+      - --pull
+    labels:
+      org.opencontainers.image.created: "{{.Date}}"
+      org.opencontainers.image.title: "{{.ProjectName}}"
+      org.opencontainers.image.revision: "{{.FullCommit}}"
+      org.opencontainers.image.version: "{{.Version}}"
+      org.opencontainers.image.source: "{{.GitURL}}"
+    sbom: true
 
-docker_manifests:
-  - name_template: "ghcr.io/larsartmann/oxlint-auto-configure:{{ .Tag }}"
-    image_templates:
-      - "ghcr.io/larsartmann/oxlint-auto-configure:{{ .Tag }}-amd64"
-      - "ghcr.io/larsartmann/oxlint-auto-configure:{{ .Tag }}-arm64"
-  - name_template: "ghcr.io/larsartmann/oxlint-auto-configure:latest"
-    image_templates:
-      - "ghcr.io/larsartmann/oxlint-auto-configure:{{ .Tag }}-amd64"
-      - "ghcr.io/larsartmann/oxlint-auto-configure:{{ .Tag }}-arm64"
+docker_signs:
+  - cmd: cosign
+    artifacts: manifests
+    args:
+      - sign
+      - "--yes"
+      - "--oidc-issuer=https://token.actions.githubusercontent.com"
+      - "${artifact}"
+    output: true
 
 release:
   github:
