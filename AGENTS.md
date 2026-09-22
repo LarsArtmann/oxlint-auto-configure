@@ -26,28 +26,28 @@ Oxlint has 870 rules across 7 categories and 15 plugins (registry at oxlint 1.82
 
 ### Key Files
 
-| File                                | Purpose                                                                                |
-| ----------------------------------- | -------------------------------------------------------------------------------------- |
-| `pkg/rule/rule.go`                  | Core types: Rule, Category, Plugin, FixCapability, SeverityDecision                    |
-| `pkg/rule/external.go`              | ExternalPlugin type + known JS-plugin table (`@shadcn/lint` → `shadcn`)                |
-| `pkg/rule/registry.go`              | Rule registry loaded from embedded JSON (870 rules)                                    |
-| `pkg/rule/rules_data.json`          | Embedded oxlint rules data (from `oxlint -f json --rules`)                             |
-| `pkg/profile/profile.go`            | Profile presets, Categorizer engine, `DecideCategory()`, PluginConfig                  |
-| `pkg/config/generator.go`           | .oxlintrc.json generator (Rules values are `map[string]any`: string or array form)     |
-| `pkg/config/preserve.go`            | PreserveExternal: external-plugin bits + overrides survive regeneration                |
-| `pkg/detect/detector.go`            | Project type detection from package.json + `DetectExternalPlugins()`                   |
-| `pkg/diff/differ.go`                | Config before/after comparison (all fields: plugins, categories, rules, env, settings) |
-| `pkg/format/format.go`              | Rendering: FindingView, SummaryView, PrintSummary/PrintFindingsJSON/PrintFindingsTable |
-| `pkg/oxlint/detector.go`            | go-finding Detector for oxlint; `Runner` interface seam                                |
-| `pkg/oxlint/version.go`             | oxlint version check and binary verification                                           |
-| `pkg/oxlint/fix.go`                 | oxlint --fix wrapper                                                                   |
+| File                                | Purpose                                                                                                    |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `pkg/rule/rule.go`                  | Core types: Rule, Category, Plugin, FixCapability, SeverityDecision                                        |
+| `pkg/rule/external.go`              | ExternalPlugin type + known JS-plugin table (`@shadcn/lint` → `shadcn`)                                    |
+| `pkg/rule/registry.go`              | Rule registry loaded from embedded JSON (870 rules)                                                        |
+| `pkg/rule/rules_data.json`          | Embedded oxlint rules data (from `oxlint -f json --rules`)                                                 |
+| `pkg/profile/profile.go`            | Profile presets, Categorizer engine, `DecideCategory()`, PluginConfig                                      |
+| `pkg/config/generator.go`           | .oxlintrc.json generator (Rules values are `map[string]any`: string or array form)                         |
+| `pkg/config/preserve.go`            | PreserveExternal: external-plugin bits + overrides survive regeneration                                    |
+| `pkg/detect/detector.go`            | Project type detection from package.json + `DetectExternalPlugins()`                                       |
+| `pkg/diff/differ.go`                | Config before/after comparison (all fields: plugins, categories, rules, env, settings)                     |
+| `pkg/format/format.go`              | Rendering: FindingView, SummaryView, PrintSummary/PrintFindingsJSON/PrintFindingsTable                     |
+| `pkg/oxlint/detector.go`            | go-finding Detector for oxlint; `Runner` interface seam                                                    |
+| `pkg/oxlint/version.go`             | oxlint version check and binary verification                                                               |
+| `pkg/oxlint/fix.go`                 | oxlint --fix wrapper                                                                                       |
 | `pkg/provider/provider.go`          | BuildFlow integration: toolsdk Spec (Detect missing config, Repair via generate, HealthCheck drift report) |
-| `internal/cli/cmd_root.go`          | Root command, shared constants (defaultConfigPath, defaultProfile, version)            |
-| `internal/cli/cmd_configure.go`     | configure command + extracted `Configure(ctx, absRoot, opts)`                          |
-| `internal/cli/cmd_analyze.go`       | analyze command with go-finding pipeline integration                                   |
-| `internal/cli/cmd_validate.go`      | validate command                                                                       |
-| `internal/cli/cmd_report.go`        | report command + format helpers (JSON, table, summary)                                 |
-| `cmd/oxlint-auto-configure/main.go` | Entry point                                                                            |
+| `internal/cli/cmd_root.go`          | Root command, shared constants (defaultConfigPath, defaultProfile, version)                                |
+| `internal/cli/cmd_configure.go`     | configure command + extracted `Configure(ctx, absRoot, opts)`                                              |
+| `internal/cli/cmd_analyze.go`       | analyze command with go-finding pipeline integration                                                       |
+| `internal/cli/cmd_validate.go`      | validate command                                                                                           |
+| `internal/cli/cmd_report.go`        | report command + format helpers (JSON, table, summary)                                                     |
+| `cmd/oxlint-auto-configure/main.go` | Entry point                                                                                                |
 
 ### Key Test Files
 

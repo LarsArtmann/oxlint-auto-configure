@@ -1,6 +1,6 @@
 module github.com/larsartmann/oxlint-auto-configure
 
-go 1.27.1
+go 1.27
 
 require (
 	github.com/larsartmann/go-atomic-write v0.5.1
