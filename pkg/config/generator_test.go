@@ -54,6 +54,8 @@ func TestToJSONIsDeterministic(t *testing.T) {
 			"the same config must serialize to byte-identical JSON on every call")
 	}
 }
+
+func TestGeneratorMaximalTypesafe(t *testing.T) {
 	t.Parallel()
 	reg := testregistry.Load(t)
 
