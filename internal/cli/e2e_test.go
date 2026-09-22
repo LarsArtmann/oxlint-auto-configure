@@ -80,3 +80,27 @@ func TestConfigureE2EAllProfiles(t *testing.T) {
 		})
 	}
 }
+
+// TestAnalyzeE2EFailsOnBrokenJsPlugins runs analyze against a real oxlint
+// binary with a jsPlugins config whose package is not installed. oxlint fails
+// to load the plugin (exit 1, error text on stdout), and analyze must fail
+// visibly instead of reporting a clean project.
+func TestAnalyzeE2EFailsOnBrokenJsPlugins(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".oxlintrc.json"), []byte(`{
+		"jsPlugins": ["@shadcn/lint"],
+		"rules": {"shadcn/no-restyle": "error"}
+	}`), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "a.ts"), []byte("const x = 1;\n"), 0o644))
+
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{CmdAnalyze, testFlagRoot, dir})
+
+	err := cmd.Execute()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "detection failed")
+	assert.Contains(t, err.Error(), "Failed to load JS plugin",
+		"oxlint's actual failure reason must be visible in the error")
+}

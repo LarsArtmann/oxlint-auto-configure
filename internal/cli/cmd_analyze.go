@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -119,6 +120,22 @@ func runAnalyze(ctx context.Context, rootDir, formatFlag, sevFlag string) error 
 	result, err := p.Run(ctx)
 	if err != nil {
 		return fmt.Errorf("formatFlag=%s sevFlag=%s: pipeline: %w", formatFlag, sevFlag, err)
+	}
+
+	if len(result.PartialErrors) > 0 {
+		// Graceful degradation keeps the pipeline running, but a failed
+		// detector means the results are incomplete: "no findings" would be
+		// a lie, so analyze fails visibly instead.
+		names := slices.Sorted(maps.Keys(result.PartialErrors))
+		errs := make([]error, 0, len(names))
+		for _, name := range names {
+			errs = append(errs, fmt.Errorf("%s: %w", name, result.PartialErrors[name]))
+
+			slog.Error("detector failed", "detector", name, "error", result.PartialErrors[name])
+		}
+
+		return fmt.Errorf("formatFlag=%s sevFlag=%s: detection failed: %w",
+			formatFlag, sevFlag, errors.Join(errs...))
 	}
 
 	if snap := result.Metrics; !snap.StartTime.IsZero() {

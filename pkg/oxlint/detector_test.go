@@ -578,3 +578,24 @@ func TestWithRegistry(t *testing.T) {
 	d := NewDetector(".", WithRegistry(reg))
 	assert.NotNil(t, d.registry)
 }
+
+// TestDetectPluginLoadFailureSurfacesError reproduces oxlint's behavior when
+// a jsPlugins package cannot be loaded: exit code 1 (same as "findings
+// found") with the failure text on stdout and nothing on stderr. Detect must
+// surface that text as an error, not swallow it as zero findings.
+func TestDetectPluginLoadFailureSurfacesError(t *testing.T) {
+	t.Parallel()
+
+	_, exitErr := exec.Command("false").Output()
+	require.Error(t, exitErr)
+
+	pluginFailure := "Failed to parse oxlint configuration file.\n\n" +
+		"  x Failed to load JS plugin: @shadcn/lint\n" +
+		"  |   Cannot find module '@shadcn/lint'\n"
+
+	d := NewDetector(".", WithRunner(mockRunner{output: []byte(pluginFailure), err: exitErr}))
+	findings, err := d.Detect(context.Background())
+	require.Error(t, err)
+	assert.Nil(t, findings)
+	assert.Contains(t, err.Error(), "Failed to load JS plugin: @shadcn/lint")
+}

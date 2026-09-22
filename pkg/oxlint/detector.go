@@ -148,7 +148,11 @@ type oxlintSpan struct {
 func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {
 	var output oxlintOutput
 	if err := json.Unmarshal(data, &output); err != nil {
-		return nil, finding.NewParseError("oxlint JSON", err)
+		// oxlint reports startup failures (e.g. a jsPlugins package that
+		// cannot be loaded) as plain text on stdout with exit code 1 — the
+		// same code it uses for real findings. Surface a snippet so the
+		// actual failure is visible instead of a bare JSON syntax error.
+		return nil, finding.NewParseError("oxlint JSON", fmt.Errorf("%w (oxlint output: %.200s)", err, data))
 	}
 
 	findings := make([]finding.Finding, 0, len(output.Diagnostics))
