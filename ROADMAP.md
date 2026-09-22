@@ -19,7 +19,7 @@ Raw ideas:
 
 ### 2. Profile and Rule Intelligence
 
-Profiles are functional but `strict` and `recommended` are currently identical. The rule registry is pinned to oxlint `1.73.0`; newer runtime releases trigger a version-mismatch warning (refresh tracked in `TODO_LIST.md` R1).
+Profiles are functional but `strict` and `recommended` currently produce identical output for all known categories (they differ only in fallback severity for unknown future categories — see Open Question 2). The rule registry is refreshed to oxlint `1.82.0` and matches the installed runtime.
 
 Raw ideas:
 
