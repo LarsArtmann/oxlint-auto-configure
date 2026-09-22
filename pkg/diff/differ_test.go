@@ -171,3 +171,47 @@ func TestDiffFormatDiff(t *testing.T) {
 	assert.Contains(t, output, "~ a: warn → error")
 	assert.Contains(t, output, "+ b: error")
 }
+
+func TestDiffJsPluginsAdded(t *testing.T) {
+	t.Parallel()
+
+	before := &config.OxlintConfig{}
+	after := &config.OxlintConfig{JsPlugins: []string{"@shadcn/lint"}}
+
+	d := NewDiffer(before, after)
+	changes := d.Diff()
+	jsPluginChanges := filterChanges(changes, "jsPlugin:")
+	assert.Len(t, jsPluginChanges, 1)
+	assert.Equal(t, KindAdded, jsPluginChanges[0].Kind)
+	assert.Equal(t, "jsPlugin:@shadcn/lint", jsPluginChanges[0].Rule)
+}
+
+func TestDiffJsPluginsRemoved(t *testing.T) {
+	t.Parallel()
+
+	before := &config.OxlintConfig{JsPlugins: []string{"@shadcn/lint"}}
+	after := &config.OxlintConfig{}
+
+	d := NewDiffer(before, after)
+	changes := d.Diff()
+	jsPluginChanges := filterChanges(changes, "jsPlugin:")
+	assert.Len(t, jsPluginChanges, 1)
+	assert.Equal(t, KindRemoved, jsPluginChanges[0].Kind)
+}
+
+func TestDiffRulesWithOptionArrays(t *testing.T) {
+	t.Parallel()
+
+	oldOptions := []any{"error", map[string]any{"allow": []any{"layout"}}}
+	newOptions := []any{"error", map[string]any{"allow": []any{"layout", "spacing"}}}
+
+	before := &config.OxlintConfig{Rules: map[string]any{"shadcn/no-restyle": oldOptions}}
+	after := &config.OxlintConfig{Rules: map[string]any{"shadcn/no-restyle": newOptions}}
+
+	d := NewDiffer(before, after)
+	changes := d.Diff()
+	assert.Len(t, changes, 1)
+	assert.Equal(t, KindChanged, changes[0].Kind)
+	assert.Equal(t, `["error",{"allow":["layout"]}]`, changes[0].OldValue)
+	assert.Equal(t, `["error",{"allow":["layout","spacing"]}]`, changes[0].NewValue)
+}

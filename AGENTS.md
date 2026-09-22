@@ -29,11 +29,13 @@ Oxlint has 841 rules across 7 categories and 15 plugins. Only 113 are enabled by
 | File                                | Purpose                                                                                |
 | ----------------------------------- | -------------------------------------------------------------------------------------- |
 | `pkg/rule/rule.go`                  | Core types: Rule, Category, Plugin, FixCapability, SeverityDecision                    |
+| `pkg/rule/external.go`              | ExternalPlugin type + known JS-plugin table (`@shadcn/lint` → `shadcn`)                |
 | `pkg/rule/registry.go`              | Rule registry loaded from embedded JSON (841 rules)                                    |
 | `pkg/rule/rules_data.json`          | Embedded oxlint rules data (from `oxlint -f json --rules`)                             |
 | `pkg/profile/profile.go`            | Profile presets, Categorizer engine, `DecideCategory()`, PluginConfig                  |
-| `pkg/config/generator.go`           | .oxlintrc.json generator                                                               |
-| `pkg/detect/detector.go`            | Project type detection from package.json                                               |
+| `pkg/config/generator.go`           | .oxlintrc.json generator (Rules values are `map[string]any`: string or array form)     |
+| `pkg/config/preserve.go`            | PreserveExternal: external-plugin bits survive regeneration (jsPlugins/rules/settings) |
+| `pkg/detect/detector.go`            | Project type detection from package.json + `DetectExternalPlugins()`                   |
 | `pkg/diff/differ.go`                | Config before/after comparison (all fields: plugins, categories, rules, env, settings) |
 | `pkg/format/format.go`              | Rendering: FindingView, SummaryView, PrintSummary/PrintFindingsJSON/PrintFindingsTable |
 | `pkg/oxlint/detector.go`            | go-finding Detector for oxlint; `Runner` interface seam                                |
@@ -135,6 +137,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Public deps** — All `github.com/LarsArtmann/*` deps are public; no `GOPRIVATE` or SSH keys needed anywhere (build, CI, nix). Bumping a dep in `go.mod` requires bumping the matching flake input tag and updating `vendorHash`
 - **Plugin naming** — `FullName()` adds plugin prefix for all non-ESLint rules (e.g., `typescript/no-floating-promises`)
 - **Oxlint config format** — Uses `categories` for category-level severity + `rules` for per-rule overrides
+- **External JS plugins (@shadcn/lint)** — Contract: detect (`@shadcn/lint` in package.json deps) → register under `jsPlugins` → NEVER enable its rules (shadcn's SETUP.md: design-system policy is the project's choice) → ALWAYS preserve on regeneration (`PreserveExternal` in `pkg/config/preserve.go` unions jsPlugins, copies `shadcn/*` rules verbatim incl. array options, copies `settings.shadcn`). `jsPlugins` needs oxlint ≥1.80 (`oxlint.MinVersionForJsPlugins`); configure warns below that. `validate` reports external rules via `ExternalPluginByRuleName`, not as unknown. New known JS plugins go in `knownExternalPlugins` (`pkg/rule/external.go`) — the `jsPlugins` JSON tag needs `//nolint:tagliatelle` (oxlint schema is camelCase)
 - **Version injected at build** — `internal/cli.version/commit/date/builtBy` via ldflags (default: "dev"/"unknown"). `SetVersionTemplate` shows full metadata in `--version`.
 - **Per-command files** — Commands are in `internal/cli/cmd_*.go`, not a monolithic file
 - **SARIF output** — analyze command defaults to summary format; SARIF is opt-in via `-f sarif`

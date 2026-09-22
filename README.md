@@ -97,6 +97,28 @@ The tool auto-detects your project type and enables relevant plugins:
 | Vitest     | `vitest`, `node`                            |
 | TypeScript | `typescript` (always on)                    |
 
+## External JS Plugins (@shadcn/lint)
+
+[Oxlint JS plugins](https://oxc.rs) load at runtime from npm packages via the
+`jsPlugins` config key. This tool detects
+[@shadcn/lint](https://github.com/shadcn-ui/lint) — the agent-first
+design-system linter for Tailwind v4 — and integrates it without ever fighting
+your design-system policy:
+
+- **Detect & register**: when `@shadcn/lint` is in your `package.json`, the
+  generated config registers it (`"jsPlugins": ["@shadcn/lint"]`). Requires
+  oxlint >= 1.80; `configure` warns if the oxlint in PATH is older.
+- **Never enables rules**: `shadcn/*` rules encode *your* design-system
+  policy (contracts, allowlists, custom messages), so `configure` leaves them
+  off and points you to the [rule docs](https://github.com/shadcn-ui/lint#rules).
+  Add them under `rules` yourself when ready.
+- **Preserves your setup**: regenerating a config never destroys an existing
+  `@shadcn/lint` setup — `jsPlugins`, every `shadcn/*` rule (verbatim,
+  including options like `["error", {"allow": ["layout"]}]`), and
+  `settings.shadcn` all survive.
+- **Validates**: `validate` accepts `shadcn/*` rules (reported as external,
+  not unknown) and understands oxlint's array-form rule values.
+
 ## Commands
 
 ### `configure`
