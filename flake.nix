@@ -20,7 +20,7 @@
     };
 
     go-error-family = {
-      url = "github:LarsArtmann/go-error-family/v0.10.0";
+      url = "github:LarsArtmann/go-error-family/v0.10.1";
       flake = false;
     };
 
@@ -35,7 +35,7 @@
     };
 
     gogenfilter = {
-      url = "github:LarsArtmann/gogenfilter/v3.4.0";
+      url = "github:LarsArtmann/gogenfilter/v3.6.1";
       flake = false;
     };
   };
@@ -61,11 +61,10 @@
         enableCheck = false;
         subPackages = [ "cmd/oxlint-auto-configure" ];
 
-        # go.mod floor (go 1.27.1) is newer than nixpkgs' go (1.26.7); the
-        # tarball toolchain keeps the sandboxed treefmt/goimports check
-        # offline-safe (matching go on PATH + GOTOOLCHAIN=local).
-        goTarballVersion = "1.27.1";
-        goTarballHash = "sha256-TkCKuuEm2Ra2FkYnGT8sVPDjyhMS1pO4bbRfhiqyOLE=";
+        # go.mod floor (go 1.27) is newer than nixpkgs' default go (1.26.7);
+        # go_1_27 = 1.27.1 keeps builds and the hermetic treefmt check on a
+        # binary-cached toolchain (no source build, no toolchain downloads).
+        goPkgAttr = "go_1_27";
 
         deps = {
           "github.com/larsartmann/go-atomic-write" = inputs.go-atomic-write;
@@ -95,34 +94,48 @@
           "-X github.com/larsartmann/oxlint-auto-configure/internal/cli.builtBy=nix"
         ];
 
-        extraBuildAttrs.preBuild = "export GOEXPERIMENT=jsonv2";
-
-        shellExtraEnv = {
-          GOEXPERIMENT = "jsonv2";
-        };
-
+        # gopls and golangci-lint come from the module defaults
+        # (enableGopls/enableGolangciLint); only what the module lacks.
         devShellExtraPackages = pkgs: [
           pkgs.oxlint
-          pkgs.gopls
           pkgs.gotools
-          pkgs.golangci-lint
         ];
 
         enableNixfmt = true;
       };
 
-      perSystem =
-        {
-          config,
-          pkgs,
-          lib,
-          ...
-        }:
-        {
-          checks.test = config.packages.default.overrideAttrs (_old: {
-            doCheck = true;
-            nativeCheckInputs = [ pkgs.oxlint ];
-          });
+        perSystem =
+          {
+            config,
+            pkgs,
+            lib,
+            ...
+          }:
+          {
+            checks.test = config.packages.default.overrideAttrs (_old: {
+              doCheck = true;
+              nativeCheckInputs = [ pkgs.oxlint ];
+            });
+
+            # go-standard's apps.test ships only the Go toolchain on PATH, but
+            # this repo's tests also execute a real oxlint binary — wrap the
+            # command so `nix run .#test` is hermetic. Keep pkgs.go_1_27 in
+            # sync with go-standard.goPkgAttr above.
+            apps.test = lib.mkForce {
+              type = "app";
+              program = lib.getExe (
+                pkgs.writeShellApplication {
+                  name = "run-test";
+                  runtimeInputs = [
+                    pkgs.go_1_27
+                    pkgs.oxlint
+                  ];
+                  text = ''
+                    GOWORK=off GOTOOLCHAIN=local go test -race -v -coverprofile=coverage.out ./...
+                  '';
+                }
+              );
+            };
 
           apps.default = lib.mkForce {
             type = "app";
