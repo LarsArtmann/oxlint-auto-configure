@@ -25,7 +25,7 @@ func TestLoadRegistry(t *testing.T) {
 func TestRegistryTotal(t *testing.T) {
 	t.Parallel()
 	reg := loadTestRegistry(t)
-	assert.Equal(t, 841, reg.Len())
+	assert.Equal(t, 870, reg.Len())
 }
 
 func TestRegistryByName(t *testing.T) {
@@ -219,7 +219,7 @@ func TestEmbeddedVersion(t *testing.T) {
 
 	ver := EmbeddedVersion()
 	assert.NotEmpty(t, ver)
-	assert.Equal(t, "1.73.0", ver)
+	assert.Equal(t, "1.82.0", ver)
 }
 
 func TestPluginCLIFlag(t *testing.T) {
