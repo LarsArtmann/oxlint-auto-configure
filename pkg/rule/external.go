@@ -46,7 +46,9 @@ func ExternalPluginByPackage(pkg string) (ExternalPlugin, bool) {
 		}
 	}
 
-	return ExternalPlugin{}, false
+	var zero ExternalPlugin
+
+	return zero, false
 }
 
 // ExternalPluginByRuleName returns the known external plugin owning a
@@ -59,7 +61,9 @@ func ExternalPluginByRuleName(name string) (ExternalPlugin, bool) {
 		}
 	}
 
-	return ExternalPlugin{}, false
+	var zero ExternalPlugin
+
+	return zero, false
 }
 
 // hasPluginRulePrefix reports whether name is a prefixed rule of plugin, in
@@ -68,5 +72,6 @@ func ExternalPluginByRuleName(name string) (ExternalPlugin, bool) {
 // name cannot be attributed to an external plugin.
 func hasPluginRulePrefix(name, plugin string) bool {
 	prefix, rest, found := strings.Cut(name, "/")
+
 	return found && prefix == plugin && rest != ""
 }

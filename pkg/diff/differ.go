@@ -224,14 +224,14 @@ func (d *Differ) compareAnyMaps(before, after map[string]any, prefix string) []C
 
 // formatValue renders a config value for diff display: bare strings as-is,
 // anything else as compact JSON.
-func formatValue(v any) string {
-	if s, ok := v.(string); ok {
+func formatValue(value any) string {
+	if s, ok := value.(string); ok {
 		return s
 	}
 
-	data, err := json.Marshal(v)
+	data, err := json.Marshal(value)
 	if err != nil {
-		return fmt.Sprintf("%v", v)
+		return fmt.Sprintf("%v", value)
 	}
 
 	return string(data)

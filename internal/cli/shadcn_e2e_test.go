@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestConfigureE2ERegistersShadcnLint verifies that a project with
-// @shadcn/lint installed gets the plugin registered under "jsPlugins" —
+// TestConfigureE2ERegistersShadcnLint verifies that a project with the
+// shadcn lint package installed gets the plugin registered under "jsPlugins" —
 // without any of its rules enabled (design-system policy is the project's
 // choice, per @shadcn/lint's own setup guidance).
 func TestConfigureE2ERegistersShadcnLint(t *testing.T) {

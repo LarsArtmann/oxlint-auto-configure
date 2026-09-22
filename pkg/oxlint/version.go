@@ -16,12 +16,16 @@ var versionRegex = regexp.MustCompile(`(\d+\.\d+\.\d+)`)
 // documented requirement).
 const MinVersionForJsPlugins = "1.80.0"
 
+// semverComponents is the maximum number of components compared between
+// semantic versions (major, minor, patch).
+const semverComponents = 3
+
 // VersionAtLeast reports whether version (a plain "major.minor.patch"
-// string) is greater than or equal to min. Non-numeric parts beyond the
+// string) is greater than or equal to required. Non-numeric parts beyond the
 // first three are ignored; missing parts count as zero. Malformed versions
 // compare as zero, so callers can pass user-visible strings through.
-func VersionAtLeast(version, min string) bool {
-	return compareSemver(version, min) >= 0
+func VersionAtLeast(version, required string) bool {
+	return compareSemver(version, required) >= 0
 }
 
 // compareSemver returns -1, 0, or 1 comparing two numeric semver strings.
@@ -45,7 +49,7 @@ func compareSemver(a, b string) int {
 func parseSemver(v string) []string {
 	// Keep at most three components; strip any non-numeric suffix (e.g.
 	// prerelease or build metadata) hanging off a component.
-	rest := strings.SplitN(v, ".", 3)
+	rest := strings.SplitN(v, ".", semverComponents)
 	for i, part := range rest {
 		if nonDigit := strings.IndexFunc(part, func(r rune) bool {
 			return r < '0' || r > '9'

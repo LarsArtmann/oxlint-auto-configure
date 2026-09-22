@@ -150,6 +150,33 @@ func TestRepair_WritesOptimalConfig(t *testing.T) {
 	require.NotEmpty(t, cfg.Rules, "generated config must enable rules")
 }
 
+// TestRepair_RegistersShadcnLintWithoutEnablingRules verifies the BuildFlow
+// repair path follows the same external-plugin contract as the CLI: a
+// project with the shadcn lint package installed gets it registered under
+// "jsPlugins", while none of its design-system rules are turned on.
+func TestRepair_RegistersShadcnLintWithoutEnablingRules(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writeFile(t, dir, "package.json", `{
+		"name":"test-app",
+		"dependencies":{"react":"^18.0.0"},
+		"devDependencies":{"@shadcn/lint":"^1.0.0"}
+	}`)
+
+	_, err := provider.Provider.Repair.Repair(workingDirCtx(t, dir))
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(filepath.Join(dir, ".oxlintrc.json"))
+	require.NoError(t, err)
+
+	cfg, err := config.FromJSON(data)
+	require.NoError(t, err)
+	require.Equal(t, []string{"@shadcn/lint"}, cfg.JsPlugins)
+	require.False(t, config.HasExternalRules(cfg),
+		"repair registers the plugin but leaves design-system rules to the project")
+}
+
 func TestRepair_ExistingConfigIsUntouched(t *testing.T) {
 	t.Parallel()
 

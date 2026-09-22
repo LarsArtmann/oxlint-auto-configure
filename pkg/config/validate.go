@@ -78,7 +78,7 @@ func validateRules(cfg *OxlintConfig, reg *rule.Registry, result *ValidateResult
 // severityFromValue extracts the severity string from a rules-map value,
 // which is either a bare severity ("error") or oxlint's array form
 // ("[\"error\", {options}]"). ok is false when the value has neither shape.
-func severityFromValue(value any) (severity string, ok bool) {
+func severityFromValue(value any) (string, bool) {
 	switch v := value.(type) {
 	case string:
 		return v, true
