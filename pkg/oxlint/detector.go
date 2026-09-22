@@ -3,6 +3,7 @@
 package oxlint
 
 import (
+	"bytes"
 	"context"
 	"encoding/json/v2"
 	"errors"

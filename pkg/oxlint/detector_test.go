@@ -599,3 +599,21 @@ func TestDetectPluginLoadFailureSurfacesError(t *testing.T) {
 	assert.Nil(t, findings)
 	assert.Contains(t, err.Error(), "Failed to load JS plugin: @shadcn/lint")
 }
+
+// TestDetectParsesJSONAfterNotice reproduces oxlint 1.82 prepending a plain
+// notice (e.g. "No files found to lint.") to the JSON on stdout: the
+// diagnostics object must still be parsed instead of surfacing a hard error.
+func TestDetectParsesJSONAfterNotice(t *testing.T) {
+	t.Parallel()
+
+	_, exitErr := exec.Command("false").Output()
+	require.Error(t, exitErr)
+
+	mixed := "No files found to lint. Please check your paths and ignore patterns.\n" +
+		`{ "diagnostics": [], "number_of_files": 0 }` + "\n"
+
+	d := NewDetector(".", WithRunner(mockRunner{output: []byte(mixed), err: exitErr}))
+	findings, err := d.Detect(context.Background())
+	require.NoError(t, err)
+	assert.Empty(t, findings)
+}
