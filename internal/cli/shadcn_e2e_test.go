@@ -154,11 +154,18 @@ func TestConfigureE2EWarnsOnlyForOrphanedJsPlugins(t *testing.T) {
 		"preservation never drops registrations, even orphaned ones",
 	)
 
-	assert.Empty(t, orphanedJsPlugins(cfg, nil),
-		"hand-registered unknown packages are not reported as orphaned")
-
+	// The regenerated config registers @shadcn/lint (preserved) while the
+	// package is no longer a dependency, so it is reported as orphaned; the
+	// hand-registered unknown package never is.
 	assert.Equal(t,
 		[]string{"@shadcn/lint"},
-		orphanedJsPlugins(cfg, []rule.ExternalPlugin{{Package: "@shadcn/lint", Prefix: "shadcn"}}),
+		orphanedJsPlugins(cfg, nil),
+	)
+
+	installed := &config.OxlintConfig{JsPlugins: []string{"@shadcn/lint", "some-hand-registered-plugin"}}
+
+	assert.Empty(t,
+		orphanedJsPlugins(installed, []rule.ExternalPlugin{{Package: "@shadcn/lint", Prefix: "shadcn"}}),
+		"an installed plugin is not orphaned",
 	)
 }
