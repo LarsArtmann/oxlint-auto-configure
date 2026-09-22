@@ -95,7 +95,7 @@
         ];
 
         # gopls and golangci-lint come from the module defaults
-        # (enableGopls/enableGolangciLint); only what the module lacks.
+        # (enableGopls/enableGolangciLint); only add what those lack.
         devShellExtraPackages = pkgs: [
           pkgs.oxlint
           pkgs.gotools
@@ -104,38 +104,38 @@
         enableNixfmt = true;
       };
 
-        perSystem =
-          {
-            config,
-            pkgs,
-            lib,
-            ...
-          }:
-          {
-            checks.test = config.packages.default.overrideAttrs (_old: {
-              doCheck = true;
-              nativeCheckInputs = [ pkgs.oxlint ];
-            });
+      perSystem =
+        {
+          config,
+          pkgs,
+          lib,
+          ...
+        }:
+        {
+          checks.test = config.packages.default.overrideAttrs (_old: {
+            doCheck = true;
+            nativeCheckInputs = [ pkgs.oxlint ];
+          });
 
-            # go-standard's apps.test ships only the Go toolchain on PATH, but
-            # this repo's tests also execute a real oxlint binary — wrap the
-            # command so `nix run .#test` is hermetic. Keep pkgs.go_1_27 in
-            # sync with go-standard.goPkgAttr above.
-            apps.test = lib.mkForce {
-              type = "app";
-              program = lib.getExe (
-                pkgs.writeShellApplication {
-                  name = "run-test";
-                  runtimeInputs = [
-                    pkgs.go_1_27
-                    pkgs.oxlint
-                  ];
-                  text = ''
-                    GOWORK=off GOTOOLCHAIN=local go test -race -v -coverprofile=coverage.out ./...
-                  '';
-                }
-              );
-            };
+          # go-standard's apps.test ships only the Go toolchain on PATH, but
+          # this repo's tests also execute a real oxlint binary; wrap the
+          # command so `nix run .#test` is hermetic. Keep pkgs.go_1_27 in
+          # sync with go-standard.goPkgAttr above.
+          apps.test = lib.mkForce {
+            type = "app";
+            program = lib.getExe (
+              pkgs.writeShellApplication {
+                name = "run-test";
+                runtimeInputs = [
+                  pkgs.go_1_27
+                  pkgs.oxlint
+                ];
+                text = ''
+                  GOWORK=off GOTOOLCHAIN=local go test -race -v -coverprofile=coverage.out ./...
+                '';
+              }
+            );
+          };
 
           apps.default = lib.mkForce {
             type = "app";
