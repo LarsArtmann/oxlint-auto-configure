@@ -18,17 +18,17 @@ The TODO list was empty; ROADMAP carried 8 open questions and several stale clai
 
 ### Decisions (owner-answered, recorded)
 
-| Question | Owner answer |
-| --- | --- |
-| Preserve `overrides` blocks? | **Preserve all**, with smart deduplication of duplicates |
-| `strict` vs `recommended` | **Remove one** → second batch: **`recommended` removed, `strict` survives** |
-| Config-drift detection | **"Use /home/lars/projects/go-finding/toolsdk to the max"** → implemented as toolsdk `Spec.HealthCheck` |
-| Testing framework policy | **testify stays; Ginkgo allowed for NEW behavior specs only** |
-| Status report format | **Markdown canonical — "always just markdown unless I ask for HTML"** |
-| Modularization | Owner asked *where the proposal is* → located: deleted 2026-07-07 in commit `dd69142` as premature; recoverable via `git show dd69142~1:docs/modularization/PROPOSAL.md` |
-| GitHub Discussions / social preview | **Keep off** (issues only); branding not pursued |
-| SDK adoption for `validate` | **Adopt** typed I/O |
-| Docs corrections found during research | registry was already at oxlint 1.82.0 (870 rules), ROADMAP's "pinned to 1.73.0, tracked as R1" was stale on both counts — fixed on sight |
+| Question                               | Owner answer                                                                                                                                                             |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Preserve `overrides` blocks?           | **Preserve all**, with smart deduplication of duplicates                                                                                                                 |
+| `strict` vs `recommended`              | **Remove one** → second batch: **`recommended` removed, `strict` survives**                                                                                              |
+| Config-drift detection                 | **"Use /home/lars/projects/go-finding/toolsdk to the max"** → implemented as toolsdk `Spec.HealthCheck`                                                                  |
+| Testing framework policy               | **testify stays; Ginkgo allowed for NEW behavior specs only**                                                                                                            |
+| Status report format                   | **Markdown canonical — "always just markdown unless I ask for HTML"**                                                                                                    |
+| Modularization                         | Owner asked _where the proposal is_ → located: deleted 2026-07-07 in commit `dd69142` as premature; recoverable via `git show dd69142~1:docs/modularization/PROPOSAL.md` |
+| GitHub Discussions / social preview    | **Keep off** (issues only); branding not pursued                                                                                                                         |
+| SDK adoption for `validate`            | **Adopt** typed I/O                                                                                                                                                      |
+| Docs corrections found during research | registry was already at oxlint 1.82.0 (870 rules), ROADMAP's "pinned to 1.73.0, tracked as R1" was stale on both counts — fixed on sight                                 |
 
 ### 1. `overrides` preservation (preserved-all + dedup) — `pkg/config`
 
@@ -80,8 +80,8 @@ The TODO list was empty; ROADMAP carried 8 open questions and several stale clai
 
 ## b) PARTIALLY DONE
 
-1. **swaggo formatter interplay** — root-caused (swag fmt treats a comment line starting `@shadcn/lint` as a swag annotation and wanted to tab-indent it into a pseudo code block). Reworded so `@` is never line-initial ("the \"@shadcn/lint\" component-dir disables"); lint is green. *Residual:* swag fmt rewrites this repo's comments any time a line-initial `@` sneaks in — a repo-wide scan for other line-initial `@` in Go comments was NOT done.
-2. **Deterministic-JSON audit scope** — fixed all four marshal sites in *this* repo. The same bug class very likely exists in **go-finding** (SARIF/report output) and **linter-autoconfigure-sdk** (`SaveJSON`); not audited — different repos, out of session scope.
+1. **swaggo formatter interplay** — root-caused (swag fmt treats a comment line starting `@shadcn/lint` as a swag annotation and wanted to tab-indent it into a pseudo code block). Reworded so `@` is never line-initial ("the \"@shadcn/lint\" component-dir disables"); lint is green. _Residual:_ swag fmt rewrites this repo's comments any time a line-initial `@` sneaks in — a repo-wide scan for other line-initial `@` in Go comments was NOT done.
+2. **Deterministic-JSON audit scope** — fixed all four marshal sites in _this_ repo. The same bug class very likely exists in **go-finding** (SARIF/report output) and **linter-autoconfigure-sdk** (`SaveJSON`); not audited — different repos, out of session scope.
 3. **Ginkgo policy** — decided and recorded ("new behavior specs only"), but no Ginkgo bootstrap exists yet; the dependency is not added (deliberately — no behavior spec written this session).
 
 ## c) NOT STARTED
@@ -120,6 +120,7 @@ The TODO list was empty; ROADMAP carried 8 open questions and several stale clai
 ## f) NEXT — up to 50 things to get done (ordered: session residue → release → discovered follow-ups → ROADMAP backlog)
 
 **Session residue**
+
 1. (done in this session's last minutes — verify once more) swaggo reword landed; confirm CI lint (pinned v2.12.2) is green on push — local golangci version may differ from CI's.
 2. Repo-wide scan for other comment lines starting with `@` (swag fmt bait).
 3. Export-or-not decision + implementation: `errConfigDrift` is unexported today; BuildFlow consumers cannot `errors.Is` it.
@@ -145,7 +146,7 @@ The TODO list was empty; ROADMAP carried 8 open questions and several stale clai
 19. HealthCheck drift surfacing in the **CLI**: today only BuildFlow sees drift; `validate` could report the same advisory (needs small design; reuses Differ + PreserveExternal).
 20. Measure HealthCheck cost (full detect+generate+diff every BuildFlow pre-flight) — probably negligible, but measure once.
 21. E2E fixture: real @shadcn/lint-style config (jsPlugins + overrides + array rules) through `configure` twice → byte-stable AND lossless.
-22. Expand HealthCheck tests: unreadable file (permissions) path; `.oxlintrc.json` present *and* malformed alongside a valid jsonc.
+22. Expand HealthCheck tests: unreadable file (permissions) path; `.oxlintrc.json` present _and_ malformed alongside a valid jsonc.
 23. Decide whether `Summary()` should memoize its `Diff()` (it re-runs it — this session's flake would have been caught sooner if Summary and Diff couldn't disagree).
 24. Add `DryRunFromContext`-style test matrix entry: HealthCheck under dry-run contexts (should be irrelevant, pin it).
 
@@ -178,7 +179,7 @@ The TODO list was empty; ROADMAP carried 8 open questions and several stale clai
 46. `docs/DOMAIN_LANGUAGE.md`: add "Drift (advisory)" and "Overrides block" domain terms.
 47. Prune ROADMAP Theme-2 wording once the registry-refresh sentence ages (it references "installed runtime" — will rot again at next oxlint bump).
 48. Investigate `swaggo` formatter config — either scope it to packages that actually use swag or document the line-initial-`@` hazard in AGENTS.
-49. Give `TestHealthCheck_PreservedOverridesAreNotDrift` a companion negative test: a *user-deleted* overrides block (config lacking blocks vs. generated expectation) stays healthy — semantics choice to pin.
+49. Give `TestHealthCheck_PreservedOverridesAreNotDrift` a companion negative test: a _user-deleted_ overrides block (config lacking blocks vs. generated expectation) stays healthy — semantics choice to pin.
 50. Archive this session's question/decision trail into the ROADMAP "Resolved Questions" sources (already largely done — final link-check pass).
 
 ## g) QUESTIONS I CANNOT FIGURE OUT MYSELF (3)
