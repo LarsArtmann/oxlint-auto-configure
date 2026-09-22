@@ -136,6 +136,74 @@ func TestProjectTypeString(t *testing.T) {
 	assert.Equal(t, "vue", string(ProjectTypeVue))
 }
 
+func TestDetectExternalPluginsShadcnDevDependency(t *testing.T) {
+	t.Parallel()
+
+	external := detectExternalWithPackageJSON(
+		t,
+		`{"dependencies": {"react": "^18.0.0"}, "devDependencies": {"@shadcn/lint": "^1.0.0"}}`,
+	)
+
+	want := []rule.ExternalPlugin{{Package: "@shadcn/lint", Prefix: "shadcn"}}
+	assert.Equal(t, want, external)
+}
+
+func TestDetectExternalPluginsShadcnDependency(t *testing.T) {
+	t.Parallel()
+
+	external := detectExternalWithPackageJSON(
+		t,
+		`{"dependencies": {"@shadcn/lint": "^1.0.0"}}`,
+	)
+
+	want := []rule.ExternalPlugin{{Package: "@shadcn/lint", Prefix: "shadcn"}}
+	assert.Equal(t, want, external)
+}
+
+func TestDetectExternalPluginsNone(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		pkgJSON string
+	}{
+		{"tailwind without shadcn lint", `{"devDependencies": {"tailwindcss": "^4.0.0"}}`},
+		{"shadcn ui without lint", `{"devDependencies": {"shadcn": "^2.0.0"}}`},
+		{"no package.json", ``},
+		{"empty deps", `{"dependencies": {}, "devDependencies": {}}`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			external := detectExternalWithPackageJSON(t, tt.pkgJSON)
+			assert.Empty(t, external)
+		})
+	}
+}
+
+func TestDetectExternalPluginsMalformedPackageJSON(t *testing.T) {
+	t.Parallel()
+
+	external := detectExternalWithPackageJSON(t, `{not json`)
+	assert.Empty(t, external)
+}
+
+// detectExternalWithPackageJSON writes pkgJSON to a fresh temp dir's
+// package.json and returns DetectExternalPlugins's result. An empty pkgJSON
+// skips writing package.json entirely.
+func detectExternalWithPackageJSON(t *testing.T, pkgJSON string) []rule.ExternalPlugin {
+	t.Helper()
+
+	dir := t.TempDir()
+	if pkgJSON != "" {
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkgJSON), 0o644))
+	}
+
+	return NewDetector(dir).DetectExternalPlugins()
+}
+
 // detectWithPackageJSON writes pkgJSON to a fresh temp dir's package.json and
 // returns the Detector's results. Fails the test on I/O or Detect errors.
 func detectWithPackageJSON(t *testing.T, pkgJSON string) (profile.PluginConfig, []ProjectType) {

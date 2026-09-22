@@ -21,11 +21,18 @@ const (
 
 // OxlintConfig represents the .oxlintrc.json structure.
 type OxlintConfig struct {
-	Plugins    []string          `json:"plugins,omitempty"`
+	Plugins []string `json:"plugins,omitempty"`
+	// JsPlugins registers external JS plugins loaded at runtime from npm
+	// packages (e.g. @shadcn/lint). Requires oxlint >= 1.80.
+	//
+	//nolint:tagliatelle // oxlint's schema names this key "jsPlugins"
+	JsPlugins  []string          `json:"jsPlugins,omitempty"`
 	Categories map[string]string `json:"categories,omitempty"`
-	Rules      map[string]string `json:"rules,omitempty"`
-	Settings   map[string]any    `json:"settings,omitempty"`
-	Env        map[string]bool   `json:"env,omitempty"`
+	// Rules values are either a severity string ("error") or oxlint's
+	// array form ("["error", {options}]") used by external plugin rules.
+	Rules    map[string]any `json:"rules,omitempty"`
+	Settings map[string]any `json:"settings,omitempty"`
+	Env      map[string]bool `json:"env,omitempty"`
 }
 
 // Generator creates oxlint configuration from profile decisions.
@@ -163,7 +170,7 @@ func (g *Generator) categorySeverityMap() map[string]string {
 // Only emits rules whose severity contradicts their category-level severity.
 // Rules from omitted categories (e.g., minimal's non-correctness categories)
 // are skipped entirely — oxlint defaults apply.
-func (g *Generator) ruleSeverityMap() map[string]string {
+func (g *Generator) ruleSeverityMap() map[string]any {
 	if g.categorizer == nil {
 		return map[string]string{}
 	}

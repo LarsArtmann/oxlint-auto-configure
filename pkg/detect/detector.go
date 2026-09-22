@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
@@ -47,6 +48,31 @@ func (d *Detector) Detect() (profile.PluginConfig, []ProjectType, error) {
 	pc := d.toPluginConfig(types, deps)
 
 	return pc, types, nil
+}
+
+// DetectExternalPlugins returns the known oxlint JS plugins (loaded at
+// runtime via the "jsPlugins" config key, e.g. @shadcn/lint) installed in
+// this project's dependencies or devDependencies. Presence of the package is
+// the signal: an installed plugin should be registered in the generated
+// config, while its rules stay off (design-system policy is the project's
+// choice, not ours).
+func (d *Detector) DetectExternalPlugins() []rule.ExternalPlugin {
+	pkg := d.readPackageJSON()
+	deps := d.collectDependencies(pkg)
+
+	var found []rule.ExternalPlugin
+
+	for _, external := range rule.KnownExternalPlugins() {
+		if deps[external.Package] {
+			found = append(found, external)
+		}
+	}
+
+	slices.SortFunc(found, func(a, b rule.ExternalPlugin) int {
+		return strings.Compare(a.Package, b.Package)
+	})
+
+	return found
 }
 
 // depTypeRules maps dependency names to project types.
