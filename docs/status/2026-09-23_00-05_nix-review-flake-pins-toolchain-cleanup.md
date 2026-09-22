@@ -16,12 +16,12 @@
 4. **`nix flake check --all-systems`** never ran. My `goPkgAttr`/`perSystem` changes are system-independent in principle, but aarch64-darwin/aarch64-linux eval was skipped (flake check omitted them). Risk near zero; verification still incomplete.
 5. **No `go mod tidy` no-op check locally** after the pin discussion (nix FOD ran tidy in-sandbox and CI has a tidy-consistency job, so covered indirectly — but I didn't run it myself and didn't say so).
 6. **Left a knowingly-stale line in AGENTS.md:** the GoReleaser gotcha still says "without `GOEXPERIMENT=jsonv2` the build fails" — false since Go 1.27 un-gated jsonv2. I consciously deferred it as "out of nix scope". Deferring doc lies is how drift starts; I flagged the exact line, so it is one edit away.
-7. **`nix run . -- --version` (wrapped default app) was never smoke-tested.** I didn't change that wrapper, and `nix flake check` evaluates all apps, but I verified `apps.test` end-to-end and only *assumed* `apps.default`.
+7. **`nix run . -- --version` (wrapped default app) was never smoke-tested.** I didn't change that wrapper, and `nix flake check` evaluates all apps, but I verified `apps.test` end-to-end and only _assumed_ `apps.default`.
 
 ### 2. What is stupid that we do anyway?
 
 1. **The host exports `GOEXPERIMENT=jsonv2` globally** (NixOS system env). It contaminated my first "definitive" test and it silently masks flag-freeness for every local Go run in every project. It's a landmine for exactly the class of verification this session performed.
-2. **Dep pins live in two places (go.mod + flake inputs) with no mechanical sync check.** This bit go-finding (v1.8.0 vs v1.10.0), and TODAY bit gogenfilter (v3.4.0 vs v3.6.1) and go-error-family (v0.10.0 vs v0.10.1) — all compiled silently because APIs stayed compatible. "Caught by builds" is provably false; it's caught by *luck or audit*.
+2. **Dep pins live in two places (go.mod + flake inputs) with no mechanical sync check.** This bit go-finding (v1.8.0 vs v1.10.0), and TODAY bit gogenfilter (v3.4.0 vs v3.6.1) and go-error-family (v0.10.0 vs v0.10.1) — all compiled silently because APIs stayed compatible. "Caught by builds" is provably false; it's caught by _luck or audit_.
 
 ### 3. What could I have done better?
 
@@ -94,6 +94,7 @@
 ## d) TOTALLY FUCKED UP!
 
 **Nothing survived to HEAD.** Transient self-inflicted failures, all caught and fixed in-session:
+
 1. multiedit indentation corruption of `perSystem` block (fixed immediately; root cause: guessed whitespace).
 2. Three rounds of masked exit codes (all re-verified properly afterward).
 3. Invalid "proof" via contaminated environment (re-proven clean with `env -u`).
@@ -111,6 +112,7 @@
 ## f) Up to 50 things we should get done next
 
 **Nix / build (highest impact first)**
+
 1. CI job: diff go.mod LarsArtmann requires vs flake input refs + `deps` map; fail on drift (kills the recurring silent-pin class).
 2. Inspect `.github/workflows/ci.yml` + `.goreleaser.yaml`; drop GOEXPERIMENT=jsonv2 envs (verify a clean run after).
 3. Fix the stale GoReleaser gotcha line in AGENTS.md ("without it the build fails").
@@ -155,10 +157,10 @@
 32. Adopt: no "definitive/works-without" claims until `env | grep ^GO` proves a clean baseline.
 33. Adopt: read any CI/workflow file before writing a claim about it into docs.
 
-*(34–50 intentionally not padded: everything above is real, observed this session; inventing filler would be the actual failure mode.)*
+_(34–50 intentionally not padded: everything above is real, observed this session; inventing filler would be the actual failure mode.)_
 
 ## g) Questions I can NOT figure out myself
 
-1. **Host-global `GOEXPERIMENT=jsonv2`:** your NixOS config exports it system-wide. Now that this repo's floor (go 1.27) un-gates jsonv2, is any *other* project still on Go ≤1.26 and depending on it — or may it be removed from the global env? (Lives outside this repo; only you know the fleet.)
+1. **Host-global `GOEXPERIMENT=jsonv2`:** your NixOS config exports it system-wide. Now that this repo's floor (go 1.27) un-gates jsonv2, is any _other_ project still on Go ≤1.26 and depending on it — or may it be removed from the global env? (Lives outside this repo; only you know the fleet.)
 2. **Dependency bump policy:** upstream has `go-atomic-write` v0.6.0, `go-error-family` v0.10.2, `linter-autoconfigure-sdk` v0.3.0. Bump all now (same sweep, one vendorHash refresh), or hold — especially `linter-autoconfigure-sdk`, given the documented BuildFlow version-pairing landmines?
 3. **Should the pin-sync check (f/1) live in THIS repo's CI or in go-nix-helpers (eval-time validation for all consumers)?** In-repo is faster to ship; upstream fixes every LarsArtmann Go project at once but is a separate release cycle.
