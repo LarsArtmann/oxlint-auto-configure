@@ -1,13 +1,13 @@
 module github.com/larsartmann/oxlint-auto-configure
 
-go 1.27
+go 1.27.1
 
 require (
-	github.com/larsartmann/go-atomic-write v0.5.1
+	github.com/larsartmann/go-atomic-write v0.6.0
 	github.com/larsartmann/go-finding v1.13.0
 	github.com/larsartmann/go-finding/pipeline v1.10.0
 	github.com/larsartmann/go-finding/toolsdk v1.13.0
-	github.com/larsartmann/linter-autoconfigure-sdk v0.2.0
+	github.com/larsartmann/linter-autoconfigure-sdk v0.3.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 )
@@ -21,7 +21,7 @@ require (
 	github.com/go-faster/yaml v0.4.6 // indirect
 	github.com/gofrs/flock v0.13.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/larsartmann/go-error-family v0.10.1 // indirect
+	github.com/larsartmann/go-error-family v0.10.2 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
