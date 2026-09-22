@@ -2,6 +2,7 @@
 package diff
 
 import (
+	stdjson "encoding/json"
 	"encoding/json/v2"
 	"fmt"
 	"sort"
@@ -58,8 +59,70 @@ func (d *Differ) Diff() []Change {
 	changes = append(changes, d.compareAnyMaps(d.before.Rules, d.after.Rules, "")...)
 	changes = append(changes, d.compareBoolMaps(d.before.Env, d.after.Env, "env:")...)
 	changes = append(changes, d.compareAnyMaps(d.before.Settings, d.after.Settings, "settings:")...)
+	changes = append(
+		changes,
+		d.compareOverrides(d.before.Overrides, d.after.Overrides, "override:")...,
+	)
 
 	return changes
+}
+
+// compareOverrides compares overrides blocks by their canonical JSON form.
+// Array order is ignored: a pure reorder is not a meaningful drift signal for
+// an advisory check (oxlint applies the whole list either way).
+func (d *Differ) compareOverrides(before, after []map[string]any, prefix string) []Change {
+	beforeKeys := canonicalOverrideKeys(before)
+	afterKeys := canonicalOverrideKeys(after)
+
+	var changes []Change
+
+	for _, key := range sortedKeys(beforeKeys) {
+		if !afterKeys[key] {
+			changes = append(changes, Change{Rule: prefix + key, Kind: KindRemoved})
+		}
+	}
+
+	for _, key := range sortedKeys(afterKeys) {
+		if !beforeKeys[key] {
+			changes = append(changes, Change{Rule: prefix + key, Kind: KindAdded})
+		}
+	}
+
+	return changes
+}
+
+// canonicalOverrideKeys maps each overrides block to its canonical JSON form
+// (sorted keys via the stdlib v1 marshaler — encoding/json/v2 preserves map
+// construction order, which is not canonical).
+func canonicalOverrideKeys(blocks []map[string]any) map[string]bool {
+	keys := make(map[string]bool, len(blocks))
+
+	for _, block := range blocks {
+		data, err := stdjson.Marshal(block)
+		if err != nil {
+			// Content that cannot be marshaled cannot collide either; fall
+			// back to a printed form so the block still participates.
+			keys[fmt.Sprint(block)] = true
+
+			continue
+		}
+
+		keys[string(data)] = true
+	}
+
+	return keys
+}
+
+// sortedKeys returns the keys of a set map in sorted order.
+func sortedKeys(set map[string]bool) []string {
+	keys := make([]string, 0, len(set))
+	for key := range set {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
+	return keys
 }
 
 // compareMaps returns changes between two string maps with an optional prefix.

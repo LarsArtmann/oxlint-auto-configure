@@ -23,6 +23,7 @@ import (
 	autoconfigure "github.com/larsartmann/linter-autoconfigure-sdk"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
+	"github.com/larsartmann/oxlint-auto-configure/pkg/diff"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 )
@@ -114,9 +115,12 @@ func mustProvider() toolsdk.Spec {
 	// ProviderFromSpec derives Inputs from ConfigFile alone; the detector
 	// also reads package.json, so restore the full read contract.
 	spec.Inputs = []string{"package.json", configFileName}
-	// nil = always healthy: config generation uses the embedded rule registry
-	// and never shells out to the oxlint binary.
-	spec.HealthCheck = nil
+	// HealthCheck reports config drift as an advisory. BuildFlow treats a
+	// failing health check as report-only (warn log + summary entry): it
+	// never skips the tool and never triggers a repair, so flagging drift
+	// here cannot cause Repair to stomp user customizations — Detect stays
+	// missing-only and Repair keeps its never-overwrite contract.
+	spec.HealthCheck = healthCheckDrift
 
 	return toolsdk.Register(spec)
 }
@@ -152,6 +156,60 @@ func detectMissingConfig(ctx context.Context) ([]autoconfigure.ConfigIssue, erro
 			FixStrategy: nil,
 		},
 	}, nil
+}
+
+// healthCheckDrift is the toolsdk Spec's HealthCheck: it verifies that an
+// existing .oxlintrc.json still matches what the tool would generate for the
+// detected project type. A missing config is healthy (Detect owns the
+// missing-config finding, and Repair generates on demand); the other config
+// file names oxlint accepts (.oxlintrc.jsonc, oxlint.config.json) are
+// user-curated configs this tool never writes, so they are out of scope. A
+// returned error is advisory by contract: it names the drift and the fix,
+// and states that nothing was modified.
+func healthCheckDrift(ctx context.Context) error {
+	root := workingDir(ctx)
+
+	path := configPath(root)
+	if _, err := os.Stat(path); err != nil {
+		return nil
+	}
+
+	existingData, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("%s health: read %s: %w", toolName, configFileName, err)
+	}
+
+	existing, err := config.FromJSON(existingData)
+	if err != nil {
+		return fmt.Errorf(
+			"%s health: %s is malformed (%v); run `oxlint-auto-configure configure` to regenerate",
+			toolName, configFileName, err)
+	}
+
+	expectedData, _, err := generateConfig(root)
+	if err != nil {
+		return fmt.Errorf("%s health: generate expected config: %w", toolName, err)
+	}
+
+	expected, err := config.FromJSON(expectedData)
+	if err != nil {
+		return fmt.Errorf("%s health: re-parse generated config: %w", toolName, err)
+	}
+
+	// Compare against what configure would actually write: the generated
+	// config plus every external-plugin bit carried over from the existing
+	// file. Without this, a deliberately customized external setup would
+	// read as drift on every run.
+	expected = config.PreserveExternal(existing, expected)
+
+	d := diff.NewDiffer(existing, expected)
+	if len(d.Diff()) == 0 {
+		return nil
+	}
+
+	return fmt.Errorf(
+		"%s health: %s has drifted from the generated config (%s); run `oxlint-auto-configure configure` to regenerate (advisory only — nothing was modified)",
+		toolName, configFileName, d.Summary())
 }
 
 // hasKnownProjectType reports whether at least one detected project type is
