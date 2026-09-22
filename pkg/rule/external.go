@@ -43,23 +43,23 @@ func KnownExternalPlugins() []ExternalPlugin {
 // ExternalPluginByPackage returns the known external plugin for an npm
 // package name, and whether it was found.
 func ExternalPluginByPackage(pkg string) (ExternalPlugin, bool) {
-	for _, p := range knownExternalPlugins {
-		if p.Package == pkg {
-			return p, true
-		}
-	}
-
-	var zero ExternalPlugin
-
-	return zero, false
+	return findExternalPlugin(func(p ExternalPlugin) bool { return p.Package == pkg })
 }
 
 // ExternalPluginByRuleName returns the known external plugin owning a
 // fully-qualified rule name (e.g. "shadcn/no-restyle"), and whether it was
 // found.
 func ExternalPluginByRuleName(name string) (ExternalPlugin, bool) {
+	return findExternalPlugin(func(p ExternalPlugin) bool {
+		return hasPluginRulePrefix(name, p.Prefix)
+	})
+}
+
+// findExternalPlugin returns the first known external plugin satisfying
+// match, preserving knownExternalPlugins order.
+func findExternalPlugin(match func(ExternalPlugin) bool) (ExternalPlugin, bool) {
 	for _, p := range knownExternalPlugins {
-		if hasPluginRulePrefix(name, p.Prefix) {
+		if match(p) {
 			return p, true
 		}
 	}

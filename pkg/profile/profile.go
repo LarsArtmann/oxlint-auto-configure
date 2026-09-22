@@ -75,6 +75,8 @@ func AllProfiles() []Profile {
 func AllProfileNames() []string {
 	ps := AllProfiles()
 
+	// Deliberate clone of the ~string-to-string conversion loop (stdlib has
+	// no slices.Map); a shared generic helper would over-couple.
 	names := make([]string, 0, len(ps))
 	for _, p := range ps {
 		names = append(names, string(p))

@@ -300,6 +300,8 @@ func (d *Detector) hasPromiseSubstringDep(deps map[string]bool) bool {
 
 // FormatTypes returns a human-readable string of detected types.
 func FormatTypes(types []ProjectType) string {
+	// Deliberate clone of the ~string-to-string conversion loop (stdlib has
+	// no slices.Map); a shared generic helper would over-couple.
 	names := make([]string, 0, len(types))
 	for _, t := range types {
 		names = append(names, string(t))
