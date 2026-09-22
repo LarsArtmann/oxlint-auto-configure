@@ -167,7 +167,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **SummaryView.Findings** — Carries `[]FindingView` for top-rules/top-files computation in `PrintSummary`
 - **Iteration logging** — OnIteration callback uses `slog.Debug` (only visible with `-v`); no more raw slog spam
 - **ProjectTypeTest** — `vitest`/`jest` now detected as `ProjectTypeTest` (not `ProjectTypeNode`); enables both `PluginNode` AND the correct test plugin via `depPluginRules`
-- **GOWORK=off** — Parent workspace at `/home/lars/projects/go.work` interferes; always use `GOWORK=off` for `go run`/`go test`
+- **GOWORK=off** — A parent `go.work` workspace interferes; always use `GOWORK=off` for `go run`/`go test`
 - **GOEXPERIMENT=jsonv2** — Codebase uses `encoding/json/v2` (Go 1.25+ policy). Still behind `goexperiment.jsonv2` build tag in Go 1.26, so `go test`/`go vet`/`go run` need `GOEXPERIMENT=jsonv2`. Nix flakes set it via `env.GOEXPERIMENT`.
 - **Test boilerplate is intentional** — `t.Parallel()` must appear as a direct statement in every `Test*` function body (`paralleltest` linter enforces this — do not fold it into a helper). The `reg := testregistry.Load(t)` line is the shared registry-loading helper from `internal/testregistry`; `pkg/rule/registry_test.go` retains a local `loadTestRegistry` because its tests access the unexported `mapFix` and cannot import `internal/testregistry` without an import cycle.
 - **marshalConfigJSON helper** — `internal/cli/cmd_configure.go` extracts the shared `cfg.ToJSON()` + error wrap into `marshalConfigJSON`. The remaining 4-line preamble (`data, err := marshalConfigJSON(cfg); if err != nil { return err }`) in `writeConfig`/`writeDryRun` is idiomatic Go error propagation and intentionally not abstracted further.
