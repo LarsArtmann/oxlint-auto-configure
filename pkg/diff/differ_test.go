@@ -30,6 +30,25 @@ func TestDiffNoChanges(t *testing.T) {
 	assert.Empty(t, changes)
 }
 
+func TestDifferHasChanges(t *testing.T) {
+	t.Parallel()
+
+	identical := &config.OxlintConfig{
+		Rules:     map[string]any{testRuleNoUnusedVars: testSeverityError},
+		Plugins:   []string{testPluginTS},
+		Overrides: []map[string]any{{"files": []string{"gen.ts"}, "rules": map[string]any{"no-explicit-any": "off"}}},
+	}
+
+	assert.False(t, NewDiffer(identical, identical).HasChanges(), "identical configs must not report changes")
+
+	after := &config.OxlintConfig{
+		Rules:     map[string]any{testRuleNoUnusedVars: testSeverityWarn},
+		Plugins:   []string{testPluginTS},
+		Overrides: []map[string]any{{"files": []string{"gen.ts"}, "rules": map[string]any{"no-explicit-any": "off"}}},
+	}
+	assert.True(t, NewDiffer(identical, after).HasChanges(), "a changed rule severity must report changes")
+}
+
 func TestDiffAdded(t *testing.T) {
 	t.Parallel()
 

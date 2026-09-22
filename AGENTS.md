@@ -148,7 +148,7 @@ Then bump `pkg/rule/rules_version.txt` to the generating oxlint version and upda
 - **Self-describing Plugin** — `CLIFlag()` and `NeedsFlag()` methods on Plugin type
 - **Version-pinned rules** — `rules_version.txt` embedded; warns on mismatch
 - **DecideCategory** — Returns `(SeverityDecision, bool)`; bool controls whether category appears in config (false = omit)
-- **Differ completeness** — Compares all fields: Plugins, JsPlugins, Categories, Rules, Env, Settings, Overrides (overrides compared as canonical-JSON key sets, order-insensitive)
+- **Differ completeness** — Compares all fields: Plugins, JsPlugins, Categories, Rules, Env, Settings, Overrides (overrides compared as canonical-JSON key sets, order-insensitive). `Differ.HasChanges()` is the cheap boolean drift check (`Diff()` emits only real changes, never unchanged rows); `pkg/provider.healthCheckDrift` uses it
 - **Runner seam** — `pkg/oxlint.Runner` interface; `realRunner` (production), `mockRunner` (tests)
 - **Configure extraction** — `Configure(ctx, absRoot, opts)` callable without cobra; malformed existing configs now log warnings
 - **go-finding branded types** — `Finding.Rule` is `finding.RuleName`, `Finding.ToolName` is `finding.ToolName`, `Position.File` is `finding.FilePath` (since v1.2.0). `NewFinding` requires branded conversions: `finding.RuleName(s)`, `finding.ToolName(s)`. Use `string(f.Rule)` / `string(f.Position.File)` when assigning to plain-string fields (e.g., `FindingView.Rule`, `FindingView.File`).
