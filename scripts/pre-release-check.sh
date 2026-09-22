@@ -20,8 +20,15 @@ export GOTOOLCHAIN=auto
 step() { printf '\n==> %s\n' "$1"; }
 
 step "go mod tidy (module consistency)"
+tmp="$(mktemp -d)"
+cp go.mod go.sum "$tmp/"
 go mod tidy
-git diff --exit-code go.mod go.sum
+if ! cmp -s go.mod "$tmp/go.mod" || ! cmp -s go.sum "$tmp/go.sum"; then
+	diff -u "$tmp/go.mod" go.mod || true
+	diff -u "$tmp/go.sum" go.sum || true
+	printf 'ERROR: go mod tidy changed go.mod/go.sum — commit the result first\n' >&2
+	exit 1
+fi
 
 step "go build"
 go build -v ./...
@@ -32,14 +39,14 @@ go vet ./...
 step "go test"
 go test -race ./...
 
-if command -v golangci-lint > /dev/null 2>&1; then
+if command -v golangci-lint >/dev/null 2>&1; then
 	step "golangci-lint"
 	golangci-lint run --timeout=5m
 else
 	printf 'golangci-lint not found, skipping\n'
 fi
 
-if ! command -v goreleaser > /dev/null 2>&1; then
+if ! command -v goreleaser >/dev/null 2>&1; then
 	printf '\nERROR: goreleaser not found — install it to validate the release pipeline\n' >&2
 	exit 1
 fi

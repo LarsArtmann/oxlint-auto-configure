@@ -93,7 +93,6 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 		return err
 	}
 
-
 	reg, err := rule.LoadRegistry()
 	if err != nil {
 		return fmt.Errorf("absRoot=%s: load rule registry: %w", absRoot, err)
