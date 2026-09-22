@@ -12,18 +12,16 @@ Deepen the tool's place in the linting ecosystem. The core loop — detect proje
 
 Raw ideas:
 
-- **SDK evaluation.** The `linter-autoconfigure-sdk` offers `FindingFromIssue` / `ConfigIssue` for structured finding emission and `ReadConfig` / `LoadJSON` for typed config I/O. The `validate` command currently hand-wraps `os.ReadFile` + `fmt.Errorf` and emits only `slog` messages. Evaluate whether adopting the SDK's typed I/O and finding model is worth the early-adopter tax.
 - **Monorepo support.** Auto-detect workspace layouts and generate per-package configs instead of a single root config.
 - **CI integration.** First-class `oxlint-auto-configure` as a CI step: validate configs on PR, diff old vs. new config, flag rule drift.
 - **Public documentation website.** A docs site (via the `website-launch` skill) for profile reference, rule explorer, and getting-started guide.
 
 ### 2. Profile and Rule Intelligence
 
-Profiles are functional but `strict` and `recommended` currently produce identical output for all known categories (they differ only in fallback severity for unknown future categories — see Open Question 2). The rule registry is refreshed to oxlint `1.82.0` and matches the installed runtime.
+Profiles are functional and differentiated: `strict` (default) sets correctness+suspicious at error and everything else at warn; the former `recommended` alias was removed after the two were confirmed byte-identical (see Resolved Questions). The rule registry is refreshed to oxlint `1.82.0` and matches the installed runtime.
 
 Raw ideas:
 
-- **Profile differentiation.** Decide whether `strict` and `recommended` should produce different output, or remove one and document the equivalence.
 - **`--explain` flag.** Print the decision tree for a given project — which plugins were enabled, which rules were set to which severity, and why. Makes the tool self-documenting.
 - **`--profile` on `analyze`.** Let `analyze` accept a profile to scope findings to the rules that profile would enable.
 - **Automatic rule updates.** A `nix run` app or `flake.nix` target that runs `oxlint -f json --rules > pkg/rule/rules_data.json` and updates the version + test count, reducing the manual update burden.
@@ -50,21 +48,20 @@ Raw ideas:
 - **BDD tests for all commands.** Behavior-driven tests (via the `bdd-testing` skill) for `configure`, `analyze`, `validate`, `report`.
 - **Coverage threshold in CI.** Gate PRs on >=80% coverage to prevent regression.
 - **Upstream toolsdk `Outputs`.** Propose `Outputs []string` on `Spec` so BuildFlow regains `**/.oxlintrc.json` producer edges (lost in the `ProviderFromSpec` migration; affects dependabot the same way).
-- **`doctor` command.** One-shot diagnosis: oxlint version vs. `jsPlugins` needs, plugin installed-but-unregistered, registered-but-uninstalled, registry-version drift.
+- **`doctor` command.** One-shot CLI diagnosis: oxlint version vs. `jsPlugins` needs, plugin installed-but-unregistered, registered-but-uninstalled, registry-version drift. (The config-drift slice is now covered by the provider's HealthCheck; the remaining checks are CLI-facing ideas.)
 - **Docker image with oxlint.** The distroless image ships the binary only; `analyze`/`--fix` cannot run inside it. Either bake oxlint in or document the limitation.
 
 ## Open Questions
 
 Decisions that need user input before they can become actionable tasks:
 
-1. **Adopt `linter-autoconfigure-sdk` for `validate`?** The SDK self-describes as "the weakest of the 5 SDKs" with "modest value over stdlib until a second auto-configurer lands." This is a product direction call: be the first consumer (absorbing early-adopter tax) or wait. _(Source: 2026-07-26 report, question g.1)_
-2. **Should `strict` and `recommended` differ?** They are functionally identical in `pkg/profile/profile.go`. Either differentiate the code or consolidate and document the equivalence. _(Source: 2026-07-22 report, question g.2)_
-3. **testify to ginkgo/gomega migration?** Establish a testing framework policy for this project.
-4. **Modularization proposal: execute or archive?** The docs were deleted but the decision to pursue modularization remains open.
-5. **Markdown or HTML for status reports?** The `status-report` skill prescribes styled HTML dashboards; the user has requested `.md` repeatedly. A split format exists in `docs/status/`. Pick one canonical format and document the decision.
-6. **Config-drift detection scope?** Owner answer to "detect stale configs too?" was "All?!?!" (ambiguous). Detect currently flags only a MISSING config; flagging drift risks Repair stomping user customizations. Needs a decision before design. _(Source: 2026-09-11 14:49 report, §g.1)_
-7. **Preserve `overrides` blocks for external rules?** `@shadcn/lint`'s setup disables rules inside component dirs via an `overrides` block, which regeneration drops today — same data-loss class as the one `PreserveExternal` fixed. Preserving broadens the "tool owns the file" contract. _(Source: 2026-09-22 report, §g.2)_
-8. **GitHub Discussions on/off, and social-preview branding?** Community-surface and visual-identity calls only the owner can make. _(Source: 2026-09-11 07:27 report, §g.1–2)_
+1. **Adopt `linter-autoconfigure-sdk` for `validate`?** → **Resolved 2026-09-22: adopted.** `validate` reads configs through the SDK's typed `LoadJSON[config.OxlintConfig]`; a missing config stays programmatically detectable (`errors.Is(err, fs.ErrNotExist)` via the SDK's `*ConfigError` chain) and the error names the fix. The provider already bridged through `ProviderFromSpec`.
+2. **Should `strict` and `recommended` differ?** → **Resolved 2026-09-22: `recommended` removed, `strict` survives.** They were byte-identical; two names for one behavior invited drift. `-p recommended` now returns a migration error naming `strict` (`profile.ErrProfileRemoved`); README documents the change.
+3. **testify to ginkgo/gomega migration?** → **Resolved 2026-09-22: testify stays; Ginkgo allowed for NEW behavior specs only.** Existing table-driven testify tests are not migrated; the first command-level behavior spec is the trigger to add the Ginkgo dependency.
+5. **Markdown or HTML for status reports?** → **Resolved 2026-09-22: Markdown canonical — "always just markdown unless I ask for HTML" (owner).** HTML is produced only on explicit request.
+6. **Config-drift detection scope?** → **Resolved 2026-09-22: advisory drift reporting via the toolsdk Spec's HealthCheck** (owner: "use toolsdk to the max"). BuildFlow treats health-check failures as warn-log + summary only — it never skips the tool nor triggers Repair, so drift is visible without stomp risk. Detect stays missing-only; Repair keeps never-overwrite.
+7. **Preserve `overrides` blocks for external rules?** → **Resolved 2026-09-22: preserved wholesale** (owner: "preserve all, with smart deduplication"). `PreserveExternal` copies every `overrides` block verbatim, deduplicating exact duplicates by canonical JSON form (key-order-insensitive). The generator never emits the field.
+8. **GitHub Discussions on/off, and social-preview branding?** → **Resolved 2026-09-22: Discussions stay off** (issues only); social-preview branding not pursued.
 
 ## Resolved Questions
 
