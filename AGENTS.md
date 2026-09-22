@@ -17,7 +17,7 @@
 
 ### Core Purpose
 
-Oxlint has 841 rules across 7 categories and 15 plugins. Only 113 are enabled by default. This tool:
+Oxlint has 870 rules across 7 categories and 15 plugins (registry at oxlint 1.82.0). Only 111 are enabled by default. This tool:
 
 1. Discovers project type (React, Next.js, Vue, etc.)
 2. Enables relevant plugins automatically
@@ -30,18 +30,18 @@ Oxlint has 841 rules across 7 categories and 15 plugins. Only 113 are enabled by
 | ----------------------------------- | -------------------------------------------------------------------------------------- |
 | `pkg/rule/rule.go`                  | Core types: Rule, Category, Plugin, FixCapability, SeverityDecision                    |
 | `pkg/rule/external.go`              | ExternalPlugin type + known JS-plugin table (`@shadcn/lint` → `shadcn`)                |
-| `pkg/rule/registry.go`              | Rule registry loaded from embedded JSON (841 rules)                                    |
+| `pkg/rule/registry.go`              | Rule registry loaded from embedded JSON (870 rules)                                    |
 | `pkg/rule/rules_data.json`          | Embedded oxlint rules data (from `oxlint -f json --rules`)                             |
 | `pkg/profile/profile.go`            | Profile presets, Categorizer engine, `DecideCategory()`, PluginConfig                  |
 | `pkg/config/generator.go`           | .oxlintrc.json generator (Rules values are `map[string]any`: string or array form)     |
-| `pkg/config/preserve.go`            | PreserveExternal: external-plugin bits survive regeneration (jsPlugins/rules/settings) |
+| `pkg/config/preserve.go`            | PreserveExternal: external-plugin bits + overrides survive regeneration                |
 | `pkg/detect/detector.go`            | Project type detection from package.json + `DetectExternalPlugins()`                   |
 | `pkg/diff/differ.go`                | Config before/after comparison (all fields: plugins, categories, rules, env, settings) |
 | `pkg/format/format.go`              | Rendering: FindingView, SummaryView, PrintSummary/PrintFindingsJSON/PrintFindingsTable |
 | `pkg/oxlint/detector.go`            | go-finding Detector for oxlint; `Runner` interface seam                                |
 | `pkg/oxlint/version.go`             | oxlint version check and binary verification                                           |
 | `pkg/oxlint/fix.go`                 | oxlint --fix wrapper                                                                   |
-| `pkg/provider/provider.go`          | BuildFlow integration: toolsdk Spec (Detect missing config, Repair via generate)       |
+| `pkg/provider/provider.go`          | BuildFlow integration: toolsdk Spec (Detect missing config, Repair via generate, HealthCheck drift report) |
 | `internal/cli/cmd_root.go`          | Root command, shared constants (defaultConfigPath, defaultProfile, version)            |
 | `internal/cli/cmd_configure.go`     | configure command + extracted `Configure(ctx, absRoot, opts)`                          |
 | `internal/cli/cmd_analyze.go`       | analyze command with go-finding pipeline integration                                   |
@@ -120,8 +120,7 @@ nix flake check .                                    # All checks via nix
 | Profile            | Description                                                |
 | ------------------ | ---------------------------------------------------------- |
 | `maximal-typesafe` | ALL rules at error (nursery at warn)                       |
-| `recommended`      | Correctness+suspicious at error, rest at warn, nursery off |
-| `strict`           | Correctness+suspicious at error, rest at warn, nursery off |
+| `strict` (default) | Correctness+suspicious at error, rest at warn, nursery off |
 | `minimal`          | Only correctness at error, rest uses defaults              |
 
 ### Updating Rules

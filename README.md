@@ -49,7 +49,7 @@ Requires Go 1.26+ and [oxlint](https://oxc.rs/docs/guide/usage/linter.html) in P
 ## Quick Start
 
 ```bash
-# Generate config with recommended profile (default)
+# Generate config with strict profile (default)
 oxlint-auto-configure configure
 
 # Maximum type safety — ALL rules at 'error'
@@ -74,14 +74,16 @@ oxlint-auto-configure report
 | -------------------- | ----------- | ---------- | ------- | ------- | -------- | ----------- | ------- |
 | **maximal-typesafe** | error       | error      | error   | error   | error    | error       | warn    |
 | **strict**           | error       | error      | warn    | warn    | warn     | warn        | off     |
-| **recommended**      | error       | error      | warn    | warn    | warn     | warn        | off     |
 | **minimal**          | error       | default    | default | default | default  | default     | default |
+
+> The former `recommended` profile was removed: it produced byte-identical
+> output to `strict`. Scripts passing `-p recommended` get a migration error
+> pointing at `strict`.
 
 ### Profile Details
 
 - **maximal-typesafe**: Every single rule at `error`. Maximum type safety and correctness enforcement. Even nursery rules at `warn`.
-- **strict**: Core correctness at `error`, everything else at `warn` except nursery.
-- **recommended** (default): Correctness + suspicious at `error`. Style, perf, pedantic, and restriction at `warn`. Nursery off.
+- **strict** (default): Core correctness at `error`, everything else at `warn` except nursery.
 - **minimal**: Only correctness at `error`. Everything else uses oxlint defaults.
 
 ## Project Detection
@@ -131,7 +133,7 @@ oxlint-auto-configure configure [flags]
 
 | Flag            | Default          | Description                           |
 | --------------- | ---------------- | ------------------------------------- |
-| `-p, --profile` | `recommended`    | Configuration profile                 |
+| `-p, --profile` | `strict`         | Configuration profile                 |
 | `-c, --config`  | `.oxlintrc.json` | Output config file path               |
 | `-d, --dry-run` | false            | Show changes without writing          |
 | `--fix`         | false            | Run oxlint --fix after writing config |
@@ -158,7 +160,7 @@ oxlint-auto-configure validate [-c .oxlintrc.json]
 Generate a report of all rules and recommended severities:
 
 ```bash
-oxlint-auto-configure report [-p recommended] [-f table|json|summary]
+oxlint-auto-configure report [-p strict] [-f table|json|summary]
 ```
 
 ## Rule Statistics

@@ -43,8 +43,8 @@ func Validate(configPath string) error {
 	if cerr != nil {
 		if errors.Is(cerr, fs.ErrNotExist) {
 			return fmt.Errorf(
-				"no config at %s; run `oxlint-auto-configure configure` to generate one",
-				targetPath)
+				"no config at %s; run `oxlint-auto-configure configure` to generate one: %w",
+				targetPath, cerr)
 		}
 
 		return fmt.Errorf("load config %s: %w", targetPath, cerr)
