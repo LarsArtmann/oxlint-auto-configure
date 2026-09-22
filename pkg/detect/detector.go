@@ -40,7 +40,11 @@ type Detector struct {
 
 // NewDetector creates a project detector for the given root directory.
 func NewDetector(rootDir string) *Detector {
-	return &Detector{rootDir: rootDir}
+	return &Detector{
+		rootDir:  rootDir,
+		depsOnce: sync.Once{},
+		deps:     make(map[string]bool),
+	}
 }
 
 // Detect analyzes the project and returns the plugin configuration.
