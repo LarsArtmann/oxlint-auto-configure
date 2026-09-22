@@ -10,7 +10,7 @@
     };
 
     go-nix-helpers = {
-      url = "github:LarsArtmann/go-nix-helpers/a97742e806193cd7e4c457439c7e117a6cfd1fe7";
+      url = "github:LarsArtmann/go-nix-helpers/29e39b25b691ce51c0daa7be85f551c7016ed2c5";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -60,6 +60,12 @@
         description = "Auto-generate optimal .oxlintrc.json configurations";
         enableCheck = false;
         subPackages = [ "cmd/oxlint-auto-configure" ];
+
+        # go.mod floor (go 1.27.1) is newer than nixpkgs' go (1.26.7); the
+        # tarball toolchain keeps the sandboxed treefmt/goimports check
+        # offline-safe (matching go on PATH + GOTOOLCHAIN=local).
+        goTarballVersion = "1.27.1";
+        goTarballHash = "sha256-TkCKuuEm2Ra2FkYnGT8sVPDjyhMS1pO4bbRfhiqyOLE=";
 
         deps = {
           "github.com/larsartmann/go-atomic-write" = inputs.go-atomic-write;
