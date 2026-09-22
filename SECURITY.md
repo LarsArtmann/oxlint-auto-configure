@@ -4,10 +4,10 @@
 
 Only the latest tagged release receives security fixes:
 
-| Version | Supported |
-| ------- | --------- |
-| latest release on [GitHub Releases](https://github.com/LarsArtmann/oxlint-auto-configure/releases) | ✅ |
-| older releases / `master` between releases | ❌ |
+| Version                                                                                            | Supported |
+| -------------------------------------------------------------------------------------------------- | --------- |
+| latest release on [GitHub Releases](https://github.com/LarsArtmann/oxlint-auto-configure/releases) | ✅        |
+| older releases / `master` between releases                                                         | ❌        |
 
 ## Reporting a Vulnerability
 

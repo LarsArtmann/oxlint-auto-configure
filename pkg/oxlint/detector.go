@@ -160,13 +160,14 @@ func decodeOutput(data []byte) (oxlintOutput, error) {
 
 	start := bytes.IndexByte(data, '{')
 	end := bytes.LastIndexByte(data, '}')
+
 	if start >= 0 && end > start {
 		if err := json.Unmarshal(data[start:end+1], &output); err == nil {
 			return output, nil
 		}
 	}
 
-	return oxlintOutput{}, wholeErr
+	return oxlintOutput{}, fmt.Errorf("parse oxlint JSON: %w", wholeErr)
 }
 
 func (d *Detector) parseOutput(data []byte) ([]finding.Finding, error) {

@@ -144,7 +144,7 @@ func Configure(ctx context.Context, absRoot string, opts ConfigureOptions) error
 // reports both the version and whether a binary was found at all. A missing
 // binary is a warning — generation works from the embedded registry — while
 // any other failure aborts the run.
-func checkOxlintVersion(ctx context.Context) (version string, found bool, err error) {
+func checkOxlintVersion(ctx context.Context) (string, bool, error) {
 	oxlintVer, err := oxlint.CheckVersion(ctx)
 	if err != nil {
 		if errors.Is(err, oxlint.ErrNotFound) {
