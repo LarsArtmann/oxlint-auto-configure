@@ -35,8 +35,7 @@ func newConfigureCommand() *cobra.Command {
 
 Profiles:
   maximal-typesafe  Enable ALL rules at 'error' — maximum type safety
-  recommended       Correctness+suspicious at error, rest at warn (default)
-  strict            Correctness+suspicious at error, everything else at warn
+  strict            Correctness+suspicious at error, everything else at warn (default)
   minimal           Only correctness at error, rest uses oxlint defaults`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if rootDir == "" {
@@ -48,8 +47,13 @@ Profiles:
 				return fmt.Errorf("profileFlag=%s: resolve root dir: %w", profileFlag, err)
 			}
 
+			p, err := profile.Parse(profileFlag)
+			if err != nil {
+				return err
+			}
+
 			opts := ConfigureOptions{
-				Profile:    profile.Profile(profileFlag),
+				Profile:    p,
 				ConfigPath: configPath,
 				DryRun:     dryRun,
 				Fix:        runFix,

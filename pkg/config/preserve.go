@@ -1,7 +1,7 @@
 package config
 
 import (
-	"encoding/json/v2"
+	stdjson "encoding/json"
 	"fmt"
 	"slices"
 
@@ -118,10 +118,11 @@ func preserveOverrides(existing, generated *OxlintConfig) {
 }
 
 // canonicalOverridesKey renders a single overrides block in a canonical form
-// (sorted keys via JSON marshaling) so structurally identical blocks dedup
-// regardless of key order.
+// so structurally identical blocks dedup regardless of key order. The stdlib
+// v1 marshaler is used deliberately: it sorts map keys (encoding/json/v2
+// preserves construction order, which is not canonical for maps).
 func canonicalOverridesKey(block map[string]any) (string, error) {
-	data, err := json.Marshal(block)
+	data, err := stdjson.Marshal(block)
 	if err != nil {
 		return "", fmt.Errorf("canonicalize overrides block: %w", err)
 	}

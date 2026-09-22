@@ -3,6 +3,7 @@
 package profile
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -18,10 +19,6 @@ const (
 	// Maximum type safety and correctness enforcement.
 	ProfileMaximalTypesafe Profile = "maximal-typesafe"
 
-	// ProfileRecommended enables correctness+suspicious at error,
-	// perf+style+pedantic+restriction at warn, nursery at off.
-	ProfileRecommended Profile = "recommended"
-
 	// ProfileStrict enables correctness+suspicious at error,
 	// everything else at warn except nursery (off).
 	ProfileStrict Profile = "strict"
@@ -31,9 +28,47 @@ const (
 	ProfileMinimal Profile = "minimal"
 )
 
+// removedProfileName is the profile name removed once strict and
+// recommended were confirmed byte-identical: two names for one behavior
+// invited drift. Parse maps the removed name to an actionable migration
+// error instead of a generic unknown-profile error.
+const removedProfileName = "recommended"
+
+// Sentinel errors for profile-name parsing.
+var (
+	// ErrInvalidProfile is returned for profile names that were never valid.
+	ErrInvalidProfile = errors.New("invalid profile")
+
+	// ErrProfileRemoved is returned when a formerly valid, since-removed
+	// profile name is used. The error text names the replacement.
+	ErrProfileRemoved = errors.New("removed profile")
+)
+
+// Parse converts a profile name into a Profile. The removed "recommended"
+// name yields ErrProfileRemoved with the migration path in the message; any
+// other unknown name yields ErrInvalidProfile listing the valid choices.
+func Parse(name string) (Profile, error) {
+	if name == removedProfileName {
+		return "", fmt.Errorf(
+			"%w: %q produced byte-identical output to %q and was removed; use %q",
+			ErrProfileRemoved, name, ProfileStrict, ProfileStrict,
+		)
+	}
+
+	p := Profile(name)
+	if !p.IsValid() {
+		return "", fmt.Errorf(
+			"%w %q: choose from %s",
+			ErrInvalidProfile, name, strings.Join(AllProfileNames(), ", "),
+		)
+	}
+
+	return p, nil
+}
+
 // AllProfiles returns all available profiles.
 func AllProfiles() []Profile {
-	return []Profile{ProfileMaximalTypesafe, ProfileRecommended, ProfileStrict, ProfileMinimal}
+	return []Profile{ProfileMaximalTypesafe, ProfileStrict, ProfileMinimal}
 }
 
 // AllProfileNames returns all profile names as strings.
@@ -91,18 +126,6 @@ var profileSpecs = map[Profile]profileSpec{ //nolint:gochecknoglobals // immutab
 			rule.CategoryNursery: {rule.SeverityWarn, true},
 		},
 		fallback: categoryPolicy{rule.SeverityError, true},
-	},
-	ProfileRecommended: {
-		explicit: map[rule.Category]categoryPolicy{
-			rule.CategoryCorrectness: {rule.SeverityError, true},
-			rule.CategorySuspicious:  {rule.SeverityError, true},
-			rule.CategoryPerf:        {rule.SeverityWarn, true},
-			rule.CategoryStyle:       {rule.SeverityWarn, true},
-			rule.CategoryPedantic:    {rule.SeverityWarn, true},
-			rule.CategoryRestriction: {rule.SeverityWarn, true},
-			rule.CategoryNursery:     {rule.SeverityOff, true},
-		},
-		fallback: categoryPolicy{rule.SeverityOff, true},
 	},
 	ProfileStrict: {
 		explicit: map[rule.Category]categoryPolicy{

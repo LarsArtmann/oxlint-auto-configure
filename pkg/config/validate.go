@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 )
 
@@ -13,7 +14,9 @@ import (
 var ErrInvalidConfig = errors.New("invalid config")
 
 // ErrInvalidProfile is returned when an unknown profile name is given.
-var ErrInvalidProfile = errors.New("invalid profile")
+// Deprecated: alias of profile.ErrInvalidProfile (same value), kept so
+// errors.Is callers keep matching; use profile.ErrInvalidProfile directly.
+var ErrInvalidProfile = profile.ErrInvalidProfile
 
 // ValidateResult contains the outcome of validating an OxlintConfig.
 type ValidateResult struct {

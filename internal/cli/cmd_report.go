@@ -36,9 +36,9 @@ func newReportCommand() *cobra.Command {
 				return fmt.Errorf("resolve root dir: %w", err)
 			}
 
-			p := profile.Profile(profileFlag)
-			if !p.IsValid() {
-				return fmt.Errorf("%w %q", config.ErrInvalidProfile, profileFlag)
+			p, err := profile.Parse(profileFlag)
+			if err != nil {
+				return err
 			}
 
 			reg, err := rule.LoadRegistry()

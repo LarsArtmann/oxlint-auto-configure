@@ -16,7 +16,7 @@ var logSetupMu sync.Mutex //nolint:gochecknoglobals // protects concurrent slog 
 
 const (
 	defaultConfigPath = ".oxlintrc.json"
-	defaultProfile    = profile.ProfileRecommended
+	defaultProfile    = profile.ProfileStrict
 )
 
 // Command names (used across cmd files and tests).

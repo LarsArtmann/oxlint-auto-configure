@@ -196,7 +196,7 @@ func repairConfig(ctx context.Context) (string, error) {
 
 // generateConfig runs the detect → profile → generate pipeline shared with
 // the CLI's configure command and returns the marshaled config plus its rule
-// count. The recommended profile is the DAG default; custom profiles remain a
+// count. The strict profile is the DAG default; custom profiles remain a
 // CLI concern.
 func generateConfig(root string) ([]byte, int, error) {
 	reg, err := rule.LoadRegistry()
@@ -214,7 +214,7 @@ func generateConfig(root string) ([]byte, int, error) {
 	externalPlugins := det.DetectExternalPlugins()
 
 	cfg, err := config.GenerateProjectConfig(
-		profile.ProfileRecommended, reg, pluginConfig, projectTypes, externalPlugins)
+		profile.ProfileStrict, reg, pluginConfig, projectTypes, externalPlugins)
 	if err != nil {
 		return nil, 0, fmt.Errorf("%s repair: generate config: %w", toolName, err)
 	}
