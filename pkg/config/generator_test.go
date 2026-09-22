@@ -249,3 +249,79 @@ func TestFromJSONEmptyObject(t *testing.T) {
 	assert.Empty(t, cfg.Categories)
 	assert.Empty(t, cfg.Rules)
 }
+
+// TestToJSON_GoldenBytes pins the serialized config format byte-for-byte:
+// struct field order, sorted map keys, 2-space indent, and NO trailing
+// newline (the write paths append exactly one '\n' — the on-disk contract is
+// ToJSON() + "\n"). Any change here changes every regenerated .oxlintrc.json
+// in the fleet; migrations of ToJSON onto shared helpers must reproduce
+// these bytes exactly.
+func TestToJSON_GoldenBytes(t *testing.T) {
+	t.Parallel()
+
+	cfg := &OxlintConfig{
+		Plugins:    []string{"import", "unicorn"},
+		JsPlugins:  []string{"@shadcn/lint"},
+		Categories: map[string]string{"correctness": "error", "style": "warn"},
+		Rules: map[string]any{
+			"no-console":             "warn",
+			"no-debugger":            "off",
+			"shadcn/no-css-variables": []any{"off", map[string]any{"catchAll": "off"}},
+		},
+		Settings: map[string]any{"shadcn": map[string]any{"style": "new-york"}},
+		Env:      map[string]bool{"builtin": true, "node": true},
+		Overrides: []map[string]any{{
+			"files": []string{"src/components/**"},
+			"rules": map[string]any{"shadcn/no-css-variables": "off"},
+		}},
+	}
+
+	data, err := cfg.ToJSON()
+	require.NoError(t, err)
+
+	want := `{
+  "plugins": [
+    "import",
+    "unicorn"
+  ],
+  "jsPlugins": [
+    "@shadcn/lint"
+  ],
+  "categories": {
+    "correctness": "error",
+    "style": "warn"
+  },
+  "rules": {
+    "no-console": "warn",
+    "no-debugger": "off",
+    "shadcn/no-css-variables": [
+      "off",
+      {
+        "catchAll": "off"
+      }
+    ]
+  },
+  "settings": {
+    "shadcn": {
+      "style": "new-york"
+    }
+  },
+  "env": {
+    "builtin": true,
+    "node": true
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/components/**"
+      ],
+      "rules": {
+        "shadcn/no-css-variables": "off"
+      }
+    }
+  ]
+}`
+
+	assert.Equal(t, want, string(data), "ToJSON bytes must stay golden")
+	assert.NotEqual(t, want+"\n", string(data), "ToJSON must not append a trailing newline")
+}
