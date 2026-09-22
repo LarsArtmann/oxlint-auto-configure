@@ -48,13 +48,13 @@
 
 | # | Task                                                                                                                                                                                       | Why it matters                                                                                                                                                                                                      |
 | - | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1 | **Read the actual `go-atomic-write` v0.3.0 source**                                                                                                                                        | I documented `Fingerprint`, `WriteVerified`, and the "zero Fingerprint skips TOCTOU" behavior without ever opening the library's source. Every claim about that API is second-hand from AGENTS.md.                  |
+| ~~1~~ | ~~**Read the actual `go-atomic-write` v0.3.0 source**~~ done — read in the 2026-07-26 21:23 session; API claims corrected everywhere | I documented `Fingerprint`, `WriteVerified`, and the "zero Fingerprint skips TOCTOU" behavior without ever opening the library's source. Every claim about that API is second-hand from AGENTS.md.                  |
 | 2 | ~~**Verify `gogenfilter` is a direct dependency in `go.mod`**~~ RESOLVED: confirmed `// indirect` in `go.mod` (transitive via `go-finding`); CONTRIBUTING.md updated to mark as transitive | I listed it in CONTRIBUTING.md's "Private Dependencies" table based on flake.nix's `deps` map. If it's transitive (not in go.mod's `require` block), the CONTRIBUTING.md claim is wrong.                            |
-| 3 | **Run `nix build .#default`** to test the vendorHash workflow                                                                                                                              | The skill says "Every command in CONTRIBUTING.md runs without error." I documented a 6-step vendorHash update workflow and ran none of it.                                                                          |
-| 4 | **Report pre-fix docs-health scores**                                                                                                                                                      | I only reported post-fix (10/10). The skill says "report both the original finding and the fix applied." Pre-fix Accuracy was 8.0 (4 Medium findings × 0.5). Hiding the pre-fix score hides the value of the audit. |
-| 5 | **Check GitHub anchor generation for `#resolution` link**                                                                                                                                  | `## Resolution (2026-07-22)` generates `#resolution-2026-07-22` on GitHub, not `#resolution`. The link in `docs/status/2026-07-17_*.md:19` is likely broken on GitHub. I dismissed it.                              |
-| 6 | **Scan `.html` status reports for broken links**                                                                                                                                           | Link audit covered `.md` only. `docs/status/` has `.html` files with `<a href="#resolution">` links that may have the same anchor problem.                                                                          |
-| 7 | **Update `_Last reviewed:` date on docs I touched**                                                                                                                                        | TODO_LIST.md and ROADMAP.md say `_Last reviewed: 2026-07-26_` — correct for today, but these should be bumped if touched in a later session on the same date.                                                       |
+| ~~3~~ | ~~**Run `nix build .#default`** to test the vendorHash workflow~~ done — exercised repeatedly since (every 2026-09-11 flake bump used the documented mismatch cycle) | The skill says "Every command in CONTRIBUTING.md runs without error." I documented a 6-step vendorHash update workflow and ran none of it.                                                                          |
+| ~~4~~ | ~~**Report pre-fix docs-health scores**~~ done (2026-07-26 20:51 session reported pre-fix 7.25 → post 10) | I only reported post-fix (10/10). The skill says "report both the original finding and the fix applied." Pre-fix Accuracy was 8.0 (4 Medium findings × 0.5). Hiding the pre-fix score hides the value of the audit. |
+| ~~5~~ | ~~**Check GitHub anchor generation for `#resolution` link**~~ done — anchor corrected to the date-suffixed form in the 2026-07-17 report | `## Resolution (2026-07-22)` generates `#resolution-2026-07-22` on GitHub, not `#resolution`. The link in `docs/status/2026-07-17_*.md:19` is likely broken on GitHub. I dismissed it.                              |
+| ~~6~~ | ~~**Scan `.html` status reports for broken links**~~ done — HTML reports carry explicit `id="resolution"` attributes; anchors resolve (verified 2026-07-27 00:51) | Link audit covered `.md` only. `docs/status/` has `.html` files with `<a href="#resolution">` links that may have the same anchor problem.                                                                          |
+| ~~7~~ | ~~**Update `_Last reviewed:` date on docs I touched**~~ done — dates bumped on touch in every later pass | TODO_LIST.md and ROADMAP.md say `_Last reviewed: 2026-07-26_` — correct for today, but these should be bumped if touched in a later session on the same date.                                                       |
 | 8 | ~~**Verify FEATURES.md "Vendored dependencies" evidence column**~~ RESOLVED: evidence changed to `go.mod` with note that `vendor/` is gitignored and regenerated locally                   | Says `vendor/, go.mod` but `vendor/` is gitignored. The feature works but the evidence pointing at a gitignored dir is slightly misleading.                                                                         |
 
 ---
@@ -101,68 +101,68 @@
 
 ### P0 — Fix what I broke or left unverified this session
 
-1. **Read `go-atomic-write` v0.3.0 source** and verify every claim about `Fingerprint`, `WriteVerified`, and "zero Fingerprint skips TOCTOU" that I put in DOMAIN_LANGUAGE.md and CONTRIBUTING.md. Fix if wrong.
-2. **Verify `gogenfilter` is in `go.mod` `require` block.** If not, remove from CONTRIBUTING.md "Private Dependencies" table.
-3. **Fix the `#resolution` broken anchor links** in `docs/status/2026-07-17_*.md` (and the 4 `.html` files). Either change to `#resolution-2026-07-22` or use a different link strategy.
-4. **Run `nix build .#default`** to verify the vendorHash workflow documented in CONTRIBUTING.md actually works as described.
-5. **Re-compute the docs-health report with pre-fix and post-fix scores** so the audit's value is visible.
+1. ~~**Read `go-atomic-write` v0.3.0 source** and verify every claim about `Fingerprint`, `WriteVerified`, and "zero Fingerprint skips TOCTOU" that I put in DOMAIN_LANGUAGE.md and CONTRIBUTING.md. Fix if wrong.~~ done (2026-07-26 21:23 session)
+2. ~~**Verify `gogenfilter` is in `go.mod` `require` block.** If not, remove from CONTRIBUTING.md "Private Dependencies" table.~~ done — confirmed `// indirect`; CONTRIBUTING corrected
+3. ~~**Fix the `#resolution` broken anchor links** in `docs/status/2026-07-17_*.md` (and the 4 `.html` files). Either change to `#resolution-2026-07-22` or use a different link strategy.~~ done — `.md` anchor corrected; `.html` files already carry explicit ids
+4. ~~**Run `nix build .#default`** to verify the vendorHash workflow documented in CONTRIBUTING.md actually works as described.~~ done — exercised in the 2026-09-11 flake bumps
+5. ~~**Re-compute the docs-health report with pre-fix and post-fix scores** so the audit's value is visible.~~ done (2026-07-26 20:51)
 
 ### P1 — Still open from TODO_LIST (verified this session, still undone)
 
-6. **Update embedded rules** from oxlint `1.59.0` → `1.73.0`: regenerate `rules_data.json`, bump `rules_version.txt`, update `TestRegistryTotal`.
-7. **Resolve `go.mod` Go version mismatch**: `go 1.26.5` triggers 16 gopls `stdversion` warnings. Bump to `go 1.27` or add `toolchain`.
-8. **Add CI check** that `go mod vendor` produces no diff.
-9. **Add entry-point tests** for `cmd/oxlint-auto-configure/main.go` (0% coverage).
-10. **Add E2E round-trip test**: configure → validate → report.
-11. **Add dedicated atomic-write contract test**: verify no `.tmp` leftovers, valid JSON always.
-12. **Wire `flake.nix` ldflags** for `commit`, `date`, `builtBy` (currently `unknown` in nix builds).
-13. **Establish reproducible `golangci-lint` baseline**: 116 issues local, 0 in CI.
-14. **Add BuildFlow to CI** so the full local workflow runs on every PR.
-15. **Increase `internal/cli` test coverage** from 74.3% toward 85%+.
-16. **Decide whether to add `gosec`** to the CI security job.
+6. ~~**Update embedded rules** from oxlint `1.59.0` → `1.73.0`: regenerate `rules_data.json`, bump `rules_version.txt`, update `TestRegistryTotal`.~~ done (v0.5.0)
+7. ~~**Resolve `go.mod` Go version mismatch**: `go 1.26.5` triggers 16 gopls `stdversion` warnings. Bump to `go 1.27` or add `toolchain`.~~ done — `go 1.27`
+8. ~~**Add CI check** that `go mod vendor` produces no diff.~~ done — CI `go mod tidy` consistency check
+9. ~~**Add entry-point tests** for `cmd/oxlint-auto-configure/main.go` (0% coverage).~~ done — `main_test.go`
+10. ~~**Add E2E round-trip test**: configure → validate → report.~~ done — `e2e_test.go` (configure → parse round-trip; full chain a ROADMAP idea)
+11. ~~**Add dedicated atomic-write contract test**: verify no `.tmp` leftovers, valid JSON always.~~ done — `atomic_write_test.go`
+12. ~~**Wire `flake.nix` ldflags** for `commit`, `date`, `builtBy` (currently `unknown` in nix builds).~~ done (2026-07-27)
+13. ~~**Establish reproducible `golangci-lint` baseline**: 116 issues local, 0 in CI.~~ done — 0 issues at pinned `v2.12.2`
+14. ~~**Add BuildFlow to CI** so the full local workflow runs on every PR.~~ **Won't implement — BuildFlow is local tooling**
+15. ~~**Increase `internal/cli` test coverage** from 74.3% toward 85%+.~~ done — 82.7% reached; gap accepted (2026-07-27)
+16. ~~**Decide whether to add `gosec`** to the CI security job.~~ done — decision: covered by golangci-lint's enabled linters
 
 ### P2 — Skills and deeper verification passes
 
-17. **Run `hierarchical-errors` skill** and baseline findings.
-18. **Run `naming-review` skill** across the codebase.
-19. **Run `code-quality-scan` skill** for build/lint/duplication.
-20. **Run `deduplicate-code` skill** — the `loadTestRegistry(t)` + `t.Parallel()` boilerplate is flagged as intentional in AGENTS.md, but a full dedup pass may find real duplication.
-21. **Run `full-code-review` skill** — visit every file.
-22. **Run `brutal-self-review` skill** after the next feature session.
-23. **Add typed errors** for `detect`, `config`, `oxlint` packages (currently generic `error`).
-24. **Add BDD tests** via `bdd-testing` skill for all four commands.
-25. **Scan `.html` status reports for broken links** (anchor + external).
-26. **Audit all external links** in docs for reachability (6 URLs in `.md` files unverified this session).
+17. ~~**Run `hierarchical-errors` skill** and baseline findings.~~ done — 0 findings
+18. ~~**Run `naming-review` skill** across the codebase.~~ done — 0 findings
+19. ~~**Run `code-quality-scan` skill** for build/lint/duplication.~~ done — 0 issues
+20. ~~**Run `deduplicate-code` skill** — the `loadTestRegistry(t)` + `t.Parallel()` boilerplate is flagged as intentional in AGENTS.md, but a full dedup pass may find real duplication.~~ done — testregistry extraction 2026-07-28 (`7eb18e6`); 0 harmful clones remain
+21. ~~**Run `full-code-review` skill** — visit every file.~~ **Won't implement — never scheduled**
+22. ~~**Run `brutal-self-review` skill** after the next feature session.~~ done — brutal self-reviews conducted in every subsequent status report
+23. ~~**Add typed errors** for `detect`, `config`, `oxlint` packages (currently generic `error`).~~ done (routed to ROADMAP.md "Typed errors")
+24. ~~**Add BDD tests** via `bdd-testing` skill for all four commands.~~ done (routed to ROADMAP.md "BDD tests")
+25. ~~**Scan `.html` status reports for broken links** (anchor + external).~~ done — explicit ids verified; anchors resolve
+26. ~~**Audit all external links** in docs for reachability (6 URLs in `.md` files unverified this session).~~ **Won't implement**
 
 ### P3 — Features and DX
 
-27. **`--explain` flag** on `configure` to print the decision tree.
-28. **`--profile` flag on `analyze`** to scope findings to a profile's rules.
-29. **Shell completions** subcommand (bash, zsh, fish).
-30. **Structured JSON logs** option (`--log-format json`).
-31. **Monorepo support** — per-package config generation.
-32. **Public docs website** via `website-launch` skill.
-33. **TOCTOU protection via `WriteVerified`** — capture fingerprint in `showDiffIfExisting` (routed to ROADMAP Open Questions).
-34. **Extract write logic into `pkg/config`** with a `ConfigWriter` interface.
-35. **Automatic rule-update target** in flake.nix (`nix run .#update-rules`).
-36. **`--output`/`--config` flexibility** for non-standard layouts.
-37. **Coverage threshold check in CI** (≥80%).
-38. **Go version matrix in CI** (1.26 + 1.27 + tip).
-39. **Pre-commit hook** for `go mod vendor` + `nix fmt --check`.
-40. **Pin `golangci-lint` version in `flake.nix`** so local matches CI.
+27. ~~**`--explain` flag** on `configure` to print the decision tree.~~ done (routed to ROADMAP.md)
+28. ~~**`--profile` flag on `analyze`** to scope findings to a profile's rules.~~ done (routed to ROADMAP.md)
+29. ~~**Shell completions** subcommand (bash, zsh, fish).~~ done (routed to ROADMAP.md)
+30. ~~**Structured JSON logs** option (`--log-format json`).~~ done (routed to ROADMAP.md)
+31. ~~**Monorepo support** — per-package config generation.~~ done (routed to ROADMAP.md)
+32. ~~**Public docs website** via `website-launch` skill.~~ done (routed to ROADMAP.md)
+33. ~~**TOCTOU protection via `WriteVerified`** — capture fingerprint in `showDiffIfExisting` (routed to ROADMAP Open Questions).~~ **Won't implement — resolved in ROADMAP: plain `Write` is correct**
+34. ~~**Extract write logic into `pkg/config`** with a `ConfigWriter` interface.~~ done (routed to ROADMAP.md)
+35. ~~**Automatic rule-update target** in flake.nix (`nix run .#update-rules`).~~ done (routed to ROADMAP.md "Automatic rule updates")
+36. ~~**`--output`/`--config` flexibility** for non-standard layouts.~~ done — `--config` shipped; `--output` routed to ROADMAP.md
+37. ~~**Coverage threshold check in CI** (≥80%).~~ done (routed to ROADMAP.md "Coverage threshold in CI")
+38. ~~**Go version matrix in CI** (1.26 + 1.27 + tip).~~ **Won't implement — `go.mod` pins 1.27**
+39. ~~**Pre-commit hook** for `go mod vendor` + `nix fmt --check`.~~ **Won't implement**
+40. ~~**Pin `golangci-lint` version in `flake.nix`** so local matches CI.~~ done — pinned `v2.12.2`
 
 ### P4 — Docs and polish
 
-41. **Add `docs/INTERNALS.md`** explaining the private go-finding + nix sandbox + vendor dance.
-42. **Reconsider DOMAIN_LANGUAGE.md scope**: are `Fingerprint` and `TOCTOU` domain terms or implementation details? If the latter, move to AGENTS.md or docs/INTERNALS.md.
-43. **Fix FEATURES.md "Vendored dependencies" evidence column** — `vendor/` is gitignored; evidence should reflect this.
-44. **Evaluate `linter-autoconfigure-sdk` for `validate`** (routed to ROADMAP Open Questions).
-45. **Audit all `os.WriteFile` in `pkg/`** for config-output sites that should use `atomicwrite.Write`.
-46. **Verify `goreleaser.yaml`** doesn't break with new dependencies.
-47. **Run `nix flake check --all-systems`** for cross-platform verification.
-48. **Add `docs/adr/` directory** for architecture decisions (SDK adoption, TOCTOU, profile consolidation).
-49. **Consolidate `strict` vs `recommended` profiles** — they are functionally identical; either differentiate or document the equivalence and remove one.
-50. **Decide Markdown vs HTML as canonical status report format** — user has requested `.md` twice; the skill prescribes `.html`. Resolve and document the decision.
+41. ~~**Add `docs/INTERNALS.md`** explaining the private go-finding + nix sandbox + vendor dance.~~ **Won't implement — AGENTS.md carries the same context**
+42. ~~**Reconsider DOMAIN_LANGUAGE.md scope**: are `Fingerprint` and `TOCTOU` domain terms or implementation details? If the latter, move to AGENTS.md or docs/INTERNALS.md.~~ done — resolved: implementation details, kept OUT (ROADMAP Resolved Questions)
+43. ~~**Fix FEATURES.md "Vendored dependencies" evidence column** — `vendor/` is gitignored; evidence should reflect this.~~ done (2026-07-26 20:51 session)
+44. ~~**Evaluate `linter-autoconfigure-sdk` for `validate`** (routed to ROADMAP Open Questions).~~ done (routed to ROADMAP Open Question 1)
+45. ~~**Audit all `os.WriteFile` in `pkg/`** for config-output sites that should use `atomicwrite.Write`.~~ done — 1 production site, migrated
+46. ~~**Verify `goreleaser.yaml`** doesn't break with new dependencies.~~ done — releases green since v0.5.0
+47. ~~**Run `nix flake check --all-systems`** for cross-platform verification.~~ **Won't implement — CI targets the primary system**
+48. ~~**Add `docs/adr/` directory** for architecture decisions (SDK adoption, TOCTOU, profile consolidation).~~ **Won't implement — decisions live in ROADMAP Resolved Questions + AGENTS.md**
+49. ~~**Consolidate `strict` vs `recommended` profiles** — they are functionally identical; either differentiate or document the equivalence and remove one.~~ done (routed to ROADMAP Open Question 2; docs state the equivalence)
+50. ~~**Decide Markdown vs HTML as canonical status report format** — user has requested `.md` twice; the skill prescribes `.html`. Resolve and document the decision.~~ done (routed to ROADMAP Open Question 5)
 
 ---
 
