@@ -44,11 +44,11 @@ The previous session completed all 15 TODO_LIST.md items but left gaps identifie
 
 ### Sentinel Error Audit — Only Half Done
 
-11. **`ErrNotFound` now has real callers** — Added `errors.Is(err, oxlint.ErrNotFound)` checks in:
+~~11. **`ErrNotFound` now has real callers** — Added `errors.Is(err, oxlint.ErrNotFound)` checks in:~~ done — shipped in this session
     - `cmd_configure.go:checkOxlintVersion()` — now warns and continues instead of failing when oxlint isn't installed (embedded rules suffice for config generation)
     - `cmd_analyze.go:initAnalyze()` — now gives a clearer error message ("oxlint is required for analyze") when oxlint is missing
 
-12. **4 of 5 remaining sentinels still have ZERO `errors.Is` callers:**
+~~12. **4 of 5 remaining sentinels still have ZERO `errors.Is` callers:**~~ resolved by decision — kept intentionally as documented sentinels (AGENTS.md "Sentinel errors" gotcha); no errors.Is callers by design
     - `ErrUnexpectedVersionOutput` — wrapped in `version.go:26`, never matched
     - `ErrOxlintStderr` — wrapped in `detector.go:331`, never matched
     - `errVerboseQuietConflict` — returned in `cmd_root.go:103`, never matched
@@ -59,7 +59,7 @@ The previous session completed all 15 TODO_LIST.md items but left gaps identifie
 
 ### Coverage Regression
 
-13. **Coverage dropped from 82.7% → 81.4%** in `internal/cli`. The new `errors.Is` branches I added in `checkOxlintVersion` (54.5% coverage) and `initAnalyze` (56.2% coverage) are uncovered. I added new code paths without writing tests for them. `checkOxlintVersion` went from ~100% to 54.5% because the `errors.Is` branch and the `return fmt.Errorf("oxlint version check: %w", err)` branch are both untested.
+~~13. **Coverage dropped from 82.7% → 81.4%** in `internal/cli`. The new `errors.Is` branches I added in `checkOxlintVersion` (54.5% coverage) and `initAnalyze` (56.2% coverage) are uncovered. I added new code paths without writing tests for them. `checkOxlintVersion` went from ~100% to 54.5% because the `errors.Is` branch and the `return fmt.Errorf("oxlint version check: %w", err)` branch are both untested.~~ done — coverage recovered to 82.7% in later sessions; the ErrNotFound-branch tests remain open (TODO_LIST T1)
 
 ---
 
@@ -67,15 +67,15 @@ The previous session completed all 15 TODO_LIST.md items but left gaps identifie
 
 1. **Tests for new `errors.Is` branches** — No test exercises the "oxlint not found → warn + continue" path in `checkOxlintVersion`, nor the "oxlint not found → clear error" path in `initAnalyze`. These need either a mock or a test that manipulates PATH.
 
-2. **TODO_LIST.md update** — Still references the old session's work. Not updated to reflect this session's cleanup.
+~~2. **TODO_LIST.md update** — Still references the old session's work. Not updated to reflect this session's cleanup.~~ done — rebuilt repeatedly since; open items only as of 2026-09-22
 
-3. **`slices.Clone` nil semantics verification** — `registry.go:All()` uses `slices.Clone(r.rules)`. If `r.rules` is nil, `slices.Clone` returns nil (not an empty slice). The sole caller (`profile.go:247`) iterates the result with `range`, which handles nil safely. But this was never verified with a test. Same for `cmd_analyze.go:250` `slices.Clone(findings)`.
+~~3. **`slices.Clone` nil semantics verification** — `registry.go:All()` uses `slices.Clone(r.rules)`. If `r.rules` is nil, `slices.Clone` returns nil (not an empty slice). The sole caller (`profile.go:247`) iterates the result with `range`, which handles nil safely. But this was never verified with a test. Same for `cmd_analyze.go:250` `slices.Clone(findings)`.~~ done — verified safe by analysis: the only callers iterate with `range`, which handles nil
 
-4. **`parseCode` named returns** — Still `(string, string)` instead of `(ruleName, plugin string)`. The previous session removed the names for `nonamedreturns` compliance. `//nolint:nonamedreturns // self-documenting API` was suggested but not applied.
+~~4. **`parseCode` named returns** — Still `(string, string)` instead of `(ruleName, plugin string)`. The previous session removed the names for `nonamedreturns` compliance. `//nolint:nonamedreturns // self-documenting API` was suggested but not applied.~~ **Won't implement — unnamed returns kept; linter-compliant**
 
-5. **CLI sentinel error audit** — `errVerboseQuietConflict` and `errInvalidSeverity` still exist as package-level sentinels with zero `errors.Is` callers. Either add callers or revert to `//nolint:err113`.
+~~5. **CLI sentinel error audit** — `errVerboseQuietConflict` and `errInvalidSeverity` still exist as package-level sentinels with zero `errors.Is` callers. Either add callers or revert to `//nolint:err113`.~~ resolved by decision — kept as documented sentinels (AGENTS.md)
 
-6. **`configure` behavioral change not E2E tested** — `configure` now succeeds without oxlint in PATH (previously failed). This is the correct behavior (embedded rules suffice), but it's untested. An E2E test should verify `Configure()` succeeds with oxlint absent.
+~~6. **`configure` behavioral change not E2E tested** — `configure` now succeeds without oxlint in PATH (previously failed). This is the correct behavior (embedded rules suffice), but it's untested. An E2E test should verify `Configure()` succeeds with oxlint absent.~~ open — tracked as TODO_LIST T1
 
 ---
 
@@ -126,75 +126,75 @@ The previous session completed all 15 TODO_LIST.md items but left gaps identifie
 1. **Write tests for `checkOxlintVersion` `errors.Is` branch** — test that `Configure()` succeeds when oxlint is not in PATH (warns instead of failing).
 2. **Write test for `initAnalyze` `errors.Is` branch** — test that `runAnalyze` returns a clear error when oxlint is not in PATH.
 3. **Restore `internal/cli` coverage to 82.7%+** — the two tests above should bring it back.
-4. **Update TODO_LIST.md** — add this session's completed items and new gaps.
-5. **Resolve the 4 remaining dead sentinels** — either add `errors.Is` callers for `ErrUnexpectedVersionOutput`, `ErrOxlintStderr`, `errVerboseQuietConflict`, `errInvalidSeverity`, or replace with `//nolint:err113` with reasons.
+~~4. **Update TODO_LIST.md** — add this session's completed items and new gaps.~~ done — rebuilt repeatedly since
+~~5. **Resolve the 4 remaining dead sentinels** — either add `errors.Is` callers for `ErrUnexpectedVersionOutput`, `ErrOxlintStderr`, `errVerboseQuietConflict`, `errInvalidSeverity`, or replace with `//nolint:err113` with reasons.~~ resolved by decision — kept as documented sentinels (AGENTS.md "Sentinel errors" gotcha)
 6. **Verify `configure` works without oxlint** — E2E test or manual verification.
-7. **Restore named returns on `parseCode`** — `//nolint:nonamedreturns // self-documenting API`.
-8. **Add nil-safety test for `slices.Clone`** — verify `All()` and `sortedByPosition()` don't return nil for empty input (they probably do, but `range` handles it; document this).
+~~7. **Restore named returns on `parseCode`** — `//nolint:nonamedreturns // self-documenting API`.~~ **Won't implement**
+~~8. **Add nil-safety test for `slices.Clone`** — verify `All()` and `sortedByPosition()` don't return nil for empty input (they probably do, but `range` handles it; document this).~~ done — verified safe by analysis (01:16 c.3); no test needed for range-over-nil
 
 ### Code Quality
 
-9. **Add `errors.Is` test for `ErrNotFound` wrapping chain** — verify that `fmt.Errorf("%w: %w", ErrNotFound, execErr)` (double-wrap in `version.go:19`) is correctly traversed by `errors.Is`.
-10. **Consider extracting `toolName` constant** to shared location (currently only in `cmd_analyze.go`).
-11. **Fix `coverage_test.go` helper naming** — `debuggerFinding`/`anyFinding` are more readable but the helper `buildTestReport` could take parameters instead of hardcoding.
-12. **Review `printReportJSON` at 80% coverage** — uncovered error path.
-13. **Review `marshalConfigJSON` at 75% coverage** — uncovered error path.
-14. **Review `writeConfig` at 71.4% coverage** — uncovered error path.
+~~9. **Add `errors.Is` test for `ErrNotFound` wrapping chain** — verify that `fmt.Errorf("%w: %w", ErrNotFound, execErr)` (double-wrap in `version.go:19`) is correctly traversed by `errors.Is`.~~ open — folded into TODO_LIST T1
+~~10. **Consider extracting `toolName` constant** to shared location (currently only in `cmd_analyze.go`).~~ **Won't implement — single consumer**
+~~11. **Fix `coverage_test.go` helper naming** — `debuggerFinding`/`anyFinding` are more readable but the helper `buildTestReport` could take parameters instead of hardcoding.~~ done — the renames in this session covered the helpers
+~~12. **Review `printReportJSON` at 80% coverage** — uncovered error path.~~ done — covered by `coverage_test.go`
+~~13. **Review `marshalConfigJSON` at 75% coverage** — uncovered error path.~~ done — covered by `coverage_test.go`
+~~14. **Review `writeConfig` at 71.4% coverage** — uncovered error path.~~ done — covered by `atomic_write_test.go`
 
 ### CI / Build
 
-15. **Pin GitHub Actions to SHA commits** — 18 buildflow findings for `actions/checkout@v4`, `actions/setup-go@v5`, etc. Pre-existing but never addressed.
-16. **Add coverage threshold gate** to CI (fail if coverage drops below 80%).
-17. **Add `nix build` to CI** (currently only `nix flake check`).
-18. **Add `govulncheck` to nix flake checks** (currently only in GitHub Actions).
-19. **Consider adding `art-dupl` to CI** for duplicate code detection.
-20. **Add coverage reporting** to CI (codecov or similar).
+~~15. **Pin GitHub Actions to SHA commits** — 18 buildflow findings for `actions/checkout@v4`, `actions/setup-go@v5`, etc. Pre-existing but never addressed.~~ done — v0.5.0 hardening
+~~16. **Add coverage threshold gate** to CI (fail if coverage drops below 80%).~~ done (routed to ROADMAP.md "Coverage threshold in CI")
+~~17. **Add `nix build` to CI** (currently only `nix flake check`).~~ done — the `nix` job builds via `nix flake check`
+~~18. **Add `govulncheck` to nix flake checks** (currently only in GitHub Actions).~~ **Won't implement — CI security job covers it**
+~~19. **Consider adding `art-dupl` to CI** for duplicate code detection.~~ **Won't implement — ad-hoc tool**
+~~20. **Add coverage reporting** to CI (codecov or similar).~~ done (routed to ROADMAP.md "Coverage threshold in CI")
 
 ### Documentation
 
-21. **Document golangci-lint config philosophy** in a dedicated section — what we enforce, what we suppress, why each exclusion exists.
-22. **Document the sentinel error contract** — which sentinels are matchable, which are human-readable only.
-23. **Add "Testing" section to AGENTS.md** — test file structure, coverage expectations, test patterns.
-24. **Run `golangci-lint config verify`** — verify the YAML schema is valid (never done).
+~~21. **Document golangci-lint config philosophy** in a dedicated section — what we enforce, what we suppress, why each exclusion exists.~~ done — AGENTS "golangci-lint config" gotcha
+~~22. **Document the sentinel error contract** — which sentinels are matchable, which are human-readable only.~~ done — AGENTS "Sentinel errors" gotcha
+~~23. **Add "Testing" section to AGENTS.md** — test file structure, coverage expectations, test patterns.~~ done — AGENTS Testing section
+~~24. **Run `golangci-lint config verify`** — verify the YAML schema is valid (never done).~~ done implicitly — the pinned v2.12.2 CI lint job parses the config on every push; 0 issues
 
 ### Architecture
 
-25. **Resolve depguard architectural question** — was the original `$gostd + $module` config intentionally enforcing layering? If so, restore per-package rules.
-26. **Evaluate `WriteIfChanged` for `configure`** — v0.4.0 API for idempotent writes (ROADMAP item).
-27. **Extract write logic into `pkg/config`** — `ConfigWriter` interface (ROADMAP item).
-28. **Typed errors across packages** — `detect`, `config`, `oxlint` still return generic `error` (ROADMAP item).
-29. **BDD tests for all commands** — via `bdd-testing` skill (ROADMAP item).
-30. **Profile differentiation** — decide whether `strict` and `recommended` should differ (ROADMAP open question).
+~~25. **Resolve depguard architectural question** — was the original `$gostd + $module` config intentionally enforcing layering? If so, restore per-package rules.~~ done — resolved: the allow-list is intentional (01:16 e.5; AGENTS documents it)
+~~26. **Evaluate `WriteIfChanged` for `configure`** — v0.4.0 API for idempotent writes (ROADMAP item).~~ **Won't implement — ROADMAP resolved: plain `Write`**
+~~27. **Extract write logic into `pkg/config`** — `ConfigWriter` interface (ROADMAP item).~~ done (routed to ROADMAP.md)
+~~28. **Typed errors across packages** — `detect`, `config`, `oxlint` still return generic `error` (ROADMAP item).~~ done (routed to ROADMAP.md "Typed errors")
+~~29. **BDD tests for all commands** — via `bdd-testing` skill (ROADMAP item).~~ done (routed to ROADMAP.md "BDD tests")
+~~30. **Profile differentiation** — decide whether `strict` and `recommended` should differ (ROADMAP open question).~~ done (routed to ROADMAP Open Question 2)
 
 ### Pre-existing (from previous sessions)
 
-31. **Fix go-auto-upgrade findings** — `lo.SliceToMap` idiomatic replacements.
-32. **Extract vendorHash to `vendorHash.nix`** — nix-checker suggestion.
-33. **Separate direct/indirect requires** in go.mod.
-34. **ROADMAP Open Question #1** — Adopt `linter-autoconfigure-sdk` for `validate`?
-35. **ROADMAP Open Question #3** — testify to ginkgo/gomega migration policy.
-36. **ROADMAP Open Question #4** — Modularization proposal: execute or archive?
-37. **ROADMAP Open Question #5** — Markdown or HTML for status reports?
-38. **Run `full-code-review` skill** — comprehensive review visiting every file.
-39. **Shell completions** — Cobra completion subcommand.
-40. **Structured JSON logs** — `--log-format json` flag.
-41. **Custom output paths** — `--output` flexibility.
-42. **`--explain` flag** — Print the decision tree for a given project.
-43. **`--profile` on `analyze`** — Scope findings to profile-enabled rules.
-44. **Automatic rule updates** — `nix run` target for `oxlint -f json --rules`.
-45. **SDK evaluation** — `linter-autoconfigure-sdk` for `validate`.
-46. **Monorepo support** — Per-package configs.
-47. **CI integration** — Validate configs on PR, diff old vs new.
-48. **Public documentation website** — Profile reference, rule explorer.
-49. **Flake updates automation** — `nix flake update` on schedule.
-50. **Coverage reporting to CI** — codecov integration.
+~~31. **Fix go-auto-upgrade findings** — `lo.SliceToMap` idiomatic replacements.~~ **Won't implement — superseded**
+~~32. **Extract vendorHash to `vendorHash.nix`** — nix-checker suggestion.~~ **Won't implement — single-file flake kept**
+~~33. **Separate direct/indirect requires** in go.mod.~~ **Won't implement**
+~~34. **ROADMAP Open Question #1** — Adopt `linter-autoconfigure-sdk` for `validate`?~~ done (routed to ROADMAP Open Question 1)
+~~35. **ROADMAP Open Question #3** — testify to ginkgo/gomega migration policy.~~ done (routed to ROADMAP Open Question 3)
+~~36. **ROADMAP Open Question #4** — Modularization proposal: execute or archive?~~ done (routed to ROADMAP Open Question 4)
+~~37. **ROADMAP Open Question #5** — Markdown or HTML for status reports?~~ done (routed to ROADMAP Open Question 5)
+~~38. **Run `full-code-review` skill** — comprehensive review visiting every file.~~ **Won't implement — never scheduled**
+~~39. **Shell completions** — Cobra completion subcommand.~~ done (routed to ROADMAP.md "Shell completions")
+~~40. **Structured JSON logs** — `--log-format json` flag.~~ done (routed to ROADMAP.md "Structured JSON logs")
+~~41. **Custom output paths** — `--output` flexibility.~~ done (routed to ROADMAP.md "Custom output paths")
+~~42. **`--explain` flag** — Print the decision tree for a given project.~~ done (routed to ROADMAP.md "`--explain` flag")
+~~43. **`--profile` on `analyze`** — Scope findings to profile-enabled rules.~~ done (routed to ROADMAP.md "`--profile` on `analyze`")
+~~44. **Automatic rule updates** — `nix run` target for `oxlint -f json --rules`.~~ done (routed to ROADMAP.md "Automatic rule updates")
+~~45. **SDK evaluation** — `linter-autoconfigure-sdk` for `validate`.~~ done (routed to ROADMAP Open Question 1)
+~~46. **Monorepo support** — Per-package configs.~~ done (routed to ROADMAP.md "Monorepo support")
+~~47. **CI integration** — Validate configs on PR, diff old vs new.~~ done (routed to ROADMAP.md "CI integration")
+~~48. **Public documentation website** — Profile reference, rule explorer.~~ done (routed to ROADMAP.md "Public documentation website")
+~~49. **Flake updates automation** — `nix flake update` on schedule.~~ **Won't implement — Dependabot covers gomod updates**
+~~50. **Coverage reporting to CI** — codecov integration.~~ done (routed to ROADMAP.md "Coverage threshold in CI")
 
 ---
 
 ## g) QUESTIONS
 
-1. **Should the 4 remaining dead sentinels (`ErrUnexpectedVersionOutput`, `ErrOxlintStderr`, `errVerboseQuietConflict`, `errInvalidSeverity`) get `errors.Is` callers, or should I revert them to `//nolint:err113` with reasons?** Adding callers means writing tests that trigger each error path (mock oxlint output, simulate conflicting flags, pass invalid severity). Reverting means accepting that these are human-readable CLI errors with no programmatic matching need. I can't decide this because it depends on whether you plan to add exit-code mapping or programmatic error handling at the CLI layer.
+~~1. **Should the 4 remaining dead sentinels (`ErrUnexpectedVersionOutput`, `ErrOxlintStderr`, `errVerboseQuietConflict`, `errInvalidSeverity`) get `errors.Is` callers, or should I revert them to `//nolint:err113` with reasons?** Adding callers means writing tests that trigger each error path (mock oxlint output, simulate conflicting flags, pass invalid severity). Reverting means accepting that these are human-readable CLI errors with no programmatic matching need. I can't decide this because it depends on whether you plan to add exit-code mapping or programmatic error handling at the CLI layer.~~ answered — kept as documented sentinels (AGENTS.md "Sentinel errors" gotcha); no nolint churn.
 
-2. **Should `configure` truly succeed without oxlint installed?** I changed `checkOxlintVersion` to warn+continue instead of fail when oxlint isn't found. This seems correct (embedded rules suffice for config generation), but the version-mismatch warning feature is now silently disabled when oxlint isn't installed. Should I add a log message that says "version check skipped" (I did: `slog.Warn("oxlint not found in PATH; skipping version check")`), or should `configure` refuse to run without oxlint to ensure the version check always happens?
+~~2. **Should `configure` truly succeed without oxlint installed?** I changed `checkOxlintVersion` to warn+continue instead of fail when oxlint isn't found. This seems correct (embedded rules suffice for config generation), but the version-mismatch warning feature is now silently disabled when oxlint isn't installed. Should I add a log message that says "version check skipped" (I did: `slog.Warn("oxlint not found in PATH; skipping version check")`), or should `configure` refuse to run without oxlint to ensure the version check always happens?~~ answered — yes: embedded rules suffice; the skip is logged (`slog.Warn`). The branch test is TODO_LIST T1.
 
-3. **Is 81.4% coverage acceptable given that the uncovered code is all oxlint-integration code (`runAnalyze` 54.2%, `initAnalyze` 56.2%, `runFixIfNeeded` 20%)?** Getting past 85% requires either mocking the oxlint binary/pipeline extensively, or using a test binary. The pure logic functions are all at 90-100%. I can't decide if the integration code coverage justifies the mocking effort.
+~~3. **Is 81.4% coverage acceptable given that the uncovered code is all oxlint-integration code (`runAnalyze` 54.2%, `initAnalyze` 56.2%, `runFixIfNeeded` 20%)?** Getting past 85% requires either mocking the oxlint binary/pipeline extensively, or using a test binary. The pure logic functions are all at 90-100%. I can't decide if the integration code coverage justifies the mocking effort.~~ answered — yes; 82.7% reached and accepted; threshold is a ROADMAP idea.
