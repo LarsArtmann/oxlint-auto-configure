@@ -28,5 +28,5 @@ func TestLoadIsRepeatable(t *testing.T) {
 	first := Load(t)
 	second := Load(t)
 
-	require.Equal(t, len(first.All()), len(second.All()))
+	require.Len(t, first.All(), len(second.All()))
 }
