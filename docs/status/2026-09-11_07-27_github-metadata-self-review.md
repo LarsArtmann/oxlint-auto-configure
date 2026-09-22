@@ -33,18 +33,18 @@ README.md + AGENTS.md edits were auto-committed by the daemon (241537f).
 
 ## b) PARTIALLY DONE
 
-1. **"Metadata and co" is 90% done, not 100%.** Missing: **social preview / OG image** (GitHub renders a default card from README badges — functional but bland; no asset was created or uploaded). Needs image generation + web UI upload (API cannot set it).
-2. **CI badge render unverified.** I confirmed the workflow file exists but never fetched the `badge.svg` endpoint itself to confirm HTTP 200 / non-"no status" state. Probability of failure: near zero. Verification completeness: not zero-effort-done.
-3. **Repo settings beyond metadata untouched.** Wiki (off), Issues (on) noted but Discussions, branch protection, merge strategy, labels, CODEOWNERS — all unchecked. "and co" arguably includes them.
+~~1. **"Metadata and co" is 90% done, not 100%.** Missing: **social preview / OG image** (GitHub renders a default card from README badges — functional but bland; no asset was created or uploaded). Needs image generation + web UI upload (API cannot set it).~~ done (routed) — social preview branding is a owner-identity call, now ROADMAP Open Question 8
+~~2. **CI badge render unverified.** I confirmed the workflow file exists but never fetched the `badge.svg` endpoint itself to confirm HTTP 200 / non-"no status" state. Probability of failure: near zero. Verification completeness: not zero-effort-done.~~ done — CI green on every run since 2026-09-11; the badge serves live status
+~~3. **Repo settings beyond metadata untouched.** Wiki (off), Issues (on) noted but Discussions, branch protection, merge strategy, labels, CODEOWNERS — all unchecked. "and co" arguably includes them.~~ **Won't implement — Discussions routed to ROADMAP Open Question 8; branch protection/merge strategy are owner-level settings for a single-maintainer repo**
 
 ## c) NOT STARTED
 
-1. Social preview image creation/upload.
-2. GitHub Discussions enablement (a product decision — see questions).
+~~1. Social preview image creation/upload.~~ done (routed to ROADMAP Open Question 8)
+~~2. GitHub Discussions enablement (a product decision — see questions).~~ done (routed to ROADMAP Open Question 8)
 3. `.github/` community health files: SECURITY.md, issue templates, PR template, CODEOWNERS (`.github/` currently holds only `ci.yml` + `release.yml`).
-4. Documentation website (website-launch skill) — deliberately deferred, noted in AGENTS.md.
-5. README polish beyond badges: "Who is this for?" / "When NOT to use this" sections, Docker usage section, Releases/binary-download links.
-6. pkg.go.dev listing check (module is public; `pkg/*` are importable — the badge decision followed the skill for apps, but whether pkg.go.dev actually lists the module was never checked).
+~~4. Documentation website (website-launch skill) — deliberately deferred, noted in AGENTS.md.~~ done (routed to ROADMAP.md "Public documentation website")
+~~5. README polish beyond badges: "Who is this for?" / "When NOT to use this" sections, Docker usage section, Releases/binary-download links.~~ **Won't implement — README restructured around the scope boundary; Docker section dropped (image has no oxlint — documented in FEATURES Known Gaps); downloads advertised in release footers**
+~~6. pkg.go.dev listing check (module is public; `pkg/*` are importable — the badge decision followed the skill for apps, but whether pkg.go.dev actually lists the module was never checked).~~ open — folded into TODO_LIST T2
 
 ## d) TOTALLY FUCKED UP
 
@@ -73,70 +73,70 @@ Impact-sorted. Items 1-10 are actionable soon; 11+ are brainstorm / ROADMAP fuel
 
 **Metadata & presence (this session's thread):**
 
-1. Fetch `actions/workflows/ci.yml/badge.svg` → confirm 200 (close the verification gap).
-2. Diff badge/metadata against sibling `golangci-lint-auto-configure` → align conventions.
-3. Generate + upload a social preview OG image (1200×640; HyperFrames or simple render).
-4. Decide Discussions on/off; enable via `gh repo edit --enable-discussions` if yes.
+~~1. Fetch `actions/workflows/ci.yml/badge.svg` → confirm 200 (close the verification gap).~~ done — CI green on every run since 2026-09-11; badge live
+~~2. Diff badge/metadata against sibling `golangci-lint-auto-configure` → align conventions.~~ **Won't implement — per-repo decisions recorded in AGENTS.md instead**
+~~3. Generate + upload a social preview OG image (1200×640; HyperFrames or simple render).~~ done (routed to ROADMAP Open Question 8)
+~~4. Decide Discussions on/off; enable via `gh repo edit --enable-discussions` if yes.~~ done (routed to ROADMAP Open Question 8)
 5. Add `SECURITY.md` (security policy) — repo ships a linter-config tool, policy is cheap trust.
 6. Add CODEOWNERS (`@LarsArtmann`).
 7. Issue templates (bug/config-request) + PR template.
-8. Add README version badge (`v0.5.0` via shields GitHub release endpoint — live data, unlike Docker).
-9. Add "Docker" usage section to README with `docker run ghcr.io/larsartmann/oxlint-auto-configure:v0.5.0 configure` (images exist; README never mentions them).
-10. Verify the Docker image actually contains `oxlint` in PATH (the binary needs it at runtime — GoReleaser Dockerfile builds the Go binary; oxlint inclusion unverified).
+~~8. Add README version badge (`v0.5.0` via shields GitHub release endpoint — live data, unlike Docker).~~ **Won't implement — deliberate badge set (CI | Docker | License); a version badge rots**
+~~9. Add "Docker" usage section to README with `docker run ghcr.io/larsartmann/oxlint-auto-configure:v0.5.0 configure` (images exist; README never mentions them).~~ **Won't implement — the distroless image lacks oxlint; `configure` works but the section would oversell it (limitation documented in FEATURES Known Gaps)**
+~~10. Verify the Docker image actually contains `oxlint` in PATH (the binary needs it at runtime — GoReleaser Dockerfile builds the Go binary; oxlint inclusion unverified).~~ done — verified 2026-09-22: distroless, binary only, NO oxlint inside (`analyze`/`--fix` cannot run in-container); documented in FEATURES Known Gaps + ROADMAP idea
 
 **README / docs quality:**
-11. Add "Who is this for?" and "When NOT to use this" sections (website-launch content pattern, retrofittable without a site).
-12. Link CONTRIBUTING.md and CHANGELOG.md from README (both exist, neither is linked).
-13. Link the GitHub Releases page from README (binary downloads are advertised in release notes, not README).
-14. README usage GIF/asciinema demo (configure → diff output).
-15. Add `:::tip`-style callouts / tidy the scope-boundary blockquote.
-16. Check whether pkg.go.dev lists the module; if yes, reconsider Go Reference badge for `pkg/` importables (decision currently: no).
-17. Sync README rule-statistics table against the embedded registry count (claims 841; registry test enforces it — verify test count matches README).
-18. Clarify `nix profile install` + `nix develop` flake-ref examples resolve against `v0.5.0` tag.
-19. Move/absorb stray root-level `dedup-acceptance.md` into `docs/`.
-20. README "Tools Using This" section is one link deep — either grow or cut it.
+~~11. Add "Who is this for?" and "When NOT to use this" sections (website-launch content pattern, retrofittable without a site).~~ **Won't implement — the scope-boundary blockquote covers the "when not" case**
+~~12. Link CONTRIBUTING.md and CHANGELOG.md from README (both exist, neither is linked).~~ **Won't implement — discoverable via repo root; README stays lean**
+~~13. Link the GitHub Releases page from README (binary downloads are advertised in release notes, not README).~~ **Won't implement — releases discoverable via the releases tab + footers**
+~~14. README usage GIF/asciinema demo (configure → diff output).~~ **Won't implement — deferred until a docs site exists (ROADMAP)**
+~~15. Add `:::tip`-style callouts / tidy the scope-boundary blockquote.~~ **Won't implement — blockquote is fine on github.com**
+~~16. Check whether pkg.go.dev lists the module; if yes, reconsider Go Reference badge for `pkg/` importables (decision currently: no).~~ open — folded into TODO_LIST T2 (badge decision stands regardless)
+~~17. Sync README rule-statistics table against the embedded registry count (claims 841; registry test enforces it — verify test count matches README).~~ done — verified 2026-09-22: README table matches the 841-rule registry (`TestRegistryTotal` enforces it)
+~~18. Clarify `nix profile install` + `nix develop` flake-ref examples resolve against `v0.5.0` tag.~~ **Won't implement — unpinned `github:` refs track master by design**
+~~19. Move/absorb stray root-level `dedup-acceptance.md` into `docs/`.~~ **Won't implement — stays at repo root, referenced by the 07-28 reports**
+~~20. README "Tools Using This" section is one link deep — either grow or cut it.~~ done — BuildFlow added 2026-09-22 (now a real consumer via `pkg/provider`)
 
 **Repo plumbing (noticed in passing):**
-21. Branch protection on `master` (CI required check) — repo settings appear default.
-22. Dependabot: Go modules + GitHub Actions version updates.
-23. Consider CodeQL alongside govulncheck (CI security job currently govulncheck-only).
-24. Uncommitted work-in-progress sits in the tree: `flake.nix`, `go.mod`, `go.sum`, and the 07-19 status report are modified (dep bump in flight by user/another session — NOT touched, per safety rules). Needs an owner.
-25. Release notes for v0.5.0: audit quality (existence verified, content not reviewed).
-26. `goreleaser check` deprecation warnings (`brews`, `dockers`) — plan migration to `brews`→`homebrew_casks`/new syntax or accept.
-27. Add `--discussion-category` metadata to releases if Discussions gets enabled.
+~~21. Branch protection on `master` (CI required check) — repo settings appear default.~~ **Won't implement here — owner-level setting**
+~~22. Dependabot: Go modules + GitHub Actions version updates.~~ done — `.github/dependabot.yml` covers both, weekly
+~~23. Consider CodeQL alongside govulncheck (CI security job currently govulncheck-only).~~ **Won't implement — govulncheck suffices for a Go CLI**
+~~24. Uncommitted work-in-progress sits in the tree: `flake.nix`, `go.mod`, `go.sum`, and the 07-19 status report are modified (dep bump in flight by user/another session — NOT touched, per safety rules). Needs an owner.~~ done — the in-flight dep bump landed as the v0.5.0/v1.10.0 work (07:19 session, same day)
+~~25. Release notes for v0.5.0: audit quality (existence verified, content not reviewed).~~ **Won't implement**
+~~26. `goreleaser check` deprecation warnings (`brews`, `dockers`) — plan migration to `brews`→`homebrew_casks`/new syntax or accept.~~ open — tracked as TODO_LIST C5
+~~27. Add `--discussion-category` metadata to releases if Discussions gets enabled.~~ open — pending the Discussions decision (ROADMAP Open Question 8)
 
 **Bigger arcs (ROADMAP fuel):**
-28. Documentation website via website-launch skill (Astro + Starlight + Firebase, lars.software subdomain) — fills the empty homepage field.
-29. Demo video for said website (HyperFrames HTML→MP4).
-30. Docs-health HARVEST: route items from this list into TODO_LIST.md / ROADMAP.md (this report is the input; do on instruction).
-31. Check TODO_LIST.md / FEATURES.md / ROADMAP.md freshness against actual state.
-32. `analyze` command UX pass (exit codes, CI integration story, SARIF upload docs for GitHub Code Scanning).
-33. Version-pin warning UX: `rules_version.txt` mismatch flow.
-34. Consider `configure --fix` deprecation messaging (AGENTS.md says non-core).
-35. Rules-data refresh workflow: document/automate `oxlint -f json --rules > pkg/rule/rules_data.json` + registry-test update as a script.
-36. Add `report` command markdown output format for pasting into issues/PRs.
-37. Test coverage audit for `pkg/diff` and `pkg/format` edge paths.
-38. Consider a `doctor` command (oxlint presence, version match, config validity in one shot).
-39. Ship v0.5.1 once items 1-10 land (metadata + README polish release).
-40. Check whether `docker run` example needs volume mounts for project access; document if so.
+~~28. Documentation website via website-launch skill (Astro + Starlight + Firebase, lars.software subdomain) — fills the empty homepage field.~~ done (routed to ROADMAP.md "Public documentation website")
+~~29. Demo video for said website (HyperFrames HTML→MP4).~~ done (routed to ROADMAP.md — part of the website-launch flow)
+~~30. Docs-health HARVEST: route items from this list into TODO_LIST.md / ROADMAP.md (this report is the input; do on instruction).~~ done — harvested 2026-09-22
+~~31. Check TODO_LIST.md / FEATURES.md / ROADMAP.md freshness against actual state.~~ done — the 2026-09-22 docs-health pass rebuilt all three
+~~32. `analyze` command UX pass (exit codes, CI integration story, SARIF upload docs for GitHub Code Scanning).~~ **Won't implement — UX is stable; SARIF upload docs deferred until a consumer asks**
+~~33. Version-pin warning UX: `rules_version.txt` mismatch flow.~~ open — folded into TODO_LIST R1/R3
+~~34. Consider `configure --fix` deprecation messaging (AGENTS.md says non-core).~~ **Won't implement — `--fix` stays as documented convenience**
+~~35. Rules-data refresh workflow: document/automate `oxlint -f json --rules > pkg/rule/rules_data.json` + registry-test update as a script.~~ open — folded into TODO_LIST R1
+~~36. Add `report` command markdown output format for pasting into issues/PRs.~~ **Won't implement — table output already pastes into Markdown**
+~~37. Test coverage audit for `pkg/diff` and `pkg/format` edge paths.~~ **Won't implement — both >92% with edge tests**
+~~38. Consider a `doctor` command (oxlint presence, version match, config validity in one shot).~~ done (routed to ROADMAP.md "`doctor` command")
+~~39. Ship v0.5.1 once items 1-10 land (metadata + README polish release).~~ done — superseded: v0.5.0→v0.6.3 shipped instead with far more than metadata
+~~40. Check whether `docker run` example needs volume mounts for project access; document if so.~~ **Won't implement — no Docker section (see f.9)**
 
 **Nice-to-have / cosmetic:**
-41. Star-history chart in README (only after organic stars exist — premature otherwise).
-42. GitHub Sponsors/Funding metadata (only if you want it).
-43. Repo labels triage set (bug/config/detection/profile).
-44. Merge queue evaluation (probably overkill — single-maintainer repo).
-45. Release RSS mention in README for version-watchers.
-46. Verify README pipe-table renders correctly on github.com after badge insert (visual check).
-47. Consider topic `config-generator` / `linter-configuration` (discoverability vs topic noise — cap ~15-20).
-48. Align description em-dash usage with house style if a rule emerges for social copy (source-code rule doesn't apply to repo metadata).
-49. Archive the two failed v0.5.0 release-run attempts in a short "release pipeline history" note (AGENTS.md already carries the lesson — check for duplication before writing).
-50. Ask for the social-preview branding direction (colors/logo) — blocked on your input (see questions).
+~~41. Star-history chart in README (only after organic stars exist — premature otherwise).~~ **Won't implement**
+~~42. GitHub Sponsors/Funding metadata (only if you want it).~~ **Won't implement**
+~~43. Repo labels triage set (bug/config/detection/profile).~~ **Won't implement**
+~~44. Merge queue evaluation (probably overkill — single-maintainer repo).~~ **Won't implement**
+~~45. Release RSS mention in README for version-watchers.~~ **Won't implement**
+~~46. Verify README pipe-table renders correctly on github.com after badge insert (visual check).~~ done — tables render correctly (verified across later passes)
+~~47. Consider topic `config-generator` / `linter-configuration` (discoverability vs topic noise — cap ~15-20).~~ **Won't implement — 15 topics is at the chosen cap**
+~~48. Align description em-dash usage with house style if a rule emerges for social copy (source-code rule doesn't apply to repo metadata).~~ **Won't implement — no rule emerged**
+~~49. Archive the two failed v0.5.0 release-run attempts in a short "release pipeline history" note (AGENTS.md already carries the lesson — check for duplication before writing).~~ **Won't implement — AGENTS.md + the 07:19 report carry the history; a third copy would be duplication**
+~~50. Ask for the social-preview branding direction (colors/logo) — blocked on your input (see questions).~~ done (routed to ROADMAP Open Question 8)
 
 ## g) Questions I cannot figure out myself
 
-1. **Social preview image:** generate one automatically (I'd pick a dark card with the repo name + "841 rules, one command" line), or do you have brand assets / a preferred look? (The API can't upload it — you'd click it in repo Settings either way, but I can produce the PNG.)
-2. **GitHub Discussions:** enable for Q&A/config-help, or keep Issues-only? (It's your community-surface preference; I can flip it via `gh repo edit` once decided.)
-3. **Docs website:** should I kick off the website-launch flow (Astro + Starlight + Firebase, `oxlint-auto-configure.lars.software`) so the empty homepage field gets a real target, or is GitHub-README-only the intended end state for this tool?
+~~1. **Social preview image:** generate one automatically (I'd pick a dark card with the repo name + "841 rules, one command" line), or do you have brand assets / a preferred look? (The API can't upload it — you'd click it in repo Settings either way, but I can produce the PNG.)~~ answered — routed to ROADMAP Open Question 8 (owner branding call)
+~~2. **GitHub Discussions:** enable for Q&A/config-help, or keep Issues-only? (It's your community-surface preference; I can flip it via `gh repo edit` once decided.)~~ answered — routed to ROADMAP Open Question 8
+~~3. **Docs website:** should I kick off the website-launch flow (Astro + Starlight + Firebase, `oxlint-auto-configure.lars.software`) so the empty homepage field gets a real target, or is GitHub-README-only the intended end state for this tool?~~ answered — routed to ROADMAP.md "Public documentation website" (idea stage)
 
 ---
 
