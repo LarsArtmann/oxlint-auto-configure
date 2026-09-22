@@ -52,6 +52,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - **Docker images build again.** The `dockers` → `dockers_v2` migration changed the Docker build context layout: binaries live at `$TARGETPLATFORM/<binary>` inside the context instead of at the context root. The Dockerfile was still using the v1 layout (`COPY oxlint-auto-configure ...`), so v0.6.4's and v0.7.0's release runs both failed at the image-build step (after signing) and published no artifacts. Fixed with `ARG TARGETPLATFORM` + `COPY $TARGETPLATFORM/oxlint-auto-configure /oxlint-auto-configure`; verified locally with real multi-platform image builds (amd64 boots and reports the right version; the arm64 binary is confirmed EM_AARCH64). The v0.6.4 and v0.7.0 tags stay tag-only (immutable once pushed) — `go install github.com/larsartmann/oxlint-auto-configure@v0.7.0` builds fine from source; prebuilt binaries, packages, and Docker images exist from v0.7.1 onward.
+- The post-release smoke check now strips the tag's `v` prefix before matching `--version` output (ldflags inject `0.7.1`, not `v0.7.1`). Its first real run on v0.7.1 false-failed on exactly this — after GoReleaser had already published everything, so the release itself was complete.
 
 ## [0.6.4] - 2026-09-22
 

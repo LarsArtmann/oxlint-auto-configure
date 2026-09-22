@@ -63,7 +63,8 @@ jobs:
           chmod +x smoke/oxlint-auto-configure
           version="$(./smoke/oxlint-auto-configure --version)"
           echo "${version}"
-          echo "${version}" | grep -q "${tag}" || {
-            echo "::error::smoke test failed: --version output does not contain ${tag}"
+          # ldflags inject {{ .Version }} ("0.7.1") without the tag's "v" prefix
+          echo "${version}" | grep -q "${tag#v}" || {
+            echo "::error::smoke test failed: --version output does not contain ${tag#v}"
             exit 1
           }
