@@ -99,7 +99,12 @@ func reportJSON(w io.Writer, decisions []profile.RuleDecision) error {
 		})
 	}
 
-	data, err := json.Marshal(entries, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
+	data, err := json.Marshal(
+		entries,
+		jsontext.WithIndentPrefix(""),
+		jsontext.WithIndent("  "),
+		json.Deterministic(true),
+	)
 	if err != nil {
 		return fmt.Errorf("marshal report: %w", err)
 	}

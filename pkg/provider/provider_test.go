@@ -44,6 +44,7 @@ func TestProviderRegistered(t *testing.T) {
 	require.NotEmpty(t, specs[0].Description)
 	require.NotNil(t, specs[0].Detect, "provider must detect")
 	require.NotNil(t, specs[0].Repair, "provider must repair")
+	require.NotNil(t, specs[0].HealthCheck, "provider must report config drift via its health check")
 	require.Empty(t, specs[0].DependsOn, "provider must not depend on oxlint; oxlint depends on it")
 	require.Equal(t, []string{"package.json", ".oxlintrc.json"}, specs[0].Inputs)
 	require.Equal(t, "javascript", specs[0].Trigger.Language)
@@ -211,6 +212,106 @@ func TestRepair_ExistingJsoncConfigIsNotShadowed(t *testing.T) {
 	require.Contains(t, string(jsonc), "curated config", "the curated .oxlintrc.jsonc must be untouched")
 	require.NoFileExists(t, filepath.Join(dir, ".oxlintrc.json"),
 		"generating a .oxlintrc.json next to a curated .oxlintrc.jsonc would shadow it — oxlint prefers .json")
+}
+
+func TestHealthCheck_NoConfigIsHealthy(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writeFile(t, dir, "package.json", reactPackageJSON)
+
+	require.NoError(t, provider.Provider.HealthCheck(workingDirCtx(t, dir)),
+		"a missing config is Detect's finding, not a health failure")
+}
+
+func TestHealthCheck_JsoncOnlyConfigIsHealthy(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writeFile(t, dir, "package.json", reactPackageJSON)
+	writeFile(t, dir, ".oxlintrc.jsonc", `{"rules":{}}`)
+
+	require.NoError(t, provider.Provider.HealthCheck(workingDirCtx(t, dir)),
+		"a user-curated .oxlintrc.jsonc is out of scope: the tool never writes that file")
+}
+
+func TestHealthCheck_FreshRepairIsHealthy(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writeFile(t, dir, "package.json", reactPackageJSON)
+
+	_, err := provider.Provider.Repair.Repair(workingDirCtx(t, dir))
+	require.NoError(t, err)
+
+	require.NoError(t, provider.Provider.HealthCheck(workingDirCtx(t, dir)),
+		"a config this tool just wrote must match what it would generate")
+}
+
+func TestHealthCheck_DriftedConfigIsReported(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writeFile(t, dir, "package.json", reactPackageJSON)
+	writeFile(t, dir, ".oxlintrc.json", `{"rules":{"no-console":"off"}}`)
+
+	err := provider.Provider.HealthCheck(workingDirCtx(t, dir))
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "drifted")
+	require.Contains(t, err.Error(), "oxlint-auto-configure configure",
+		"the error must name the fix")
+	require.Contains(t, err.Error(), "advisory only",
+		"the error must reassure that nothing was modified")
+
+	data, err := os.ReadFile(filepath.Join(dir, ".oxlintrc.json"))
+	require.NoError(t, err)
+	require.JSONEq(t, `{"rules":{"no-console":"off"}}`, string(data),
+		"the health check is report-only and must never touch the config")
+}
+
+func TestHealthCheck_MalformedConfigIsReported(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writeFile(t, dir, "package.json", reactPackageJSON)
+	writeFile(t, dir, ".oxlintrc.json", `{"rules":`)
+
+	err := provider.Provider.HealthCheck(workingDirCtx(t, dir))
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "malformed")
+	require.Contains(t, err.Error(), "configure", "the error must name the fix")
+}
+
+func TestHealthCheck_PreservedOverridesAreNotDrift(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writeFile(t, dir, "package.json", reactPackageJSON)
+
+	_, err := provider.Provider.Repair.Repair(workingDirCtx(t, dir))
+	require.NoError(t, err)
+
+	// Simulate a project adding an @shadcn/lint-style overrides block to the
+	// generated config: regeneration (and therefore the drift check) must
+	// treat the block as preserved policy, not drift.
+	path := filepath.Join(dir, ".oxlintrc.json")
+	data, err := os.ReadFile(path)
+	require.NoError(t, err)
+
+	cfg, err := config.FromJSON(data)
+	require.NoError(t, err)
+	cfg.Overrides = append(cfg.Overrides, map[string]any{
+		"files": []any{"src/components/ui/**"},
+		"rules": map[string]any{"shadcn/no-restyle": "off"},
+	})
+	updated, err := cfg.ToJSON()
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(path, updated, 0o600))
+
+	require.NoError(t, provider.Provider.HealthCheck(workingDirCtx(t, dir)),
+		"overrides are preserved verbatim on regeneration, so they cannot be drift")
 }
 
 func workingDirCtx(t *testing.T, dir string) context.Context {

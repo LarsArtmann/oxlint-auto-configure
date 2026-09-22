@@ -33,7 +33,27 @@ func TestGeneratorStrict(t *testing.T) {
 	assert.Equal(t, SeverityOff, cfg.Categories["nursery"])
 }
 
-func TestGeneratorMaximalTypesafe(t *testing.T) {
+// TestToJSONIsDeterministic pins byte-stable config output. encoding/json/v2
+// serializes map keys in an order that changes between calls unless
+// json.Deterministic(true) is set; a shuffled key order would churn every
+// regenerated config and poison VCS diffs.
+func TestToJSONIsDeterministic(t *testing.T) {
+	t.Parallel()
+	reg := testregistry.Load(t)
+
+	cat := profile.NewCategorizer(profile.ProfileStrict, profile.PluginConfig{})
+	cfg := NewGenerator(cat, reg, nil, nil).Generate()
+
+	first, err := cfg.ToJSON()
+	require.NoError(t, err)
+
+	for range 50 {
+		again, err := cfg.ToJSON()
+		require.NoError(t, err)
+		require.Equal(t, string(first), string(again),
+			"the same config must serialize to byte-identical JSON on every call")
+	}
+}
 	t.Parallel()
 	reg := testregistry.Load(t)
 

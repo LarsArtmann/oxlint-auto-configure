@@ -91,9 +91,16 @@ func (g *Generator) GenerateMaximal() *OxlintConfig {
 	return cfg
 }
 
-// ToJSON serializes the config to pretty-printed JSON.
+// ToJSON serializes the config to pretty-printed JSON. Deterministic is
+// required: without it, map-key order changes between runs, so regenerating
+// an unchanged config churns every key.
 func (c *OxlintConfig) ToJSON() ([]byte, error) {
-	data, err := json.Marshal(c, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
+	data, err := json.Marshal(
+		c,
+		jsontext.WithIndentPrefix(""),
+		jsontext.WithIndent("  "),
+		json.Deterministic(true),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("marshal config: %w", err)
 	}

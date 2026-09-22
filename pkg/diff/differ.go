@@ -292,7 +292,7 @@ func formatValue(value any) string {
 		return s
 	}
 
-	data, err := json.Marshal(value)
+	data, err := json.Marshal(value, json.Deterministic(true))
 	if err != nil {
 		return fmt.Sprintf("%v", value)
 	}

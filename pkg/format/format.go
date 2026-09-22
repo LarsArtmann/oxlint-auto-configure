@@ -145,7 +145,12 @@ func sortedKeys(m map[string]int) []string {
 
 // PrintFindingsJSON writes findings as a JSON array to w.
 func PrintFindingsJSON(w io.Writer, findings []FindingView) error {
-	data, err := json.Marshal(findings, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
+	data, err := json.Marshal(
+		findings,
+		jsontext.WithIndentPrefix(""),
+		jsontext.WithIndent("  "),
+		json.Deterministic(true),
+	)
 	if err != nil {
 		return fmt.Errorf("marshal findings: %w", err)
 	}
