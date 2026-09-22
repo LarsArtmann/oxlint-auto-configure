@@ -223,22 +223,32 @@ func warnJsPluginsVersion(oxlintFound bool, oxlintVer string, cfg *config.Oxlint
 	}
 }
 
-// warnOrphanedJsPlugins warns about a preserved jsPlugins registration whose
-// known external plugin package is no longer a project dependency.
-// Preservation never drops entries, so a stale registration would keep
-// failing oxlint at runtime until it is removed here. Hand-registered
-// unknown packages are left alone — this tool cannot know their deps.
-func warnOrphanedJsPlugins(cfg *config.OxlintConfig, detected []rule.ExternalPlugin) {
+// orphanedJsPlugins returns preserved jsPlugins entries whose known external
+// plugin package is no longer a project dependency. Preservation never drops
+// entries, so a stale registration would keep failing oxlint at runtime.
+// Hand-registered unknown packages are not reported — this tool cannot know
+// their deps.
+func orphanedJsPlugins(cfg *config.OxlintConfig, detected []rule.ExternalPlugin) []string {
 	installed := make(map[string]bool, len(detected))
 	for _, p := range detected {
 		installed[p.Package] = true
 	}
+
+	var orphaned []string
 
 	for _, pkg := range cfg.JsPlugins {
 		if _, known := rule.ExternalPluginByPackage(pkg); !known || installed[pkg] {
 			continue
 		}
 
+		orphaned = append(orphaned, pkg)
+	}
+
+	return orphaned
+}
+
+func warnOrphanedJsPlugins(cfg *config.OxlintConfig, detected []rule.ExternalPlugin) {
+	for _, pkg := range orphanedJsPlugins(cfg, detected) {
 		slog.Warn("jsPlugins entry is not a project dependency; "+
 			"remove it from the config or install the package", "package", pkg)
 	}

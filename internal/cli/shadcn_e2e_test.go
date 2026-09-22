@@ -8,6 +8,7 @@ import (
 
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
+	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -124,4 +125,40 @@ func readConfig(t *testing.T, path string) *config.OxlintConfig {
 	require.NoError(t, err)
 
 	return cfg
+}
+
+// TestConfigureE2EWarnsOnlyForOrphanedJsPlugins verifies that a preserved
+// jsPlugins registration for an uninstalled known plugin does not block
+// configure, and that installed and hand-registered packages stay silent.
+func TestConfigureE2EWarnsOnlyForOrphanedJsPlugins(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	writePackageJSON(t, dir, `{"dependencies": {"react": "^18.0.0"}}`)
+
+	configPath := filepath.Join(dir, ".oxlintrc.json")
+	require.NoError(t, os.WriteFile(configPath, []byte(`{
+		"jsPlugins": ["@shadcn/lint", "some-hand-registered-plugin"]
+	}`), 0o644))
+
+	require.NoError(t, Configure(context.Background(), dir, ConfigureOptions{
+		Profile:    profile.ProfileRecommended,
+		ConfigPath: configPath,
+	}))
+
+	cfg := readConfig(t, configPath)
+
+	assert.ElementsMatch(t,
+		[]string{"@shadcn/lint", "some-hand-registered-plugin"},
+		cfg.JsPlugins,
+		"preservation never drops registrations, even orphaned ones",
+	)
+
+	assert.Empty(t, orphanedJsPlugins(cfg, nil),
+		"hand-registered unknown packages are not reported as orphaned")
+
+	assert.Equal(t,
+		[]string{"@shadcn/lint"},
+		orphanedJsPlugins(cfg, []rule.ExternalPlugin{{Package: "@shadcn/lint", Prefix: "shadcn"}}),
+	)
 }
