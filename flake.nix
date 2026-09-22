@@ -56,7 +56,7 @@
 
       go-standard = {
         pname = "oxlint-auto-configure";
-        vendorHash = "sha256-zgK/kRZb0CdaXpvjnZ76hxrsjTzTI9YQjSebpu5Oxhc=";
+        vendorHash = "sha256-zF/tMeJYvQeTEj0xc8SCCp7/yQe6/pC7VNcOt7dHkA4=";
         description = "Auto-generate optimal .oxlintrc.json configurations";
         enableCheck = false;
         subPackages = [ "cmd/oxlint-auto-configure" ];
