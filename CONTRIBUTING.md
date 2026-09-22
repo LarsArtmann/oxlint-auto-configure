@@ -30,7 +30,7 @@ Two environment variables are **required** for all `go` commands:
 | Variable       | Value    | Why                                                                               |
 | -------------- | -------- | --------------------------------------------------------------------------------- |
 | `GOEXPERIMENT` | `jsonv2` | The codebase uses `encoding/json/v2`, still behind an experiment gate in Go 1.26. |
-| `GOWORK`       | `off`    | A parent `go.work` workspace (e.g. `~/projects/go.work`) interferes; disable it.       |
+| `GOWORK`       | `off`    | A parent `go.work` workspace (e.g. `~/projects/go.work`) interferes; disable it.  |
 
 ```bash
 export GOEXPERIMENT=jsonv2

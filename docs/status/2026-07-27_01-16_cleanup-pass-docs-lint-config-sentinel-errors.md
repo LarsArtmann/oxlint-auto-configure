@@ -45,17 +45,19 @@ The previous session completed all 15 TODO_LIST.md items but left gaps identifie
 ### Sentinel Error Audit — Only Half Done
 
 ~~11. **`ErrNotFound` now has real callers** — Added `errors.Is(err, oxlint.ErrNotFound)` checks in:~~ done — shipped in this session
-    - `cmd_configure.go:checkOxlintVersion()` — now warns and continues instead of failing when oxlint isn't installed (embedded rules suffice for config generation)
-    - `cmd_analyze.go:initAnalyze()` — now gives a clearer error message ("oxlint is required for analyze") when oxlint is missing
+
+- `cmd_configure.go:checkOxlintVersion()` — now warns and continues instead of failing when oxlint isn't installed (embedded rules suffice for config generation)
+- `cmd_analyze.go:initAnalyze()` — now gives a clearer error message ("oxlint is required for analyze") when oxlint is missing
 
 ~~12. **4 of 5 remaining sentinels still have ZERO `errors.Is` callers:**~~ resolved by decision — kept intentionally as documented sentinels (AGENTS.md "Sentinel errors" gotcha); no errors.Is callers by design
-    - `ErrUnexpectedVersionOutput` — wrapped in `version.go:26`, never matched
-    - `ErrOxlintStderr` — wrapped in `detector.go:331`, never matched
-    - `errVerboseQuietConflict` — returned in `cmd_root.go:103`, never matched
-    - `errInvalidSeverity` — wrapped in `cmd_analyze.go:194`, never matched
-    - `errUnknownFormat` — has 1 test caller (`coverage_test.go:92`)
 
-    These are the same dead sentinels the previous session created. I only gave `ErrNotFound` a purpose. The other 4 are still "linter theater" — they exist to satisfy err113 but nobody matches against them.
+- `ErrUnexpectedVersionOutput` — wrapped in `version.go:26`, never matched
+- `ErrOxlintStderr` — wrapped in `detector.go:331`, never matched
+- `errVerboseQuietConflict` — returned in `cmd_root.go:103`, never matched
+- `errInvalidSeverity` — wrapped in `cmd_analyze.go:194`, never matched
+- `errUnknownFormat` — has 1 test caller (`coverage_test.go:92`)
+
+  These are the same dead sentinels the previous session created. I only gave `ErrNotFound` a purpose. The other 4 are still "linter theater" — they exist to satisfy err113 but nobody matches against them.
 
 ### Coverage Regression
 
@@ -126,11 +128,11 @@ The previous session completed all 15 TODO_LIST.md items but left gaps identifie
 1. **Write tests for `checkOxlintVersion` `errors.Is` branch** — test that `Configure()` succeeds when oxlint is not in PATH (warns instead of failing).
 2. **Write test for `initAnalyze` `errors.Is` branch** — test that `runAnalyze` returns a clear error when oxlint is not in PATH.
 3. **Restore `internal/cli` coverage to 82.7%+** — the two tests above should bring it back.
-~~4. **Update TODO_LIST.md** — add this session's completed items and new gaps.~~ done — rebuilt repeatedly since
-~~5. **Resolve the 4 remaining dead sentinels** — either add `errors.Is` callers for `ErrUnexpectedVersionOutput`, `ErrOxlintStderr`, `errVerboseQuietConflict`, `errInvalidSeverity`, or replace with `//nolint:err113` with reasons.~~ resolved by decision — kept as documented sentinels (AGENTS.md "Sentinel errors" gotcha)
-6. **Verify `configure` works without oxlint** — E2E test or manual verification.
-~~7. **Restore named returns on `parseCode`** — `//nolint:nonamedreturns // self-documenting API`.~~ **Won't implement**
-~~8. **Add nil-safety test for `slices.Clone`** — verify `All()` and `sortedByPosition()` don't return nil for empty input (they probably do, but `range` handles it; document this).~~ done — verified safe by analysis (01:16 c.3); no test needed for range-over-nil
+   ~~4. **Update TODO_LIST.md** — add this session's completed items and new gaps.~~ done — rebuilt repeatedly since
+   ~~5. **Resolve the 4 remaining dead sentinels** — either add `errors.Is` callers for `ErrUnexpectedVersionOutput`, `ErrOxlintStderr`, `errVerboseQuietConflict`, `errInvalidSeverity`, or replace with `//nolint:err113` with reasons.~~ resolved by decision — kept as documented sentinels (AGENTS.md "Sentinel errors" gotcha)
+4. **Verify `configure` works without oxlint** — E2E test or manual verification.
+   ~~7. **Restore named returns on `parseCode`** — `//nolint:nonamedreturns // self-documenting API`.~~ **Won't implement**
+   ~~8. **Add nil-safety test for `slices.Clone`** — verify `All()` and `sortedByPosition()` don't return nil for empty input (they probably do, but `range` handles it; document this).~~ done — verified safe by analysis (01:16 c.3); no test needed for range-over-nil
 
 ### Code Quality
 

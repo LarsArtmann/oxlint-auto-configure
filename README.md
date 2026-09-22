@@ -108,7 +108,7 @@ your design-system policy:
 - **Detect & register**: when `@shadcn/lint` is in your `package.json`, the
   generated config registers it (`"jsPlugins": ["@shadcn/lint"]`). Requires
   oxlint >= 1.80; `configure` warns if the oxlint in PATH is older.
-- **Never enables rules**: `shadcn/*` rules encode *your* design-system
+- **Never enables rules**: `shadcn/*` rules encode _your_ design-system
   policy (contracts, allowlists, custom messages), so `configure` leaves them
   off and points you to the [rule docs](https://github.com/shadcn-ui/lint#rules).
   Add them under `rules` yourself when ready.

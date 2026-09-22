@@ -7,34 +7,34 @@ If a word means something different to a developer than to a customer, define it
 
 ## Glossary
 
-| Term                      | Definition                                                                                                                                     | Context                                            |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| **oxlint**                | The fast linter this tool configures.                                                                                                          | External tool                                      |
-| **oxlint-auto-configure** | This Go CLI. Generates `.oxlintrc.json` files.                                                                                                 | Product name                                       |
-| **Rule**                  | A single lint rule (e.g., `no-unused-vars`).                                                                                                   | Core domain                                        |
-| **Plugin**                | A named set of rules from a source (e.g., `react`, `typescript`).                                                                              | Core domain                                        |
-| **Category**              | A rule classification (e.g., `correctness`, `style`, `nursery`).                                                                               | Core domain                                        |
-| **Profile**               | A preset severity policy (`maximal-typesafe`, `recommended`, `strict`, `minimal`).                                                             | Core domain                                        |
-| **Severity**              | How a rule is enforced (`error`, `warn`, `off`).                                                                                               | Core domain                                        |
-| **Project Type**          | Detected framework/ecosystem (e.g., `react`, `nextjs`, `vue`, `jest`).                                                                         | Detection                                          |
-| **PluginConfig**          | Map of plugins to enable for a detected project.                                                                                               | Detection                                          |
-| **.oxlintrc.json**        | The generated oxlint configuration file.                                                                                                       | Output                                             |
-| **go-finding**            | The static-analysis pipeline library used by `analyze`.                                                                                        | Dependency                                         |
-| **Atomic Write**          | Crash-durable file write: temp file + fsync + atomic rename. Used for `.oxlintrc.json` output so a crash mid-write cannot truncate the config. | `internal/cli/cmd_configure.go`, `go-atomic-write` |
-| **Crash Durability**      | The guarantee that a config write either fully succeeds or leaves the existing file untouched, even if the process is killed mid-write.        | Quality attribute                                  |
+| Term                      | Definition                                                                                                                                                                | Context                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| **oxlint**                | The fast linter this tool configures.                                                                                                                                     | External tool                                      |
+| **oxlint-auto-configure** | This Go CLI. Generates `.oxlintrc.json` files.                                                                                                                            | Product name                                       |
+| **Rule**                  | A single lint rule (e.g., `no-unused-vars`).                                                                                                                              | Core domain                                        |
+| **Plugin**                | A named set of rules from a source (e.g., `react`, `typescript`).                                                                                                         | Core domain                                        |
+| **Category**              | A rule classification (e.g., `correctness`, `style`, `nursery`).                                                                                                          | Core domain                                        |
+| **Profile**               | A preset severity policy (`maximal-typesafe`, `recommended`, `strict`, `minimal`).                                                                                        | Core domain                                        |
+| **Severity**              | How a rule is enforced (`error`, `warn`, `off`).                                                                                                                          | Core domain                                        |
+| **Project Type**          | Detected framework/ecosystem (e.g., `react`, `nextjs`, `vue`, `jest`).                                                                                                    | Detection                                          |
+| **PluginConfig**          | Map of plugins to enable for a detected project.                                                                                                                          | Detection                                          |
+| **.oxlintrc.json**        | The generated oxlint configuration file.                                                                                                                                  | Output                                             |
+| **go-finding**            | The static-analysis pipeline library used by `analyze`.                                                                                                                   | Dependency                                         |
+| **Atomic Write**          | Crash-durable file write: temp file + fsync + atomic rename. Used for `.oxlintrc.json` output so a crash mid-write cannot truncate the config.                            | `internal/cli/cmd_configure.go`, `go-atomic-write` |
+| **Crash Durability**      | The guarantee that a config write either fully succeeds or leaves the existing file untouched, even if the process is killed mid-write.                                   | Quality attribute                                  |
 | **External Plugin**       | An oxlint JS plugin loaded at runtime via `jsPlugins` (e.g. `@shadcn/lint`). Contract: detect it, register it, never enable its rules, always preserve an existing setup. | `pkg/rule/external.go`, `pkg/config/preserve.go`   |
 
 ## Entities
 
 Objects with identity and lifecycle.
 
-| Term              | Definition                                                             | Context                   |
-| ----------------- | ---------------------------------------------------------------------- | ------------------------- |
-| **Rule Registry** | The embedded collection of 841 oxlint rules loaded at startup.         | `pkg/rule/registry.go`    |
-| **Categorizer**   | The engine that maps categories and rules to severities for a profile. | `pkg/profile/profile.go`  |
-| **Generator**     | Creates the `.oxlintrc.json` structure from profile decisions.         | `pkg/config/generator.go` |
-| **Detector**      | Discovers project type from `package.json` and filesystem.             | `pkg/detect/detector.go`  |
-| **Report**        | A go-finding `Report` produced by the `analyze` command.               | `pkg/oxlint/detector.go`  |
+| Term              | Definition                                                                                                    | Context                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| **Rule Registry** | The embedded collection of 841 oxlint rules loaded at startup.                                                | `pkg/rule/registry.go`     |
+| **Categorizer**   | The engine that maps categories and rules to severities for a profile.                                        | `pkg/profile/profile.go`   |
+| **Generator**     | Creates the `.oxlintrc.json` structure from profile decisions.                                                | `pkg/config/generator.go`  |
+| **Detector**      | Discovers project type from `package.json` and filesystem.                                                    | `pkg/detect/detector.go`   |
+| **Report**        | A go-finding `Report` produced by the `analyze` command.                                                      | `pkg/oxlint/detector.go`   |
 | **Spec**          | The toolsdk provider contract (`Detect`/`Repair`) exposing this tool to BuildFlow; registered at import time. | `pkg/provider/provider.go` |
 
 ## Value Objects

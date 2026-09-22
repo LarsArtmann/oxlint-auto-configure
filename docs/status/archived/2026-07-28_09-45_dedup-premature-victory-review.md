@@ -30,13 +30,13 @@ This is the failure mode the skill warns about: _"stop when the report is clean.
 
 ## c) NOT STARTED
 
-| # | Item                                                                                                                                                                              |
-| - | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ~~1~~ | ~~Extract the 2 **byte-for-byte identical** `loadTestRegistry` copies into a shared `internal/testregistry` helper~~ done at `7eb18e6` (2026-07-28 09:58 session) |
+| #     | Item                                                                                                                                                                  |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~1~~ | ~~Extract the 2 **byte-for-byte identical** `loadTestRegistry` copies into a shared `internal/testregistry` helper~~ done at `7eb18e6` (2026-07-28 09:58 session)     |
 | ~~2~~ | ~~Evaluate whether the `pkg/rule/registry_test.go` copy can share the same helper~~ done (09:58 session: correctly kept local — import cycle via unexported `mapFix`) |
-| ~~3~~ | ~~Re-run `art-dupl` at `-t 1`~~ done (09:58: identical report, no new clones) |
-| ~~4~~ | ~~Re-run `art-dupl --include-generated`~~ done (09:58: clean) |
-| ~~5~~ | ~~Run `nix flake check .`~~ done (09:58: all checks passed) |
+| ~~3~~ | ~~Re-run `art-dupl` at `-t 1`~~ done (09:58: identical report, no new clones)                                                                                         |
+| ~~4~~ | ~~Re-run `art-dupl --include-generated`~~ done (09:58: clean)                                                                                                         |
+| ~~5~~ | ~~Run `nix flake check .`~~ done (09:58: all checks passed)                                                                                                           |
 
 ---
 
