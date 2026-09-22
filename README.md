@@ -225,6 +225,7 @@ oxlint-auto-configure/
 
 - [go-finding](https://github.com/larsartmann/go-finding) — Unified static analysis data model
 - [golangci-lint-auto-configure](https://github.com/larsartmann/golangci-lint-auto-configure) — Linter configuration for Go
+- [BuildFlow](https://github.com/larsartmann/BuildFlow) — Consumes `pkg/provider` (toolsdk Spec) to auto-generate missing oxlint configs before linting
 
 ## License
 

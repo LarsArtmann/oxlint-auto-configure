@@ -8,11 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Nothing yet.
-
-### Fixed
-
-- Nothing yet.
+- External JS plugin support (`@shadcn/lint`): `configure` detects `@shadcn/lint` in `package.json` dependencies and registers it under `jsPlugins` (requires oxlint >= 1.80; warns when the oxlint in PATH is older). Its `shadcn/*` design-system rules are never enabled automatically — the tool points to the rule docs instead of fighting your design-system policy. Regenerating a config preserves an existing setup verbatim: `jsPlugins`, every `shadcn/*` rule including array-form options, and `settings.shadcn` (`pkg/config/preserve.go`). `validate` accepts external rules (reported as `external`, not unknown) and understands oxlint's array-form rule values.
+- `pkg/rule/external.go` — known external-plugin table (`@shadcn/lint` → `shadcn`) with lookup helpers; `pkg/detect.DetectExternalPlugins()` scans dependencies and dev-dependencies.
+- Direct test coverage for the shared `internal/testregistry` helper (previously only transitively exercised).
 
 ## [0.6.3] - 2026-09-13
 

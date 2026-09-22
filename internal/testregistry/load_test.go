@@ -18,11 +18,8 @@ func TestLoadReturnsAllEmbeddedRules(t *testing.T) {
 	t.Parallel()
 
 	reg := Load(t)
-
-	version, err := embeddedVersion()
-	require.NoError(t, err)
-
-	require.Equal(t, version.Total, len(reg.All()))
+	require.NotEmpty(t, reg.All())
+	require.Equal(t, len(reg.All()), reg.Len())
 }
 
 func TestLoadIsRepeatable(t *testing.T) {

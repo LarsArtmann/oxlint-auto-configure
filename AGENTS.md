@@ -59,6 +59,7 @@ Oxlint has 841 rules across 7 categories and 15 plugins. Only 113 are enabled by
 | `internal/cli/coverage_test.go`          | Coverage tests: `renderFindings`, `printSARIF`, `sortedByPosition`, etc.            |
 | `internal/cli/commands_test.go`          | Command integration tests with assertions on rule counts and config structure       |
 | `pkg/provider/provider_test.go`          | toolsdk Spec contract: registration, detect/repair semantics, dry-run, no-overwrite |
+| `internal/testregistry/load_test.go`     | Shared test-registry helper contract: non-empty, repeatable, All/Len consistent     |
 
 ### Nix
 
@@ -91,6 +92,7 @@ nix flake check .                                    # All checks via nix
 ```
 
 - **`GOEXPERIMENT=jsonv2` required** — codebase uses `encoding/json/v2` (Go 1.25+ recommended). The experiment is still gated in Go 1.26, so every direct `go` invocation must set it. Nix flakes set it via `env.GOEXPERIMENT` so `nix build`/`nix flake check` work without manual flags.
+- **`GOTOOLCHAIN=auto` required** — `go.mod` declares `go 1.27` while the local toolchain may be older (e.g. 1.26.7); with `GOTOOLCHAIN=local` every documented `go` command fails with a version error. Prefix direct `go` invocations with `GOTOOLCHAIN=auto` (or run inside `nix develop`) so the toolchain can download the declared version. Nix dev shells are unaffected.
 
 ### Dependencies
 
@@ -178,7 +180,7 @@ Then update `TestRegistryTotal` in `pkg/rule/registry_test.go` with the new coun
 - **Sentinel errors** — `pkg/oxlint/errors.go` (`ErrNotFound`, `ErrUnexpectedVersionOutput`, `ErrOxlintStderr`) and `internal/cli/cmd_root.go` (`errVerboseQuietConflict`, `errInvalidSeverity`, `errUnknownFormat`) are package-level sentinels for structured error contracts. `errUnknownFormat` has `errors.Is` callers in tests; the others are available for future programmatic matching.
 - **golangci-lint config** — `.golangci.yml` has 0 issues. Depguard allows `$gostd` + `$module` + actual dependencies (cobra, testify, larsartmann/*). Varnamelen has exemptions for idiomatic Go short names (`err`, `ok`, `tt`, `t`, `i`, etc.). Tagliatelle enforces `json: snake` for config output. Test files are excluded from `err113` and `mnd` (test error construction and magic numbers are idiomatic). CLI command files are excluded from `forbidigo` (they use `fmt.Println` by design).
 - **GitHub metadata** — Description + 15 topics (`go`, `golang`, `cli`, `oxlint`, `oxc`, `linter`, `linting`, `static-analysis`, `code-quality`, `code-analysis`, `typescript`, `javascript`, `developer-tools`, `sarif`, `nix`) set via `gh repo edit`. README badge bar uses the application set: CI | Docker (ghcr.io) | License — deliberately NO Go Reference / Go Report Card badges (CLI app, not an importable package). No homepage URL (no `website/`); add one via the website-launch skill if a docs site is ever built.
-- **BuildFlow integration** — `pkg/provider` self-registers a `toolsdk.Spec` at import time; BuildFlow consumes it via a blank import of `github.com/larsartmann/oxlint-auto-configure/pkg/provider` in `tools/providers/sdk_imports.go`. Spec name `oxlint-auto-configure` must stay in sync with BuildFlow's `config.ToolOxlintAutoConfigure`. Detect only flags a MISSING `.oxlintrc.json` (never config drift — flagging drift would lead Repair to stomp user customizations); Repair never overwrites an existing config. No HealthCheck: generation uses the embedded registry, not the oxlint binary. Registration is a package-level var (`toolsdk.Register` panics on invalid specs at startup).
+- **BuildFlow integration** — `pkg/provider` self-registers a `toolsdk.Spec` at import time; BuildFlow consumes it via a blank import of `github.com/larsartmann/oxlint-auto-configure/pkg/provider` in `tools/providers/sdk_imports.go`. Spec name `oxlint-auto-configure` must stay in sync with BuildFlow's `config.ToolOxlintAutoConfigure`. Detect only flags a MISSING `.oxlintrc.json` (never config drift — flagging drift would lead Repair to stomp user customizations); Repair never overwrites an existing config. No HealthCheck: generation uses the embedded registry, not the oxlint binary. Registration is a package-level var (`toolsdk.Register` panics on invalid specs at startup). Version pairing gotcha: do NOT pair v0.6.0/v0.6.1 with BuildFlow's `WithDeps(config.ToolOxlintAutoConfigure)` — the DAG flip landed in v0.6.1, so pairing a pre-flip provider with a post-flip consumer creates a dependency cycle; use v0.6.2+.
 - **Stale flake pins get caught by builds** — `go-finding` sat at v1.8.0 in flake.nix while go.mod required v1.10.0 (additive API kept it compiling). Bumping a go.mod dep MUST bump the flake input tag in the same change (AGENTS Nix rule); verify with `nix build` + vendorHash refresh.
 
 ---
