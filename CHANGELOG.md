@@ -36,6 +36,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Generated configs are byte-stable across runs.** `encoding/json/v2` serializes map keys in an order that changes between calls on the same map, so regenerating an unchanged config shuffled `rules`/`settings`/`env` key order (noisy VCS diffs, flaky comparisons). All output-facing marshals now set `json.Deterministic(true)`; pinned by `TestToJSONIsDeterministic`. The drift health check depends on this: its before/after comparison flapped without it.
 - `analyze` no longer reports a clean project when oxlint itself fails to start. oxlint signals startup failures (e.g. a `jsPlugins` package that cannot load) with exit code 1 and the error text on stdout — indistinguishable from "findings found" — which the pipeline swallowed under graceful degradation into "no findings — project is clean". Detector parse failures now surface oxlint's own message (with a stdout snippet), pipeline partial errors fail the command visibly, and plain notices oxlint prepends to the JSON (e.g. "No files found to lint.") are still parsed correctly instead of becoming false errors.
 
+## [0.6.4] - 2026-09-22
+
+### Changed
+
+- go-finding v1.13.0 (workspace-aware module floors, `go 1.27` root floor);
+  toolsdk v1.13.0
+- `go` directive normalized to the minor form `go 1.27` (fleet-adopted
+  floor form; see ADR-0001 in go-version-auto-configure)
+
 ## [0.6.3] - 2026-09-13
 
 ### Fixed
