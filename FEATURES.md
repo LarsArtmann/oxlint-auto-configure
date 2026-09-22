@@ -66,7 +66,7 @@ Status legend:
 | `TODO_LIST.md`            | FULLY_FUNCTIONAL | `TODO_LIST.md`            | Short-term open work.                   |
 | `ROADMAP.md`              | FULLY_FUNCTIONAL | `ROADMAP.md`              | Long-term direction and open questions. |
 
-## Known Gaps (captured in TODO_LIST.md)
+## Known Gaps (tracked in TODO_LIST.md / ROADMAP.md)
 
 - Embedded registry pinned to oxlint `1.73.0`; newer oxlint releases (1.82.x) trigger the version-mismatch warning on every run. Refresh pending (`oxlint -f json --rules` + `TestRegistryTotal`).
 - CI installs unpinned oxlint (`npm install -g oxlint`); an upstream rule addition can break `TestRegistryTotal` without warning.
