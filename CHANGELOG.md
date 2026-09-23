@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Nothing yet.
+
+### Fixed
+
+- Nothing yet.
+
+## [0.9.0] - 2026-09-23
+
+### Added
+
 - `validate --fail-on-drift`: after structural validation passes, the config
   is compared against what `configure` would generate (strict profile,
   `PreserveExternal` applied so preserved user policy never reads as drift).
