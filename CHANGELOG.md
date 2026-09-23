@@ -30,12 +30,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Dependencies
 
-- `linter-autoconfigure-sdk` v0.2.0 → v0.3.1: the tag carries the `SaveJSON`
+- `linter-autoconfigure-sdk` v0.2.0 → v0.4.1: v0.3.1 carries the `SaveJSON`
   determinism fix (map-bearing configs marshal to stable bytes, restoring
-  write-if-changed idempotency) and pulls `go-atomic-write` v0.6.0 +
-  `go-error-family` v0.10.2. Go directive floor `1.27` → `1.27.1`
-  (dependency-imposed by the SDK tag). Flake input tracks the v0.3.1 tag;
-  vendorHash regenerated.
+  write-if-changed idempotency); v0.4.x adds the shared I/O matrix
+  (`MarshalJSONIndented`/`ParseJSON`/`SaveJSONBytes`/`WorkingDir`), the generic
+  diff engine, and `ProviderSpec.ConfigFiles`/`FirstExisting` this release
+  migrates onto. `go-atomic-write` v0.6.0 becomes a transitive (SDK) dep only.
+  Go directive floor `1.27` → `1.27.1` (dependency-imposed by the SDK tag).
+  Flake input tracks the v0.4.1 tag; vendorHash regenerated.
 
 ### Added
 
