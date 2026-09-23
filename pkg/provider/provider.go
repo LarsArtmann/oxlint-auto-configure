@@ -85,14 +85,14 @@ func mustProvider() toolsdk.Spec {
 			Recognizable: func(ctx context.Context) (bool, error) {
 				_, projectTypes, detectErr := detect.NewDetector(autoconfigure.WorkingDir(ctx)).Detect()
 				if detectErr != nil {
-					return false, detectErr
+					return false, fmt.Errorf("%s detect: %w", toolName, detectErr)
 				}
 
 				return hasKnownProjectType(projectTypes), nil
 			},
-			Generate:  generateConfig,
-			Marshal:   marshalConfig,
-			Parse:     parseConfig,
+			Generate:          generateConfig,
+			Marshal:           marshalConfig,
+			Parse:             parseConfig,
 			NormalizeExpected: config.PreserveExternal,
 			Compare: func(existing, expected *config.OxlintConfig) []autoconfigure.Change {
 				return diff.NewDiffer(existing, expected).Diff()

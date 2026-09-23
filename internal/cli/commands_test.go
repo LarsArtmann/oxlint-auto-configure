@@ -575,6 +575,7 @@ func runConfigureForTest(t *testing.T, dir string) error {
 	}
 
 	det := detect.NewDetector(dir)
+
 	pluginConfig, projectTypes, err := det.Detect()
 	if err != nil {
 		return err

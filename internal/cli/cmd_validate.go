@@ -16,9 +16,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// errValidateDrift is returned by Validate when --fail-on-drift is set and
+// the config no longer matches what configure would generate. Advisory
+// callers (the default) never see it.
+var errValidateDrift = errors.New("config drift detected")
+
 func newValidateCommand() *cobra.Command {
-	var configPath string
-	var failOnDrift bool
+	var (
+		configPath  string
+		failOnDrift bool
+	)
 
 	cmd := &cobra.Command{
 		Use:   CmdValidate,
@@ -83,10 +90,9 @@ func Validate(configPath string, failOnDrift bool) error {
 	)
 
 	if reportDrift(targetPath, failOnDrift) {
-		return fmt.Errorf(
-			"config drift detected: %s has drifted from the generated config; "+
-				"run `oxlint-auto-configure configure` to regenerate",
-			targetPath)
+		return fmt.Errorf("%w: %s has drifted from the generated config; "+
+			"run `oxlint-auto-configure configure` to regenerate",
+			errValidateDrift, targetPath)
 	}
 
 	return nil
