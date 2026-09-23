@@ -30,7 +30,7 @@
     };
 
     linter-autoconfigure-sdk = {
-      url = "github:LarsArtmann/linter-autoconfigure-sdk/v0.3.1";
+      url = "github:LarsArtmann/linter-autoconfigure-sdk/v0.4.1";
       flake = false;
     };
 
