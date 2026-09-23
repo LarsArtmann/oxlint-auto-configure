@@ -46,6 +46,9 @@ else
 	printf 'golangci-lint not found, skipping\n'
 fi
 
+step "deterministic-marshal enforcement (jsondeterminism)"
+go run github.com/larsartmann/linter-autoconfigure-sdk/cmd/jsondeterminism ./...
+
 if ! command -v goreleaser >/dev/null 2>&1; then
 	printf '\nERROR: goreleaser not found — install it to validate the release pipeline\n' >&2
 	exit 1

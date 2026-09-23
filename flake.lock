@@ -136,16 +136,16 @@
     "linter-autoconfigure-sdk": {
       "flake": false,
       "locked": {
-        "lastModified": 1790137050,
-        "narHash": "sha256-Wio4NSYo4hldC+iHzXCQmK6TH2wZ2J1oMIE8aPtbxsM=",
+        "lastModified": 1790138313,
+        "narHash": "sha256-Zusj9j9KyLO2mH+LI2v+1M46QLFvs7VdRrbdgSQMF0Y=",
         "owner": "LarsArtmann",
         "repo": "linter-autoconfigure-sdk",
-        "rev": "beb3f2bd980474a487979a95f310feff7f95c7de",
+        "rev": "35c2e7ee0673b47513924566702a1562cbba5fc3",
         "type": "github"
       },
       "original": {
         "owner": "LarsArtmann",
-        "ref": "v0.5.0",
+        "ref": "v0.6.0",
         "repo": "linter-autoconfigure-sdk",
         "type": "github"
       }

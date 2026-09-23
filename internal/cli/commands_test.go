@@ -195,7 +195,7 @@ func TestReportJSON(t *testing.T) {
 		})
 	}
 
-	data, err := json.Marshal(entries)
+	data, err := json.Marshal(entries, json.Deterministic(true))
 	require.NoError(t, err)
 	assert.Greater(t, len(data), 1000)
 }

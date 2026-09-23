@@ -348,7 +348,7 @@ func TestJSONRoundTrip(t *testing.T) {
 		assert.True(t, f.IsValid(), "finding %s should be valid", f.Rule)
 	}
 
-	data, err := json.Marshal(findings)
+	data, err := json.Marshal(findings, json.Deterministic(true))
 	require.NoError(t, err)
 	assert.NotEmpty(t, data)
 }

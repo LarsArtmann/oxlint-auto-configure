@@ -30,7 +30,7 @@
     };
 
     linter-autoconfigure-sdk = {
-      url = "github:LarsArtmann/linter-autoconfigure-sdk/v0.5.0";
+      url = "github:LarsArtmann/linter-autoconfigure-sdk/v0.6.0";
       flake = false;
     };
 
@@ -56,7 +56,7 @@
 
       go-standard = {
         pname = "oxlint-auto-configure";
-        vendorHash = "sha256-FhCldtW8cF/LM5cPZzRKsdj9NoupJo52ZMUVSu6XuqY=";
+        vendorHash = "sha256-9G6OIchjDrmxwJClMB82IleOtAwJA9LQS/d3rdtWXFE=";
         description = "Auto-generate optimal .oxlintrc.json configurations";
         enableCheck = false;
         subPackages = [ "cmd/oxlint-auto-configure" ];

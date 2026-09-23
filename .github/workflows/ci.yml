@@ -68,6 +68,9 @@ jobs:
       - name: Vet
         run: go vet ./...
 
+      - name: Deterministic-marshal enforcement
+        run: go run github.com/larsartmann/linter-autoconfigure-sdk/cmd/jsondeterminism ./...
+
     timeout-minutes: 15
   security:
     runs-on: ubuntu-latest
