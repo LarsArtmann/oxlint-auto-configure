@@ -2,11 +2,10 @@
 package config
 
 import (
-	"encoding/json/jsontext"
-	"encoding/json/v2"
 	"fmt"
 	"sort"
 
+	autoconfigure "github.com/larsartmann/linter-autoconfigure-sdk"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
@@ -91,16 +90,11 @@ func (g *Generator) GenerateMaximal() *OxlintConfig {
 	return cfg
 }
 
-// ToJSON serializes the config to pretty-printed JSON. Deterministic is
-// required: without it, map-key order changes between runs, so regenerating
-// an unchanged config churns every key.
+// ToJSON serializes the config to pretty-printed JSON via the SDK's
+// canonical marshal options (deterministic map keys, 2-space indent). No
+// trailing newline: the write paths own that part of the file format.
 func (c *OxlintConfig) ToJSON() ([]byte, error) {
-	data, err := json.Marshal(
-		c,
-		jsontext.WithIndentPrefix(""),
-		jsontext.WithIndent("  "),
-		json.Deterministic(true),
-	)
+	data, err := autoconfigure.MarshalJSONIndented(c)
 	if err != nil {
 		return nil, fmt.Errorf("marshal config: %w", err)
 	}
@@ -108,14 +102,15 @@ func (c *OxlintConfig) ToJSON() ([]byte, error) {
 	return data, nil
 }
 
-// FromJSON parses an oxlint config from JSON bytes.
+// FromJSON parses an oxlint config from JSON bytes via the SDK's
+// byte-level parse.
 func FromJSON(data []byte) (*OxlintConfig, error) {
-	var cfg OxlintConfig
-	if err := json.Unmarshal(data, &cfg); err != nil {
+	cfg, err := autoconfigure.ParseJSON[OxlintConfig](data)
+	if err != nil {
 		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
 
-	return &cfg, nil
+	return cfg, nil
 }
 
 // buildEnv returns the env map based on detected project types.

@@ -18,7 +18,6 @@ import (
 	"os"
 	"path/filepath"
 
-	atomicwrite "github.com/larsartmann/go-atomic-write"
 	"github.com/larsartmann/go-finding"
 	toolsdk "github.com/larsartmann/go-finding/toolsdk"
 	autoconfigure "github.com/larsartmann/linter-autoconfigure-sdk"
@@ -62,15 +61,15 @@ var oxlintConfigFiles = []string{
 	"oxlint.config.json",
 }
 
-// workingDir resolves the project directory from the context, falling back
-// to the process working directory, mirroring the other BuildFlow providers
-// so the WithWorkingDir fan-out works identically.
-func workingDir(ctx context.Context) string {
-	if dir := finding.WorkingDirFromContext(ctx); dir != "" {
-		return dir
+// oxlintConfigFilePaths is oxlintConfigFiles as the SDK's branded type for
+// ProviderSpec.ConfigFiles.
+func oxlintConfigFilePaths() []finding.FilePath {
+	paths := make([]finding.FilePath, 0, len(oxlintConfigFiles))
+	for _, name := range oxlintConfigFiles {
+		paths = append(paths, finding.FilePath(name))
 	}
 
-	return "."
+	return paths
 }
 
 // configPath returns the absolute path of the oxlint config inside root.
@@ -82,13 +81,8 @@ func configPath(root string) string {
 // All three discovery names count: an existing curated config must suppress
 // regeneration regardless of which filename it uses.
 func hasConfig(root string) bool {
-	for _, name := range oxlintConfigFiles {
-		if _, err := os.Stat(filepath.Join(root, name)); err == nil {
-			return true
-		}
-	}
-
-	return false
+	_, found := autoconfigure.FirstExisting(root, oxlintConfigFiles...)
+	return found
 }
 
 //nolint:gochecknoglobals // BuildFlow plugin SDK requires package-level Provider registration
@@ -102,6 +96,7 @@ func mustProvider() toolsdk.Spec {
 		Name:        toolName,
 		Description: "Detects a missing " + configFileName + " and repairs it: generates the optimal " + configFileName + " for the detected project type (React, Next.js, Vue, ...)",
 		ConfigFile:  finding.FilePath(configFileName),
+		ConfigFiles: oxlintConfigFilePaths(),
 		Analyze:     detectMissingConfig,
 		Repair:      repairConfig,
 	})
@@ -118,9 +113,11 @@ func mustProvider() toolsdk.Spec {
 	// step depends on US (BuildFlow's NewOxlintProvider WithDeps), so a
 	// missing config is generated before linting in the same run.
 	spec.DependsOn = nil
-	// ProviderFromSpec derives Inputs from ConfigFile alone; the detector
-	// also reads package.json, so restore the full read contract.
-	spec.Inputs = []string{"package.json", configFileName}
+	// The SDK derives Inputs from ConfigFiles (all three discovery names — an
+	// existing curated .oxlintrc.jsonc or oxlint.config.json also affects
+	// this tool's findings); the detector reads package.json on top, so
+	// prepend it to the derived read contract.
+	spec.Inputs = append([]string{"package.json"}, spec.Inputs...)
 	// HealthCheck reports config drift as an advisory. BuildFlow treats a
 	// failing health check as report-only (warn log + summary entry): it
 	// never skips the tool and never triggers a repair, so flagging drift
@@ -136,7 +133,7 @@ func mustProvider() toolsdk.Spec {
 // never flagged: this tool generates a fresh optimal config, so flagging a
 // user-customized config would lead Repair to stomp it.
 func detectMissingConfig(ctx context.Context) ([]autoconfigure.ConfigIssue, error) {
-	root := workingDir(ctx)
+	root := autoconfigure.WorkingDir(ctx)
 	if hasConfig(root) {
 		return nil, nil
 	}
@@ -173,7 +170,7 @@ func detectMissingConfig(ctx context.Context) ([]autoconfigure.ConfigIssue, erro
 // returned error is advisory by contract: it wraps errConfigDrift, names the
 // fix, and states that nothing was modified.
 func healthCheckDrift(ctx context.Context) error {
-	root := workingDir(ctx)
+	root := autoconfigure.WorkingDir(ctx)
 
 	path := configPath(root)
 	if _, err := os.Stat(path); err != nil {
@@ -238,7 +235,7 @@ func hasKnownProjectType(projectTypes []detect.ProjectType) bool {
 // existing config is never overwritten: Repair only fires for projects whose
 // config is missing.
 func repairConfig(ctx context.Context) (string, error) {
-	root := workingDir(ctx)
+	root := autoconfigure.WorkingDir(ctx)
 	dryRun := toolsdk.DryRunFromContext(ctx)
 
 	if hasConfig(root) {
@@ -297,7 +294,7 @@ func generateConfig(root string) ([]byte, int, error) {
 // writeConfigFile writes the config atomically so a crash mid-write cannot
 // truncate an existing file.
 func writeConfigFile(path string, data []byte) error {
-	if err := atomicwrite.Write(path, append(data, '\n')); err != nil {
+	if _, err := autoconfigure.SaveJSONBytes(path, append(data, '\n')); err != nil {
 		return fmt.Errorf("%s repair: write %s: %w", toolName, configFileName, err)
 	}
 

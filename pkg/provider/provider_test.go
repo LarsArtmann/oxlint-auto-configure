@@ -46,7 +46,12 @@ func TestProviderRegistered(t *testing.T) {
 	require.NotNil(t, specs[0].Repair, "provider must repair")
 	require.NotNil(t, specs[0].HealthCheck, "provider must report config drift via its health check")
 	require.Empty(t, specs[0].DependsOn, "provider must not depend on oxlint; oxlint depends on it")
-	require.Equal(t, []string{"package.json", ".oxlintrc.json"}, specs[0].Inputs)
+	// package.json (the detector reads it) plus every config discovery name
+	// the SDK derives from ProviderSpec.ConfigFiles — an existing curated
+	// .oxlintrc.jsonc or oxlint.config.json affects this tool's findings too.
+	require.Equal(t,
+		[]string{"package.json", ".oxlintrc.json", ".oxlintrc.jsonc", "oxlint.config.json"},
+		specs[0].Inputs)
 	require.Equal(t, "javascript", specs[0].Trigger.Language)
 }
 

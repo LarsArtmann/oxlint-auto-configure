@@ -59,7 +59,7 @@ func TestDiffAdded(t *testing.T) {
 	changes := d.Diff()
 	assert.Len(t, changes, 1)
 	assert.Equal(t, KindAdded, changes[0].Kind)
-	assert.Equal(t, testRuleNoUnusedVars, changes[0].Rule)
+	assert.Equal(t, testRuleNoUnusedVars, changes[0].Path)
 }
 
 func TestDiffRemoved(t *testing.T) {
@@ -85,9 +85,9 @@ func TestDiffChanged(t *testing.T) {
 	d := NewDiffer(before, after)
 	changes := d.Diff()
 	assert.Len(t, changes, 1)
-	assert.Equal(t, KindChanged, changes[0].Kind)
-	assert.Equal(t, testSeverityWarn, changes[0].OldValue)
-	assert.Equal(t, testSeverityError, changes[0].NewValue)
+	assert.Equal(t, KindModified, changes[0].Kind)
+	assert.Equal(t, testSeverityWarn, changes[0].Old)
+	assert.Equal(t, testSeverityError, changes[0].New)
 }
 
 func TestDiffSummary(t *testing.T) {
@@ -101,7 +101,7 @@ func TestDiffSummary(t *testing.T) {
 	d := NewDiffer(before, after)
 	summary := d.Summary()
 	assert.Contains(t, summary, "Added: 1")
-	assert.Contains(t, summary, "Changed: 1")
+	assert.Contains(t, summary, "Modified: 1")
 }
 
 func TestDiffPluginsAdded(t *testing.T) {
@@ -169,7 +169,7 @@ func filterChanges(changes []Change, prefix string) []Change {
 	var filtered []Change
 
 	for _, c := range changes {
-		if len(c.Rule) >= len(prefix) && c.Rule[:len(prefix)] == prefix {
+		if len(c.Path) >= len(prefix) && c.Path[:len(prefix)] == prefix {
 			filtered = append(filtered, c)
 		}
 	}
@@ -202,7 +202,7 @@ func TestDiffJsPluginsAdded(t *testing.T) {
 	jsPluginChanges := filterChanges(changes, "jsPlugin:")
 	assert.Len(t, jsPluginChanges, 1)
 	assert.Equal(t, KindAdded, jsPluginChanges[0].Kind)
-	assert.Equal(t, "jsPlugin:@shadcn/lint", jsPluginChanges[0].Rule)
+	assert.Equal(t, "jsPlugin:@shadcn/lint", jsPluginChanges[0].Path)
 }
 
 func TestDiffJsPluginsRemoved(t *testing.T) {
@@ -230,7 +230,7 @@ func TestDiffRulesWithOptionArrays(t *testing.T) {
 	d := NewDiffer(before, after)
 	changes := d.Diff()
 	assert.Len(t, changes, 1)
-	assert.Equal(t, KindChanged, changes[0].Kind)
-	assert.Equal(t, `["error",{"allow":["layout"]}]`, changes[0].OldValue)
-	assert.Equal(t, `["error",{"allow":["layout","spacing"]}]`, changes[0].NewValue)
+	assert.Equal(t, KindModified, changes[0].Kind)
+	assert.Equal(t, `["error",{"allow":["layout"]}]`, changes[0].Old)
+	assert.Equal(t, `["error",{"allow":["layout","spacing"]}]`, changes[0].New)
 }

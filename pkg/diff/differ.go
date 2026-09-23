@@ -1,38 +1,31 @@
 // Package diff compares two oxlint configs and shows the differences.
+//
+// The comparison engine lives in linter-autoconfigure-sdk (DiffMaps,
+// DiffSets, DiffBlobs, Summary, FormatDiff); this package is the oxlint
+// field projection: it maps OxlintConfig sections onto the engine's
+// comparators and keeps the domain prefixes ("plugin:", "category:", ...).
 package diff
 
 import (
-	stdjson "encoding/json"
-	"encoding/json/v2"
-	"fmt"
-	"sort"
 	"strconv"
-	"strings"
 
+	autoconfigure "github.com/larsartmann/linter-autoconfigure-sdk"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
 )
 
-// estimatedChangeCount is the pre-allocation hint for the changes slice.
-// Diffs typically produce plugins + categories + rules + env + settings changes.
-const estimatedChangeCount = 8
+// Change is one difference between two configs: the SDK's autoconfigure.Change.
+// Path carries the section-prefixed setting name (e.g. "plugin:import",
+// "rules.no-console"); Kind is KindAdded, KindRemoved, or KindModified.
+type Change = autoconfigure.Change
 
-// Change represents a single difference between two configs.
-type Change struct {
-	Rule     string
-	OldValue string
-	NewValue string
-	Kind     ChangeKind
-}
+// Kind classifies a Change; alias of the SDK's Kind.
+type Kind = autoconfigure.Kind
 
-// ChangeKind categorizes the type of change.
-type ChangeKind string
-
-// KindAdded and other change kind constants categorize config differences.
+// Change-kind constants, re-exported from the SDK engine.
 const (
-	KindAdded     ChangeKind = "added"     // rule/category was not present before
-	KindRemoved   ChangeKind = "removed"   // rule/category was present before but not after
-	KindChanged   ChangeKind = "changed"   // rule/category value changed
-	KindUnchanged ChangeKind = "unchanged" // rule/category value stayed the same
+	KindAdded    = autoconfigure.KindAdded    // rule/category was not present before
+	KindRemoved  = autoconfigure.KindRemoved  // rule/category was present before but not after
+	KindModified = autoconfigure.KindModified // rule/category value changed
 )
 
 // Differ compares two OxlintConfig instances.
@@ -46,23 +39,18 @@ func NewDiffer(before, after *config.OxlintConfig) *Differ {
 	return &Differ{before: before, after: after}
 }
 
-// Diff computes all changes between before and after configs.
+// Diff computes all changes between before and after configs, sorted by
+// path (deterministic across runs).
 func (d *Differ) Diff() []Change {
-	changes := make([]Change, 0, estimatedChangeCount)
+	changes := make([]Change, 0, 8)
 
-	changes = append(changes, d.compareSlices(d.before.Plugins, d.after.Plugins, "plugin:")...)
-	changes = append(changes, d.compareSlices(d.before.JsPlugins, d.after.JsPlugins, "jsPlugin:")...)
-	changes = append(
-		changes,
-		d.compareMaps(d.before.Categories, d.after.Categories, "category:")...,
-	)
-	changes = append(changes, d.compareAnyMaps(d.before.Rules, d.after.Rules, "")...)
-	changes = append(changes, d.compareBoolMaps(d.before.Env, d.after.Env, "env:")...)
-	changes = append(changes, d.compareAnyMaps(d.before.Settings, d.after.Settings, "settings:")...)
-	changes = append(
-		changes,
-		d.compareOverrides(d.before.Overrides, d.after.Overrides, "override:")...,
-	)
+	changes = append(changes, autoconfigure.DiffSets(d.before.Plugins, d.after.Plugins, "plugin:")...)
+	changes = append(changes, autoconfigure.DiffSets(d.before.JsPlugins, d.after.JsPlugins, "jsPlugin:")...)
+	changes = append(changes, autoconfigure.DiffMaps(d.before.Categories, d.after.Categories, "category:")...)
+	changes = append(changes, autoconfigure.DiffMaps(stringify(d.before.Rules), stringify(d.after.Rules), "")...)
+	changes = append(changes, autoconfigure.DiffMaps(formatBools(d.before.Env), formatBools(d.after.Env), "env:")...)
+	changes = append(changes, autoconfigure.DiffMaps(stringify(d.before.Settings), stringify(d.after.Settings), "settings:")...)
+	changes = append(changes, autoconfigure.DiffBlobs(canonicalBlocks(d.before.Overrides), canonicalBlocks(d.after.Overrides), "override:")...)
 
 	return changes
 }
@@ -72,265 +60,48 @@ func (d *Differ) HasChanges() bool {
 	return len(d.Diff()) > 0
 }
 
-// compareOverrides compares overrides blocks by their canonical JSON form.
-// Array order is ignored: a pure reorder is not a meaningful drift signal for
-// an advisory check (oxlint applies the whole list either way).
-func (d *Differ) compareOverrides(before, after []map[string]any, prefix string) []Change {
-	beforeKeys := canonicalOverrideKeys(before)
-	afterKeys := canonicalOverrideKeys(after)
-
-	var changes []Change
-
-	for _, key := range sortedKeys(beforeKeys) {
-		if !afterKeys[key] {
-			changes = append(changes, Change{
-				Rule:     prefix + key,
-				OldValue: key,
-				NewValue: "",
-				Kind:     KindRemoved,
-			})
-		}
-	}
-
-	for _, key := range sortedKeys(afterKeys) {
-		if !beforeKeys[key] {
-			changes = append(changes, Change{
-				Rule:     prefix + key,
-				OldValue: "",
-				NewValue: key,
-				Kind:     KindAdded,
-			})
-		}
-	}
-
-	return changes
-}
-
-// canonicalOverrideKeys maps each overrides block to its canonical JSON form
-// (sorted keys via the stdlib v1 marshaler — encoding/json/v2 preserves map
-// construction order, which is not canonical).
-func canonicalOverrideKeys(blocks []map[string]any) map[string]bool {
-	keys := make(map[string]bool, len(blocks))
-
-	for _, block := range blocks {
-		data, err := stdjson.Marshal(block)
-		if err != nil {
-			// Content that cannot be marshaled cannot collide either; fall
-			// back to a printed form so the block still participates.
-			keys[fmt.Sprint(block)] = true
-
-			continue
-		}
-
-		keys[string(data)] = true
-	}
-
-	return keys
-}
-
-// sortedKeys returns the keys of a set map in sorted order.
-func sortedKeys(set map[string]bool) []string {
-	keys := make([]string, 0, len(set))
-	for key := range set {
-		keys = append(keys, key)
-	}
-
-	sort.Strings(keys)
-
-	return keys
-}
-
-// compareMaps returns changes between two string maps with an optional prefix.
-func (d *Differ) compareMaps(before, after map[string]string, prefix string) []Change {
-	var changes []Change
-
-	for _, key := range d.collectAllKeys(before, after) {
-		beforeVal, hadBefore := before[key]
-		afterVal, hasAfter := after[key]
-		name := prefix + key
-
-		switch {
-		case !hadBefore && hasAfter:
-			changes = append(
-				changes,
-				Change{Rule: name, OldValue: "", NewValue: afterVal, Kind: KindAdded},
-			)
-		case hadBefore && !hasAfter:
-			changes = append(
-				changes,
-				Change{Rule: name, OldValue: beforeVal, NewValue: "", Kind: KindRemoved},
-			)
-		case hadBefore && hasAfter && beforeVal != afterVal:
-			changes = append(
-				changes,
-				Change{Rule: name, OldValue: beforeVal, NewValue: afterVal, Kind: KindChanged},
-			)
-		}
-	}
-
-	return changes
-}
-
-// Summary returns a human-readable summary of changes.
+// Summary returns a one-line human-readable tally of the changes
+// ("Added: 1, Modified: 2, Removed: 3").
 func (d *Differ) Summary() string {
-	changes := d.Diff()
-
-	added, removed, changed := 0, 0, 0
-
-	for _, c := range changes {
-		switch c.Kind {
-		case KindAdded:
-			added++
-		case KindRemoved:
-			removed++
-		case KindChanged:
-			changed++
-		case KindUnchanged:
-			// no-op
-		}
-	}
-
-	return fmt.Sprintf("Added: %d, Changed: %d, Removed: %d", added, changed, removed)
+	return autoconfigure.Summary(d.Diff())
 }
 
-// FormatDiff returns a formatted string showing all changes.
+// FormatDiff returns a formatted string showing all changes: "+"/"-"/"~"
+// lines sorted by path, "No changes." when the configs match.
 func (d *Differ) FormatDiff() string {
-	changes := d.Diff()
-	if len(changes) == 0 {
-		return "No changes."
-	}
-
-	sort.Slice(changes, func(i, j int) bool {
-		return changes[i].Rule < changes[j].Rule
-	})
-
-	var b strings.Builder
-
-	for _, c := range changes {
-		switch c.Kind {
-		case KindAdded:
-			fmt.Fprintf(&b, "+ %s: %s\n", c.Rule, c.NewValue)
-		case KindRemoved:
-			fmt.Fprintf(&b, "- %s: %s\n", c.Rule, c.OldValue)
-		case KindChanged:
-			fmt.Fprintf(&b, "~ %s: %s → %s\n", c.Rule, c.OldValue, c.NewValue)
-		case KindUnchanged:
-			// no-op
-		}
-	}
-
-	return b.String()
+	return autoconfigure.FormatDiff(d.Diff())
 }
 
-// compareSlices compares two string slices for added/removed items.
-func (d *Differ) compareSlices(before, after []string, prefix string) []Change {
-	beforeSet := make(map[string]bool, len(before))
-	for _, s := range before {
-		beforeSet[s] = true
+// stringify renders map[string]any values for comparison: plain strings
+// (severities, settings strings) display bare; structured values (rule
+// options, settings objects) display as deterministic compact JSON.
+func stringify(m map[string]any) map[string]string {
+	result := make(map[string]string, len(m))
+	for key, value := range m {
+		result[key] = autoconfigure.StringValue(value)
 	}
 
-	afterSet := make(map[string]bool, len(after))
-	for _, s := range after {
-		afterSet[s] = true
-	}
-
-	var changes []Change
-
-	seen := make(map[string]bool)
-
-	for _, s := range before {
-		if seen[s] {
-			continue
-		}
-
-		seen[s] = true
-		if !afterSet[s] {
-			changes = append(
-				changes,
-				Change{Rule: prefix + s, OldValue: s, NewValue: "", Kind: KindRemoved},
-			)
-		}
-	}
-
-	for _, s := range after {
-		if seen[s] {
-			continue
-		}
-
-		seen[s] = true
-		if !beforeSet[s] {
-			changes = append(
-				changes,
-				Change{Rule: prefix + s, OldValue: "", NewValue: s, Kind: KindAdded},
-			)
-		}
-	}
-
-	return changes
+	return result
 }
 
-// compareBoolMaps compares two map[string]bool by converting to string values.
-func (d *Differ) compareBoolMaps(before, after map[string]bool, prefix string) []Change {
-	bStr := make(map[string]string, len(before))
-	for k, v := range before {
-		bStr[k] = strconv.FormatBool(v)
+// formatBools renders map[string]bool as strings for comparison.
+func formatBools(m map[string]bool) map[string]string {
+	result := make(map[string]string, len(m))
+	for key, value := range m {
+		result[key] = strconv.FormatBool(value)
 	}
 
-	aStr := make(map[string]string, len(after))
-	for k, v := range after {
-		aStr[k] = strconv.FormatBool(v)
-	}
-
-	return d.compareMaps(bStr, aStr, prefix)
+	return result
 }
 
-// compareAnyMaps compares two map[string]any by serializing values for
-// comparison. Plain strings (severities, settings strings) display bare;
-// structured values (rule options, settings objects) display as JSON.
-func (d *Differ) compareAnyMaps(before, after map[string]any, prefix string) []Change {
-	stringify := func(m map[string]any) map[string]string {
-		result := make(map[string]string, len(m))
-		for k, v := range m {
-			result[k] = formatValue(v)
-		}
-
-		return result
+// canonicalBlocks renders each overrides block to its canonical form
+// (deterministic compact JSON via the SDK's StringValue: sorted keys), so
+// DiffBlobs compares them as an order-insensitive set.
+func canonicalBlocks(blocks []map[string]any) []string {
+	canonical := make([]string, 0, len(blocks))
+	for _, block := range blocks {
+		canonical = append(canonical, autoconfigure.StringValue(block))
 	}
 
-	return d.compareMaps(stringify(before), stringify(after), prefix)
-}
-
-// formatValue renders a config value for diff display: bare strings as-is,
-// anything else as compact JSON.
-func formatValue(value any) string {
-	if s, ok := value.(string); ok {
-		return s
-	}
-
-	data, err := json.Marshal(value, json.Deterministic(true))
-	if err != nil {
-		return fmt.Sprintf("%v", value)
-	}
-
-	return string(data)
-}
-
-func (d *Differ) collectAllKeys(before, after map[string]string) []string {
-	seen := make(map[string]struct{})
-
-	var keys []string
-
-	addUnseenKeys(seen, &keys, before)
-	addUnseenKeys(seen, &keys, after)
-
-	return keys
-}
-
-func addUnseenKeys(seen map[string]struct{}, keys *[]string, m map[string]string) {
-	for k := range m {
-		if _, exists := seen[k]; !exists {
-			seen[k] = struct{}{}
-			*keys = append(*keys, k)
-		}
-	}
+	return canonical
 }
