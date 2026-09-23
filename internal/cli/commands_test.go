@@ -14,6 +14,7 @@ import (
 	finding "github.com/larsartmann/go-finding"
 	"github.com/larsartmann/go-finding/pipeline"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/config"
+	"github.com/larsartmann/oxlint-auto-configure/pkg/detect"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/oxlint"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/profile"
 	"github.com/larsartmann/oxlint-auto-configure/pkg/rule"
@@ -288,7 +289,7 @@ func TestValidateInvalidSeverity(t *testing.T) {
 	err := os.WriteFile(configPath, []byte(badConfig), 0o600)
 	require.NoError(t, err)
 
-	err = Validate(configPath)
+	err = Validate(configPath, false)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid severities")
 }
@@ -297,7 +298,7 @@ func TestValidateMissingConfig(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 
-	err := Validate(filepath.Join(dir, ".oxlintrc.json"))
+	err := Validate(filepath.Join(dir, ".oxlintrc.json"), false)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "configure",
@@ -528,4 +529,67 @@ func TestAnalyzeFailsWithoutOxlintBinary(t *testing.T) {
 	require.Error(t, err)
 	require.ErrorIs(t, err, oxlint.ErrNotFound)
 	assert.Contains(t, err.Error(), "oxlint is required for analyze")
+}
+
+func TestValidateDriftAdvisory(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "package.json"),
+		[]byte(`{"name":"app","dependencies":{"react":"^18.0.0"}}`), 0o600))
+
+	// A recognizable React project whose config disables a rule the strict
+	// profile enables: drifted, but structurally valid.
+	drifted := `{"rules":{"no-console":"off"}}`
+	configPath := filepath.Join(dir, ".oxlintrc.json")
+	require.NoError(t, os.WriteFile(configPath, []byte(drifted), 0o600))
+
+	require.NoError(t, Validate(configPath, false),
+		"drift is advisory by default: a valid config must not fail validate")
+
+	err := Validate(configPath, true)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "drifted")
+	assert.Contains(t, err.Error(), "oxlint-auto-configure configure",
+		"the error must name the fix")
+}
+
+func TestValidateFreshConfigHasNoDrift(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "package.json"),
+		[]byte(`{"name":"app","dependencies":{"react":"^18.0.0"}}`), 0o600))
+
+	require.NoError(t, runConfigureForTest(t, dir))
+	require.NoError(t, Validate(filepath.Join(dir, ".oxlintrc.json"), true),
+		"a config configure just wrote must not read as drifted")
+}
+
+// runConfigureForTest generates a fresh strict config into dir using the same
+// pipeline the configure command runs.
+func runConfigureForTest(t *testing.T, dir string) error {
+	t.Helper()
+
+	reg, err := rule.LoadRegistry()
+	if err != nil {
+		return err
+	}
+
+	det := detect.NewDetector(dir)
+	pluginConfig, projectTypes, err := det.Detect()
+	if err != nil {
+		return err
+	}
+
+	cfg, err := config.GenerateProjectConfig(
+		profile.ProfileStrict, reg, pluginConfig, projectTypes, det.DetectExternalPlugins())
+	if err != nil {
+		return err
+	}
+
+	data, err := cfg.ToJSON()
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(filepath.Join(dir, ".oxlintrc.json"), append(data, '\n'), 0o600)
 }

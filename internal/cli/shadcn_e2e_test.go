@@ -106,7 +106,7 @@ func TestValidateE2EShadcnConfig(t *testing.T) {
 		}
 	}`), 0o644))
 
-	require.NoError(t, Validate(configPath))
+	require.NoError(t, Validate(configPath, false))
 }
 
 func writePackageJSON(t *testing.T, dir, pkgJSON string) {
