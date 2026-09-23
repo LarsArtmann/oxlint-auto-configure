@@ -10,6 +10,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Nothing yet.
 
+### Changed
+
+- Release gate (and CI) now runs the SDK's `jsondeterminism` analyzer over
+  the whole module: bare `encoding/json/v2` Marshal calls fail the gate. Its
+  first run caught two nondeterministic test-fixture marshals (now
+  `json.Deterministic(true)`).
+
+### Dependencies
+
+- `linter-autoconfigure-sdk` v0.5.0 → v0.6.0 (determinism analyzer +
+  vettool cmd). Flake input tracks the v0.6.0 tag; vendorHash regenerated.
+
 ### Fixed
 
 - Nothing yet.
