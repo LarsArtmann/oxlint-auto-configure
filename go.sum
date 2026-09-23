@@ -31,8 +31,8 @@ github.com/larsartmann/go-error-family v0.10.2 h1:WXrBI60IZBli5bvjOr/XOZbqzPtGAP
 github.com/larsartmann/go-error-family v0.10.2/go.mod h1:SYSVwVMTkw2GcqXI4khjMYOg7ey39o8sh7rXC9LfNcY=
 github.com/larsartmann/go-finding v1.13.0 h1:JTLKvlNb6C9Yldwu1Iojyte7c6ng8frzGTdq5DNEvcc=
 github.com/larsartmann/go-finding v1.13.0/go.mod h1:0ebJF4MSuJDqO1+u2SK/QVJF+vJfwxJDuzTSjc39eIs=
-github.com/larsartmann/go-finding/pipeline v1.10.0 h1:xoXgC5noaj5PsH0AHkEdP6228/Ulo9ovBwK5v8z6Ftc=
-github.com/larsartmann/go-finding/pipeline v1.10.0/go.mod h1:pU7jhYxvsXt11v9EvUWT2Txj5GD4Hsf/BPgmUtu+J1M=
+github.com/larsartmann/go-finding/pipeline v1.12.0 h1:6yTdAYs1akGB+B06JrU+ZaXBKQTYP4V5vpTPVeaM0RI=
+github.com/larsartmann/go-finding/pipeline v1.12.0/go.mod h1:xGlNIpqdUnzCH9IPh2BCm3kxv3+oI/P1C2SXTehaNHk=
 github.com/larsartmann/go-finding/toolsdk v1.13.0 h1:GFUn/AGifKZzJA7R97/nM58RFOhLHraEadpMCv7O1qU=
 github.com/larsartmann/go-finding/toolsdk v1.13.0/go.mod h1:F90xnE95ibWIpmpjDVWqqkTXahQL5V5kqraHLwr/z1E=
 github.com/larsartmann/linter-autoconfigure-sdk v0.6.0 h1:9Ahr0XBdnPrpx4H+0QxTbCGlJryEKpUhrNEu4eZyLp4=
