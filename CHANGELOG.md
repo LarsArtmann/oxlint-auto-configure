@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Nothing yet.
 
+### Fixed
+
+- Nothing yet.
+
+## [0.9.1] - 2026-09-23
+
 ### Changed
 
 - Release gate (and CI) now runs the SDK's `jsondeterminism` analyzer over
@@ -21,10 +27,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `linter-autoconfigure-sdk` v0.5.0 → v0.6.0 (determinism analyzer +
   vettool cmd). Flake input tracks the v0.6.0 tag; vendorHash regenerated.
-
-### Fixed
-
-- Nothing yet.
 
 ## [0.9.0] - 2026-09-23
 
