@@ -82,6 +82,7 @@ func configPath(root string) string {
 // regeneration regardless of which filename it uses.
 func hasConfig(root string) bool {
 	_, found := autoconfigure.FirstExisting(root, oxlintConfigFiles...)
+
 	return found
 }
 

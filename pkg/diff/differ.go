@@ -28,6 +28,10 @@ const (
 	KindModified = autoconfigure.KindModified // rule/category value changed
 )
 
+// estimatedChangeCount is the pre-allocation hint for the changes slice:
+// plugins + jsPlugins + categories + rules + env + settings + overrides.
+const estimatedChangeCount = 8
+
 // Differ compares two OxlintConfig instances.
 type Differ struct {
 	before *config.OxlintConfig
@@ -42,15 +46,24 @@ func NewDiffer(before, after *config.OxlintConfig) *Differ {
 // Diff computes all changes between before and after configs, sorted by
 // path (deterministic across runs).
 func (d *Differ) Diff() []Change {
-	changes := make([]Change, 0, 8)
+	changes := make([]Change, 0, estimatedChangeCount)
 
 	changes = append(changes, autoconfigure.DiffSets(d.before.Plugins, d.after.Plugins, "plugin:")...)
 	changes = append(changes, autoconfigure.DiffSets(d.before.JsPlugins, d.after.JsPlugins, "jsPlugin:")...)
 	changes = append(changes, autoconfigure.DiffMaps(d.before.Categories, d.after.Categories, "category:")...)
-	changes = append(changes, autoconfigure.DiffMaps(stringify(d.before.Rules), stringify(d.after.Rules), "")...)
+
+	ruleChanges := autoconfigure.DiffMaps(stringify(d.before.Rules), stringify(d.after.Rules), "")
+	changes = append(changes, ruleChanges...)
+
 	changes = append(changes, autoconfigure.DiffMaps(formatBools(d.before.Env), formatBools(d.after.Env), "env:")...)
-	changes = append(changes, autoconfigure.DiffMaps(stringify(d.before.Settings), stringify(d.after.Settings), "settings:")...)
-	changes = append(changes, autoconfigure.DiffBlobs(canonicalBlocks(d.before.Overrides), canonicalBlocks(d.after.Overrides), "override:")...)
+
+	settingsChanges := autoconfigure.DiffMaps(
+		stringify(d.before.Settings), stringify(d.after.Settings), "settings:")
+	changes = append(changes, settingsChanges...)
+
+	overrideChanges := autoconfigure.DiffBlobs(
+		canonicalBlocks(d.before.Overrides), canonicalBlocks(d.after.Overrides), "override:")
+	changes = append(changes, overrideChanges...)
 
 	return changes
 }

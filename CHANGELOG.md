@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Config I/O migrated onto linter-autoconfigure-sdk v0.4.1: `ToJSON` and
+  `FromJSON` delegate to `MarshalJSONIndented`/`ParseJSON`, both
+  `writeConfig` paths use `SaveJSONBytes`, and the provider's hand-rolled
+  `workingDir` is replaced by the SDK's `WorkingDir` (which additionally
+  guards against nil contexts — the hand-roll would have panicked). The
+  direct `go-atomic-write` dependency is gone (it remains only as an SDK
+  transitive). A golden-byte test pins `ToJSON` output; migration verified
+  byte-identical.
+- `pkg/diff` is now a thin projection over the SDK's shared diff engine:
+  `Change.Rule`→`Path`, `OldValue`/`NewValue`→`Old`/`New`,
+  `KindChanged`→`KindModified` (unified fleet vocabulary), local
+  comparators and the dead `KindUnchanged` state deleted; overrides compare
+  via deterministic v2 canonical form (no more `\u003c` HTML escapes in
+  rendered override drift). `Summary` wording changes `Changed: N` →
+  `Modified: N`; `FormatDiff` renders byte-identically.
+- Provider uses `ProviderSpec.ConfigFiles`: `Inputs` now covers
+  `package.json` plus all three config discovery names (an existing curated
+  `.oxlintrc.jsonc` or `oxlint.config.json` also affects the tool's
+  findings); `hasConfig` resolves via the SDK's `FirstExisting`.
+
 ### Dependencies
 
 - `linter-autoconfigure-sdk` v0.2.0 → v0.3.1: the tag carries the `SaveJSON`
