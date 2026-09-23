@@ -152,8 +152,13 @@ oxlint-auto-configure analyze [--root .] [-f summary|json|report|sarif|table]
 Validate an existing `.oxlintrc.json`:
 
 ```bash
-oxlint-auto-configure validate [-c .oxlintrc.json]
+oxlint-auto-configure validate [-c .oxlintrc.json] [--fail-on-drift]
 ```
+
+Structural validation (unknown rules, invalid severities) plus an advisory
+drift check against what `configure` would generate — preserved user policy
+(external plugins, `overrides`) never reads as drift, and the advisory never
+modifies anything. Pass `--fail-on-drift` to make drift exit non-zero in CI.
 
 ### `report`
 

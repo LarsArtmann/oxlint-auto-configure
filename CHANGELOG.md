@@ -8,7 +8,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Nothing yet.
+- `validate --fail-on-drift`: after structural validation passes, the config
+  is compared against what `configure` would generate (strict profile,
+  `PreserveExternal` applied so preserved user policy never reads as drift).
+  Drift logs as an advisory warning by default (nothing is modified); the
+  flag promotes it to an error naming the fix, for CI gates. A failing drift
+  check itself (e.g. unreadable `package.json`) degrades to a skip —
+  structural validity already passed.
+
+### Changed
+
+- The BuildFlow provider's lifecycle is now derived by the SDK's
+  `BootstrapProviderFromSpec` (linter-autoconfigure-sdk v0.5.0):
+  missing-only Detect, never-overwrite dry-run-aware Repair, and the advisory
+  drift HealthCheck are owned by the shared bridge; this repo supplies only
+  the oxlint domain (recognizability, generation, comparison). ~110 lines of
+  hand-rolled provider plumbing deleted; `provider_test.go` passes semantically
+  unchanged. One visible delta: the missing-config finding message drops the
+  "for the detected project type" suffix ("No .oxlintrc.json found; generate
+  the optimal config").
+
+### Dependencies
+
+- `linter-autoconfigure-sdk` v0.4.1 → v0.5.0 (bootstrap provider lifecycle).
+  Flake input tracks the v0.5.0 tag; vendorHash regenerated.
 
 ### Fixed
 
