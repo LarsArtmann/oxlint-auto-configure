@@ -264,8 +264,8 @@ func TestToJSON_GoldenBytes(t *testing.T) {
 		JsPlugins:  []string{"@shadcn/lint"},
 		Categories: map[string]string{"correctness": "error", "style": "warn"},
 		Rules: map[string]any{
-			"no-console":             "warn",
-			"no-debugger":            "off",
+			"no-console":              "warn",
+			"no-debugger":             "off",
 			"shadcn/no-css-variables": []any{"off", map[string]any{"catchAll": "off"}},
 		},
 		Settings: map[string]any{"shadcn": map[string]any{"style": "new-york"}},
