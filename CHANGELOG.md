@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Nothing yet.
+
+### Fixed
+
+- Nothing yet.
+
+## [0.8.0] - 2026-09-23
+
 ### Changed
 
 - Config I/O migrated onto linter-autoconfigure-sdk v0.4.1: `ToJSON` and
@@ -38,14 +48,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   migrates onto. `go-atomic-write` v0.6.0 becomes a transitive (SDK) dep only.
   Go directive floor `1.27` → `1.27.1` (dependency-imposed by the SDK tag).
   Flake input tracks the v0.4.1 tag; vendorHash regenerated.
-
-### Added
-
-- Nothing yet.
-
-### Fixed
-
-- Nothing yet.
 
 ## [0.7.0] - 2026-09-23
 
