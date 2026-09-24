@@ -61,11 +61,6 @@
         enableCheck = false;
         subPackages = [ "cmd/oxlint-auto-configure" ];
 
-        # go.mod floor (go 1.27) is newer than nixpkgs' default go (1.26.7);
-        # go_1_27 = 1.27.1 keeps builds and the hermetic treefmt check on a
-        # binary-cached toolchain (no source build, no toolchain downloads).
-        goPkgAttr = "go_1_27";
-
         deps = {
           "github.com/larsartmann/go-atomic-write" = inputs.go-atomic-write;
           "github.com/larsartmann/go-error-family" = inputs.go-error-family;
