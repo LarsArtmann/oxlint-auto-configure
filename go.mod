@@ -4,9 +4,9 @@ go 1.27.1
 
 require (
 	github.com/larsartmann/go-finding v1.13.0
-	github.com/larsartmann/go-finding/pipeline v1.12.0
-	github.com/larsartmann/go-finding/toolsdk v1.13.0
-	github.com/larsartmann/linter-autoconfigure-sdk v0.6.0
+	github.com/larsartmann/go-finding/pipeline v1.13.0
+	github.com/larsartmann/go-finding/toolsdk v1.13.1
+	github.com/larsartmann/linter-autoconfigure-sdk v0.7.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 )
