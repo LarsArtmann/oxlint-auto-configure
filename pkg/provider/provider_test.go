@@ -52,7 +52,7 @@ func TestProviderRegistered(t *testing.T) {
 	require.Equal(t,
 		[]string{"package.json", ".oxlintrc.json", ".oxlintrc.jsonc", "oxlint.config.json"},
 		specs[0].Inputs)
-	require.Equal(t, "javascript", specs[0].Trigger.Language)
+	require.Equal(t, "js", specs[0].Trigger.Language)
 }
 
 func TestDetect_MissingConfigWithKnownProjectType(t *testing.T) {

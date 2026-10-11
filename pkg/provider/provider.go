@@ -104,7 +104,7 @@ func mustProvider() toolsdk.Spec {
 	}
 
 	spec.Trigger = toolsdk.OnFiles(
-		"javascript",
+		"js",
 		"**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.cjs",
 		"**/*.vue", "**/*.svelte", "**/*.astro",
 	)
