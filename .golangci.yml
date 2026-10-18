@@ -1,7 +1,7 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.26.7
+  go: "1.27"
   build-tags:
     - goexperiment.arenas
     - goexperiment.goroutineleakprofile
@@ -249,43 +249,33 @@ linters:
     rules:
       - text: cobra.Command is missing
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: slog[.].*is missing
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: exec[.]ExitError is missing
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: finding[.]Position is missing
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: config[.]OxlintConfig is missing
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: rule[.]Rule is missing
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: oxlint[.]
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: format[.]FindingView is missing
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: pipeline[.]PipelineResult is missing
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: finding[.]ToolInfo is missing
         linters:
-          - exhaustruct
           - exhaustruct_v5
       - text: G204
         source: exec.Command
@@ -300,7 +290,7 @@ linters:
           - gosec
       - path: _test\.go
         linters:
-          - exhaustruct
+          - exhaustruct_v5
           - testpackage
           - gochecknoglobals
           - funlen
@@ -317,7 +307,7 @@ linters:
         linters:
           - err113
           - mnd
-          - exhaustruct
+          - exhaustruct_v5
           - testpackage
           - gochecknoglobals
           - funlen
@@ -331,7 +321,6 @@ linters:
           - recvcheck
           - contextcheck
           - exhaustive
-          - exhaustruct_v5
       - text: devDependencies
         linters:
           - tagliatelle
@@ -354,5 +343,5 @@ formatters:
     paths:
       - _templ\.go$
 issues:
-  max-issues-per-linter: 50
-  max-same-issues: 10
+  max-issues-per-linter: 0
+  max-same-issues: 0
