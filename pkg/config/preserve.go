@@ -1,7 +1,7 @@
 package config
 
 import (
-	stdjson "encoding/json"
+	stdjson "encoding/json/v2"
 	"fmt"
 	"slices"
 
