@@ -10,7 +10,7 @@
     };
 
     go-nix-helpers = {
-      url = "github:LarsArtmann/go-nix-helpers/29e39b25b691ce51c0daa7be85f551c7016ed2c5";
+      url = "github:LarsArtmann/go-nix-helpers/1a553ce7ad5a9e84b7e04a60e68ab81ff5dd6ab8";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
