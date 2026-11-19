@@ -4,7 +4,7 @@ go 1.27
 
 require (
 	github.com/larsartmann/go-finding v1.15.1
-	github.com/larsartmann/go-finding/pipeline v1.15.0
+	github.com/larsartmann/go-finding/pipeline v1.15.1
 	github.com/larsartmann/go-finding/toolsdk v1.16.0
 	github.com/larsartmann/linter-autoconfigure-sdk v0.8.1
 	github.com/spf13/cobra v1.10.2
